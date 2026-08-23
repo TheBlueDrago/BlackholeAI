@@ -2,11 +2,12 @@ import React, { useState, useRef, useEffect } from "react";
 import { Send, Sparkles, Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
-export default function ChatBox() {
-  const [messages, setMessages] = useState([]);
+export default function ChatBox({ conversation, createConversation, addMessage, renameConversation }) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef(null);
+
+  const messages = conversation?.messages || [];
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -18,19 +19,32 @@ export default function ChatBox() {
     const text = input.trim();
     if (!text || loading) return;
 
-    const userMsg = { role: "user", content: text };
-    setMessages((m) => [...m, userMsg]);
+    let convId = conversation?.id;
+    const isFirst = !convId || messages.length === 0;
+    if (!convId) {
+      convId = createConversation();
+    }
+
+    addMessage(convId, { role: "user", content: text });
     setInput("");
     setLoading(true);
 
     try {
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: text,
-      });
-      const aiMsg = { role: "ai", content: typeof result === "string" ? result : JSON.stringify(result) };
-      setMessages((m) => [...m, aiMsg]);
-    } catch (e) {
-      setMessages((m) => [...m, { role: "ai", content: "Sorry, something went wrong. Please try again." }]);
+      const result = await base44.integrations.Core.InvokeLLM({ prompt: text });
+      const content = typeof result === "string" ? result : JSON.stringify(result);
+      addMessage(convId, { role: "ai", content });
+
+      if (isFirst) {
+        try {
+          const titleRes = await base44.integrations.Core.InvokeLLM({
+            prompt: `Create a very short title (max 4 words, no quotes, no trailing punctuation) summarizing what this chat is about based on the user's first message: "${text}". Respond with only the title.`,
+          });
+          const title = (typeof titleRes === "string" ? titleRes : "").trim().slice(0, 50);
+          if (title) renameConversation(convId, title);
+        } catch {}
+      }
+    } catch {
+      addMessage(convId, { role: "ai", content: "Sorry, something went wrong. Please try again." });
     } finally {
       setLoading(false);
     }
@@ -44,9 +58,8 @@ export default function ChatBox() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto w-full px-4 pb-10">
+    <div className="w-full max-w-3xl px-4">
       <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-3xl overflow-hidden shadow-2xl">
-        {/* Messages */}
         <div ref={scrollRef} className="h-80 sm:h-96 overflow-y-auto p-6 space-y-4 scroll-smooth">
           {messages.length === 0 && !loading && (
             <div className="h-full flex flex-col items-center justify-center text-center">
@@ -61,7 +74,7 @@ export default function ChatBox() {
           {messages.map((m, i) => (
             <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
               <div
-                className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
+                className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
                   m.role === "user"
                     ? "bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-br-sm"
                     : "bg-slate-800 text-slate-100 rounded-bl-sm border border-slate-700/50"
@@ -81,7 +94,6 @@ export default function ChatBox() {
           )}
         </div>
 
-        {/* Input */}
         <div className="border-t border-slate-700/50 p-3">
           <div className="flex items-end gap-2 bg-slate-800/70 rounded-2xl border border-slate-700/50 focus-within:border-indigo-500/50 transition-colors">
             <textarea

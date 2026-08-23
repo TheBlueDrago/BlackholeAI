@@ -1,14 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Menu } from "lucide-react";
 import ChatBox from "@/components/ChatBox";
+import Sidebar from "@/components/Sidebar";
+import { useConversations } from "@/hooks/useConversations";
 
 export default function Home() {
   const [showIntro, setShowIntro] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const conv = useConversations();
 
   useEffect(() => {
     const timer = setTimeout(() => setShowIntro(false), 2000);
     return () => clearTimeout(timer);
   }, []);
+
+  const handleNewChat = (mode) => {
+    conv.createConversation(mode === "code" ? "New Code Chat" : "New Chat");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-black overflow-hidden relative">
@@ -62,11 +71,37 @@ export default function Home() {
         ) : (
           <motion.div
             key="chat"
-            className="relative z-10 min-h-screen flex items-center justify-center py-10"
+            className="relative z-10 min-h-screen flex flex-col items-center justify-center py-10"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, transition: { duration: 0.8, ease: "easeInOut" } }}
           >
-            <ChatBox />
+            <button
+              onClick={() => setSidebarOpen((o) => !o)}
+              className="fixed top-5 right-5 z-30 p-2.5 rounded-xl bg-slate-800/70 border border-slate-700/50 text-slate-200 hover:bg-slate-700/70 transition-colors"
+              title="Menu"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+
+            <div className="flex items-start justify-center gap-5 w-full">
+              <ChatBox
+                conversation={conv.activeConversation}
+                createConversation={conv.createConversation}
+                addMessage={conv.addMessage}
+                renameConversation={conv.renameConversation}
+              />
+              <AnimatePresence>
+                {sidebarOpen && (
+                  <Sidebar
+                    conversations={conv.conversations}
+                    activeId={conv.activeId}
+                    onSelect={conv.selectConversation}
+                    onRename={conv.renameConversation}
+                    onNewChat={handleNewChat}
+                  />
+                )}
+              </AnimatePresence>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
