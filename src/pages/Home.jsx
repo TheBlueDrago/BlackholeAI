@@ -2,11 +2,14 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu } from "lucide-react";
 import ChatBox from "@/components/ChatBox";
+import CodePage from "@/components/CodePage";
 import Sidebar from "@/components/Sidebar";
+import Subscriptions from "@/components/Subscriptions";
 import { useConversations } from "@/hooks/useConversations";
 
 export default function Home() {
   const [showIntro, setShowIntro] = useState(true);
+  const [mode, setMode] = useState("ai"); // "ai" | "code" | "subscriptions"
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const conv = useConversations();
 
@@ -15,9 +18,17 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleNewChat = (mode) => {
-    conv.createConversation(mode === "code" ? "New Code Chat" : "New Chat");
+  const goHome = () => setMode("ai");
+  const goCode = () => setMode("code");
+  const newChat = () => {
+    conv.createConversation("New Chat");
+    setMode("ai");
   };
+  const codeSubmit = () => {
+    conv.createConversation("New Chat");
+    setMode("subscriptions");
+  };
+  const finishSubscriptions = () => setMode("ai");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-black overflow-hidden relative">
@@ -68,12 +79,14 @@ export default function Home() {
               </motion.p>
             </div>
           </motion.div>
+        ) : mode === "subscriptions" ? (
+          <Subscriptions key="subscriptions" onContinue={finishSubscriptions} />
         ) : (
           <motion.div
             key="chat"
             className="relative z-10 min-h-screen flex flex-col items-center justify-center py-10"
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1, transition: { duration: 0.8, ease: "easeInOut" } }}
+            animate={{ opacity: 1, transition: { duration: 0.6, ease: "easeInOut" } }}
           >
             <button
               onClick={() => setSidebarOpen((o) => !o)}
@@ -84,12 +97,16 @@ export default function Home() {
             </button>
 
             <div className="flex items-start justify-center gap-5 w-full">
-              <ChatBox
-                conversation={conv.activeConversation}
-                createConversation={conv.createConversation}
-                addMessage={conv.addMessage}
-                renameConversation={conv.renameConversation}
-              />
+              {mode === "ai" ? (
+                <ChatBox
+                  conversation={conv.activeConversation}
+                  createConversation={conv.createConversation}
+                  addMessage={conv.addMessage}
+                  renameConversation={conv.renameConversation}
+                />
+              ) : (
+                <CodePage onSubmit={codeSubmit} />
+              )}
               <AnimatePresence>
                 {sidebarOpen && (
                   <Sidebar
@@ -97,7 +114,9 @@ export default function Home() {
                     activeId={conv.activeId}
                     onSelect={conv.selectConversation}
                     onRename={conv.renameConversation}
-                    onNewChat={handleNewChat}
+                    onGoHome={goHome}
+                    onGoCode={goCode}
+                    onNewChat={newChat}
                   />
                 )}
               </AnimatePresence>

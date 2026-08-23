@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Pen, Plus, Code, Sparkles, Check } from "lucide-react";
 
-export default function Sidebar({ conversations, activeId, onSelect, onRename, onNewChat }) {
+export default function Sidebar({ conversations, activeId, onSelect, onRename, onGoHome, onGoCode, onNewChat }) {
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState("");
 
@@ -32,32 +32,40 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
       >
         {/* Header */}
         <div className="p-4 space-y-1">
-          <div className="flex items-center gap-2 px-2 py-2 rounded-xl text-white">
+          <button
+            onClick={onGoHome}
+            className="w-full flex items-center gap-2 px-2 py-2 rounded-xl text-white hover:bg-slate-800/70 transition-colors"
+          >
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center">
               <Sparkles className="w-4 h-4 text-white" />
             </div>
             <span className="font-semibold">AI</span>
-          </div>
+          </button>
           <button
-            onClick={() => onNewChat("code")}
+            onClick={onGoCode}
             className="w-full flex items-center gap-2 px-2 py-2 rounded-xl text-slate-300 hover:bg-slate-800/70 transition-colors"
           >
             <div className="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center">
-              <Code className="w-4 h-4 text-indigo-300" />
+              <Code className="w-4 h-4 text-emerald-300" />
             </div>
             <span className="font-medium">AI Code</span>
           </button>
+          <button
+            onClick={onNewChat}
+            className="w-full flex items-center gap-2 px-2 py-2 rounded-xl text-slate-300 hover:bg-slate-800/70 transition-colors"
+          >
+            <div className="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center">
+              <Plus className="w-4 h-4 text-slate-300" />
+            </div>
+            <span className="font-medium">New Chat</span>
+          </button>
         </div>
 
-        {/* Previous chats header */}
+        {/* Previous chats label (non-clickable) */}
         <div className="px-4 pb-2">
-          <button
-            onClick={() => onNewChat()}
-            className="w-full flex items-center justify-between text-slate-400 text-sm font-medium px-2 py-2 rounded-lg hover:bg-slate-800/50 transition-colors"
-          >
-            <span>Previous Chats</span>
-            <Plus className="w-4 h-4" />
-          </button>
+          <div className="px-2 py-2 text-slate-500 text-sm font-medium cursor-default select-none">
+            Previous Chats
+          </div>
         </div>
 
         <div className="mx-4 h-px bg-slate-700/50" />
