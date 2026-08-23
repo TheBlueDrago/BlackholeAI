@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import ChatBox from "@/components/ChatBox";
 
 export default function Home() {
   return (
@@ -41,6 +42,10 @@ export default function Home() {
         >
           Endless possibilities, intelligently realized.
         </motion.p>
+      </div>
+
+      <div className="relative z-10 w-full mt-16">
+        <ChatBox />
       </div>
     </div>
   );
