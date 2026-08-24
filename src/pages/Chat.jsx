@@ -20,10 +20,7 @@ export default function Chat() {
     conv.createConversation("New Chat");
     setMode("ai");
   };
-  const codeSubmit = () => {
-    conv.createConversation("New Chat");
-    setMode("subscriptions");
-  };
+  const goSubscriptions = () => setMode("subscriptions");
   const finishSubscriptions = () => setMode("ai");
 
   return (
@@ -68,6 +65,7 @@ export default function Chat() {
                   onGoHome={goHome}
                   onGoCode={goCode}
                   onNewChat={newChat}
+                  onGoSubscriptions={goSubscriptions}
                 />
               )}
             </AnimatePresence>
@@ -79,7 +77,7 @@ export default function Chat() {
                 renameConversation={conv.renameConversation}
               />
             ) : (
-              <CodePage onSubmit={codeSubmit} />
+              <CodePage />
             )}
           </div>
 

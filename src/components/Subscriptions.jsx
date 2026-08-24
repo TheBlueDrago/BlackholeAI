@@ -4,9 +4,8 @@ import { Check, ArrowRight } from "lucide-react";
 
 function FreeCard() {
   const features = [
-    "10 AI credits per month",
-    "1 type of ai",
-    "10 ai chats only",
+    "Two AIs",
+    "5 AI code credits",
   ];
   return (
     <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-indigo-500/60 rounded-3xl p-6 shadow-2xl shadow-indigo-500/10 flex flex-col">
@@ -25,6 +24,16 @@ function FreeCard() {
           </li>
         ))}
       </ul>
+      <div className="mt-4 pt-4 border-t border-slate-700/40">
+        <p className="text-xs text-slate-400 leading-relaxed">
+          Credits are spent based on how hard and how long your message is:
+        </p>
+        <ul className="mt-2 space-y-1 text-xs text-slate-400">
+          <li>• One big paragraph, easy — 1.5 credits</li>
+          <li>• One paragraph, hard — 2.5 credits</li>
+          <li>• A whole-website request — 50+ credits</li>
+        </ul>
+      </div>
     </div>
   );
 }
