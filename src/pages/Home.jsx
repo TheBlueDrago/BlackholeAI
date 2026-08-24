@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu } from "lucide-react";
+import { Menu, User } from "lucide-react";
 import ChatBox from "@/components/ChatBox";
 import CodePage from "@/components/CodePage";
 import Sidebar from "@/components/Sidebar";
 import Subscriptions from "@/components/Subscriptions";
+import Profile from "@/components/Profile";
 import { useConversations } from "@/hooks/useConversations";
 
 export default function Home() {
   const [showIntro, setShowIntro] = useState(true);
   const [mode, setMode] = useState("ai"); // "ai" | "code" | "subscriptions"
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const conv = useConversations();
 
   useEffect(() => {
@@ -90,10 +92,17 @@ export default function Home() {
           >
             <button
               onClick={() => setSidebarOpen((o) => !o)}
-              className="fixed top-5 right-5 z-30 p-2.5 rounded-xl bg-slate-800/70 border border-slate-700/50 text-slate-200 hover:bg-slate-700/70 transition-colors"
+              className="fixed top-5 left-5 z-30 p-2.5 rounded-xl bg-slate-800/70 border border-slate-700/50 text-slate-200 hover:bg-slate-700/70 transition-colors"
               title="Menu"
             >
               <Menu className="w-6 h-6" />
+            </button>
+            <button
+              onClick={() => setProfileOpen(true)}
+              className="fixed top-5 right-5 z-30 p-2.5 rounded-xl bg-slate-800/70 border border-slate-700/50 text-slate-200 hover:bg-slate-700/70 transition-colors"
+              title="Profile"
+            >
+              <User className="w-6 h-6" />
             </button>
 
             <div className="flex items-start justify-center gap-5 w-full">
@@ -122,6 +131,7 @@ export default function Home() {
                 )}
               </AnimatePresence>
             </div>
+            <Profile open={profileOpen} onClose={() => setProfileOpen(false)} />
           </motion.div>
         )}
       </AnimatePresence>
