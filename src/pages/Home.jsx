@@ -114,6 +114,7 @@ export default function Home() {
                     activeId={conv.activeId}
                     onSelect={conv.selectConversation}
                     onRename={conv.renameConversation}
+                    onDelete={conv.deleteConversation}
                     onGoHome={goHome}
                     onGoCode={goCode}
                     onNewChat={newChat}
