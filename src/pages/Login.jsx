@@ -10,6 +10,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [remember, setRemember] = useState(() => localStorage.getItem("infinity-ai-remember") !== "0");
   // Post-login destination (same-origin paths only).
   const returnTo = safeReturnTo();
 
@@ -111,6 +112,18 @@ export default function Login() {
                 />
               </div>
             </div>
+            <label className="flex items-center gap-2 text-slate-300 text-sm cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={(e) => {
+                  setRemember(e.target.checked);
+                  localStorage.setItem("infinity-ai-remember", e.target.checked ? "1" : "0");
+                }}
+                className="w-4 h-4 accent-indigo-500"
+              />
+              Remember me
+            </label>
             <button
               type="submit"
               disabled={loading}
