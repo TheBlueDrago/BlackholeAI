@@ -30,7 +30,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
     setLoading(true);
 
     try {
-      const result = await base44.integrations.Core.InvokeLLM({ prompt: text });
+      const result = await base44.integrations.Core.InvokeLLM({ prompt: text, model: "claude-sonnet-5" });
       const content = typeof result === "string" ? result : JSON.stringify(result);
       addMessage(convId, { role: "ai", content });
 

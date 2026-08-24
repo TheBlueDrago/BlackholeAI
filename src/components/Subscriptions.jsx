@@ -4,7 +4,7 @@ import { Check, ArrowRight } from "lucide-react";
 
 function FreeCard() {
   const features = [
-    "Two AIs",
+    "Two AI's",
     "5 AI code credits",
   ];
   return (
