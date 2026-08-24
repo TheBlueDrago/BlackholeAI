@@ -175,14 +175,14 @@ export default function Profile({ open, onClose }) {
 
                 {pwStep === "code" ? (
                   <>
-                    <p className="text-slate-300 text-sm mb-1 font-medium">Enter the code from your email</p>
+                    <p className="text-slate-200 text-base mb-1 font-semibold">Check your email</p>
                     <p className="text-slate-500 text-xs mb-4">
-                      We sent a code to {user?.email}. Enter it below to continue.
+                      We sent a verification code to {user?.email}. Enter it below to reset your password.
                     </p>
                     <input
                       value={code}
                       onChange={(e) => setCode(e.target.value)}
-                      placeholder="Code"
+                      placeholder="Enter code"
                       className={inputCls}
                     />
                     <button
