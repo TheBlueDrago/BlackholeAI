@@ -175,9 +175,9 @@ export default function Profile({ open, onClose }) {
 
                 {pwStep === "code" ? (
                   <>
-                    <p className="text-slate-200 text-base mb-1 font-semibold">Check your email</p>
+                    <p className="text-slate-200 text-base mb-1 font-semibold">Check your email for a reset password link</p>
                     <p className="text-slate-500 text-xs mb-4">
-                      We sent a verification code to {user?.email}. Enter it below to reset your password.
+                      We sent a reset link to {user?.email}. Enter the code from it below to reset your password.
                     </p>
                     <input
                       value={code}
