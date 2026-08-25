@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 
-const KEY = "infinity-ai-credits";
-const DEFAULTS = { aiTotal: 10, aiUsed: 0, aiCodeTotal: 100, aiCodeUsed: 0 };
+const KEY = "infinity-ai-credits-v2";
+const DEFAULTS = { aiTotal: 10, aiUsed: 0, aiCodeTotal: 5, aiCodeUsed: 0 };
 
 function load() {
   try {

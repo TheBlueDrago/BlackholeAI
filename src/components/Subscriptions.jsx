@@ -5,6 +5,8 @@ import { Check, ArrowRight } from "lucide-react";
 function FreeCard({ onFree }) {
   const features = [
     "10 normal AI credits",
+    "2 AI's",
+    "5 AI code credits",
   ];
   return (
     <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-indigo-500/60 rounded-3xl p-6 shadow-2xl shadow-indigo-500/10 flex flex-col">
