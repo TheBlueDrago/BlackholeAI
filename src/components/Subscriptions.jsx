@@ -4,8 +4,7 @@ import { Check, ArrowRight } from "lucide-react";
 
 function FreeCard() {
   const features = [
-    "Two AI's",
-    "5 AI code credits",
+    "10 normal AI credits",
   ];
   return (
     <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-indigo-500/60 rounded-3xl p-6 shadow-2xl shadow-indigo-500/10 flex flex-col">
@@ -20,6 +19,43 @@ function FreeCard() {
         {features.map((f) => (
           <li key={f} className="flex items-start gap-2 text-slate-200 text-sm">
             <Check className="w-4 h-4 text-indigo-400 mt-0.5 shrink-0" />
+            <span>{f}</span>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-4 pt-4 border-t border-slate-700/40">
+        <p className="text-xs text-slate-400 leading-relaxed">
+          Credits are spent based on how hard and how long your message is:
+        </p>
+        <ul className="mt-2 space-y-1 text-xs text-slate-400">
+          <li>• One big paragraph, easy — 1.5 credits</li>
+          <li>• One paragraph, hard — 2.5 credits</li>
+          <li>• A whole-website request — 50+ credits</li>
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+function Plan2Card() {
+  const features = [
+    "2 AI's",
+    "100 AI code credits",
+    "∞ normal AI credits",
+  ];
+  return (
+    <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-emerald-500/60 rounded-3xl p-6 shadow-2xl shadow-emerald-500/10 flex flex-col">
+      <div className="flex items-center justify-between">
+        <h3 className="text-xl font-bold text-white">Plan 2</h3>
+        <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+          $1/mo
+        </span>
+      </div>
+      <div className="h-px bg-slate-700/60 my-4" />
+      <ul className="space-y-3 flex-1">
+        {features.map((f) => (
+          <li key={f} className="flex items-start gap-2 text-slate-200 text-sm">
+            <Check className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" />
             <span>{f}</span>
           </li>
         ))}
@@ -74,7 +110,7 @@ export default function Subscriptions({ onContinue }) {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10 max-w-5xl w-full">
         <FreeCard />
-        <PlaceholderCard label="Plan 2" />
+        <Plan2Card />
         <PlaceholderCard label="Plan 3" />
       </div>
 
