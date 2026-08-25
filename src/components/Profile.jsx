@@ -7,12 +7,9 @@ export default function Profile({ open, onClose }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Password change flow: idle -> code -> newpw
+  // Password reset flow: idle -> sent
   const [pwStep, setPwStep] = useState("idle");
   const [pwBusy, setPwBusy] = useState(false);
-  const [code, setCode] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [reenter, setReenter] = useState("");
   const [pwError, setPwError] = useState("");
 
   useEffect(() => {
@@ -27,9 +24,6 @@ export default function Profile({ open, onClose }) {
 
   const resetPwState = () => {
     setPwStep("idle");
-    setCode("");
-    setNewPassword("");
-    setReenter("");
     setPwError("");
   };
 
@@ -42,39 +36,9 @@ export default function Profile({ open, onClose }) {
     setPwBusy(true);
     try {
       await base44.auth.resetPasswordRequest(user?.email || "");
-      setPwStep("code");
+      setPwStep("sent");
     } catch (e) {
       setPwError(e.message || "Could not send reset email");
-    } finally {
-      setPwBusy(false);
-    }
-  };
-
-  const submitCode = () => {
-    setPwError("");
-    if (!code.trim()) {
-      setPwError("Enter the code from your email");
-      return;
-    }
-    setPwStep("newpw");
-  };
-
-  const confirmReset = async () => {
-    setPwError("");
-    if (!newPassword) {
-      setPwError("Enter a new password");
-      return;
-    }
-    if (newPassword !== reenter) {
-      setPwError("Passwords do not match");
-      return;
-    }
-    setPwBusy(true);
-    try {
-      await base44.auth.resetPassword({ resetToken: code.trim(), newPassword });
-      resetPwState();
-    } catch (e) {
-      setPwError(e.message || "Could not reset password");
     } finally {
       setPwBusy(false);
     }
@@ -86,9 +50,6 @@ export default function Profile({ open, onClose }) {
     .slice(0, 2)
     .join("")
     .toUpperCase();
-
-  const inputCls =
-    "w-full h-11 px-3 rounded-xl bg-slate-800/70 border border-slate-700/50 text-slate-100 placeholder:text-slate-500 outline-none focus:border-indigo-500/60 text-sm";
 
   return (
     <AnimatePresence>
@@ -167,57 +128,13 @@ export default function Profile({ open, onClose }) {
                   Back
                 </button>
 
-                {pwError && (
-                  <div className="mb-4 p-3 rounded-lg bg-red-500/10 text-red-400 text-sm text-center">
-                    {pwError}
+                <div className="text-center">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center mx-auto mb-4">
+                    <Mail className="w-6 h-6 text-white" />
                   </div>
-                )}
-
-                {pwStep === "code" ? (
-                  <>
-                    <p className="text-slate-200 text-base mb-1 font-semibold">Check your email for a reset password link</p>
-                    <p className="text-slate-500 text-xs mb-4">
-                      We sent a reset link to {user?.email}. Enter the code from it below to reset your password.
-                    </p>
-                    <input
-                      value={code}
-                      onChange={(e) => setCode(e.target.value)}
-                      placeholder="Enter code"
-                      className={inputCls}
-                    />
-                    <button
-                      onClick={submitCode}
-                      className="mt-4 w-full h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-white text-sm font-medium hover:opacity-90 transition-opacity"
-                    >
-                      Continue
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-slate-300 text-sm mb-4 font-medium">Enter new password</p>
-                    <input
-                      type="password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="New password"
-                      className={inputCls}
-                    />
-                    <input
-                      type="password"
-                      value={reenter}
-                      onChange={(e) => setReenter(e.target.value)}
-                      placeholder="Re-enter new password"
-                      className={inputCls + " mt-3"}
-                    />
-                    <button
-                      onClick={confirmReset}
-                      disabled={pwBusy}
-                      className="mt-4 w-full h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-60 flex items-center justify-center gap-2"
-                    >
-                      {pwBusy ? <><Loader2 className="w-4 h-4 animate-spin" /> Confirming...</> : "Confirm"}
-                    </button>
-                  </>
-                )}
+                  <p className="text-slate-200 text-base font-semibold">Look at your AI account email for the password reset link</p>
+                  <p className="text-slate-500 text-xs mt-2">We sent a reset link to {user?.email}.</p>
+                </div>
               </div>
             )}
           </motion.div>
