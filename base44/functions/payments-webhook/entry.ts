@@ -152,6 +152,25 @@ async function handleOrderApproved(db: any, eventData: any): Promise<Response> {
   }
   if (grantUserId) {
     await db.entities.User.update(grantUserId, { plan: purchase.productId });
+    // Team plan: activate (or create) the team owned by this buyer with a fresh shared credit pool.
+    if (purchase.productId === "team") {
+      const existing = await db.entities.Team.filter({ ownerId: grantUserId });
+      const team = existing?.[0];
+      if (team) {
+        await db.entities.Team.update(team.id, {
+          status: "active",
+          aiCodeUsed: 0,
+          memberEmails: team.memberEmails ?? [],
+        });
+      } else {
+        await db.entities.Team.create({
+          ownerId: grantUserId,
+          memberEmails: [],
+          aiCodeUsed: 0,
+          status: "active",
+        });
+      }
+    }
     console.log("payments-webhook: granted plan", { userId: grantUserId, plan: purchase.productId });
   } else {
     console.warn("payments-webhook: no user to grant plan", { buyerEmail, productId: purchase.productId });
@@ -215,6 +234,14 @@ async function handleSubscriptionEnded(db: any, eventData: any): Promise<Respons
   }
   if (revokeUserId) {
     await db.entities.User.update(revokeUserId, { plan: "free" });
+    // Team plan: deactivate the team so members lose shared access too.
+    if (purchase.productId === "team") {
+      const existing = await db.entities.Team.filter({ ownerId: revokeUserId });
+      const team = existing?.[0];
+      if (team) {
+        await db.entities.Team.update(team.id, { status: "inactive" });
+      }
+    }
     console.log("payments-webhook: revoked plan", { userId: revokeUserId });
   }
   // ===== END APP-SPECIFIC =====

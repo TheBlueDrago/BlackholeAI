@@ -98,6 +98,16 @@ Deno.serve(async (req: Request) => {
           description: "100 AI code credits and unlimited normal AI credits, billed monthly",
         },
       },
+      team: {
+        name: "Team Plan",
+        price: "10.00",
+        currency: "USD",
+        subscriptionInfo: {
+          subscriptionSettings: { frequency: "MONTH" },
+          title: "Team Plan",
+          description: "1000 shared AI code credits, unlimited normal AI credits, and up to 3 members, billed monthly",
+        },
+      },
     };
     const product = PRODUCTS[productId];
     if (!product) {

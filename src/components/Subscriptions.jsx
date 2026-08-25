@@ -1,15 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Check, ArrowRight, Loader2, Gift } from "lucide-react";
+import { Check, ArrowRight, Loader2, Gift, Users, Plus, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 
 function FreeCard({ onFree }) {
-  const features = [
-    "10 normal AI credits",
-    "2 AI's",
-    "5 AI code credits",
-  ];
+  const features = ["10 normal AI credits", "2 AI's", "5 AI code credits"];
   return (
     <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-indigo-500/60 rounded-3xl p-6 shadow-2xl shadow-indigo-500/10 flex flex-col">
       <div className="flex items-center justify-between">
@@ -49,11 +45,7 @@ function FreeCard({ onFree }) {
 }
 
 function Plan2Card({ onPro }) {
-  const features = [
-    "2 AI's",
-    "100 AI code credits",
-    "∞ normal AI credits",
-  ];
+  const features = ["2 AI's", "100 AI code credits", "∞ normal AI credits"];
   return (
     <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-emerald-500/60 rounded-3xl p-6 shadow-2xl shadow-emerald-500/10 flex flex-col">
       <div className="flex items-center justify-between">
@@ -92,26 +84,146 @@ function Plan2Card({ onPro }) {
   );
 }
 
-function PlaceholderCard({ label }) {
+function TeamCard({ onTeam }) {
+  const features = [
+    "2 AI's",
+    "1000 AI code credits",
+    "∞ normal AI credits",
+    "Add up to 3 people — everyone shares the credits",
+  ];
   return (
-    <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-700/40 rounded-3xl p-6 flex flex-col">
+    <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-sky-500/60 rounded-3xl p-6 shadow-2xl shadow-sky-500/10 flex flex-col">
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-bold text-slate-500">{label}</h3>
-        <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-slate-700/40 text-slate-400 border border-slate-600/40">
-          Coming soon
+        <h3 className="text-xl font-bold text-white">Team</h3>
+        <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/40">
+          $10/mo
         </span>
       </div>
-      <div className="h-px bg-slate-700/40 my-4" />
-      <div className="space-y-3 flex-1">
-        <div className="h-4 rounded bg-slate-700/30" />
-        <div className="h-4 rounded bg-slate-700/30 w-4/5" />
-        <div className="h-4 rounded bg-slate-700/30 w-3/5" />
+      <div className="h-px bg-slate-700/60 my-4" />
+      <ul className="space-y-3 flex-1">
+        {features.map((f) => (
+          <li key={f} className="flex items-start gap-2 text-slate-200 text-sm">
+            <Check className="w-4 h-4 text-sky-400 mt-0.5 shrink-0" />
+            <span>{f}</span>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-4 pt-4 border-t border-slate-700/40">
+        <p className="text-xs text-slate-400 leading-relaxed">
+          Invite up to 3 people to your plan. You all draw from the same pool — if someone wastes
+          100 credits, the whole team's credits go down.
+        </p>
+      </div>
+      <button
+        onClick={onTeam}
+        className="mt-4 w-full inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-500 text-white font-medium hover:opacity-90 transition-opacity"
+      >
+        Continue
+        <ArrowRight className="w-4 h-4" />
+      </button>
+    </div>
+  );
+}
+
+function TeamPanel() {
+  const [team, setTeam] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [emailInput, setEmailInput] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+
+  useEffect(() => {
+    base44.functions
+      .invoke("my-team")
+      .then((r) => setTeam(r.data?.team ?? null))
+      .catch(() => setTeam(null))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const addMember = async () => {
+    const e = emailInput.trim().toLowerCase();
+    if (!e || busy) return;
+    setErr("");
+    setBusy(true);
+    try {
+      const r = await base44.functions.invoke("team-invite", { emails: [e] });
+      setTeam((t) => (t ? { ...t, memberEmails: r.data?.memberEmails ?? t.memberEmails } : t));
+      setEmailInput("");
+    } catch (ex) {
+      setErr(ex?.response?.data?.error || ex?.message || "Could not add member.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (loading || !team || !team.isOwner) return null;
+  const members = team.memberEmails ?? [];
+
+  return (
+    <div className="mt-12 w-full max-w-md mx-auto bg-slate-900/70 backdrop-blur-xl border border-sky-500/40 rounded-3xl p-6 shadow-2xl">
+      <div className="flex items-center gap-2 mb-1">
+        <Users className="w-5 h-5 text-sky-300" />
+        <h3 className="text-lg font-bold text-white">Your Team</h3>
+      </div>
+      <p className="text-slate-400 text-sm">
+        Shared AI code credits:{" "}
+        <span className="text-sky-200 font-medium">
+          {team.aiCodeUsed ?? 0} / 1000
+        </span>
+      </p>
+
+      <div className="mt-4">
+        <p className="text-slate-300 text-sm font-medium mb-2">
+          Members {members.length}/3
+        </p>
+        <div className="space-y-2">
+          {members.map((m, i) => (
+            <div
+              key={i}
+              className="flex items-center justify-between bg-slate-800/60 border border-slate-700/40 rounded-xl px-3 py-2"
+            >
+              <span className="text-slate-200 text-sm truncate">{m}</span>
+              <X className="w-4 h-4 text-slate-500" />
+            </div>
+          ))}
+          {members.length === 0 && (
+            <p className="text-slate-500 text-sm">No members yet.</p>
+          )}
+        </div>
+
+        {members.length < 3 && (
+          <div className="flex items-center gap-2 mt-3">
+            <input
+              type="email"
+              value={emailInput}
+              onChange={(e) => setEmailInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") addMember();
+              }}
+              placeholder="teammate@email.com"
+              className="flex-1 bg-slate-800/70 border border-slate-700/50 focus:border-sky-500/50 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none transition-colors"
+            />
+            <button
+              onClick={addMember}
+              disabled={busy || !emailInput.trim()}
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-500 text-white text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
+            >
+              {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+              Add
+            </button>
+          </div>
+        )}
+        {err && <p className="text-sm text-red-400 mt-2">{err}</p>}
+        <p className="text-xs text-slate-500 mt-3">
+          Added members share your credits. Tell them to create an account with the email you
+          invited.
+        </p>
       </div>
     </div>
   );
 }
 
-export default function Subscriptions({ onFree, onPro }) {
+export default function Subscriptions({ onFree, onPro, onTeam }) {
   const navigate = useNavigate();
   const [promoInput, setPromoInput] = useState("");
   const [promoBusy, setPromoBusy] = useState(false);
@@ -149,8 +261,10 @@ export default function Subscriptions({ onFree, onPro }) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10 max-w-5xl w-full">
         <FreeCard onFree={onFree} />
         <Plan2Card onPro={onPro} />
-        <PlaceholderCard label="Plan 3" />
+        <TeamCard onTeam={onTeam} />
       </div>
+
+      <TeamPanel />
 
       {/* Promo code */}
       <div className="mt-12 w-full max-w-md mx-auto">
@@ -160,7 +274,9 @@ export default function Subscriptions({ onFree, onPro }) {
             type="text"
             value={promoInput}
             onChange={(e) => setPromoInput(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") redeem(); }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") redeem();
+            }}
             placeholder="Enter promo code"
             className="flex-1 bg-slate-800/70 border border-slate-700/50 focus:border-emerald-500/50 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none transition-colors uppercase tracking-wide"
           />
@@ -175,7 +291,6 @@ export default function Subscriptions({ onFree, onPro }) {
         </div>
         {promoError && <p className="text-center text-sm text-red-400 mt-2">{promoError}</p>}
       </div>
-
     </motion.div>
   );
 }
