@@ -4,15 +4,28 @@
   "properties": {
     "ownerId": {
       "type": "string",
-      "description": "App user id of the team owner (the purchaser of the Team plan)."
+      "description": "App user id of the team owner (the purchaser or promo redeemer of the Team plan)."
     },
     "memberEmails": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "Up to 3 invited member emails (lowercased). Members share the team's AI-code credits.",
+      "description": "Up to 2 invited member emails (lowercased). 3 people total with the owner. Members share the team's AI-code credits.",
       "default": []
+    },
+    "pendingRemovalEmails": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Members who asked to leave; removed at the end of the current period.",
+      "default": []
+    },
+    "ownerLeaving": {
+      "type": "boolean",
+      "default": false,
+      "description": "Owner asked to end the membership at the end of the current period."
     },
     "aiCodeUsed": {
       "type": "number",

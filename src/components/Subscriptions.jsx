@@ -89,7 +89,7 @@ function TeamCard({ onTeam }) {
     "2 AI's",
     "1000 AI code credits",
     "∞ normal AI credits",
-    "Add up to 3 people — everyone shares the credits",
+    "Add up to 2 people — everyone shares the credits",
   ];
   return (
     <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-sky-500/60 rounded-3xl p-6 shadow-2xl shadow-sky-500/10 flex flex-col">
@@ -110,7 +110,7 @@ function TeamCard({ onTeam }) {
       </ul>
       <div className="mt-4 pt-4 border-t border-slate-700/40">
         <p className="text-xs text-slate-400 leading-relaxed">
-          Invite up to 3 people to your plan. You all draw from the same pool — if someone wastes
+          Invite up to 2 people to your plan (3 with you). You all draw from the same pool — if someone wastes
           100 credits, the whole team's credits go down.
         </p>
       </div>

@@ -7,6 +7,8 @@ import CodePage from "@/components/CodePage";
 import Sidebar from "@/components/Sidebar";
 import Subscriptions from "@/components/Subscriptions";
 import Profile from "@/components/Profile";
+import PromoExpiredPopup from "@/components/PromoExpiredPopup";
+import TeamWelcomePopup from "@/components/TeamWelcomePopup";
 import { useConversations } from "@/hooks/useConversations";
 import { useCredits } from "@/hooks/useCredits";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +17,7 @@ export default function Chat() {
   const [mode, setMode] = useState("ai"); // "ai" | "code" | "subscriptions"
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [profileInitialView, setProfileInitialView] = useState("main");
   const conv = useConversations();
   const navigate = useNavigate();
   const credits = useCredits();
@@ -57,7 +60,10 @@ export default function Chat() {
             <Menu className="w-6 h-6" />
           </button>
           <button
-            onClick={() => setProfileOpen(true)}
+            onClick={() => {
+              setProfileInitialView("main");
+              setProfileOpen(true);
+            }}
             className="fixed top-5 right-5 z-30 p-2.5 rounded-xl bg-slate-800/70 border border-slate-700/50 text-slate-200 hover:bg-slate-700/70 transition-colors"
             title="Profile"
           >
@@ -95,7 +101,21 @@ export default function Chat() {
             )}
           </div>
 
-          <Profile open={profileOpen} onClose={() => setProfileOpen(false)} />
+          <Profile
+            open={profileOpen}
+            initialView={profileInitialView}
+            onClose={() => {
+              setProfileOpen(false);
+              setProfileInitialView("main");
+            }}
+          />
+          <TeamWelcomePopup
+            onAddPeople={() => {
+              setProfileInitialView("membership");
+              setProfileOpen(true);
+            }}
+          />
+          <PromoExpiredPopup />
         </motion.div>
       )}
     </div>

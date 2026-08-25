@@ -19,7 +19,7 @@ export default function Billing() {
         price: "$10 / month",
         gradient: "from-sky-500 to-indigo-500",
         glow: "bg-sky-600/15",
-        features: ["2 AI's", "1000 AI code credits", "∞ normal AI credits", "Add up to 3 people — shared credits"],
+        features: ["2 AI's", "1000 AI code credits", "∞ normal AI credits", "Add up to 2 people — shared credits"],
         button: "Subscribe — $10/mo",
         icon: Users,
       }

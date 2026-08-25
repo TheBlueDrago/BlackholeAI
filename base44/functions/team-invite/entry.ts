@@ -20,9 +20,9 @@ export default async function (req: Request): Promise<Response> {
 
     let members = (team.memberEmails ?? []).map((e) => String(e).toLowerCase());
     for (const e of cleaned) {
-      if (!members.includes(e) && members.length < 3) members.push(e);
+      if (!members.includes(e) && members.length < 2) members.push(e);
     }
-    if (members.length > 3) members = members.slice(0, 3);
+    if (members.length > 2) members = members.slice(0, 2);
 
     await db.entities.Team.update(team.id, { memberEmails: members });
     return Response.json({ memberEmails: members });

@@ -105,7 +105,7 @@ Deno.serve(async (req: Request) => {
         subscriptionInfo: {
           subscriptionSettings: { frequency: "MONTH" },
           title: "Team Plan",
-          description: "1000 shared AI code credits, unlimited normal AI credits, and up to 3 members, billed monthly",
+          description: "1000 shared AI code credits, unlimited normal AI credits, and up to 2 members (3 with you), billed monthly",
         },
       },
     };

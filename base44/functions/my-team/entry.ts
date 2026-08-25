@@ -1,7 +1,8 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
 
-// Returns the active team the current user belongs to (as owner or invited member), or null.
-// A team is only "active" while the owner's subscription is still on the team plan.
+// Returns the team the current user belongs to (as owner or invited member), or null.
+// "active" only while the team record is active, the owner is still on the team plan,
+// and (for promo-granted teams) the promo period hasn't expired.
 export default async function (req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
@@ -11,12 +12,10 @@ export default async function (req: Request): Promise<Response> {
     const email = String(user.email ?? "").trim().toLowerCase();
     const db = base44.asServiceRole;
 
-    // Owner path.
     const owned = await db.entities.Team.filter({ ownerId: user.id });
     let team = owned?.[0];
     let isOwner = !!team;
 
-    // Member path: array-contains match on memberEmails.
     if (!team && email) {
       const memberTeams = await db.entities.Team.filter({ memberEmails: email });
       team = memberTeams?.[0];
@@ -25,22 +24,24 @@ export default async function (req: Request): Promise<Response> {
 
     if (!team) return Response.json({ team: null });
 
-    // Active only if the team record is active AND the owner still has the team plan.
-    let active = team.status === "active";
-    if (active) {
-      const owner = await db.entities.User.get(team.ownerId).catch(() => null);
-      active = owner?.plan === "team";
-    }
+    const owner = await db.entities.User.get(team.ownerId).catch(() => null);
+    const ownerExpiresAt = owner?.planExpiresAt ?? null;
+    const expired = ownerExpiresAt ? new Date(ownerExpiresAt) < new Date() : false;
+    const active = team.status === "active" && owner?.plan === "team" && !expired;
 
     return Response.json({
       team: {
         id: team.id,
         ownerId: team.ownerId,
         memberEmails: team.memberEmails ?? [],
+        pendingRemovalEmails: team.pendingRemovalEmails ?? [],
+        ownerLeaving: team.ownerLeaving ?? false,
         aiCodeUsed: team.aiCodeUsed ?? 0,
         status: team.status,
         active,
         isOwner,
+        ownerPlanExpiresAt: ownerExpiresAt,
+        isPromo: !!ownerExpiresAt,
       },
     });
   } catch (error) {
