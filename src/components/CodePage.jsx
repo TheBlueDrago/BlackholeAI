@@ -23,11 +23,11 @@ export default function CodePage() {
     setLoading(true);
 
     try {
-      const result = await base44.integrations.Core.InvokeLLM({
+      const res = await base44.functions.invoke("chatCompletion", {
         prompt: text,
         model: "claude-sonnet-5",
       });
-      const content = typeof result === "string" ? result : JSON.stringify(result);
+      const content = res.data?.content ?? "";
       setMessages((m) => [...m, { role: "ai", content }]);
     } catch {
       setMessages((m) => [

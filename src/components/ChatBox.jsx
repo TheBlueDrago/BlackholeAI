@@ -30,16 +30,16 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
     setLoading(true);
 
     try {
-      const result = await base44.integrations.Core.InvokeLLM({ prompt: text, model: "claude_sonnet_4_6" });
-      const content = typeof result === "string" ? result : JSON.stringify(result);
+      const res = await base44.functions.invoke("chatCompletion", { prompt: text, model: "claude_sonnet_4_6" });
+      const content = res.data?.content ?? "";
       addMessage(convId, { role: "ai", content });
 
       if (isFirst) {
         try {
-          const titleRes = await base44.integrations.Core.InvokeLLM({
+          const titleRes = await base44.functions.invoke("chatCompletion", {
             prompt: `Create a very short title (max 4 words, no quotes, no trailing punctuation) summarizing what this chat is about based on the user's first message: "${text}". Respond with only the title.`,
           });
-          const title = (typeof titleRes === "string" ? titleRes : "").trim().slice(0, 50);
+          const title = (titleRes.data?.content ?? "").trim().slice(0, 50);
           if (title) renameConversation(convId, title);
         } catch {}
       }
