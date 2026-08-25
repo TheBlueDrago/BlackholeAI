@@ -10,6 +10,7 @@ import Home from '@/pages/Home';
 import Chat from '@/pages/Chat';
 import Billing from '@/pages/Billing';
 import ThankYou from '@/pages/ThankYou';
+import PromoSuccess from '@/pages/PromoSuccess';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
@@ -51,6 +52,7 @@ const AuthenticatedApp = () => {
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route path="/chat" element={<Chat />} />
         <Route path="/billing" element={<Billing />} />
+        <Route path="/promo-success" element={<PromoSuccess />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

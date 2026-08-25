@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Check, ArrowRight } from "lucide-react";
+import { Check, ArrowRight, Loader2, Gift } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { base44 } from "@/api/base44Client";
 
 function FreeCard({ onFree }) {
   const features = [
@@ -110,6 +112,26 @@ function PlaceholderCard({ label }) {
 }
 
 export default function Subscriptions({ onFree, onPro }) {
+  const navigate = useNavigate();
+  const [promoInput, setPromoInput] = useState("");
+  const [promoBusy, setPromoBusy] = useState(false);
+  const [promoError, setPromoError] = useState("");
+
+  const redeem = async () => {
+    const code = promoInput.trim();
+    if (!code || promoBusy) return;
+    setPromoError("");
+    setPromoBusy(true);
+    try {
+      const res = await base44.functions.invoke("redeem-promo", { code });
+      navigate("/promo-success", { state: { expiresAt: res.data?.expiresAt } });
+    } catch (e) {
+      setPromoError(e?.response?.data?.error || e?.message || "Could not redeem code.");
+    } finally {
+      setPromoBusy(false);
+    }
+  };
+
   return (
     <motion.div
       key="subscriptions"
@@ -128,6 +150,30 @@ export default function Subscriptions({ onFree, onPro }) {
         <FreeCard onFree={onFree} />
         <Plan2Card onPro={onPro} />
         <PlaceholderCard label="Plan 3" />
+      </div>
+
+      {/* Promo code */}
+      <div className="mt-12 w-full max-w-md mx-auto">
+        <p className="text-center text-slate-300 text-sm font-medium mb-3">Have A Promo Code?</p>
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            value={promoInput}
+            onChange={(e) => setPromoInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") redeem(); }}
+            placeholder="Enter promo code"
+            className="flex-1 bg-slate-800/70 border border-slate-700/50 focus:border-emerald-500/50 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none transition-colors uppercase tracking-wide"
+          />
+          <button
+            onClick={redeem}
+            disabled={promoBusy || !promoInput.trim()}
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
+          >
+            {promoBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Gift className="w-4 h-4" />}
+            Redeem
+          </button>
+        </div>
+        {promoError && <p className="text-center text-sm text-red-400 mt-2">{promoError}</p>}
       </div>
 
     </motion.div>

@@ -10,12 +10,17 @@
     },
     "plan": {
       "type": "string",
-      "description": "Subscription plan granted by the payments webhook",
+      "description": "Subscription plan granted by the payments webhook or a promo code",
       "enum": [
         "free",
         "pro"
       ],
       "default": "free"
+    },
+    "planExpiresAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When a promo-granted Pro plan expires. Null for a paid subscription or the free plan."
     }
   },
   "required": [
