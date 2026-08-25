@@ -89,6 +89,10 @@ export default function Billing() {
           ))}
         </ul>
 
+        <p className="mt-5 pt-4 border-t border-slate-700/40 text-xs text-slate-400 leading-relaxed">
+          Credits are the units Base44 uses when you interact with Base44's AI or connect your app to external tools. Credit usage adjusts dynamically based on how much work the builder needs to do behind the scenes.
+        </p>
+
         {error && <p className="mt-4 text-sm text-red-400 text-center">{error}</p>}
 
         <button

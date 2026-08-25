@@ -25,13 +25,8 @@ function FreeCard({ onFree }) {
       </ul>
       <div className="mt-4 pt-4 border-t border-slate-700/40">
         <p className="text-xs text-slate-400 leading-relaxed">
-          Credits are spent based on how hard and how long your message is:
+          Credits are the units Base44 uses when you interact with Base44's AI or connect your app to external tools. Credit usage adjusts dynamically based on how much work the builder needs to do behind the scenes.
         </p>
-        <ul className="mt-2 space-y-1 text-xs text-slate-400">
-          <li>• One big paragraph, easy — 1.5 credits</li>
-          <li>• One paragraph, hard — 2.5 credits</li>
-          <li>• A whole-website request — 50+ credits</li>
-        </ul>
       </div>
       <button
         onClick={onFree}
@@ -65,13 +60,8 @@ function Plan2Card({ onPro }) {
       </ul>
       <div className="mt-4 pt-4 border-t border-slate-700/40">
         <p className="text-xs text-slate-400 leading-relaxed">
-          Credits are spent based on how hard and how long your message is:
+          Credits are the units Base44 uses when you interact with Base44's AI or connect your app to external tools. Credit usage adjusts dynamically based on how much work the builder needs to do behind the scenes.
         </p>
-        <ul className="mt-2 space-y-1 text-xs text-slate-400">
-          <li>• One big paragraph, easy — 1.5 credits</li>
-          <li>• One paragraph, hard — 2.5 credits</li>
-          <li>• A whole-website request — 50+ credits</li>
-        </ul>
       </div>
       <button
         onClick={onPro}
