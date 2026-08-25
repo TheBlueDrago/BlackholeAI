@@ -5,9 +5,10 @@ import { Pen, Plus, Code, Sparkles, Check, X, CreditCard } from "lucide-react";
 const SKIP_KEY = "infinity-ai-skip-delete-confirm";
 
 function CreditBar({ icon, label, used, total, gradient }) {
-  const safeTotal = total > 0 ? total : 1;
-  const pct = Math.min(100, Math.round((used / safeTotal) * 100));
-  const remaining = Math.max(0, total - used);
+  const unlimited = total === Infinity;
+  const safeTotal = unlimited ? 1 : total > 0 ? total : 1;
+  const pct = unlimited ? 100 : Math.min(100, Math.round((used / safeTotal) * 100));
+  const remaining = unlimited ? "∞" : Math.max(0, total - used);
   return (
     <div className="px-3 py-2 rounded-xl bg-slate-800/50 border border-slate-700/40">
       <div className="flex items-center justify-between text-xs mb-1.5">
@@ -15,12 +16,12 @@ function CreditBar({ icon, label, used, total, gradient }) {
           {icon}
           {label}
         </span>
-        <span className="text-slate-400">{used} / {total}</span>
+        <span className="text-slate-400">{unlimited ? `${used} / ∞` : `${used} / ${total}`}</span>
       </div>
       <div className="h-1.5 rounded-full bg-slate-700/60 overflow-hidden">
         <div className={`h-full bg-gradient-to-r ${gradient}`} style={{ width: `${pct}%` }} />
       </div>
-      <p className="text-[10px] text-slate-500 mt-1">{remaining} left</p>
+      <p className="text-[10px] text-slate-500 mt-1">{unlimited ? "Unlimited" : `${remaining} left`}</p>
     </div>
   );
 }

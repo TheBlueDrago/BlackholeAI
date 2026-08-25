@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { LogOut, Mail, Shield, KeyRound, ArrowLeft, Loader2 } from "lucide-react";
+import { LogOut, Mail, Shield, KeyRound, ArrowLeft, Loader2, Crown } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 export default function Profile({ open, onClose }) {
@@ -51,6 +51,8 @@ export default function Profile({ open, onClose }) {
     .join("")
     .toUpperCase();
 
+  const isPro = user?.plan === "pro" && (!user?.planExpiresAt || new Date(user.planExpiresAt) > new Date());
+
   return (
     <AnimatePresence>
       {open && (
@@ -82,6 +84,12 @@ export default function Profile({ open, onClose }) {
                       <h3 className="mt-4 text-lg font-semibold text-white">
                         {user.full_name || "Infinity User"}
                       </h3>
+                      {isPro && (
+                        <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500/25 to-yellow-500/25 text-amber-200 border border-amber-400/50">
+                          <Crown className="w-3 h-3" />
+                          Pro
+                        </span>
+                      )}
                       <div className="mt-1 flex items-center gap-1.5 text-slate-400 text-sm">
                         <Mail className="w-3.5 h-3.5" />
                         <span>{user.email}</span>
