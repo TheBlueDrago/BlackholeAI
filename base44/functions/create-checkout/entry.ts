@@ -86,16 +86,30 @@ Deno.serve(async (req: Request) => {
     //   const product = (await base44.asServiceRole.entities.Product.filter({ id: productId }))[0];
     //   if (!product) return new Response(JSON.stringify({ error: "Unknown product" }), { status: 400 });
     //   const productName = product.name; const price = String(product.price); const currency = product.currency ?? "USD";
-    const productName = "Purchase"; // TODO: from your trusted product source
-    const price = "0.00";           // TODO: authoritative per-unit price (major units), resolved server-side
-    const currency = "USD";
-    // For a SUBSCRIPTION set this to Wix's subscriptionInfo; leave null for a one-time payment.
-    const subscriptionInfo = null;
-    // Where Wix returns the buyer. Both MUST be real, PUBLICLY reachable routes in this app: the
-    // returning buyer is often anonymous, so a missing or login-gated route strands a paid customer.
-    // Match your router exactly — `/ThankYou`, not `/thank-you`.
+    // Resolve the product and its price SERVER-SIDE. Only a product id comes from the client.
+    const PRODUCTS = {
+      pro: {
+        name: "Pro Plan",
+        price: "1.00",
+        currency: "USD",
+        subscriptionInfo: {
+          subscriptionSettings: { frequency: "MONTH" },
+          title: "Pro Plan",
+          description: "100 AI code credits and unlimited normal AI credits, billed monthly",
+        },
+      },
+    };
+    const product = PRODUCTS[productId];
+    if (!product) {
+      return new Response(JSON.stringify({ error: "Unknown product" }), { status: 400 });
+    }
+    const productName = product.name;
+    const price = product.price;
+    const currency = product.currency;
+    const subscriptionInfo = product.subscriptionInfo;
+    // Where Wix returns the buyer. Both MUST be real, PUBLICLY reachable routes.
     const thankYouPath = "/ThankYou";
-    const postFlowPath = "/";
+    const postFlowPath = "/chat";
     // ===== END APP-SPECIFIC =====
 
     const total = parseFloat(price) * quantity;

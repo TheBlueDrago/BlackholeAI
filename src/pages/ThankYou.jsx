@@ -1,0 +1,30 @@
+import React from "react";
+import { motion } from "framer-motion";
+import { CheckCircle2 } from "lucide-react";
+import { Link } from "react-router-dom";
+
+export default function ThankYou() {
+  return (
+    <motion.div
+      className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-10 bg-gradient-to-br from-slate-950 via-slate-900 to-black overflow-hidden"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1, transition: { duration: 0.6, ease: "easeInOut" } }}
+    >
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-600/15 rounded-full blur-[120px] pointer-events-none" />
+
+      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center mb-5">
+        <CheckCircle2 className="w-9 h-9 text-white" />
+      </div>
+      <h1 className="text-3xl sm:text-4xl font-bold text-white text-center">Thanks for subscribing!</h1>
+      <p className="text-slate-400 mt-3 text-center max-w-md">
+        We're confirming your payment. Your Pro access will activate shortly.
+      </p>
+      <Link
+        to="/chat"
+        className="mt-8 inline-flex items-center gap-2 px-8 py-3 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white font-medium shadow-lg shadow-emerald-500/30 hover:opacity-90 transition-opacity"
+      >
+        Back to Infinity AI
+      </Link>
+    </motion.div>
+  );
+}

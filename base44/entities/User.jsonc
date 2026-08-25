@@ -7,6 +7,15 @@
         "admin",
         "user"
       ]
+    },
+    "plan": {
+      "type": "string",
+      "description": "Subscription plan granted by the payments webhook",
+      "enum": [
+        "free",
+        "pro"
+      ],
+      "default": "free"
     }
   },
   "required": [
