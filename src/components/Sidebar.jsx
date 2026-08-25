@@ -4,7 +4,28 @@ import { Pen, Plus, Code, Sparkles, Check, X, CreditCard } from "lucide-react";
 
 const SKIP_KEY = "infinity-ai-skip-delete-confirm";
 
-export default function Sidebar({ conversations, activeId, onSelect, onRename, onDelete, onGoHome, onGoCode, onNewChat, onGoSubscriptions }) {
+function CreditBar({ icon, label, used, total, gradient }) {
+  const safeTotal = total > 0 ? total : 1;
+  const pct = Math.min(100, Math.round((used / safeTotal) * 100));
+  const remaining = Math.max(0, total - used);
+  return (
+    <div className="px-3 py-2 rounded-xl bg-slate-800/50 border border-slate-700/40">
+      <div className="flex items-center justify-between text-xs mb-1.5">
+        <span className="text-slate-300 font-medium flex items-center gap-1.5">
+          {icon}
+          {label}
+        </span>
+        <span className="text-slate-400">{used} / {total}</span>
+      </div>
+      <div className="h-1.5 rounded-full bg-slate-700/60 overflow-hidden">
+        <div className={`h-full bg-gradient-to-r ${gradient}`} style={{ width: `${pct}%` }} />
+      </div>
+      <p className="text-[10px] text-slate-500 mt-1">{remaining} left</p>
+    </div>
+  );
+}
+
+export default function Sidebar({ conversations, activeId, onSelect, onRename, onDelete, onGoHome, onGoCode, onNewChat, onGoSubscriptions, credits = {} }) {
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState("");
   const [confirmId, setConfirmId] = useState(null);
@@ -94,6 +115,24 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
               </div>
               <span className="font-medium">Plans</span>
             </button>
+          </div>
+
+          {/* Credit bars */}
+          <div className="px-4 space-y-2 pb-2">
+            <CreditBar
+              icon={<Sparkles className="w-3 h-3 text-indigo-400" />}
+              label="AI"
+              used={credits.aiUsed ?? 0}
+              total={credits.aiTotal ?? 0}
+              gradient="from-indigo-500 to-fuchsia-500"
+            />
+            <CreditBar
+              icon={<Code className="w-3 h-3 text-emerald-300" />}
+              label="AI Code"
+              used={credits.aiCodeUsed ?? 0}
+              total={credits.aiCodeTotal ?? 0}
+              gradient="from-emerald-500 to-teal-500"
+            />
           </div>
 
           {/* Previous chats label (non-clickable) */}

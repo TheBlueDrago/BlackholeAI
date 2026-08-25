@@ -7,6 +7,7 @@ import Sidebar from "@/components/Sidebar";
 import Subscriptions from "@/components/Subscriptions";
 import Profile from "@/components/Profile";
 import { useConversations } from "@/hooks/useConversations";
+import { useCredits } from "@/hooks/useCredits";
 import { useNavigate } from "react-router-dom";
 
 export default function Chat() {
@@ -15,6 +16,7 @@ export default function Chat() {
   const [profileOpen, setProfileOpen] = useState(false);
   const conv = useConversations();
   const navigate = useNavigate();
+  const credits = useCredits();
 
   const goHome = () => setMode("ai");
   const goCode = () => setMode("code");
@@ -69,6 +71,7 @@ export default function Chat() {
                   onGoCode={goCode}
                   onNewChat={newChat}
                   onGoSubscriptions={goSubscriptions}
+                  credits={{ aiTotal: credits.aiTotal, aiUsed: credits.aiUsed, aiCodeTotal: credits.aiCodeTotal, aiCodeUsed: credits.aiCodeUsed }}
                 />
               )}
             </AnimatePresence>
@@ -78,9 +81,11 @@ export default function Chat() {
                 createConversation={conv.createConversation}
                 addMessage={conv.addMessage}
                 renameConversation={conv.renameConversation}
+                aiExhausted={credits.aiExhausted}
+                onSpendAI={credits.spendAI}
               />
             ) : (
-              <CodePage />
+              <CodePage aiCodeExhausted={credits.aiCodeExhausted} onSpendAICode={credits.spendAICode} />
             )}
           </div>
 

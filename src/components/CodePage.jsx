@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Send, Terminal, Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
-export default function CodePage() {
+export default function CodePage({ aiCodeExhausted, onSpendAICode }) {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -16,11 +16,12 @@ export default function CodePage() {
 
   const send = async () => {
     const text = input.trim();
-    if (!text || loading) return;
+    if (!text || loading || aiCodeExhausted) return;
 
     setMessages((m) => [...m, { role: "user", content: text }]);
     setInput("");
     setLoading(true);
+    onSpendAICode?.();
 
     try {
       const res = await base44.functions.invoke("chatCompletion", {
@@ -95,12 +96,15 @@ export default function CodePage() {
             />
             <button
               onClick={send}
-              disabled={!input.trim() || loading}
+              disabled={!input.trim() || loading || aiCodeExhausted}
               className="m-1.5 p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
             >
               <Send className="w-5 h-5" />
             </button>
           </div>
+          {aiCodeExhausted && (
+            <p className="text-center text-xs text-red-400 mt-2">You're out of AI Code credits.</p>
+          )}
           <p className="text-center text-xs text-slate-600 mt-2">Infinity AI can make mistakes. Check important info.</p>
         </div>
       </div>
