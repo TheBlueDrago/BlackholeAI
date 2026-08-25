@@ -13,7 +13,7 @@ export default function TeamWelcomePopup({ onAddPeople }) {
       .invoke("my-team")
       .then((r) => {
         const t = r.data?.team;
-        if (t && t.isOwner && t.active && (t.memberEmails ?? []).length === 0) {
+        if (t && t.isOwner && t.active && t.id && (t.memberEmails ?? []).length === 0) {
           const key = "infinity-team-welcome-" + t.id;
           if (localStorage.getItem(key) !== "1") setShow(true);
         }

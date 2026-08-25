@@ -12,6 +12,26 @@ export default async function (req: Request): Promise<Response> {
     const email = String(user.email ?? "").trim().toLowerCase();
     const db = base44.asServiceRole;
 
+    // Admins get Team membership for free, forever — no record, no expiry, no payment.
+    if (user.role === "admin") {
+      return Response.json({
+        team: {
+          id: null,
+          ownerId: user.id,
+          memberEmails: [],
+          pendingRemovalEmails: [],
+          ownerLeaving: false,
+          aiCodeUsed: 0,
+          status: "active",
+          active: true,
+          isOwner: true,
+          ownerPlanExpiresAt: null,
+          isPromo: false,
+          isAdmin: true,
+        },
+      });
+    }
+
     const owned = await db.entities.Team.filter({ ownerId: user.id });
     let team = owned?.[0];
     let isOwner = !!team;

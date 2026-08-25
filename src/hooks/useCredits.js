@@ -80,6 +80,7 @@ export function useCredits() {
   const spendAICode = useCallback(
     (amount = 1) => {
       if (plan === "team") {
+        if (team?.isAdmin) return; // admins: free forever, no shared-pool counting
         // Shared pool lives on the server so every member's spend counts.
         base44.functions
           .invoke("team-spend", { amount })
