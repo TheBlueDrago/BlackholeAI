@@ -8,6 +8,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
 import Home from '@/pages/Home';
 import Chat from '@/pages/Chat';
+import Billing from '@/pages/Billing';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
@@ -47,6 +48,7 @@ const AuthenticatedApp = () => {
       <Route path="/" element={<Home />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route path="/chat" element={<Chat />} />
+        <Route path="/billing" element={<Billing />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

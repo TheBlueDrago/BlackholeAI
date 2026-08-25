@@ -7,12 +7,14 @@ import Sidebar from "@/components/Sidebar";
 import Subscriptions from "@/components/Subscriptions";
 import Profile from "@/components/Profile";
 import { useConversations } from "@/hooks/useConversations";
+import { useNavigate } from "react-router-dom";
 
 export default function Chat() {
   const [mode, setMode] = useState("ai"); // "ai" | "code" | "subscriptions"
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const conv = useConversations();
+  const navigate = useNavigate();
 
   const goHome = () => setMode("ai");
   const goCode = () => setMode("code");
@@ -22,6 +24,7 @@ export default function Chat() {
   };
   const goSubscriptions = () => setMode("subscriptions");
   const finishSubscriptions = () => setMode("ai");
+  const goBilling = () => navigate("/billing");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-black overflow-hidden relative">
@@ -30,7 +33,7 @@ export default function Chat() {
       <div className="absolute top-1/3 left-1/3 w-[400px] h-[400px] bg-fuchsia-600/10 rounded-full blur-[100px] pointer-events-none" />
 
       {mode === "subscriptions" ? (
-        <Subscriptions onContinue={finishSubscriptions} />
+        <Subscriptions onFree={finishSubscriptions} onPro={goBilling} />
       ) : (
         <motion.div
           className="relative z-10 min-h-screen flex flex-col items-center justify-center py-10"

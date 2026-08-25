@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Check, ArrowRight } from "lucide-react";
 
-function FreeCard() {
+function FreeCard({ onFree }) {
   const features = [
     "10 normal AI credits",
   ];
@@ -33,11 +33,18 @@ function FreeCard() {
           <li>• A whole-website request — 50+ credits</li>
         </ul>
       </div>
+      <button
+        onClick={onFree}
+        className="mt-4 w-full inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-500/90 text-white font-medium hover:bg-indigo-500 transition-colors"
+      >
+        Continue
+        <ArrowRight className="w-4 h-4" />
+      </button>
     </div>
   );
 }
 
-function Plan2Card() {
+function Plan2Card({ onPro }) {
   const features = [
     "2 AI's",
     "100 AI code credits",
@@ -46,7 +53,7 @@ function Plan2Card() {
   return (
     <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-emerald-500/60 rounded-3xl p-6 shadow-2xl shadow-emerald-500/10 flex flex-col">
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-bold text-white">Plan 2</h3>
+        <h3 className="text-xl font-bold text-white">Pro</h3>
         <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
           $1/mo
         </span>
@@ -70,6 +77,13 @@ function Plan2Card() {
           <li>• A whole-website request — 50+ credits</li>
         </ul>
       </div>
+      <button
+        onClick={onPro}
+        className="mt-4 w-full inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white font-medium hover:opacity-90 transition-opacity"
+      >
+        Continue
+        <ArrowRight className="w-4 h-4" />
+      </button>
     </div>
   );
 }
@@ -93,7 +107,7 @@ function PlaceholderCard({ label }) {
   );
 }
 
-export default function Subscriptions({ onContinue }) {
+export default function Subscriptions({ onFree, onPro }) {
   return (
     <motion.div
       key="subscriptions"
@@ -109,20 +123,11 @@ export default function Subscriptions({ onContinue }) {
       <p className="text-slate-400 mt-3 text-center">Choose the plan that fits you</p>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10 max-w-5xl w-full">
-        <FreeCard />
-        <Plan2Card />
+        <FreeCard onFree={onFree} />
+        <Plan2Card onPro={onPro} />
         <PlaceholderCard label="Plan 3" />
       </div>
 
-      <div className="h-px bg-slate-700/50 max-w-5xl w-full mt-10" />
-
-      <button
-        onClick={onContinue}
-        className="mt-6 inline-flex items-center gap-2 px-8 py-3 rounded-2xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-white font-medium shadow-lg shadow-indigo-500/30 hover:opacity-90 transition-opacity"
-      >
-        Continue
-        <ArrowRight className="w-4 h-4" />
-      </button>
     </motion.div>
   );
 }
