@@ -29,6 +29,16 @@ export default function Register() {
     }
     setLoading(true);
     try {
+      const check = await base44.functions.invoke("check-email", { email });
+      const status = check.data?.status;
+      if (status === "deleted") {
+        setError("This AI email account has been deleted.");
+        return;
+      }
+      if (status === "exists") {
+        setError("An account with this email already exists. Try logging in.");
+        return;
+      }
       await base44.auth.register({ email, password });
       setShowOtp(true);
     } catch (err) {

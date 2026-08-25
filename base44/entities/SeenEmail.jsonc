@@ -1,0 +1,39 @@
+{
+  "name": "SeenEmail",
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string",
+      "description": "Lowercased email of an account that has logged in. Used to detect re-registration of deleted accounts."
+    },
+    "firstSeenAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "email"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

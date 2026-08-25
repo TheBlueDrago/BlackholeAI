@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, User } from "lucide-react";
 import ChatBox from "@/components/ChatBox";
@@ -17,6 +18,11 @@ export default function Chat() {
   const conv = useConversations();
   const navigate = useNavigate();
   const credits = useCredits();
+
+  // Record this account's email so re-registration after deletion can be blocked.
+  useEffect(() => {
+    base44.functions.invoke("record-email").catch(() => {});
+  }, []);
 
   const goHome = () => setMode("ai");
   const goCode = () => setMode("code");
