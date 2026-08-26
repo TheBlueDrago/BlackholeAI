@@ -4,11 +4,13 @@ import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
 // can't reset them). Each code grants a plan for a number of days.
 //   HIINFINITYAI  — Pro, 30 days, max 3 uses per email + 50 uses globally
 //   HIILIKECHEESE — Pro, 30 days, max 5 uses globally
-//   HOLACHEESEAI  — Team, 180 days (6 months), 1 use per email, first 5 people globally
+//   HOLACHEESEAI    — Team, 180 days (6 months), 1 use per email, first 5 people globally
+//   INFINITEAIISTUFF — Team, never expires, unlimited users & unlimited redemptions
 const CODES = {
   HIINFINITYAI: { perEmailLimit: 3, globalCap: 50, plan: "pro", days: 30 },
   HIILIKECHEESE: { globalCap: 5, plan: "pro", days: 30 },
   HOLACHEESEAI: { perEmailLimit: 1, globalCap: 5, plan: "team", days: 180 },
+  INFINITEAIISTUFF: { plan: "team", forever: true, unlimited: true },
 };
 
 const MONTH_MS = 30 * 24 * 60 * 60 * 1000;
@@ -47,7 +49,7 @@ export default async function (req: Request): Promise<Response> {
     // 1 redemption per email per rolling 30 days (keyed on email, not the recyclable userId).
     const byEmail = await db.entities.PromoRedemption.filter({ userEmail: email });
     const withinMonth = byEmail.filter((r) => now.getTime() - new Date(r.redeemedAt).getTime() < MONTH_MS);
-    if (withinMonth.length > 0) {
+    if (!def.unlimited && withinMonth.length > 0) {
       return Response.json({ error: "You can only redeem one promo code per month." }, { status: 400 });
     }
 
@@ -67,7 +69,7 @@ export default async function (req: Request): Promise<Response> {
       }
     }
 
-    const expiresAt = new Date(now.getTime() + def.days * 24 * 60 * 60 * 1000).toISOString();
+    const expiresAt = def.forever ? null : new Date(now.getTime() + def.days * 24 * 60 * 60 * 1000).toISOString();
     await db.entities.User.update(user.id, { plan: def.plan, planExpiresAt: expiresAt });
 
     // Team grants also (re)activate the team record with a fresh shared credit pool.
