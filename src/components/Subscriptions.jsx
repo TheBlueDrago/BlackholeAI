@@ -256,6 +256,16 @@ export default function Subscriptions({ onFree, onPro, onTeam }) {
 
       <TeamPanel />
 
+      <div className="mt-10 w-full max-w-md mx-auto">
+        <button
+          onClick={onFree}
+          className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-white font-medium hover:opacity-90 transition-opacity"
+        >
+          Continue
+          <ArrowRight className="w-4 h-4" />
+        </button>
+      </div>
+
       {/* Promo code */}
       <div className="mt-12 w-full max-w-md mx-auto">
         <p className="text-center text-slate-300 text-sm font-medium mb-3">Have A Promo Code?</p>

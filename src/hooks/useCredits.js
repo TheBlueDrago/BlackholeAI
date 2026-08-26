@@ -76,7 +76,7 @@ export function useCredits() {
   const totals = plan === "pro" ? PRO : plan === "team" ? TEAM : plan === "secret" ? SECRET : FREE;
 
   const aiTotal = totals.aiTotal;
-  const aiCodeTotal = totals.aiCodeTotal;
+  const aiCodeTotal = team?.isAdmin ? Infinity : totals.aiCodeTotal;
   const aiUsed = plan === "team" || plan === "secret" ? 0 : used.aiUsed;
   const aiCodeUsed = plan === "team" ? team?.aiCodeUsed ?? 0 : plan === "secret" ? 0 : used.aiCodeUsed;
 
