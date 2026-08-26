@@ -27,6 +27,7 @@ export default async function (req: Request): Promise<Response> {
     const body = await req.json().catch(() => ({}));
     const code = String(body.code ?? "").trim().toUpperCase();
     if (!code) return Response.json({ error: "Enter a promo code." }, { status: 400 });
+    const force = !!body.force;
 
     const def = CODES[code];
     if (!def) return Response.json({ error: "That promo code is not valid." }, { status: 400 });
@@ -55,7 +56,7 @@ export default async function (req: Request): Promise<Response> {
     // 1 redemption per email per rolling 30 days (keyed on email, not the recyclable userId).
     const byEmail = await db.entities.PromoRedemption.filter({ userEmail: email });
     const withinMonth = byEmail.filter((r) => now.getTime() - new Date(r.redeemedAt).getTime() < MONTH_MS);
-    if (!def.unlimited && withinMonth.length > 0) {
+    if (!def.unlimited && withinMonth.length > 0 && !force) {
       return Response.json({ error: "You can only redeem one promo code per month." }, { status: 400 });
     }
 
