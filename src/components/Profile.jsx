@@ -59,7 +59,7 @@ export default function Profile({ open, onClose, initialView = "main" }) {
 
   const isPro = user?.plan === "pro" && (!user?.planExpiresAt || new Date(user.planExpiresAt) > new Date());
   const isTeam = user?.plan === "team" && (!user?.planExpiresAt || new Date(user.planExpiresAt) > new Date());
-  const isSecret = user?.plan === "secret" && (!user?.planExpiresAt || new Date(user.planExpiresAt) > new Date());
+  const isSecret = user?.role === "admin" || (user?.plan === "secret" && (!user?.planExpiresAt || new Date(user.planExpiresAt) > new Date()));
 
   return (
     <AnimatePresence>

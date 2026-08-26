@@ -29,6 +29,7 @@ function loadUsed() {
 // Effective plan: Pro only counts while not expired (promo grants carry planExpiresAt).
 function effectivePlan(user) {
   if (!user) return "free";
+  if (user.role === "admin") return "secret";
   if (user.plan === "secret") return "secret";
   if (user.plan !== "pro") return "free";
   if (user.planExpiresAt && new Date(user.planExpiresAt) < new Date()) return "free";
@@ -51,7 +52,7 @@ export function useCredits() {
         const t = r?.data?.team;
         if (active && t && t.active) {
           setTeam(t);
-          setPlan("team");
+          if (!t.isAdmin) setPlan("team");
         } else if (active) {
           setTeam(null);
         }
