@@ -32,6 +32,11 @@
       "default": 0,
       "description": "Shared AI-code credit counter for the whole team (owner + members)."
     },
+    "periodKey": {
+      "type": "string",
+      "default": "",
+      "description": "YYYY-MM month key. When it changes, aiCodeUsed resets to 0 (monthly refresh, no stacking)."
+    },
     "status": {
       "type": "string",
       "enum": [

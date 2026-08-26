@@ -6,11 +6,19 @@ const FREE = { aiTotal: 10, aiCodeTotal: 5 };
 const PRO = { aiTotal: Infinity, aiCodeTotal: 100 };
 const TEAM = { aiTotal: Infinity, aiCodeTotal: 1000 };
 
+function monthKey(d = new Date()) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
 function loadUsed() {
   try {
     const raw = localStorage.getItem(KEY);
     if (raw) {
       const p = JSON.parse(raw);
+      // New calendar month → reset to plan total (unused credits don't stack).
+      if (p.periodKey && p.periodKey !== monthKey()) {
+        return { aiUsed: 0, aiCodeUsed: 0 };
+      }
       return { aiUsed: p.aiUsed ?? 0, aiCodeUsed: p.aiCodeUsed ?? 0 };
     }
   } catch {}
@@ -58,7 +66,7 @@ export function useCredits() {
 
   useEffect(() => {
     try {
-      localStorage.setItem(KEY, JSON.stringify(used));
+      localStorage.setItem(KEY, JSON.stringify({ ...used, periodKey: monthKey() }));
     } catch {}
   }, [used]);
 

@@ -49,6 +49,16 @@ export default async function (req: Request): Promise<Response> {
     const expired = ownerExpiresAt ? new Date(ownerExpiresAt) < new Date() : false;
     const active = team.status === "active" && owner?.plan === "team" && !expired;
 
+    // Monthly reset of the shared AI-code pool — unused credits don't stack across months.
+    if (active) {
+      const d = new Date();
+      const pk = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      if (team.periodKey !== pk) {
+        await db.entities.Team.update(team.id, { aiCodeUsed: 0, periodKey: pk });
+        team = { ...team, aiCodeUsed: 0, periodKey: pk };
+      }
+    }
+
     return Response.json({
       team: {
         id: team.id,
