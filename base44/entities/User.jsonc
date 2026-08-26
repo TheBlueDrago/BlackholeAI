@@ -13,14 +13,16 @@
       "description": "Subscription plan granted by the payments webhook or a promo code",
       "enum": [
         "free",
-        "pro"
+        "pro",
+        "team",
+        "secret"
       ],
       "default": "free"
     },
     "planExpiresAt": {
       "type": "string",
       "format": "date-time",
-      "description": "When a promo-granted Pro plan expires. Null for a paid subscription or the free plan."
+      "description": "When a promo-granted Pro/Team plan expires. Null for a paid subscription, the free plan, or the forever Secret plan."
     }
   },
   "required": [

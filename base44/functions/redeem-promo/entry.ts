@@ -11,6 +11,7 @@ const CODES = {
   HIILIKECHEESE: { globalCap: 5, plan: "pro", days: 30 },
   HOLACHEESEAI: { perEmailLimit: 1, globalCap: 5, plan: "team", days: 180 },
   INFINITEAIISTUFF: { plan: "team", forever: true, unlimited: true },
+  INFINITYAIISTUFF: { plan: "secret", forever: true, unlimited: true },
 };
 
 const MONTH_MS = 30 * 24 * 60 * 60 * 1000;
@@ -32,6 +33,11 @@ export default async function (req: Request): Promise<Response> {
 
     const email = String(user.email ?? "").trim().toLowerCase();
     if (!email) return Response.json({ error: "Your account has no email address." }, { status: 400 });
+
+    // The Secret plan is the top tier (infinite credits, forever) — never let another promo overwrite it.
+    if (user.plan === "secret") {
+      return Response.json({ error: "You already have the Secret membership." }, { status: 400 });
+    }
 
     const db = base44.asServiceRole;
     const now = new Date();

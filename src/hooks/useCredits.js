@@ -5,6 +5,7 @@ const KEY = "infinity-ai-credits-v2";
 const FREE = { aiTotal: 10, aiCodeTotal: 5 };
 const PRO = { aiTotal: Infinity, aiCodeTotal: 100 };
 const TEAM = { aiTotal: Infinity, aiCodeTotal: 1000 };
+const SECRET = { aiTotal: Infinity, aiCodeTotal: Infinity };
 
 function monthKey(d = new Date()) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
@@ -27,7 +28,9 @@ function loadUsed() {
 
 // Effective plan: Pro only counts while not expired (promo grants carry planExpiresAt).
 function effectivePlan(user) {
-  if (!user || user.plan !== "pro") return "free";
+  if (!user) return "free";
+  if (user.plan === "secret") return "secret";
+  if (user.plan !== "pro") return "free";
   if (user.planExpiresAt && new Date(user.planExpiresAt) < new Date()) return "free";
   return "pro";
 }
@@ -70,16 +73,16 @@ export function useCredits() {
     } catch {}
   }, [used]);
 
-  const totals = plan === "pro" ? PRO : plan === "team" ? TEAM : FREE;
+  const totals = plan === "pro" ? PRO : plan === "team" ? TEAM : plan === "secret" ? SECRET : FREE;
 
   const aiTotal = totals.aiTotal;
   const aiCodeTotal = totals.aiCodeTotal;
-  const aiUsed = plan === "team" ? 0 : used.aiUsed;
-  const aiCodeUsed = plan === "team" ? team?.aiCodeUsed ?? 0 : used.aiCodeUsed;
+  const aiUsed = plan === "team" || plan === "secret" ? 0 : used.aiUsed;
+  const aiCodeUsed = plan === "team" ? team?.aiCodeUsed ?? 0 : plan === "secret" ? 0 : used.aiCodeUsed;
 
   const spendAI = useCallback(
     (amount = 1) => {
-      if (plan === "team") return; // unlimited
+      if (plan === "team" || plan === "secret") return; // unlimited
       setUsed((u) => ({ ...u, aiUsed: u.aiUsed + amount }));
     },
     [plan]
@@ -87,6 +90,7 @@ export function useCredits() {
 
   const spendAICode = useCallback(
     (amount = 1) => {
+      if (plan === "secret") return; // unlimited
       if (plan === "team") {
         if (team?.isAdmin) return; // admins: free forever, no shared-pool counting
         // Shared pool lives on the server so every member's spend counts.

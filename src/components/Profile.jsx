@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { LogOut, Mail, Shield, KeyRound, ArrowLeft, Loader2, Crown, Settings, Users } from "lucide-react";
+import { LogOut, Mail, Shield, KeyRound, ArrowLeft, Loader2, Crown, Settings, Users, Lock } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import TeamMembership from "@/components/TeamMembership";
 
@@ -59,6 +59,7 @@ export default function Profile({ open, onClose, initialView = "main" }) {
 
   const isPro = user?.plan === "pro" && (!user?.planExpiresAt || new Date(user.planExpiresAt) > new Date());
   const isTeam = user?.plan === "team" && (!user?.planExpiresAt || new Date(user.planExpiresAt) > new Date());
+  const isSecret = user?.plan === "secret" && (!user?.planExpiresAt || new Date(user.planExpiresAt) > new Date());
 
   return (
     <AnimatePresence>
@@ -146,6 +147,12 @@ export default function Profile({ open, onClose, initialView = "main" }) {
                         <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-gradient-to-r from-sky-500/25 to-indigo-500/25 text-sky-200 border border-sky-400/50">
                           <Users className="w-3 h-3" />
                           Team
+                        </span>
+                      )}
+                      {isSecret && (
+                        <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-black text-slate-100 border border-slate-700">
+                          <Lock className="w-3 h-3" />
+                          Secret
                         </span>
                       )}
                       <div className="mt-1 flex items-center gap-1.5 text-slate-400 text-sm">
