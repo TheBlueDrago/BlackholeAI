@@ -154,12 +154,15 @@ async function handleOrderApproved(db: any, eventData: any): Promise<Response> {
     await db.entities.User.update(grantUserId, { plan: purchase.productId });
     // Team plan: activate (or create) the team owned by this buyer with a fresh shared credit pool.
     if (purchase.productId === "team") {
+      const d = new Date();
+      const pk = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
       const existing = await db.entities.Team.filter({ ownerId: grantUserId });
       const team = existing?.[0];
       if (team) {
         await db.entities.Team.update(team.id, {
           status: "active",
           aiCodeUsed: 0,
+          periodKey: pk,
           memberEmails: team.memberEmails ?? [],
         });
       } else {
@@ -167,6 +170,7 @@ async function handleOrderApproved(db: any, eventData: any): Promise<Response> {
           ownerId: grantUserId,
           memberEmails: [],
           aiCodeUsed: 0,
+          periodKey: pk,
           status: "active",
         });
       }
