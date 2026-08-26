@@ -148,6 +148,8 @@ function TeamPanel() {
 
   if (loading || !team || !team.isOwner) return null;
   const members = team.memberEmails ?? [];
+  const isSecretTeam = team.ownerPlan === "secret";
+  const memberCap = isSecretTeam ? 4 : 2;
 
   return (
     <div className="mt-12 w-full max-w-md mx-auto bg-slate-900/70 backdrop-blur-xl border border-sky-500/40 rounded-3xl p-6 shadow-2xl">
@@ -158,13 +160,13 @@ function TeamPanel() {
       <p className="text-slate-400 text-sm">
         Shared AI code credits:{" "}
         <span className="text-sky-200 font-medium">
-          {team.aiCodeUsed ?? 0} / 1000
+          {isSecretTeam ? "Unlimited" : `${team.aiCodeUsed ?? 0} / 1000`}
         </span>
       </p>
 
       <div className="mt-4">
         <p className="text-slate-300 text-sm font-medium mb-2">
-          Members {members.length}/3
+          Members {members.length}/{memberCap + 1}
         </p>
         <div className="space-y-2">
           {members.map((m, i) => (
@@ -181,7 +183,7 @@ function TeamPanel() {
           )}
         </div>
 
-        {members.length < 3 && (
+        {members.length < memberCap && (
           <div className="flex items-center gap-2 mt-3">
             <input
               type="email"

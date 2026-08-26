@@ -7,6 +7,7 @@ import { base44 } from "@/api/base44Client";
 // to add their 2 people now or later (Account → Settings → Membership).
 export default function TeamWelcomePopup({ onAddPeople }) {
   const [show, setShow] = useState(false);
+  const [ownerPlan, setOwnerPlan] = useState("team");
 
   useEffect(() => {
     base44.functions
@@ -15,7 +16,10 @@ export default function TeamWelcomePopup({ onAddPeople }) {
         const t = r.data?.team;
         if (t && t.isOwner && t.active && t.id && (t.memberEmails ?? []).length === 0) {
           const key = "infinity-team-welcome-" + t.id;
-          if (localStorage.getItem(key) !== "1") setShow(true);
+          if (localStorage.getItem(key) !== "1") {
+            setOwnerPlan(t.ownerPlan ?? "team");
+            setShow(true);
+          }
         }
       })
       .catch(() => {});
@@ -59,7 +63,7 @@ export default function TeamWelcomePopup({ onAddPeople }) {
             </div>
             <h3 className="text-lg font-semibold text-white">Redeem your membership</h3>
             <p className="text-slate-400 text-sm mt-2">
-              Add up to 2 people to your Team now, or add them later from your account → Settings → Membership.
+              Add up to {ownerPlan === "secret" ? 4 : 2} people to your {ownerPlan === "secret" ? "Secret" : "Team"} now, or add them later from your account → Settings → Membership.
             </p>
             <div className="flex gap-3 mt-5">
               <button

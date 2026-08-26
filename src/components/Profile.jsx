@@ -137,24 +137,22 @@ export default function Profile({ open, onClose, initialView = "main" }) {
                       <h3 className="mt-4 text-lg font-semibold text-white">
                         {user.full_name || "Infinity User"}
                       </h3>
-                      {isPro && (
-                        <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500/25 to-yellow-500/25 text-amber-200 border border-amber-400/50">
-                          <Crown className="w-3 h-3" />
-                          Pro
-                        </span>
-                      )}
-                      {isTeam && (
-                        <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-gradient-to-r from-sky-500/25 to-indigo-500/25 text-sky-200 border border-sky-400/50">
-                          <Users className="w-3 h-3" />
-                          Team
-                        </span>
-                      )}
-                      {isSecret && (
+                      {isSecret ? (
                         <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-black text-slate-100 border border-slate-700">
                           <Lock className="w-3 h-3" />
                           Secret
                         </span>
-                      )}
+                      ) : isTeam ? (
+                        <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-gradient-to-r from-sky-500/25 to-indigo-500/25 text-sky-200 border border-sky-400/50">
+                          <Users className="w-3 h-3" />
+                          Team
+                        </span>
+                      ) : isPro ? (
+                        <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500/25 to-yellow-500/25 text-amber-200 border border-amber-400/50">
+                          <Crown className="w-3 h-3" />
+                          Pro
+                        </span>
+                      ) : null}
                       <div className="mt-1 flex items-center gap-1.5 text-slate-400 text-sm">
                         <Mail className="w-3.5 h-3.5" />
                         <span>{user.email}</span>

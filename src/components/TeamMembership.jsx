@@ -197,8 +197,10 @@ export default function TeamMembership({ onBack }) {
 
   const members = team.memberEmails ?? [];
   const isOwner = team.isOwner;
-  const slots = [0, 1];
-  const full = members.length >= 2;
+  const isSecretTeam = team.ownerPlan === "secret";
+  const memberCap = isSecretTeam ? 4 : 2;
+  const slots = isSecretTeam ? [0, 1, 2, 3] : [0, 1];
+  const full = members.length >= memberCap;
   const myEmail = (me?.email ?? "").toLowerCase();
   const iAmPending = (team.pendingRemovalEmails ?? []).map((e) => String(e).toLowerCase()).includes(myEmail);
 
@@ -248,7 +250,7 @@ export default function TeamMembership({ onBack }) {
                 onClick={() => setShowAdd(true)}
                 className="px-5 py-2.5 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-500 text-white font-medium hover:opacity-90"
               >
-                {members.length === 0 ? "Add 2 people" : "Add 1 more"}
+                {members.length === 0 ? `Add ${memberCap} people` : `Add ${memberCap - members.length} more`}
               </button>
             )
           ) : (
@@ -307,11 +309,11 @@ export default function TeamMembership({ onBack }) {
       <div className="mt-6 rounded-2xl bg-slate-800/40 border border-slate-700/40 p-4 space-y-2 text-sm">
         <div className="flex justify-between">
           <span className="text-slate-400">Plan</span>
-          <span className="text-slate-200">Team</span>
+          <span className="text-slate-200">{isSecretTeam ? "Secret" : "Team"}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-slate-400">Shared AI code credits</span>
-          <span className="text-slate-200">{team.aiCodeUsed ?? 0} / 1000</span>
+          <span className="text-slate-200">{isSecretTeam ? "Unlimited" : `${team.aiCodeUsed ?? 0} / 1000`}</span>
         </div>
         {team.isPromo && team.ownerPlanExpiresAt && (
           <div className="flex justify-between">

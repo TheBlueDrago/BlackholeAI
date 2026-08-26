@@ -18,11 +18,12 @@ export default async function (req: Request): Promise<Response> {
       .map((e) => String(e ?? "").trim().toLowerCase())
       .filter((e) => !!e && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
 
+    const cap = user.plan === "secret" ? 4 : 2;
     let members = (team.memberEmails ?? []).map((e) => String(e).toLowerCase());
     for (const e of cleaned) {
-      if (!members.includes(e) && members.length < 2) members.push(e);
+      if (!members.includes(e) && members.length < cap) members.push(e);
     }
-    if (members.length > 2) members = members.slice(0, 2);
+    if (members.length > cap) members = members.slice(0, cap);
 
     await db.entities.Team.update(team.id, { memberEmails: members });
     return Response.json({ memberEmails: members });

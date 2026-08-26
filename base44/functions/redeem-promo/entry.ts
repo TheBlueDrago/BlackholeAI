@@ -81,7 +81,7 @@ export default async function (req: Request): Promise<Response> {
 
     // Team grants also (re)activate the team record with a fresh shared credit pool, stamped to the
     // current month so the monthly reset (in my-team) is anchored — no stacking across periods.
-    if (def.plan === "team") {
+    if (def.plan === "team" || def.plan === "secret") {
       const pk = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
       const existing = (await db.entities.Team.filter({ ownerId: user.id }))?.[0];
       if (existing) {

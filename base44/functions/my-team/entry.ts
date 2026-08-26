@@ -25,6 +25,7 @@ export default async function (req: Request): Promise<Response> {
           status: "active",
           active: true,
           isOwner: true,
+          ownerPlan: "secret",
           ownerPlanExpiresAt: null,
           isPromo: false,
           isAdmin: true,
@@ -46,8 +47,9 @@ export default async function (req: Request): Promise<Response> {
 
     const owner = await db.entities.User.get(team.ownerId).catch(() => null);
     const ownerExpiresAt = owner?.planExpiresAt ?? null;
+    const ownerPlan = owner?.plan ?? "free";
     const expired = ownerExpiresAt ? new Date(ownerExpiresAt) < new Date() : false;
-    const active = team.status === "active" && owner?.plan === "team" && !expired;
+    const active = team.status === "active" && (ownerPlan === "team" || ownerPlan === "secret") && !expired;
 
     // Monthly reset of the shared AI-code pool — unused credits don't stack across months.
     if (active) {
@@ -70,6 +72,7 @@ export default async function (req: Request): Promise<Response> {
         status: team.status,
         active,
         isOwner,
+        ownerPlan,
         ownerPlanExpiresAt: ownerExpiresAt,
         isPromo: !!ownerExpiresAt,
       },

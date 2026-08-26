@@ -52,7 +52,7 @@ export function useCredits() {
         const t = r?.data?.team;
         if (active && t && t.active) {
           setTeam(t);
-          if (!t.isAdmin) setPlan("team");
+          if (!t.isAdmin) setPlan(t.ownerPlan === "secret" ? "secret" : "team");
         } else if (active) {
           setTeam(null);
         }
