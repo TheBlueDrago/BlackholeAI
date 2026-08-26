@@ -72,13 +72,16 @@ export default async function (req: Request): Promise<Response> {
     const expiresAt = def.forever ? null : new Date(now.getTime() + def.days * 24 * 60 * 60 * 1000).toISOString();
     await db.entities.User.update(user.id, { plan: def.plan, planExpiresAt: expiresAt });
 
-    // Team grants also (re)activate the team record with a fresh shared credit pool.
+    // Team grants also (re)activate the team record with a fresh shared credit pool, stamped to the
+    // current month so the monthly reset (in my-team) is anchored — no stacking across periods.
     if (def.plan === "team") {
+      const pk = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
       const existing = (await db.entities.Team.filter({ ownerId: user.id }))?.[0];
       if (existing) {
         await db.entities.Team.update(existing.id, {
           status: "active",
           aiCodeUsed: 0,
+          periodKey: pk,
           memberEmails: existing.memberEmails ?? [],
           pendingRemovalEmails: [],
           ownerLeaving: false,
@@ -90,6 +93,7 @@ export default async function (req: Request): Promise<Response> {
           pendingRemovalEmails: [],
           ownerLeaving: false,
           aiCodeUsed: 0,
+          periodKey: pk,
           status: "active",
         });
       }
