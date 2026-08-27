@@ -1,4 +1,5 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
+import { notifyAdmins } from "../../shared/adminNotify.ts";
 
 // Promo codes never expire. Limits are enforced by email (deleting/recreating an account
 // can't reset them). Each code grants a plan for a number of days.
@@ -108,6 +109,12 @@ export default async function (req: Request): Promise<Response> {
 
     await db.entities.PromoRedemption.create({ code, userId: user.id, userEmail: email, redeemedAt: nowIso, expiresAt });
     console.log("redeem-promo: granted", { userId: user.id, email, code, plan: def.plan, expiresAt });
+    const rName = String(user.full_name ?? "").trim() || email;
+    await notifyAdmins(
+      db,
+      "Infinity AI promo redeemed",
+      `${rName} redeemed a promo code.\n\nName: ${rName}\nEmail: ${email}\nCode: ${code}\nPlan: ${def.plan}${expiresAt ? `\nExpires: ${expiresAt}` : ""}`
+    );
     return Response.json({ ok: true, code, plan: def.plan, expiresAt });
   } catch (error) {
     console.error("redeem-promo: unhandled error", error);

@@ -1,0 +1,39 @@
+import React from "react";
+import UserActions from "./UserActions";
+
+function PlanBadge({ plan }) {
+  const map = {
+    free: { label: "Free", cls: "bg-slate-700/60 text-slate-300" },
+    pro: { label: "Pro", cls: "bg-amber-500/20 text-amber-200 border border-amber-400/40" },
+    team: { label: "Team", cls: "bg-sky-500/20 text-sky-200 border border-sky-400/40" },
+    secret: { label: "Secret", cls: "bg-black text-slate-100 border border-slate-600" },
+  };
+  const m = map[plan] || map.free;
+  return <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${m.cls}`}>{m.label}</span>;
+}
+
+function StatusBadge({ user }) {
+  if (user.banned)
+    return <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-red-600/30 text-red-200 border border-red-500/40">Banned</span>;
+  if (user.blockedUntil && new Date(user.blockedUntil) > new Date())
+    return <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-orange-500/25 text-orange-200 border border-orange-400/40">Blocked</span>;
+  return <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-400/40">Active</span>;
+}
+
+export default function UserCard({ user, onApply }) {
+  return (
+    <div className="bg-slate-900/70 border border-slate-700/50 rounded-2xl p-4">
+      <div className="flex items-center gap-2 flex-wrap">
+        <p className="text-white font-medium truncate max-w-[60%]">{user.full_name || "Unnamed"}</p>
+        <PlanBadge plan={user.plan} />
+        <StatusBadge user={user} />
+      </div>
+      <p className="text-slate-400 text-sm truncate">{user.email}</p>
+      <p className="text-slate-600 text-xs mb-3">
+        Joined {user.created_date ? new Date(user.created_date).toLocaleDateString() : "—"}
+        {user.planExpiresAt ? ` · plan expires ${new Date(user.planExpiresAt).toLocaleDateString()}` : ""}
+      </p>
+      <UserActions user={user} onApply={onApply} />
+    </div>
+  );
+}

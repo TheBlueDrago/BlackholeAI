@@ -1,4 +1,5 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
+import { notifyAdmins } from "../../shared/adminNotify.ts";
 
 // Records the logged-in user's email as "seen", so a later re-registration attempt with
 // that email (after the account is deleted) can be detected and blocked. Idempotent.
@@ -18,6 +19,12 @@ export default async function (req: Request): Promise<Response> {
     const existing = await db.entities.SeenEmail.filter({ email });
     if (!existing || existing.length === 0) {
       await db.entities.SeenEmail.create({ email, firstSeenAt: new Date().toISOString() });
+      const name = String(user.full_name ?? "").trim() || email;
+      await notifyAdmins(
+        db,
+        "New Infinity AI account",
+        `${name} just joined Infinity AI.\n\nName: ${name}\nEmail: ${email}`
+      );
     }
     return Response.json({ ok: true });
   } catch (error) {

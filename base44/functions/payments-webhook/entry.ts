@@ -12,6 +12,7 @@
 
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.31";
 import { importSPKI, jwtVerify } from "npm:jose@5.9.6";
+import { notifyAdmins } from "../../shared/adminNotify.ts";
 
 // Wix event types (verbatim from Wix docs).
 const ORDER_APPROVED = "wix.ecom.v1.order_approved";
@@ -176,6 +177,11 @@ async function handleOrderApproved(db: any, eventData: any): Promise<Response> {
       }
     }
     console.log("payments-webhook: granted plan", { userId: grantUserId, plan: purchase.productId });
+    await notifyAdmins(
+      db,
+      "New Infinity AI subscription",
+      `A subscription was purchased.\n\nEmail: ${buyerEmail ?? "unknown"}\nProduct: ${purchase.productName ?? purchase.productId}\nPlan: ${purchase.productId}`
+    );
   } else {
     console.warn("payments-webhook: no user to grant plan", { buyerEmail, productId: purchase.productId });
   }
