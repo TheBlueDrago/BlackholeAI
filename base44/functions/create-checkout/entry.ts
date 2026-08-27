@@ -108,6 +108,16 @@ Deno.serve(async (req: Request) => {
           description: "1000 shared AI code credits, unlimited normal AI credits, and up to 2 members (3 with you), billed monthly",
         },
       },
+      secret: {
+        name: "Secret Plan",
+        price: "0.50",
+        currency: "USD",
+        subscriptionInfo: {
+          subscriptionSettings: { frequency: "MONTH" },
+          title: "Secret Plan",
+          description: "Unlimited normal AI and AI code credits, and up to 4 members (5 with you), billed monthly",
+        },
+      },
     };
     const product = PRODUCTS[productId];
     if (!product) {

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Loader2, ShieldCheck, Users } from "lucide-react";
+import { ArrowLeft, Loader2, ShieldCheck, Users, Lock } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 
@@ -8,30 +8,39 @@ export default function Billing() {
   const navigate = useNavigate();
   const location = useLocation();
   const productId = location.state?.productId ?? "pro";
-  const isTeam = productId === "team";
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const plan = isTeam
-    ? {
-        name: "Team Plan",
-        price: "$10 / month",
-        gradient: "from-sky-500 to-indigo-500",
-        glow: "bg-sky-600/15",
-        features: ["2 AI's", "1000 AI code credits", "∞ normal AI credits", "Add up to 2 people — shared credits"],
-        button: "Subscribe — $10/mo",
-        icon: Users,
-      }
-    : {
-        name: "Pro Plan",
-        price: "$1 / month",
-        gradient: "from-emerald-500 to-teal-500",
-        glow: "bg-emerald-600/15",
-        features: ["2 AI's", "100 AI code credits", "∞ normal AI credits"],
-        button: "Subscribe — $1/mo",
-        icon: ShieldCheck,
-      };
+  const PLANS = {
+    secret: {
+      name: "Secret Plan",
+      price: "$0.50 / month",
+      gradient: "from-slate-800 to-black",
+      glow: "bg-fuchsia-600/10",
+      features: ["5 people total — invite up to 4", "∞ normal AI credits", "∞ AI code credits"],
+      button: "Subscribe — $0.50/mo",
+      icon: Lock,
+    },
+    team: {
+      name: "Team Plan",
+      price: "$10 / month",
+      gradient: "from-sky-500 to-indigo-500",
+      glow: "bg-sky-600/15",
+      features: ["2 AI's", "1000 AI code credits", "∞ normal AI credits", "Add up to 2 people — shared credits"],
+      button: "Subscribe — $10/mo",
+      icon: Users,
+    },
+    pro: {
+      name: "Pro Plan",
+      price: "$1 / month",
+      gradient: "from-emerald-500 to-teal-500",
+      glow: "bg-emerald-600/15",
+      features: ["2 AI's", "100 AI code credits", "∞ normal AI credits"],
+      button: "Subscribe — $1/mo",
+      icon: ShieldCheck,
+    },
+  };
+  const plan = PLANS[productId] ?? PLANS.pro;
 
   const startCheckout = async () => {
     setError("");
@@ -70,7 +79,7 @@ export default function Billing() {
           Billing
         </span>
       </h1>
-      <p className="text-slate-400 mt-3 text-center">Upgrade to {isTeam ? "Team" : "Pro"}</p>
+      <p className="text-slate-400 mt-3 text-center">Upgrade to {productId === "secret" ? "Secret" : productId === "team" ? "Team" : "Pro"}</p>
 
       <div className="mt-10 w-full max-w-md bg-slate-900/70 backdrop-blur-xl border border-slate-700/40 rounded-3xl p-8 shadow-2xl">
         <div className="flex items-center gap-3">

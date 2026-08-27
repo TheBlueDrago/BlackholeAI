@@ -154,7 +154,7 @@ async function handleOrderApproved(db: any, eventData: any): Promise<Response> {
   if (grantUserId) {
     await db.entities.User.update(grantUserId, { plan: purchase.productId });
     // Team plan: activate (or create) the team owned by this buyer with a fresh shared credit pool.
-    if (purchase.productId === "team") {
+    if (purchase.productId === "team" || purchase.productId === "secret") {
       const d = new Date();
       const pk = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
       const existing = await db.entities.Team.filter({ ownerId: grantUserId });
@@ -245,7 +245,7 @@ async function handleSubscriptionEnded(db: any, eventData: any): Promise<Respons
   if (revokeUserId) {
     await db.entities.User.update(revokeUserId, { plan: "free" });
     // Team plan: deactivate the team so members lose shared access too.
-    if (purchase.productId === "team") {
+    if (purchase.productId === "team" || purchase.productId === "secret") {
       const existing = await db.entities.Team.filter({ ownerId: revokeUserId });
       const team = existing?.[0];
       if (team) {

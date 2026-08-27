@@ -55,7 +55,7 @@ export default function Chat() {
       {isBanned || isBlocked ? (
         <BanScreen banned={isBanned} until={blockedUntil} />
       ) : mode === "subscriptions" ? (
-        <Subscriptions onFree={finishSubscriptions} onPro={() => goBilling("pro")} onTeam={() => goBilling("team")} />
+        <Subscriptions onFree={finishSubscriptions} onPro={() => goBilling("pro")} onTeam={() => goBilling("team")} onSecret={() => goBilling("secret")} />
       ) : mode === "monitor" ? (
         <Monitor onBack={() => setMode("ai")} />
       ) : (

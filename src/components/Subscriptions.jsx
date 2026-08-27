@@ -215,7 +215,7 @@ function TeamPanel() {
   );
 }
 
-export default function Subscriptions({ onFree, onPro, onTeam }) {
+export default function Subscriptions({ onFree, onPro, onTeam, onSecret }) {
   const navigate = useNavigate();
   const [promoInput, setPromoInput] = useState("");
   const [promoBusy, setPromoBusy] = useState(false);
@@ -266,9 +266,13 @@ export default function Subscriptions({ onFree, onPro, onTeam }) {
       animate={{ opacity: 1, transition: { duration: 0.6, ease: "easeInOut" } }}
     >
       <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-center">
-        <span className="bg-gradient-to-r from-white via-indigo-200 to-fuchsia-200 bg-clip-text text-transparent">
+        <button
+          type="button"
+          onClick={onSecret}
+          className="bg-gradient-to-r from-white via-indigo-200 to-fuchsia-200 bg-clip-text text-transparent cursor-pointer select-none"
+        >
           Subscriptions
-        </span>
+        </button>
       </h1>
       <p className="text-slate-400 mt-3 text-center">Choose the plan that fits you</p>
 
