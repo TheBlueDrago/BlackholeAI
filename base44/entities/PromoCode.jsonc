@@ -1,0 +1,76 @@
+{
+  "name": "PromoCode",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "Promo code (uppercased). What users type to redeem."
+    },
+    "plan": {
+      "type": "string",
+      "enum": [
+        "pro",
+        "team",
+        "secret"
+      ],
+      "default": "pro",
+      "description": "Subscription plan this code grants."
+    },
+    "days": {
+      "type": "number",
+      "default": 30,
+      "description": "Duration in days. 0 = never expires (forever)."
+    },
+    "globalCap": {
+      "type": "number",
+      "default": 0,
+      "description": "Max total redemptions across all accounts. 0 = unlimited."
+    },
+    "perEmailLimit": {
+      "type": "number",
+      "default": 0,
+      "description": "Max redemptions per account. 0 = unlimited."
+    },
+    "unlimited": {
+      "type": "boolean",
+      "default": false,
+      "description": "Bypass the one-redemption-per-month rule."
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Inactive codes cannot be redeemed."
+    },
+    "label": {
+      "type": "string",
+      "default": "",
+      "description": "Optional admin note."
+    }
+  },
+  "required": [
+    "code",
+    "plan"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

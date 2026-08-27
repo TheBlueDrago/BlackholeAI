@@ -30,9 +30,6 @@ export default async function (req: Request): Promise<Response> {
     if (!code) return Response.json({ error: "Enter a promo code." }, { status: 400 });
     const force = !!body.force;
 
-    const def = CODES[code];
-    if (!def) return Response.json({ error: "That promo code is not valid." }, { status: 400 });
-
     const email = String(user.email ?? "").trim().toLowerCase();
     if (!email) return Response.json({ error: "Your account has no email address." }, { status: 400 });
 
@@ -44,6 +41,24 @@ export default async function (req: Request): Promise<Response> {
     const db = base44.asServiceRole;
     const now = new Date();
     const nowIso = now.toISOString();
+
+    // Look up the code in the admin-managed PromoCode entity; fall back to the built-in codes so
+    // legacy redemptions keep working even before the codes are seeded into the entity.
+    const rec = (await db.entities.PromoCode.filter({ code }))?.[0];
+    const def = rec
+      ? {
+          plan: rec.plan,
+          days: Number(rec.days) || 0,
+          forever: !rec.days || Number(rec.days) <= 0,
+          globalCap: Number(rec.globalCap) || 0,
+          perEmailLimit: Number(rec.perEmailLimit) || 0,
+          unlimited: !!rec.unlimited,
+          active: rec.active !== false,
+        }
+      : CODES[code];
+    if (!def || def.active === false) {
+      return Response.json({ error: "That promo code is not valid." }, { status: 400 });
+    }
 
     // Auto-revert an expired promo-granted plan so state stays clean.
     if ((user.plan === "pro" || user.plan === "team") && user.planExpiresAt && new Date(user.planExpiresAt) < now) {

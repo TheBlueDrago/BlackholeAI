@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Pen, Plus, Code, Sparkles, Check, X, CreditCard, Monitor } from "lucide-react";
+import { Pen, Plus, Code, Sparkles, Check, X, CreditCard } from "lucide-react";
 
 const SKIP_KEY = "infinity-ai-skip-delete-confirm";
 
@@ -116,17 +116,6 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
               </div>
               <span className="font-medium">Plans</span>
             </button>
-            {isAdmin && (
-              <button
-                onClick={onGoMonitor}
-                className="w-full flex items-center gap-2 px-2 py-2 rounded-xl text-slate-300 hover:bg-slate-800/70 transition-colors"
-              >
-                <div className="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center">
-                  <Monitor className="w-4 h-4 text-sky-300" />
-                </div>
-                <span className="font-medium">Monitor</span>
-              </button>
-            )}
           </div>
 
           {/* Credit bars */}

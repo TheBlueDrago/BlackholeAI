@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { LogOut, Mail, Shield, KeyRound, ArrowLeft, Loader2, Crown, Settings, Users, Lock, ShieldCheck } from "lucide-react";
+import { LogOut, Mail, Shield, KeyRound, ArrowLeft, Loader2, Crown, Settings, Users, Lock, ShieldCheck, Ticket } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import TeamMembership from "@/components/TeamMembership";
 
-export default function Profile({ open, onClose, initialView = "main", onMonitor }) {
+export default function Profile({ open, onClose, initialView = "main", onMonitor, onPromos }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState("main"); // main | settings | membership
@@ -179,6 +179,15 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                     >
                       <ShieldCheck className="w-4 h-4" />
                       Monitor
+                    </button>
+                  )}
+                  {user?.role === "admin" && (
+                    <button
+                      onClick={onPromos}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-800 text-slate-200 font-medium hover:bg-slate-700 transition-colors"
+                    >
+                      <Ticket className="w-4 h-4" />
+                      Promo Code
                     </button>
                   )}
                   <button

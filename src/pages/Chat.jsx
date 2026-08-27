@@ -10,6 +10,7 @@ import Profile from "@/components/Profile";
 import PromoExpiredPopup from "@/components/PromoExpiredPopup";
 import TeamWelcomePopup from "@/components/TeamWelcomePopup";
 import Monitor from "@/pages/Monitor";
+import PromoManager from "@/pages/PromoManager";
 import BanScreen from "@/components/BanScreen";
 import { useConversations } from "@/hooks/useConversations";
 import { useCredits } from "@/hooks/useCredits";
@@ -58,6 +59,8 @@ export default function Chat() {
         <Subscriptions onFree={finishSubscriptions} onPro={() => goBilling("pro")} onTeam={() => goBilling("team")} onSecret={() => goBilling("secret")} />
       ) : mode === "monitor" ? (
         <Monitor onBack={() => setMode("ai")} />
+      ) : mode === "promos" ? (
+        <PromoManager onBack={() => setMode("ai")} />
       ) : (
         <motion.div
           className="relative z-10 min-h-screen flex flex-col items-center justify-center py-10"
@@ -126,6 +129,10 @@ export default function Chat() {
             onMonitor={() => {
               setProfileOpen(false);
               setMode("monitor");
+            }}
+            onPromos={() => {
+              setProfileOpen(false);
+              setMode("promos");
             }}
           />
           <TeamWelcomePopup
