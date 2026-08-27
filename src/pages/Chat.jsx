@@ -123,6 +123,10 @@ export default function Chat() {
               setProfileOpen(false);
               setProfileInitialView("main");
             }}
+            onMonitor={() => {
+              setProfileOpen(false);
+              setMode("monitor");
+            }}
           />
           <TeamWelcomePopup
             onAddPeople={() => {
