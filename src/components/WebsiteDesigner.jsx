@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Sparkles, Loader2, Globe, Search, RefreshCw, Plus, X, Crown, Rocket } from "lucide-react";
+import { Send, Sparkles, Loader2, Globe, Search, RefreshCw, Plus, X, Crown, Rocket, Paperclip } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import AiChooser from "@/components/AiChooser";
 
 const STORE_KEY = "infinity-ai-designer";
 const TAKEN_KEY = "infinity-ai-taken-sites";
@@ -71,7 +72,7 @@ function initialOf(s) {
   return (s || "?").trim().charAt(0).toUpperCase();
 }
 
-export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgrade, aiExhausted, onSpendAI }) {
+export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgrade, aiExhausted, onSpendAI, aiCodeExhausted, onSpendAICode, plan }) {
   const initial = loadState();
   const [siteName, setSiteName] = useState(initial.siteName);
   const [messages, setMessages] = useState(initial.messages);
@@ -87,6 +88,10 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   const [inviteErr, setInviteErr] = useState("");
   const [showPublish, setShowPublish] = useState(false);
   const [published, setPublished] = useState(false);
+  const fableAllowed = plan === "pro" || plan === "team" || plan === "secret";
+  const [selectedAi, setSelectedAi] = useState(fableAllowed ? "fable" : "ai");
+  const [files, setFiles] = useState([]);
+  const fileInputRef = useRef(null);
   const scrollRef = useRef(null);
 
   const lastAi = [...messages].reverse().find((m) => m.role === "ai");
@@ -106,21 +111,23 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, loading]);
 
-  const plan = user?.plan || "free";
-  const planActive = plan !== "free" && (!user?.planExpiresAt || new Date(user.planExpiresAt) > new Date());
-  const effPlan = planActive ? plan : "free";
-  const cap = capFor(effPlan);
+  const effPlan = plan;
+  const cap = capFor(plan);
   const ownerInitial = initialOf(user?.full_name || user?.email || "U");
   const canAdd = members.length < cap - 1;
 
+  const isCodeAi = selectedAi === "code";
+  const sendExhausted = isCodeAi ? aiCodeExhausted : aiExhausted;
+
   const send = async () => {
     const text = input.trim();
-    if (!text || loading || aiExhausted) return;
-    const userMsg = { role: "user", content: text };
+    if (!text || loading || sendExhausted) return;
+    const fileNote = files.length ? `\n[Attached files: ${files.map((f) => f.name).join(", ")}]` : "";
+    const userMsg = { role: "user", content: text + (files.length ? ` (attached: ${files.map((f) => f.name).join(", ")})` : "") };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setLoading(true);
-    onSpendAI?.();
+    (isCodeAi ? onSpendAICode : onSpendAI)?.();
     try {
       const lastHtml = messages.filter((m) => m.role === "ai").pop()?.content || "";
       const userTurns = messages.filter((m) => m.role === "user").map((m) => m.content);
@@ -128,8 +135,9 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
         `${SYSTEM}\n\n` +
         (lastHtml ? `Current website HTML:\n${lastHtml}\n\n` : "") +
         `Requests so far:\n${userTurns.length ? userTurns.map((u, i) => `${i + 1}. ${u}`).join("\n") : "(none)"}\n\n` +
-        `Latest request: ${text}\n\nOutput the complete updated HTML document now.`;
-      const res = await base44.functions.invoke("chatCompletion", { prompt, model: MODEL });
+        `Latest request: ${text}${fileNote}\n\nOutput the complete updated HTML document now.`;
+      const model = selectedAi === "ai" ? "automatic" : MODEL;
+      const res = await base44.functions.invoke("chatCompletion", { prompt, model });
       const content = res.data?.content ?? "";
       setMessages((prev) => [...prev, { role: "ai", content }]);
     } catch {
@@ -367,6 +375,19 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
           </div>
 
           <div className="p-3 border-t border-slate-700/50">
+            {files.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-2">
+                {files.map((f, i) => (
+                  <div key={i} className="flex items-center gap-1.5 bg-slate-800 border border-slate-700/50 rounded-lg px-2 py-1 text-xs text-slate-200">
+                    <Paperclip className="w-3 h-3 text-slate-400" />
+                    <span className="max-w-[120px] truncate">{f.name}</span>
+                    <button onClick={() => setFiles((fs) => fs.filter((_, j) => j !== i))} className="text-slate-400 hover:text-red-400">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
             <div className="flex items-end gap-2 bg-slate-800/70 rounded-2xl border border-slate-700/50 focus-within:border-sky-500/50 transition-colors">
               <textarea
                 value={input}
@@ -378,15 +399,38 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
               />
               <button
                 onClick={send}
-                disabled={!input.trim() || loading || aiExhausted}
+                disabled={!input.trim() || loading || sendExhausted}
                 className="m-1.5 p-2.5 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-500 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
               >
                 <Send className="w-5 h-5" />
               </button>
             </div>
-            {aiExhausted && (
-              <p className="text-center text-xs text-red-400 mt-2">You're out of AI credits.</p>
-            )}
+            <div className="flex items-center gap-2 mt-2">
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                title="Attach images or files"
+                className="p-1.5 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+              <AiChooser value={selectedAi} onChange={setSelectedAi} plan={plan} allowFable={true} />
+              {sendExhausted && (
+                <p className="text-xs text-red-400 ml-auto">
+                  You're out of {isCodeAi ? "AI Code" : "AI"} credits. Switch AI or upgrade.
+                </p>
+              )}
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              className="hidden"
+              onChange={(e) => {
+                const fs = Array.from(e.target.files || []);
+                if (fs.length) setFiles((prev) => [...prev, ...fs]);
+                e.target.value = "";
+              }}
+            />
           </div>
         </section>
 

@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 
 function FreeCard({ onFree }) {
-  const features = ["10 normal AI credits", "2 AI's", "5 AI code credits"];
+  const features = ["10 normal AI credits", "2 AI's (AI + Code AI)", "5 AI code credits"];
   return (
     <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-indigo-500/60 rounded-3xl p-6 shadow-2xl shadow-indigo-500/10 flex flex-col">
       <div className="flex items-center justify-between">
@@ -40,7 +40,7 @@ function FreeCard({ onFree }) {
 }
 
 function Plan2Card({ onPro }) {
-  const features = ["2 AI's", "100 AI code credits", "∞ normal AI credits"];
+  const features = ["3 AI's (incl. Fable 5 in Website Designer)", "100 AI code credits", "∞ normal AI credits"];
   return (
     <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-emerald-500/60 rounded-3xl p-6 shadow-2xl shadow-emerald-500/10 flex flex-col">
       <div className="flex items-center justify-between">
@@ -76,7 +76,7 @@ function Plan2Card({ onPro }) {
 
 function TeamCard({ onTeam }) {
   const features = [
-    "2 AI's",
+    "3 AI's (incl. Fable 5 in Website Designer)",
     "1000 AI code credits",
     "∞ normal AI credits",
     "Add up to 2 people — everyone shares the credits",

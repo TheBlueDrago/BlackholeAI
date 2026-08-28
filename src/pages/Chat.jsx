@@ -38,16 +38,19 @@ export default function Chat() {
   const isBanned = currentUser?.banned === true;
   const blockedUntil = currentUser?.blockedUntil ? new Date(currentUser.blockedUntil) : null;
   const isBlocked = blockedUntil && blockedUntil > new Date();
+  const planActive = currentUser?.plan && currentUser.plan !== "free" && (!currentUser?.planExpiresAt || new Date(currentUser.planExpiresAt) > new Date());
+  const effPlan = planActive ? currentUser.plan : "free";
 
-  const goHome = () => setMode("ai");
-  const goCode = () => setMode("code");
+  const switchMode = (m) => { setMode(m); setSidebarOpen(false); };
+  const goHome = () => switchMode("ai");
+  const goCode = () => switchMode("code");
   const newChat = () => {
     conv.createConversation("New Chat");
-    setMode("ai");
+    switchMode("ai");
   };
-  const goSubscriptions = () => { setReturnMode(mode === "designer" ? "designer" : "ai"); setMode("subscriptions"); };
-  const goDesigner = () => setMode("designer");
-  const finishSubscriptions = () => setMode(returnMode);
+  const goSubscriptions = () => { setReturnMode(mode === "designer" ? "designer" : "ai"); setMode("subscriptions"); setSidebarOpen(false); };
+  const goDesigner = () => switchMode("designer");
+  const finishSubscriptions = () => { setMode(returnMode); setSidebarOpen(false); };
   const goBilling = (productId = "pro") => navigate("/billing", { state: { productId } });
 
   return (
@@ -72,7 +75,7 @@ export default function Chat() {
                 <Sidebar
                   conversations={conv.conversations}
                   activeId={conv.activeId}
-                  onSelect={(id) => { conv.selectConversation(id); setMode("ai"); }}
+                  onSelect={(id) => { conv.selectConversation(id); switchMode("ai"); }}
                   onRename={conv.renameConversation}
                   onDelete={conv.deleteConversation}
                   onGoHome={goHome}
@@ -80,7 +83,7 @@ export default function Chat() {
                   onNewChat={newChat}
                   onGoSubscriptions={goSubscriptions}
                   onGoDesigner={goDesigner}
-                  onGoMonitor={() => setMode("monitor")}
+                  onGoMonitor={() => switchMode("monitor")}
                   isAdmin={isAdmin}
                   credits={{ aiTotal: credits.aiTotal, aiUsed: credits.aiUsed, aiCodeTotal: credits.aiCodeTotal, aiCodeUsed: credits.aiCodeUsed }}
                 />
@@ -91,8 +94,11 @@ export default function Chat() {
             onToggleSidebar={() => setSidebarOpen((o) => !o)}
             onOpenProfile={() => { setProfileInitialView("main"); setProfileOpen(true); }}
             onUpgrade={() => { setReturnMode("designer"); setMode("subscriptions"); }}
+            plan={effPlan}
             aiExhausted={credits.aiExhausted}
+            aiCodeExhausted={credits.aiCodeExhausted}
             onSpendAI={credits.spendAI}
+            onSpendAICode={credits.spendAICode}
           />
         </div>
       ) : (
@@ -134,7 +140,7 @@ export default function Chat() {
                   onNewChat={newChat}
                   onGoSubscriptions={goSubscriptions}
                   onGoDesigner={goDesigner}
-                  onGoMonitor={() => setMode("monitor")}
+                  onGoMonitor={() => switchMode("monitor")}
                   isAdmin={isAdmin}
                   credits={{ aiTotal: credits.aiTotal, aiUsed: credits.aiUsed, aiCodeTotal: credits.aiCodeTotal, aiCodeUsed: credits.aiCodeUsed }}
                 />
@@ -146,8 +152,11 @@ export default function Chat() {
                 createConversation={conv.createConversation}
                 addMessage={conv.addMessage}
                 renameConversation={conv.renameConversation}
+                plan={effPlan}
                 aiExhausted={credits.aiExhausted}
+                aiCodeExhausted={credits.aiCodeExhausted}
                 onSpendAI={credits.spendAI}
+                onSpendAICode={credits.spendAICode}
               />
             ) : (
               <CodePage aiCodeExhausted={credits.aiCodeExhausted} onSpendAICode={credits.spendAICode} />
@@ -165,11 +174,11 @@ export default function Chat() {
         }}
         onMonitor={() => {
           setProfileOpen(false);
-          setMode("monitor");
+          switchMode("monitor");
         }}
         onPromos={() => {
           setProfileOpen(false);
-          setMode("promos");
+          switchMode("promos");
         }}
       />
       <TeamWelcomePopup
