@@ -4,7 +4,10 @@ import { Send, Sparkles, Loader2, Globe, Search, RefreshCw, Plus, X, Crown, Rock
 import { base44 } from "@/api/base44Client";
 
 const STORE_KEY = "infinity-ai-designer";
+const TAKEN_KEY = "infinity-ai-taken-sites";
 const MODEL = "claude_sonnet_4_6";
+
+const RESERVED = ["home", "www", "admin", "api", "mail", "infinity", "ai", "app", "login", "register", "support", "blog"];
 
 const SYSTEM = `You are Infinity AI Website Designer. The user describes a website and you build it.
 ALWAYS respond with a single complete, self-contained HTML document: include <!DOCTYPE html>, <html>, <head> with inline <style> CSS, and <body> with inline <script> for any interactivity.
@@ -24,10 +27,38 @@ function loadState() {
     const raw = localStorage.getItem(STORE_KEY);
     if (raw) {
       const p = JSON.parse(raw);
-      return { name: p.name || "Untitled Project", messages: p.messages || [], members: p.members || [] };
+      return { siteName: p.siteName || p.name || "my-site", messages: p.messages || [], members: p.members || [] };
     }
   } catch {}
-  return { name: "Untitled Project", messages: [], members: [] };
+  return { siteName: "my-site", messages: [], members: [] };
+}
+
+function getTaken() {
+  try {
+    return JSON.parse(localStorage.getItem(TAKEN_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function isTaken(n) {
+  return !n || RESERVED.includes(n) || getTaken().includes(n);
+}
+
+function suggestNames(n) {
+  const base = n || "my-site";
+  const out = [];
+  let i = 1;
+  while (out.length < 3 && i < 30) {
+    const c = `${base}-${i}`;
+    if (!isTaken(c)) out.push(c);
+    i++;
+  }
+  return out;
+}
+
+function sanitizeSite(s) {
+  return s.toLowerCase().replace(/[^a-z-]+/g, "-").replace(/^-+|-+$/g, "");
 }
 
 function capFor(plan) {
@@ -42,17 +73,19 @@ function initialOf(s) {
 
 export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgrade, aiExhausted, onSpendAI }) {
   const initial = loadState();
-  const [projectName, setProjectName] = useState(initial.name);
+  const [siteName, setSiteName] = useState(initial.siteName);
   const [messages, setMessages] = useState(initial.messages);
   const [members, setMembers] = useState(initial.members);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
+  const [pagePath, setPagePath] = useState("/chat");
   const [previewMode, setPreviewMode] = useState("preview");
   const [reloadKey, setReloadKey] = useState(0);
   const [showInvite, setShowInvite] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteErr, setInviteErr] = useState("");
+  const [showPublish, setShowPublish] = useState(false);
   const [published, setPublished] = useState(false);
   const scrollRef = useRef(null);
 
@@ -65,9 +98,9 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
 
   useEffect(() => {
     try {
-      localStorage.setItem(STORE_KEY, JSON.stringify({ name: projectName, messages, members }));
+      localStorage.setItem(STORE_KEY, JSON.stringify({ siteName, messages, members }));
     } catch {}
-  }, [projectName, messages, members]);
+  }, [siteName, messages, members]);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -137,12 +170,22 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
     setShowInvite(false);
   };
 
-  const publish = () => {
+  const confirmPublish = () => {
+    const n = siteName;
+    if (isTaken(n)) return;
+    const list = getTaken();
+    if (!list.includes(n)) {
+      list.push(n);
+      localStorage.setItem(TAKEN_KEY, JSON.stringify(list));
+    }
+    setShowPublish(false);
     setPublished(true);
     setTimeout(() => setPublished(false), 2500);
   };
 
   const reload = () => setReloadKey((k) => k + 1);
+
+  const taken = isTaken(siteName);
 
   return (
     <div className="h-full flex flex-col bg-gradient-to-br from-slate-950 via-slate-900 to-black overflow-hidden">
@@ -163,15 +206,23 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
         >
           {ownerInitial}
         </button>
-        <span className="text-slate-500 text-sm font-mono hidden md:inline shrink-0">/chat</span>
+        <input
+          value={siteName}
+          onChange={(e) => setSiteName(sanitizeSite(e.target.value))}
+          placeholder="my-site"
+          title="Website name (letters and hyphens only)"
+          className="bg-slate-800/70 border border-slate-700/50 rounded-lg px-2.5 py-1.5 text-sm text-white outline-none focus:border-indigo-500/50 w-28 sm:w-40 font-medium shrink-0"
+        />
 
-        {/* Search */}
+        {/* Page path / search bar */}
         <div className="flex-1 flex justify-center px-2 min-w-0">
           <div className="flex items-center w-full max-w-md bg-slate-800/70 rounded-lg border border-slate-700/50 focus-within:border-indigo-500/50 transition-colors">
             <Search className="w-4 h-4 text-slate-500 ml-2.5 shrink-0" />
             <input
-              placeholder="Search..."
-              className="flex-1 bg-transparent outline-none text-slate-200 placeholder:text-slate-500 px-2 py-1.5 text-sm min-w-0"
+              value={pagePath}
+              onChange={(e) => setPagePath(e.target.value)}
+              placeholder="/chat"
+              className="flex-1 bg-transparent outline-none text-slate-200 placeholder:text-slate-500 px-2 py-1.5 text-sm font-mono min-w-0"
             />
             <button
               onClick={reload}
@@ -219,7 +270,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
             <Crown className="w-4 h-4" /> Upgrade
           </button>
           <button
-            onClick={publish}
+            onClick={() => setShowPublish(true)}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500 text-white text-sm font-medium hover:bg-indigo-400 transition-colors"
           >
             <Rocket className="w-4 h-4" /> Publish
@@ -363,7 +414,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
           <div className="flex-1 relative overflow-hidden bg-white">
             {previewMode === "dashboard" ? (
               <div className="w-full h-full bg-slate-950 p-6 overflow-y-auto">
-                <h2 className="text-lg font-semibold text-white">{projectName}</h2>
+                <h2 className="text-lg font-semibold text-white">{siteName}</h2>
                 <p className="text-slate-400 text-sm mt-1">
                   Plan: <span className="text-slate-200 capitalize">{effPlan}</span>
                 </p>
@@ -409,6 +460,72 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
           </div>
         </section>
       </div>
+
+      {/* Publish dialog */}
+      <AnimatePresence>
+        {showPublish && (
+          <motion.div
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowPublish(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-md bg-slate-900 border border-slate-700/60 rounded-2xl shadow-2xl p-6"
+            >
+              <h3 className="text-lg font-semibold text-white">Publish your website</h3>
+              <p className="text-slate-400 text-sm mt-1">Your website will be live at:</p>
+              <div className="mt-3 flex items-center gap-2 bg-slate-800/70 border border-slate-700/50 rounded-xl px-3 py-2.5">
+                <Globe className="w-4 h-4 text-sky-300 shrink-0" />
+                <span className="text-slate-100 text-sm font-mono truncate">
+                  https://{siteName || "your-site"}.infinity-ai.app
+                </span>
+              </div>
+
+              {taken && (
+                <div className="mt-3">
+                  <p className="text-amber-300 text-xs">
+                    That name is taken. Try one of these:
+                  </p>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {suggestNames(siteName || "my-site").map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => setSiteName(s)}
+                        className="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700/50 text-slate-200 text-xs hover:bg-slate-700 transition-colors"
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-3 mt-5">
+                <button
+                  onClick={() => setShowPublish(false)}
+                  className="flex-1 py-2.5 rounded-xl bg-black text-white font-medium hover:bg-slate-900 border border-slate-700 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmPublish}
+                  disabled={taken || !siteName}
+                  className="flex-1 py-2.5 rounded-xl bg-indigo-500 text-white font-medium hover:bg-indigo-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  Publish
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Publish toast */}
       <AnimatePresence>
