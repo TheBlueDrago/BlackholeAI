@@ -4,7 +4,7 @@ import { Sparkles, Code, Star, ChevronDown, Lock } from "lucide-react";
 
 const OPTIONS = [
   { id: "ai", label: "AI", icon: Sparkles, color: "text-indigo-400" },
-  { id: "code", label: "Code AI", icon: Code, color: "text-emerald-300" },
+  { id: "code", label: "AI Code", icon: Code, color: "text-emerald-300" },
   { id: "fable", label: "Fable 5", icon: Star, color: "text-fuchsia-300" },
 ];
 

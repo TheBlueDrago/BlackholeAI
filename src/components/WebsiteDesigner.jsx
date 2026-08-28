@@ -23,6 +23,16 @@ function extractHtml(text) {
   return text.trim();
 }
 
+function detectPages(html) {
+  const paths = new Set(["/home"]);
+  if (html) {
+    const re = /href=["'](\/[a-z0-9][a-z0-9-]*)["']/gi;
+    let m;
+    while ((m = re.exec(html))) paths.add(m[1]);
+  }
+  return Array.from(paths).sort();
+}
+
 function loadState() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
@@ -92,7 +102,6 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
   const [pagePath, setPagePath] = useState("/home");
-  const PAGES = ["/home", "/chat", "/billing"];
   const [previewMode, setPreviewMode] = useState("preview");
   const [reloadKey, setReloadKey] = useState(0);
   const [showInvite, setShowInvite] = useState(false);
@@ -100,6 +109,9 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   const [inviteErr, setInviteErr] = useState("");
   const [showPublish, setShowPublish] = useState(false);
   const [published, setPublished] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [publishErr, setPublishErr] = useState("");
+  const [publishUrl, setPublishUrl] = useState("");
   const fableAllowed = plan === "pro" || plan === "team" || plan === "secret";
   const [selectedAi, setSelectedAi] = useState(fableAllowed ? "fable" : "ai");
   const [files, setFiles] = useState([]);
@@ -190,20 +202,44 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
     setShowInvite(false);
   };
 
-  const confirmPublish = () => {
-    const n = siteName;
-    if (isTakenFor(n, projectId)) return;
-    const list = getTaken().filter((e) => e.name !== n);
-    list.push({ name: n, projectId });
-    localStorage.setItem(TAKEN_KEY, JSON.stringify(list));
-    setShowPublish(false);
-    setPublished(true);
-    setTimeout(() => setPublished(false), 2500);
+  const confirmPublish = async () => {
+    const n = sanitizeSite(siteName).toLowerCase();
+    if (!n) { setPublishErr("Enter a website name."); return; }
+    if (!previewHtml) { setPublishErr("Generate a website first."); return; }
+    setPublishErr("");
+    setPublishing(true);
+    try {
+      const existing = await base44.entities.PublishedSite.filter({ name: n });
+      const mine = existing.find((s) => s.created_by_id === user?.id);
+      if (existing.length && !mine) {
+        setPublishErr("That name is taken. Try another.");
+        return;
+      }
+      const ownerName = user?.email || user?.full_name || "";
+      if (mine) {
+        await base44.entities.PublishedSite.update(mine.id, { html: previewHtml, ownerName });
+      } else {
+        await base44.entities.PublishedSite.create({ name: n, html: previewHtml, ownerName });
+      }
+      const list = getTaken().filter((e) => e.name !== n);
+      list.push({ name: n, projectId });
+      localStorage.setItem(TAKEN_KEY, JSON.stringify(list));
+      setPublishUrl(`${window.location.origin}/site/${n}`);
+      setShowPublish(false);
+      setPublished(true);
+      setTimeout(() => setPublished(false), 2500);
+    } catch (e) {
+      setPublishErr(e?.response?.data?.error || e?.message || "Could not publish.");
+    } finally {
+      setPublishing(false);
+    }
   };
 
   const reload = () => setReloadKey((k) => k + 1);
 
   const taken = isTakenFor(siteName, projectId);
+  const pages = detectPages(previewHtml);
+  const safePagePath = pages.includes(pagePath) ? pagePath : pages[0];
 
   return (
     <div className="h-full flex flex-col bg-gradient-to-br from-slate-950 via-slate-900 to-black overflow-hidden">
@@ -237,11 +273,11 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
           <div className="flex items-center w-full max-w-md bg-slate-800/70 rounded-lg border border-slate-700/50 focus-within:border-indigo-500/50 transition-colors">
             <Search className="w-4 h-4 text-slate-500 ml-2.5 shrink-0" />
             <select
-              value={pagePath}
+              value={safePagePath}
               onChange={(e) => { setPagePath(e.target.value); reload(); }}
               className="flex-1 bg-transparent outline-none text-slate-200 px-2 py-1.5 text-sm font-mono min-w-0 cursor-pointer appearance-none"
             >
-              {PAGES.map((p) => (
+              {pages.map((p) => (
                 <option key={p} value={p} className="bg-slate-800 text-slate-100">
                   {p}
                 </option>
@@ -543,7 +579,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
               <div className="mt-3 flex items-center gap-2 bg-slate-800/70 border border-slate-700/50 rounded-xl px-3 py-2.5">
                 <Globe className="w-4 h-4 text-sky-300 shrink-0" />
                 <span className="text-slate-100 text-sm font-mono truncate">
-                  https://{siteName || "your-site"}.infinity-ai.app
+                  {window.location.origin}/site/{sanitizeSite(siteName || "your-site")}
                 </span>
               </div>
 
@@ -575,12 +611,13 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
                 </button>
                 <button
                   onClick={confirmPublish}
-                  disabled={taken || !siteName}
+                  disabled={!siteName || publishing || !previewHtml}
                   className="flex-1 py-2.5 rounded-xl bg-indigo-500 text-white font-medium hover:bg-indigo-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
-                  Publish
+                  {publishing ? "Publishing…" : "Publish"}
                 </button>
               </div>
+              {publishErr && <p className="text-sm text-red-400 mt-3">{publishErr}</p>}
             </motion.div>
           </motion.div>
         )}
@@ -596,6 +633,9 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
             className="fixed top-20 right-6 z-50 bg-emerald-500 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 text-sm font-medium"
           >
             <Rocket className="w-4 h-4" /> Website published!
+            {publishUrl && (
+              <a href={publishUrl} target="_blank" rel="noreferrer" className="underline ml-1">View</a>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
