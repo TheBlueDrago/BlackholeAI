@@ -28,10 +28,14 @@ function loadState() {
     const raw = localStorage.getItem(STORE_KEY);
     if (raw) {
       const p = JSON.parse(raw);
-      return { siteName: p.siteName || p.name || "my-site", messages: p.messages || [], members: p.members || [] };
+      return { siteName: p.siteName || p.name || "my-site", messages: p.messages || [], members: p.members || [], projectId: p.projectId || genId() };
     }
   } catch {}
-  return { siteName: "my-site", messages: [], members: [] };
+  return { siteName: "my-site", messages: [], members: [], projectId: genId() };
+}
+
+function genId() {
+  return (crypto.randomUUID && crypto.randomUUID()) || String(Date.now());
 }
 
 function getTaken() {
@@ -42,17 +46,23 @@ function getTaken() {
   }
 }
 
-function isTaken(n) {
-  return !n || RESERVED.includes(n) || getTaken().includes(n);
+function ownerOf(n) {
+  return getTaken().find((e) => e.name === n)?.projectId;
 }
 
-function suggestNames(n) {
+function isTakenFor(n, projectId) {
+  if (!n || RESERVED.includes(n)) return true;
+  const o = ownerOf(n);
+  return !!o && o !== projectId;
+}
+
+function suggestNames(n, projectId) {
   const base = n || "my-site";
   const out = [];
   let i = 1;
   while (out.length < 3 && i < 30) {
     const c = `${base}-${i}`;
-    if (!isTaken(c)) out.push(c);
+    if (!isTakenFor(c, projectId)) out.push(c);
     i++;
   }
   return out;
@@ -74,6 +84,7 @@ function initialOf(s) {
 
 export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgrade, aiExhausted, onSpendAI, aiCodeExhausted, onSpendAICode, plan }) {
   const initial = loadState();
+  const projectId = initial.projectId;
   const [siteName, setSiteName] = useState(initial.siteName);
   const [messages, setMessages] = useState(initial.messages);
   const [members, setMembers] = useState(initial.members);
@@ -103,7 +114,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
 
   useEffect(() => {
     try {
-      localStorage.setItem(STORE_KEY, JSON.stringify({ siteName, messages, members }));
+      localStorage.setItem(STORE_KEY, JSON.stringify({ siteName, messages, members, projectId }));
     } catch {}
   }, [siteName, messages, members]);
 
@@ -180,12 +191,10 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
 
   const confirmPublish = () => {
     const n = siteName;
-    if (isTaken(n)) return;
-    const list = getTaken();
-    if (!list.includes(n)) {
-      list.push(n);
-      localStorage.setItem(TAKEN_KEY, JSON.stringify(list));
-    }
+    if (isTakenFor(n, projectId)) return;
+    const list = getTaken().filter((e) => e.name !== n);
+    list.push({ name: n, projectId });
+    localStorage.setItem(TAKEN_KEY, JSON.stringify(list));
     setShowPublish(false);
     setPublished(true);
     setTimeout(() => setPublished(false), 2500);
@@ -193,7 +202,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
 
   const reload = () => setReloadKey((k) => k + 1);
 
-  const taken = isTaken(siteName);
+  const taken = isTakenFor(siteName, projectId);
 
   return (
     <div className="h-full flex flex-col bg-gradient-to-br from-slate-950 via-slate-900 to-black overflow-hidden">
@@ -538,7 +547,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
                     That name is taken. Try one of these:
                   </p>
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {suggestNames(siteName || "my-site").map((s) => (
+                    {suggestNames(siteName || "my-site", projectId).map((s) => (
                       <button
                         key={s}
                         onClick={() => setSiteName(s)}
