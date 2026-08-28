@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Pen, Plus, Code, Sparkles, Check, X, CreditCard } from "lucide-react";
+import { Pen, Plus, Code, Sparkles, Check, X, CreditCard, Globe } from "lucide-react";
 
 const SKIP_KEY = "infinity-ai-skip-delete-confirm";
 
@@ -26,7 +26,7 @@ function CreditBar({ icon, label, used, total, gradient }) {
   );
 }
 
-export default function Sidebar({ conversations, activeId, onSelect, onRename, onDelete, onGoHome, onGoCode, onNewChat, onGoSubscriptions, onGoMonitor, isAdmin, credits = {} }) {
+export default function Sidebar({ conversations, activeId, onSelect, onRename, onDelete, onGoHome, onGoCode, onNewChat, onGoSubscriptions, onGoDesigner, onGoMonitor, isAdmin, credits = {} }) {
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState("");
   const [confirmId, setConfirmId] = useState(null);
@@ -106,6 +106,15 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
                 <Plus className="w-4 h-4 text-slate-300" />
               </div>
               <span className="font-medium">New Chat</span>
+            </button>
+            <button
+              onClick={onGoDesigner}
+              className="w-full flex items-center gap-2 px-2 py-2 rounded-xl text-slate-300 hover:bg-slate-800/70 transition-colors"
+            >
+              <div className="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center">
+                <Globe className="w-4 h-4 text-sky-300" />
+              </div>
+              <span className="font-medium">Website Designer</span>
             </button>
             <button
               onClick={onGoSubscriptions}

@@ -11,6 +11,7 @@ import PromoExpiredPopup from "@/components/PromoExpiredPopup";
 import TeamWelcomePopup from "@/components/TeamWelcomePopup";
 import Monitor from "@/pages/Monitor";
 import PromoManager from "@/pages/PromoManager";
+import WebsiteDesigner from "@/components/WebsiteDesigner";
 import BanScreen from "@/components/BanScreen";
 import { useConversations } from "@/hooks/useConversations";
 import { useCredits } from "@/hooks/useCredits";
@@ -44,6 +45,7 @@ export default function Chat() {
     setMode("ai");
   };
   const goSubscriptions = () => setMode("subscriptions");
+  const goDesigner = () => setMode("designer");
   const finishSubscriptions = () => setMode("ai");
   const goBilling = (productId = "pro") => navigate("/billing", { state: { productId } });
 
@@ -61,6 +63,36 @@ export default function Chat() {
         <Monitor onBack={() => setMode("ai")} />
       ) : mode === "promos" ? (
         <PromoManager onBack={() => setMode("ai")} />
+      ) : mode === "designer" ? (
+        <div className="relative z-10 h-screen">
+          <AnimatePresence>
+            {sidebarOpen && (
+              <div className="absolute top-4 left-4 z-40">
+                <Sidebar
+                  conversations={conv.conversations}
+                  activeId={conv.activeId}
+                  onSelect={(id) => { conv.selectConversation(id); setMode("ai"); }}
+                  onRename={conv.renameConversation}
+                  onDelete={conv.deleteConversation}
+                  onGoHome={goHome}
+                  onGoCode={goCode}
+                  onNewChat={newChat}
+                  onGoSubscriptions={goSubscriptions}
+                  onGoDesigner={goDesigner}
+                  onGoMonitor={() => setMode("monitor")}
+                  isAdmin={isAdmin}
+                  credits={{ aiTotal: credits.aiTotal, aiUsed: credits.aiUsed, aiCodeTotal: credits.aiCodeTotal, aiCodeUsed: credits.aiCodeUsed }}
+                />
+              </div>
+            )}
+          </AnimatePresence>
+          <WebsiteDesigner
+            onToggleSidebar={() => setSidebarOpen((o) => !o)}
+            onOpenProfile={() => { setProfileInitialView("main"); setProfileOpen(true); }}
+            aiExhausted={credits.aiExhausted}
+            onSpendAI={credits.spendAI}
+          />
+        </div>
       ) : (
         <motion.div
           className="relative z-10 min-h-screen flex flex-col items-center justify-center py-10"
@@ -99,6 +131,7 @@ export default function Chat() {
                   onGoCode={goCode}
                   onNewChat={newChat}
                   onGoSubscriptions={goSubscriptions}
+                  onGoDesigner={goDesigner}
                   onGoMonitor={() => setMode("monitor")}
                   isAdmin={isAdmin}
                   credits={{ aiTotal: credits.aiTotal, aiUsed: credits.aiUsed, aiCodeTotal: credits.aiCodeTotal, aiCodeUsed: credits.aiCodeUsed }}
@@ -119,31 +152,31 @@ export default function Chat() {
             )}
           </div>
 
-          <Profile
-            open={profileOpen}
-            initialView={profileInitialView}
-            onClose={() => {
-              setProfileOpen(false);
-              setProfileInitialView("main");
-            }}
-            onMonitor={() => {
-              setProfileOpen(false);
-              setMode("monitor");
-            }}
-            onPromos={() => {
-              setProfileOpen(false);
-              setMode("promos");
-            }}
-          />
-          <TeamWelcomePopup
-            onAddPeople={() => {
-              setProfileInitialView("membership");
-              setProfileOpen(true);
-            }}
-          />
-          <PromoExpiredPopup />
         </motion.div>
       )}
+      <Profile
+        open={profileOpen}
+        initialView={profileInitialView}
+        onClose={() => {
+          setProfileOpen(false);
+          setProfileInitialView("main");
+        }}
+        onMonitor={() => {
+          setProfileOpen(false);
+          setMode("monitor");
+        }}
+        onPromos={() => {
+          setProfileOpen(false);
+          setMode("promos");
+        }}
+      />
+      <TeamWelcomePopup
+        onAddPeople={() => {
+          setProfileInitialView("membership");
+          setProfileOpen(true);
+        }}
+      />
+      <PromoExpiredPopup />
     </div>
   );
 }
