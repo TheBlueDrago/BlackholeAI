@@ -22,6 +22,7 @@ export default function Chat() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [profileInitialView, setProfileInitialView] = useState("main");
+  const [returnMode, setReturnMode] = useState("ai");
   const conv = useConversations();
   const navigate = useNavigate();
   const credits = useCredits();
@@ -44,9 +45,9 @@ export default function Chat() {
     conv.createConversation("New Chat");
     setMode("ai");
   };
-  const goSubscriptions = () => setMode("subscriptions");
+  const goSubscriptions = () => { setReturnMode(mode === "designer" ? "designer" : "ai"); setMode("subscriptions"); };
   const goDesigner = () => setMode("designer");
-  const finishSubscriptions = () => setMode("ai");
+  const finishSubscriptions = () => setMode(returnMode);
   const goBilling = (productId = "pro") => navigate("/billing", { state: { productId } });
 
   return (
@@ -67,7 +68,7 @@ export default function Chat() {
         <div className="relative z-10 h-screen">
           <AnimatePresence>
             {sidebarOpen && (
-              <div className="absolute top-4 left-4 z-40">
+              <div className="absolute top-20 left-4 z-40">
                 <Sidebar
                   conversations={conv.conversations}
                   activeId={conv.activeId}
@@ -89,6 +90,7 @@ export default function Chat() {
           <WebsiteDesigner
             onToggleSidebar={() => setSidebarOpen((o) => !o)}
             onOpenProfile={() => { setProfileInitialView("main"); setProfileOpen(true); }}
+            onUpgrade={() => { setReturnMode("designer"); setMode("subscriptions"); }}
             aiExhausted={credits.aiExhausted}
             onSpendAI={credits.spendAI}
           />

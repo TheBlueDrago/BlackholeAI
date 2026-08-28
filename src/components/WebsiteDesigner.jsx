@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Sparkles, Loader2, Globe, User } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Send, Sparkles, Loader2, Globe, Search, RefreshCw, Plus, X, Crown, Rocket } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 const STORE_KEY = "infinity-ai-designer";
@@ -21,42 +22,72 @@ function extractHtml(text) {
 function loadState() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const p = JSON.parse(raw);
+      return { name: p.name || "Untitled Project", messages: p.messages || [], members: p.members || [] };
+    }
   } catch {}
-  return { name: "Untitled Project", messages: [] };
+  return { name: "Untitled Project", messages: [], members: [] };
 }
 
-export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, aiExhausted, onSpendAI }) {
+function capFor(plan) {
+  if (plan === "secret") return 5;
+  if (plan === "team" || plan === "pro") return 3;
+  return 2;
+}
+
+function initialOf(s) {
+  return (s || "?").trim().charAt(0).toUpperCase();
+}
+
+export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgrade, aiExhausted, onSpendAI }) {
   const initial = loadState();
   const [projectName, setProjectName] = useState(initial.name);
   const [messages, setMessages] = useState(initial.messages);
+  const [members, setMembers] = useState(initial.members);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
+  const [previewMode, setPreviewMode] = useState("preview");
+  const [reloadKey, setReloadKey] = useState(0);
+  const [showInvite, setShowInvite] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteErr, setInviteErr] = useState("");
+  const [published, setPublished] = useState(false);
   const scrollRef = useRef(null);
 
   const lastAi = [...messages].reverse().find((m) => m.role === "ai");
   const previewHtml = lastAi ? extractHtml(lastAi.content) : "";
 
   useEffect(() => {
+    base44.auth.me().then(setUser).catch(() => setUser(null));
+  }, []);
+
+  useEffect(() => {
     try {
-      localStorage.setItem(STORE_KEY, JSON.stringify({ name: projectName, messages }));
+      localStorage.setItem(STORE_KEY, JSON.stringify({ name: projectName, messages, members }));
     } catch {}
-  }, [projectName, messages]);
+  }, [projectName, messages, members]);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, loading]);
 
+  const plan = user?.plan || "free";
+  const planActive = plan !== "free" && (!user?.planExpiresAt || new Date(user.planExpiresAt) > new Date());
+  const effPlan = planActive ? plan : "free";
+  const cap = capFor(effPlan);
+  const ownerInitial = initialOf(user?.full_name || user?.email || "U");
+  const canAdd = members.length < cap - 1;
+
   const send = async () => {
     const text = input.trim();
     if (!text || loading || aiExhausted) return;
-
     const userMsg = { role: "user", content: text };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setLoading(true);
     onSpendAI?.();
-
     try {
       const lastHtml = messages.filter((m) => m.role === "ai").pop()?.content || "";
       const userTurns = messages.filter((m) => m.role === "user").map((m) => m.content);
@@ -65,7 +96,6 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, aiExha
         (lastHtml ? `Current website HTML:\n${lastHtml}\n\n` : "") +
         `Requests so far:\n${userTurns.length ? userTurns.map((u, i) => `${i + 1}. ${u}`).join("\n") : "(none)"}\n\n` +
         `Latest request: ${text}\n\nOutput the complete updated HTML document now.`;
-
       const res = await base44.functions.invoke("chatCompletion", { prompt, model: MODEL });
       const content = res.data?.content ?? "";
       setMessages((prev) => [...prev, { role: "ai", content }]);
@@ -86,42 +116,158 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, aiExha
     }
   };
 
+  const addMember = () => {
+    const e = inviteEmail.trim().toLowerCase();
+    if (!e) return;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) {
+      setInviteErr("Enter a valid email.");
+      return;
+    }
+    if (members.includes(e)) {
+      setInviteErr("Already added.");
+      return;
+    }
+    if (!canAdd) {
+      setInviteErr(`Your ${effPlan} plan allows ${cap} people total (including you).`);
+      return;
+    }
+    setMembers((m) => [...m, e]);
+    setInviteEmail("");
+    setInviteErr("");
+    setShowInvite(false);
+  };
+
+  const publish = () => {
+    setPublished(true);
+    setTimeout(() => setPublished(false), 2500);
+  };
+
+  const reload = () => setReloadKey((k) => k + 1);
+
   return (
     <div className="h-full flex flex-col bg-gradient-to-br from-slate-950 via-slate-900 to-black overflow-hidden">
       <div className="pointer-events-none absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-indigo-600/15 rounded-full blur-[120px]" />
 
       {/* Top bar */}
-      <header className="relative z-10 flex items-center gap-3 h-14 px-4 border-b border-slate-700/50 bg-slate-900/70 backdrop-blur-xl">
-        <button
-          onClick={onToggleSidebar}
-          title="Menu"
-          className="p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
-        >
+      <header className="relative z-20 flex items-center gap-2 sm:gap-3 h-14 px-3 sm:px-4 border-b border-slate-700/50 bg-slate-900/70 backdrop-blur-xl">
+        <button onClick={onToggleSidebar} title="Menu" className="p-1.5 rounded-lg hover:bg-slate-800 transition-colors shrink-0">
           <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center">
             <Sparkles className="w-4 h-4 text-white" />
           </div>
         </button>
-        <span className="h-6 w-px bg-slate-700" />
+        <span className="h-6 w-px bg-slate-700 shrink-0" />
         <button
           onClick={onOpenProfile}
           title="Account"
-          className="p-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+          className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-xs font-bold text-white hover:opacity-90 transition-opacity shrink-0"
         >
-          <User className="w-5 h-5" />
+          {ownerInitial}
         </button>
-        <span className="h-6 w-px bg-slate-700" />
-        <div className="flex items-center gap-2 min-w-0">
-          <Globe className="w-5 h-5 text-sky-300 shrink-0" />
-          <input
-            value={projectName}
-            onChange={(e) => setProjectName(e.target.value)}
-            placeholder="Untitled Project"
-            className="bg-transparent text-sm font-medium text-white outline-none w-44 max-w-[40vw] border-b border-transparent focus:border-indigo-500/60 transition-colors"
-          />
+        <span className="text-slate-500 text-sm font-mono hidden md:inline shrink-0">/chat</span>
+
+        {/* Search */}
+        <div className="flex-1 flex justify-center px-2 min-w-0">
+          <div className="flex items-center w-full max-w-md bg-slate-800/70 rounded-lg border border-slate-700/50 focus-within:border-indigo-500/50 transition-colors">
+            <Search className="w-4 h-4 text-slate-500 ml-2.5 shrink-0" />
+            <input
+              placeholder="Search..."
+              className="flex-1 bg-transparent outline-none text-slate-200 placeholder:text-slate-500 px-2 py-1.5 text-sm min-w-0"
+            />
+            <button
+              onClick={reload}
+              title="Reload preview"
+              className="p-1.5 mr-1 rounded-md text-slate-400 hover:text-slate-200 hover:bg-slate-700/60 transition-colors shrink-0"
+            >
+              <RefreshCw className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Right cluster */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center -space-x-2">
+            <div
+              className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-xs font-bold text-white ring-2 ring-slate-900"
+              title="You"
+            >
+              {ownerInitial}
+            </div>
+            {members.map((m, i) => (
+              <div
+                key={i}
+                className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-200 ring-2 ring-slate-900"
+                title={m}
+              >
+                {initialOf(m)}
+              </div>
+            ))}
+            {canAdd && (
+              <button
+                onClick={() => setShowInvite((s) => !s)}
+                title="Invite people"
+                className="w-8 h-8 rounded-full bg-slate-800 border border-dashed border-slate-600 flex items-center justify-center text-slate-300 hover:text-white hover:border-indigo-500 ring-2 ring-slate-900 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+
+          <button
+            onClick={onUpgrade}
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 text-white text-sm font-medium hover:opacity-90 transition-opacity"
+          >
+            <Crown className="w-4 h-4" /> Upgrade
+          </button>
+          <button
+            onClick={publish}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500 text-white text-sm font-medium hover:bg-indigo-400 transition-colors"
+          >
+            <Rocket className="w-4 h-4" /> Publish
+          </button>
         </div>
       </header>
 
-      {/* Body: chat + preview */}
+      {/* Invite popover */}
+      <AnimatePresence>
+        {showInvite && (
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            className="absolute right-4 top-16 z-30 w-72 bg-slate-900 border border-slate-700/60 rounded-xl shadow-2xl p-3"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm font-semibold text-white">Invite to project</p>
+              <button onClick={() => setShowInvite(false)} className="text-slate-400 hover:text-white">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <p className="text-xs text-slate-400 mb-2">
+              {effPlan} plan · {cap} people max (incl. you) · {members.length + 1}/{cap} used
+            </p>
+            <div className="flex items-center gap-2">
+              <input
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") addMember();
+                }}
+                placeholder="email@example.com"
+                className="flex-1 bg-slate-800/70 border border-slate-700/50 rounded-lg px-2.5 py-2 text-sm text-white outline-none focus:border-indigo-500/50"
+              />
+              <button
+                onClick={addMember}
+                className="px-3 py-2 rounded-lg bg-indigo-500 text-white text-sm font-medium hover:bg-indigo-400 transition-colors"
+              >
+                Add
+              </button>
+            </div>
+            {inviteErr && <p className="text-xs text-red-400 mt-2">{inviteErr}</p>}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Body */}
       <div className="relative z-10 flex-1 flex flex-col md:flex-row overflow-hidden">
         {/* Chat */}
         <section className="md:w-[40%] w-full md:h-full h-[45%] flex flex-col border-b md:border-b-0 md:border-r border-slate-700/50 bg-slate-900/40">
@@ -193,26 +339,90 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, aiExha
           </div>
         </section>
 
-        {/* Preview */}
-        <section className="md:flex-1 w-full md:h-full h-[55%] bg-white relative overflow-hidden">
-          {previewHtml ? (
-            <iframe
-              srcDoc={previewHtml}
-              title="Website preview"
-              sandbox="allow-scripts"
-              className="w-full h-full bg-white"
-            />
-          ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center bg-slate-950 text-center p-6">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-500 flex items-center justify-center mb-3">
-                <Globe className="w-7 h-7 text-white" />
+        {/* Preview / Dashboard */}
+        <section className="md:flex-1 w-full md:h-full h-[55%] flex flex-col bg-slate-950">
+          <div className="flex items-center gap-1 px-3 h-10 border-b border-slate-700/50 bg-slate-900/60">
+            <button
+              onClick={() => setPreviewMode("preview")}
+              className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                previewMode === "preview" ? "bg-slate-800 text-white" : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              Preview
+            </button>
+            <button
+              onClick={() => setPreviewMode("dashboard")}
+              className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                previewMode === "dashboard" ? "bg-slate-800 text-white" : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              Dashboard
+            </button>
+          </div>
+
+          <div className="flex-1 relative overflow-hidden bg-white">
+            {previewMode === "dashboard" ? (
+              <div className="w-full h-full bg-slate-950 p-6 overflow-y-auto">
+                <h2 className="text-lg font-semibold text-white">{projectName}</h2>
+                <p className="text-slate-400 text-sm mt-1">
+                  Plan: <span className="text-slate-200 capitalize">{effPlan}</span>
+                </p>
+                <div className="mt-5">
+                  <p className="text-slate-300 text-sm font-medium mb-3">
+                    People ({members.length + 1}/{cap})
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <div className="flex items-center gap-2 bg-slate-800 rounded-full pl-1 pr-3 py-1">
+                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-xs font-bold text-white">
+                        {ownerInitial}
+                      </div>
+                      <span className="text-slate-200 text-xs">{user?.email || "You"}</span>
+                    </div>
+                    {members.map((m, i) => (
+                      <div key={i} className="flex items-center gap-2 bg-slate-800 rounded-full pl-1 pr-3 py-1">
+                        <div className="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-200">
+                          {initialOf(m)}
+                        </div>
+                        <span className="text-slate-200 text-xs">{m}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
-              <p className="text-slate-300 font-medium">Your website preview will appear here</p>
-              <p className="text-slate-500 text-sm mt-1">Describe what you want to build in the chat</p>
-            </div>
-          )}
+            ) : previewHtml ? (
+              <iframe
+                key={reloadKey}
+                srcDoc={previewHtml}
+                title="Website preview"
+                sandbox="allow-scripts"
+                className="w-full h-full bg-white"
+              />
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center bg-slate-950 text-center p-6">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-500 flex items-center justify-center mb-3">
+                  <Globe className="w-7 h-7 text-white" />
+                </div>
+                <p className="text-slate-300 font-medium">Your website preview will appear here</p>
+                <p className="text-slate-500 text-sm mt-1">Describe what you want to build in the chat</p>
+              </div>
+            )}
+          </div>
         </section>
       </div>
+
+      {/* Publish toast */}
+      <AnimatePresence>
+        {published && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="fixed top-20 right-6 z-50 bg-emerald-500 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 text-sm font-medium"
+          >
+            <Rocket className="w-4 h-4" /> Website published!
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
