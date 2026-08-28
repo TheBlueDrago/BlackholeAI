@@ -91,7 +91,8 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
-  const [pagePath, setPagePath] = useState("/chat");
+  const [pagePath, setPagePath] = useState("/home");
+  const PAGES = ["/home", "/chat", "/billing"];
   const [previewMode, setPreviewMode] = useState("preview");
   const [reloadKey, setReloadKey] = useState(0);
   const [showInvite, setShowInvite] = useState(false);
@@ -235,12 +236,17 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
         <div className="flex-1 flex justify-center px-2 min-w-0">
           <div className="flex items-center w-full max-w-md bg-slate-800/70 rounded-lg border border-slate-700/50 focus-within:border-indigo-500/50 transition-colors">
             <Search className="w-4 h-4 text-slate-500 ml-2.5 shrink-0" />
-            <input
+            <select
               value={pagePath}
-              onChange={(e) => setPagePath(e.target.value)}
-              placeholder="/chat"
-              className="flex-1 bg-transparent outline-none text-slate-200 placeholder:text-slate-500 px-2 py-1.5 text-sm font-mono min-w-0"
-            />
+              onChange={(e) => { setPagePath(e.target.value); reload(); }}
+              className="flex-1 bg-transparent outline-none text-slate-200 px-2 py-1.5 text-sm font-mono min-w-0 cursor-pointer appearance-none"
+            >
+              {PAGES.map((p) => (
+                <option key={p} value={p} className="bg-slate-800 text-slate-100">
+                  {p}
+                </option>
+              ))}
+            </select>
             <button
               onClick={reload}
               title="Reload preview"
