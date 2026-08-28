@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Send, Sparkles, Loader2, Plus, X, Paperclip } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-import AiChooser from "@/components/AiChooser";
 
 const CODE_SYS = "You are Infinity AI Code Assistant. Help with programming. Give clear, correct code with brief explanations.";
 const FABLE_SYS = "You are Fable 5, Infinity AI's premium creative model. Be imaginative and high-quality.";
@@ -142,7 +141,6 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
             >
               <Plus className="w-4 h-4" />
             </button>
-            <AiChooser value={selectedAi} onChange={setSelectedAi} plan={plan} allowFable={false} />
             {exhausted && (
               <p className="text-xs text-red-400 ml-auto">
                 You're out of {isCodeAi ? "AI Code" : "AI"} credits. Switch AI or upgrade.
