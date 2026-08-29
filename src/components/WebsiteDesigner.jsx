@@ -112,8 +112,9 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   const [publishing, setPublishing] = useState(false);
   const [publishErr, setPublishErr] = useState("");
   const [publishUrl, setPublishUrl] = useState("");
-  const fableAllowed = plan === "pro" || plan === "team" || plan === "secret";
-  const [selectedAi, setSelectedAi] = useState(fableAllowed ? "fable" : "ai");
+  const opusAllowed = plan === "pro" || plan === "team" || plan === "secret";
+  const fableAllowed = plan === "team" || plan === "secret";
+  const [selectedAi, setSelectedAi] = useState(fableAllowed ? "fable" : opusAllowed ? "opus5" : "ai");
   const [files, setFiles] = useState([]);
   const fileInputRef = useRef(null);
   const scrollRef = useRef(null);
@@ -160,7 +161,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
         (lastHtml ? `Current website HTML:\n${lastHtml}\n\n` : "") +
         `Requests so far:\n${userTurns.length ? userTurns.map((u, i) => `${i + 1}. ${u}`).join("\n") : "(none)"}\n\n` +
         `Latest request: ${text}${fileNote}\n\nOutput the complete updated HTML document now.`;
-      const model = selectedAi === "ai" ? "automatic" : MODEL;
+      const model = { ai: "automatic", code: MODEL, opus5: "claude_opus_4_8", fable: MODEL }[selectedAi] || "automatic";
       const res = await base44.functions.invoke("chatCompletion", { prompt, model });
       const content = res.data?.content ?? "";
       setMessages((prev) => [...prev, { role: "ai", content }]);
