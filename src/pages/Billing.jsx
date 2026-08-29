@@ -17,7 +17,7 @@ export default function Billing() {
       price: "$0.50 / month",
       gradient: "from-slate-800 to-black",
       glow: "bg-fuchsia-600/10",
-      features: ["5 people total — invite up to 4", "∞ normal AI credits", "∞ AI code credits"],
+      features: ["3 AI's", "5 people total — invite up to 4", "∞ normal AI credits", "∞ AI code credits"],
       button: "Subscribe — $0.50/mo",
       icon: Lock,
     },
