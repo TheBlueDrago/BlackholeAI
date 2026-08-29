@@ -129,19 +129,19 @@ export default function Chat() {
         </div>
       ) : (
         <motion.div
-          className="relative z-10 min-h-screen flex flex-col items-center justify-center py-10"
+          className="relative z-10 min-h-screen flex flex-col items-center justify-center py-4 sm:py-10"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, ease: "easeInOut" }}
         >
           <button
             onClick={() => setSidebarOpen((o) => !o)}
-            className="fixed top-5 left-5 z-30 p-2.5 rounded-xl bg-slate-800/70 border border-slate-700/50 text-slate-200 hover:bg-slate-700/70 transition-colors"
+            className="fixed top-4 left-4 sm:top-5 sm:left-5 z-30 p-2 sm:p-2.5 rounded-xl bg-slate-800/70 border border-slate-700/50 text-slate-200 hover:bg-slate-700/70 transition-colors"
             title="Menu"
           >
-            <Menu className="w-6 h-6" />
+            <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
-          <div className="fixed top-5 right-5 z-30 flex items-center gap-2">
+          <div className="fixed top-4 right-4 sm:top-5 sm:right-5 z-30 flex items-center gap-2">
             <ThemeToggle light={lightMode} onToggle={toggleLight} />
             <span className="h-8 w-px bg-slate-500/60" />
             <button
@@ -156,7 +156,7 @@ export default function Chat() {
             </button>
           </div>
 
-          <div className="flex items-center justify-center gap-5 w-full min-h-[524px]">
+          <div className="flex items-center justify-center gap-5 w-full min-h-[60vh] sm:min-h-[524px]">
             <AnimatePresence>
               {sidebarOpen && (
                 <Sidebar

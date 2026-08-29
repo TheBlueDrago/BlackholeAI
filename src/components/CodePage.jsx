@@ -48,9 +48,9 @@ export default function CodePage({ aiCodeExhausted, onSpendAICode }) {
   };
 
   return (
-    <div className="w-full max-w-3xl px-4">
+    <div className="w-full max-w-3xl px-3 sm:px-4">
       <div className="bg-slate-900/60 backdrop-blur-xl border border-emerald-700/40 rounded-3xl overflow-hidden shadow-2xl">
-        <div ref={scrollRef} className="h-80 sm:h-96 overflow-y-auto p-6 space-y-4 scroll-smooth">
+        <div ref={scrollRef} className="h-[55vh] sm:h-96 overflow-y-auto p-4 sm:p-6 space-y-4 scroll-smooth">
           {messages.length === 0 && !loading && (
             <div className="h-full flex flex-col items-center justify-center text-center">
               <div className="keep-color w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center mb-3 shadow-lg shadow-emerald-500/20">
