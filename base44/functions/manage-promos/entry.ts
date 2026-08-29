@@ -1,15 +1,6 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
 
-// The built-in legacy codes, seeded into the editable PromoCode entity on first use so the
-// admin can change what they grant, how long they last, and their usage caps.
-const LEGACY = [
-  { code: "HIINFINITYAI", plan: "pro", days: 30, globalCap: 50, perEmailLimit: 3, unlimited: false, active: true, label: "Legacy" },
-  { code: "HIILIKECHEESE", plan: "pro", days: 30, globalCap: 5, perEmailLimit: 0, unlimited: false, active: true, label: "Legacy" },
-  { code: "HOLACHEESEAI", plan: "team", days: 180, globalCap: 5, perEmailLimit: 1, unlimited: false, active: true, label: "Legacy" },
-  { code: "INFINITEAIISTUFF", plan: "team", days: 0, globalCap: 0, perEmailLimit: 0, unlimited: true, active: true, label: "Legacy" },
-  { code: "INFINITYAIISTUFF", plan: "secret", days: 0, globalCap: 0, perEmailLimit: 0, unlimited: true, active: true, label: "Legacy" },
-];
-
+// Promo codes are managed entirely as rows in the PromoCode entity — none are hardcoded.
 export default async function (req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
@@ -20,12 +11,6 @@ export default async function (req: Request): Promise<Response> {
     const db = base44.asServiceRole;
     const body = await req.json().catch(() => ({}));
     const action = String(body.action ?? "list");
-
-    // Seed the legacy codes once so they become editable in the manager.
-    const existing = await db.entities.PromoCode.list();
-    if (existing.length === 0) {
-      await db.entities.PromoCode.bulkCreate(LEGACY);
-    }
 
     if (action === "list") {
       const all = await db.entities.PromoCode.list("-created_date", 200);
