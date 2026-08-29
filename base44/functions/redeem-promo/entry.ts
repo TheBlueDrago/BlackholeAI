@@ -6,12 +6,10 @@ import { notifyAdmins } from "../../shared/adminNotify.ts";
 //   HIINFINITYAI  — Pro, 30 days, max 3 uses per email + 50 uses globally
 //   HIILIKECHEESE — Pro, 30 days, max 5 uses globally
 //   HOLACHEESEAI    — Team, 180 days (6 months), 1 use per email, first 5 people globally
-//   INFINITEAIISTUFF — Team, never expires, unlimited users & unlimited redemptions
 const CODES = {
   HIINFINITYAI: { perEmailLimit: 3, globalCap: 50, plan: "pro", days: 30 },
   HIILIKECHEESE: { globalCap: 5, plan: "pro", days: 30 },
   HOLACHEESEAI: { perEmailLimit: 1, globalCap: 5, plan: "team", days: 180 },
-  INFINITEAIISTUFF: { plan: "team", forever: true, unlimited: true },
   INFINITYAIISTUFF: { plan: "secret", forever: true, unlimited: true },
 };
 
