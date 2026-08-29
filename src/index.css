@@ -90,3 +90,13 @@
     @apply bg-background text-foreground font-body;
   }
 }
+
+.light-mode {
+  filter: invert(1) hue-rotate(180deg);
+}
+.light-mode img,
+.light-mode video,
+.light-mode iframe,
+.light-mode .keep-color {
+  filter: invert(1) hue-rotate(180deg);
+}

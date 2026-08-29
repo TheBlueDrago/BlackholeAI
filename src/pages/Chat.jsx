@@ -12,6 +12,7 @@ import TeamWelcomePopup from "@/components/TeamWelcomePopup";
 import Monitor from "@/pages/Monitor";
 import PromoManager from "@/pages/PromoManager";
 import WebsiteDesigner from "@/components/WebsiteDesigner";
+import ThemeToggle from "@/components/ThemeToggle";
 import BanScreen from "@/components/BanScreen";
 import { useConversations } from "@/hooks/useConversations";
 import { useCredits } from "@/hooks/useCredits";
@@ -27,12 +28,33 @@ export default function Chat() {
   const navigate = useNavigate();
   const credits = useCredits();
   const [currentUser, setCurrentUser] = useState(null);
+  const [lightMode, setLightMode] = useState(false);
 
   // Record this account's email so re-registration after deletion can be blocked.
   useEffect(() => {
     base44.functions.invoke("record-email").catch(() => {});
     base44.auth.me().then(setCurrentUser).catch(() => setCurrentUser(null));
   }, []);
+
+  // Light/dark theme is stored per account, so one user's choice never affects anyone else.
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    try {
+      setLightMode(localStorage.getItem("infinity-ai-light-" + currentUser.id) === "1");
+    } catch {}
+  }, [currentUser?.id]);
+
+  const toggleLight = () => {
+    setLightMode((prev) => {
+      const next = !prev;
+      if (currentUser?.id) {
+        try {
+          localStorage.setItem("infinity-ai-light-" + currentUser.id, next ? "1" : "0");
+        } catch {}
+      }
+      return next;
+    });
+  };
 
   const isAdmin = currentUser?.role === "admin";
   const isBanned = currentUser?.banned === true;
@@ -41,6 +63,7 @@ export default function Chat() {
   const planActive = currentUser?.plan && currentUser.plan !== "free" && (!currentUser?.planExpiresAt || new Date(currentUser.planExpiresAt) > new Date());
   const effPlan = planActive ? currentUser.plan : "free";
   const avatarInitial = (currentUser?.full_name || currentUser?.email || "U").trim().charAt(0).toUpperCase();
+  const applyLight = lightMode && (mode === "ai" || mode === "code" || mode === "designer");
 
   const switchMode = (m) => { setMode(m); setSidebarOpen(false); };
   const goHome = () => switchMode("ai");
@@ -55,7 +78,7 @@ export default function Chat() {
   const goBilling = (productId = "pro") => navigate("/billing", { state: { productId } });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-black overflow-hidden relative">
+    <div className={`min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-black overflow-hidden relative ${applyLight ? "light-mode" : ""}`}>
       {/* Ambient glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute top-1/3 left-1/3 w-[400px] h-[400px] bg-fuchsia-600/10 rounded-full blur-[100px] pointer-events-none" />
@@ -95,6 +118,8 @@ export default function Chat() {
             onToggleSidebar={() => setSidebarOpen((o) => !o)}
             onOpenProfile={() => { setProfileInitialView("main"); setProfileOpen(true); }}
             onUpgrade={() => { setReturnMode("designer"); setMode("subscriptions"); }}
+            lightMode={lightMode}
+            onToggleLight={toggleLight}
             plan={effPlan}
             aiExhausted={credits.aiExhausted}
             aiCodeExhausted={credits.aiCodeExhausted}
@@ -116,16 +141,20 @@ export default function Chat() {
           >
             <Menu className="w-6 h-6" />
           </button>
-          <button
-            onClick={() => {
-              setProfileInitialView("main");
-              setProfileOpen(true);
-            }}
-            className="fixed top-5 right-5 z-30 w-11 h-11 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-sm font-bold text-white hover:opacity-90 transition-opacity shadow-lg shadow-indigo-500/20"
-            title="Profile"
-          >
-            {avatarInitial}
-          </button>
+          <div className="fixed top-5 right-5 z-30 flex items-center gap-2">
+            <ThemeToggle light={lightMode} onToggle={toggleLight} />
+            <span className="h-8 w-px bg-slate-500/60" />
+            <button
+              onClick={() => {
+                setProfileInitialView("main");
+                setProfileOpen(true);
+              }}
+              className="keep-color w-11 h-11 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-sm font-bold text-white hover:opacity-90 transition-opacity shadow-lg shadow-indigo-500/20"
+              title="Profile"
+            >
+              {avatarInitial}
+            </button>
+          </div>
 
           <div className="flex items-center justify-center gap-5 w-full min-h-[524px]">
             <AnimatePresence>

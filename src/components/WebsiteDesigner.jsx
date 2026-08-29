@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Send, Sparkles, Loader2, Globe, Search, RefreshCw, Plus, X, Crown, Rocket, Paperclip } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import AiChooser from "@/components/AiChooser";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const STORE_KEY = "infinity-ai-designer";
 const TAKEN_KEY = "infinity-ai-taken-sites";
@@ -92,7 +93,7 @@ function initialOf(s) {
   return (s || "?").trim().charAt(0).toUpperCase();
 }
 
-export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgrade, aiExhausted, onSpendAI, aiCodeExhausted, onSpendAICode, plan }) {
+export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgrade, aiExhausted, onSpendAI, aiCodeExhausted, onSpendAICode, plan, lightMode, onToggleLight }) {
   const initial = loadState();
   const projectId = initial.projectId;
   const [siteName, setSiteName] = useState(initial.siteName);
@@ -249,7 +250,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
       {/* Top bar */}
       <header className="relative z-20 flex items-center gap-2 sm:gap-3 h-14 px-3 sm:px-4 border-b border-slate-700/50 bg-slate-900/70 backdrop-blur-xl">
         <button onClick={onToggleSidebar} title="Menu" className="p-1.5 rounded-lg hover:bg-slate-800 transition-colors shrink-0">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center">
+          <div className="keep-color w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center">
             <Sparkles className="w-4 h-4 text-white" />
           </div>
         </button>
@@ -257,10 +258,12 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
         <button
           onClick={onOpenProfile}
           title="Account"
-          className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-xs font-bold text-white hover:opacity-90 transition-opacity shrink-0"
+          className="keep-color w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-xs font-bold text-white hover:opacity-90 transition-opacity shrink-0"
         >
           {ownerInitial}
         </button>
+        <span className="h-6 w-px bg-slate-500/60 shrink-0" />
+        <ThemeToggle light={lightMode} onToggle={onToggleLight} />
         <input
           value={siteName}
           onChange={(e) => setSiteName(sanitizeSite(e.target.value))}

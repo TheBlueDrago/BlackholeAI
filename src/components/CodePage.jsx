@@ -53,7 +53,7 @@ export default function CodePage({ aiCodeExhausted, onSpendAICode }) {
         <div ref={scrollRef} className="h-80 sm:h-96 overflow-y-auto p-6 space-y-4 scroll-smooth">
           {messages.length === 0 && !loading && (
             <div className="h-full flex flex-col items-center justify-center text-center">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center mb-3 shadow-lg shadow-emerald-500/20">
+              <div className="keep-color w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center mb-3 shadow-lg shadow-emerald-500/20">
                 <Terminal className="w-6 h-6 text-white" />
               </div>
               <p className="text-slate-200 font-medium text-lg">Let's start coding</p>

@@ -71,7 +71,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
         <div ref={scrollRef} className="h-80 sm:h-96 overflow-y-auto p-6 space-y-4 scroll-smooth">
           {messages.length === 0 && !loading && (
             <div className="h-full flex flex-col items-center justify-center text-center">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center mb-3">
+              <div className="keep-color w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center mb-3">
                 <Sparkles className="w-6 h-6 text-white" />
               </div>
               <p className="text-slate-300 font-medium">Ask me anything</p>
