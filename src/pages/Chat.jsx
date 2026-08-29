@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, User } from "lucide-react";
+import { Menu } from "lucide-react";
 import ChatBox from "@/components/ChatBox";
 import CodePage from "@/components/CodePage";
 import Sidebar from "@/components/Sidebar";
@@ -40,6 +40,7 @@ export default function Chat() {
   const isBlocked = blockedUntil && blockedUntil > new Date();
   const planActive = currentUser?.plan && currentUser.plan !== "free" && (!currentUser?.planExpiresAt || new Date(currentUser.planExpiresAt) > new Date());
   const effPlan = planActive ? currentUser.plan : "free";
+  const avatarInitial = (currentUser?.full_name || currentUser?.email || "U").trim().charAt(0).toUpperCase();
 
   const switchMode = (m) => { setMode(m); setSidebarOpen(false); };
   const goHome = () => switchMode("ai");
@@ -120,10 +121,10 @@ export default function Chat() {
               setProfileInitialView("main");
               setProfileOpen(true);
             }}
-            className="fixed top-5 right-5 z-30 p-2.5 rounded-xl bg-slate-800/70 border border-slate-700/50 text-slate-200 hover:bg-slate-700/70 transition-colors"
+            className="fixed top-5 right-5 z-30 w-11 h-11 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-sm font-bold text-white hover:opacity-90 transition-opacity shadow-lg shadow-indigo-500/20"
             title="Profile"
           >
-            <User className="w-6 h-6" />
+            {avatarInitial}
           </button>
 
           <div className="flex items-center justify-center gap-5 w-full min-h-[524px]">
