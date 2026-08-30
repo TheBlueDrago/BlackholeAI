@@ -77,8 +77,8 @@ function Plan2Card({ onPro }) {
 function TeamCard({ onTeam }) {
   const features = [
     "4 AI's (Galaxy 5 and Space 5 in Website Designer)",
-    "1000 Blackhole Code credits",
-    "∞ Blackhole AI credits",
+    "25 Blackhole Code credits",
+    "50 Blackhole AI credits",
     "∞ Galaxy 5 credits",
     "Add up to 2 people — everyone shares the credits",
   ];
@@ -161,7 +161,7 @@ function TeamPanel() {
       <p className="text-slate-400 text-sm">
         Shared Blackhole Code credits:{" "}
         <span className="text-sky-200 font-medium">
-          {isSecretTeam ? "Unlimited" : `${team.aiCodeUsed ?? 0} / 1000`}
+          {isSecretTeam ? "Unlimited" : `${team.aiCodeUsed ?? 0} / 25`}
         </span>
       </p>
 

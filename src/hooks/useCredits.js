@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 const KEY = "infinity-ai-credits-v2";
 const FREE = { aiTotal: 10, aiCodeTotal: 5, galaxy5Total: 0 };
 const PRO = { aiTotal: 25, aiCodeTotal: 15, galaxy5Total: 25 };
-const TEAM = { aiTotal: Infinity, aiCodeTotal: 1000, galaxy5Total: Infinity };
+const TEAM = { aiTotal: 50, aiCodeTotal: 25, galaxy5Total: Infinity };
 const SECRET = { aiTotal: Infinity, aiCodeTotal: Infinity, galaxy5Total: Infinity };
 
 function monthKey(d = new Date()) {
@@ -79,13 +79,13 @@ export function useCredits() {
   const aiTotal = totals.aiTotal;
   const aiCodeTotal = team?.isAdmin ? Infinity : totals.aiCodeTotal;
   const galaxy5Total = totals.galaxy5Total;
-  const aiUsed = plan === "team" || plan === "secret" ? 0 : used.aiUsed;
+  const aiUsed = plan === "secret" ? 0 : used.aiUsed;
   const aiCodeUsed = plan === "team" ? team?.aiCodeUsed ?? 0 : plan === "secret" ? 0 : used.aiCodeUsed;
   const galaxy5Used = plan === "team" || plan === "secret" ? 0 : used.galaxy5Used;
 
   const spendAI = useCallback(
     (amount = 1) => {
-      if (plan === "team" || plan === "secret") return; // unlimited
+      if (plan === "secret") return; // unlimited
       setUsed((u) => ({ ...u, aiUsed: u.aiUsed + amount }));
     },
     [plan]

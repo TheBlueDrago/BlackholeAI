@@ -2,7 +2,7 @@ import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
 
 // Spends AI-code credits against the shared team pool. Owner or any member may spend.
 // One message = 1 credit. Rejects if the team is inactive or the shared pool is exhausted.
-const TEAM_AI_CODE_TOTAL = 1000;
+const TEAM_AI_CODE_TOTAL = 25;
 
 export default async function (req: Request): Promise<Response> {
   try {

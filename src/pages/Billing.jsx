@@ -26,7 +26,7 @@ export default function Billing() {
       price: "$10 / month",
       gradient: "from-sky-500 to-indigo-500",
       glow: "bg-sky-600/15",
-      features: ["4 AI's (Galaxy 5 and Space 5 in Website Designer)", "1000 Blackhole Code credits", "∞ Blackhole AI credits", "∞ Galaxy 5 credits", "Add up to 2 people — shared credits"],
+      features: ["4 AI's (Galaxy 5 and Space 5 in Website Designer)", "25 Blackhole Code credits", "50 Blackhole AI credits", "∞ Galaxy 5 credits", "Add up to 2 people — shared credits"],
       button: "Subscribe — $10/mo",
       icon: Users,
     },
