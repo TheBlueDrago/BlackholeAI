@@ -51,6 +51,8 @@ export function useConversations() {
     setActiveId((cur) => (cur === id ? null : cur));
   }, []);
 
+  const reload = useCallback(() => setConversations(load), []);
+
   const activeConversation = conversations.find((c) => c.id === activeId) || null;
 
   return {
@@ -62,5 +64,6 @@ export function useConversations() {
     addMessage,
     renameConversation,
     deleteConversation,
+    reload,
   };
 }

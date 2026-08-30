@@ -1,0 +1,73 @@
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { base44 } from "@/api/base44Client";
+import { useConversations } from "@/hooks/useConversations";
+import { useCredits } from "@/hooks/useCredits";
+import { applyThemeClass, readUserTheme, writeUserTheme, prefersLight } from "@/lib/theme";
+
+const AppShellContext = createContext(null);
+
+export const useAppShell = () => useContext(AppShellContext);
+
+export function AppShellProvider({ children }) {
+  const navigate = useNavigate();
+  const conv = useConversations();
+  const credits = useCredits();
+  const [currentUser, setCurrentUser] = useState(null);
+  const [lightMode, setLightMode] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    base44.functions.invoke("record-email").catch(() => {});
+    base44.auth.me().then(setCurrentUser).catch(() => setCurrentUser(null));
+  }, []);
+
+  // Initial theme from OS preference, then refined per-user once we know who's logged in.
+  useEffect(() => {
+    setLightMode(prefersLight());
+  }, []);
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    const t = readUserTheme(currentUser.id);
+    if (t !== null) setLightMode(t);
+  }, [currentUser?.id]);
+  useEffect(() => {
+    applyThemeClass(lightMode);
+  }, [lightMode]);
+
+  const toggleLight = useCallback(() => {
+    setLightMode((prev) => {
+      const next = !prev;
+      writeUserTheme(currentUser?.id, next);
+      return next;
+    });
+  }, [currentUser?.id]);
+
+  const isAdmin = currentUser?.role === "admin";
+  const isBanned = currentUser?.banned === true;
+  const blockedUntil = currentUser?.blockedUntil ? new Date(currentUser.blockedUntil) : null;
+  const isBlocked = !!(blockedUntil && blockedUntil > new Date());
+  const planActive =
+    currentUser?.plan && currentUser.plan !== "free" && (!currentUser?.planExpiresAt || new Date(currentUser.planExpiresAt) > new Date());
+  const effPlan = planActive ? currentUser.plan : "free";
+  const avatarInitial = (currentUser?.full_name || currentUser?.email || "U").trim().charAt(0).toUpperCase();
+
+  const goHome = useCallback(() => { navigate("/chat"); setSidebarOpen(false); }, [navigate]);
+  const goCode = useCallback(() => { navigate("/chat/code"); setSidebarOpen(false); }, [navigate]);
+  const goDesigner = useCallback(() => { navigate("/chat/designer"); setSidebarOpen(false); }, [navigate]);
+  const goPlans = useCallback(() => { navigate("/chat/plans"); setSidebarOpen(false); }, [navigate]);
+  const goMonitor = useCallback(() => { navigate("/chat/monitor"); setSidebarOpen(false); }, [navigate]);
+  const goPromos = useCallback(() => { navigate("/chat/promos"); setSidebarOpen(false); }, [navigate]);
+  const newChat = useCallback(() => { conv.createConversation("New Chat"); navigate("/chat"); setSidebarOpen(false); }, [navigate, conv]);
+  const goBilling = useCallback((productId = "pro") => navigate("/billing", { state: { productId } }), [navigate]);
+  const openProfile = useCallback((initialView = "main") => navigate("/chat/settings", { state: { initialView } }), [navigate]);
+
+  const value = {
+    currentUser, conv, credits, lightMode, toggleLight,
+    isAdmin, isBanned, isBlocked, blockedUntil, effPlan, avatarInitial,
+    sidebarOpen, setSidebarOpen,
+    navigate, goHome, goCode, goDesigner, goPlans, goMonitor, goPromos, newChat, goBilling, openProfile,
+  };
+
+  return <AppShellContext.Provider value={value}>{children}</AppShellContext.Provider>;
+}

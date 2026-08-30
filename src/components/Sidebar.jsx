@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Pen, Plus, Code, Sparkles, Gem, Star, Check, X, CreditCard, Globe } from "lucide-react";
 import BlackholeIcon from "@/components/BlackholeIcon";
+import PullToRefresh from "@/components/PullToRefresh";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const SKIP_KEY = "infinity-ai-skip-delete-confirm";
@@ -28,7 +29,7 @@ function CreditBar({ icon, label, used, total, gradient }) {
   );
 }
 
-export default function Sidebar({ conversations, activeId, onSelect, onRename, onDelete, onGoHome, onGoCode, onNewChat, onGoSubscriptions, onGoDesigner, onGoMonitor, isAdmin, credits = {} }) {
+export default function Sidebar({ conversations, activeId, onSelect, onRename, onDelete, onRefresh, onGoHome, onGoCode, onNewChat, onGoSubscriptions, onGoDesigner, onGoMonitor, isAdmin, credits = {} }) {
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState("");
   const [confirmId, setConfirmId] = useState(null);
@@ -76,8 +77,9 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
         transition={{ type: "spring", stiffness: 240, damping: 28 }}
         className={`shrink-0 overflow-hidden ${isMobile ? "fixed left-0 top-0 z-40 h-[100dvh]" : "h-[524px]"}`}
       >
-        <div
+        <PullToRefresh
           style={{ width: targetWidth }}
+          onRefresh={onRefresh}
           className={`h-full sidebar-scroll overflow-y-auto ${isMobile ? "bg-slate-900/95 backdrop-blur-xl border-r border-slate-700/50 shadow-2xl" : "bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-3xl shadow-2xl"}`}
         >
           {/* Header */}
@@ -183,7 +185,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
               <div
                 key={conv.id}
                 onClick={() => editingId !== conv.id && onSelect(conv.id)}
-                className={`group relative rounded-lg px-2 py-1.5 transition-colors cursor-pointer ${
+                className={`group relative rounded-lg px-2 py-1.5 min-h-[44px] flex items-center transition-colors cursor-pointer ${
                   conv.id === activeId ? "bg-slate-800/80" : "hover:bg-slate-800/40"
                 }`}
               >
@@ -202,28 +204,28 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
                     />
                     <button
                       onClick={(e) => { e.stopPropagation(); saveEdit(); }}
-                      className="p-1.5 rounded-lg bg-indigo-500 text-white shrink-0"
+                      className="w-11 h-11 flex items-center justify-center rounded-lg bg-indigo-500 text-white shrink-0"
                     >
-                      <Check className="w-3.5 h-3.5" />
+                      <Check className="w-4 h-4" />
                     </button>
                   </div>
                 ) : (
                   <>
-                    <p className="text-xs text-slate-200 truncate pr-[52px]">{conv.title}</p>
-                    <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <p className="text-xs text-slate-200 truncate pr-[100px]">{conv.title}</p>
+                    <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={(e) => { e.stopPropagation(); startEdit(conv); }}
-                        className="p-1 rounded-md bg-slate-700/80 border border-slate-600/50 text-slate-300 hover:text-white"
+                        className="w-11 h-11 flex items-center justify-center rounded-lg bg-slate-700/80 border border-slate-600/50 text-slate-300 hover:text-white"
                         title="Rename"
                       >
-                        <Pen className="w-2.5 h-2.5" />
+                        <Pen className="w-4 h-4" />
                       </button>
                       <button
                         onClick={(e) => askDelete(e, conv)}
-                        className="p-1 rounded-md bg-slate-700/80 border border-slate-600/50 text-slate-300 hover:text-red-400"
+                        className="w-11 h-11 flex items-center justify-center rounded-lg bg-slate-700/80 border border-slate-600/50 text-slate-300 hover:text-red-400"
                         title="Delete"
                       >
-                        <X className="w-2.5 h-2.5" />
+                        <X className="w-4 h-4" />
                       </button>
                     </div>
                   </>
@@ -231,7 +233,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
               </div>
             ))}
           </div>
-        </div>
+        </PullToRefresh>
       </motion.div>
 
       <AnimatePresence>

@@ -19,6 +19,9 @@ import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { WorkspaceShell, ChatWorkspace, CodeWorkspace } from '@/components/WorkspaceShell';
+import DesignerWorkspace from '@/components/DesignerWorkspace';
+import { PlansView, MonitorView, PromosView, SettingsView } from '@/pages/chat/Views';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -55,7 +58,17 @@ const AuthenticatedApp = () => {
       <Route path="/plans" element={<Plans />} />
       <Route path="/site/:name" element={<SiteView />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
-        <Route path="/chat" element={<Chat />} />
+        <Route path="/chat" element={<Chat />}>
+          <Route element={<WorkspaceShell />}>
+            <Route index element={<ChatWorkspace />} />
+            <Route path="code" element={<CodeWorkspace />} />
+          </Route>
+          <Route path="designer" element={<DesignerWorkspace />} />
+          <Route path="plans" element={<PlansView />} />
+          <Route path="monitor" element={<MonitorView />} />
+          <Route path="promos" element={<PromosView />} />
+          <Route path="settings" element={<SettingsView />} />
+        </Route>
         <Route path="/billing" element={<Billing />} />
         <Route path="/promo-success" element={<PromoSuccess />} />
       </Route>

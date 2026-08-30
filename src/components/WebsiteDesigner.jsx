@@ -4,6 +4,7 @@ import { Send, Loader2, Globe, Search, RefreshCw, Plus, X, Crown, Rocket, Paperc
 import BlackholeIcon from "@/components/BlackholeIcon";
 import { base44 } from "@/api/base44Client";
 import AiChooser from "@/components/AiChooser";
+import SheetSelect from "@/components/SheetSelect";
 import ThemeToggle from "@/components/ThemeToggle";
 
 const STORE_KEY = "infinity-ai-designer";
@@ -291,17 +292,12 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
         <div className="flex-1 flex justify-center px-2 min-w-0">
           <div className="flex items-center w-full max-w-md bg-slate-800/70 rounded-lg border border-slate-700/50 focus-within:border-indigo-500/50 transition-colors">
             <Search className="w-4 h-4 text-slate-500 ml-2.5 shrink-0" />
-            <select
+            <SheetSelect
               value={safePagePath}
-              onChange={(e) => { setPagePath(e.target.value); reload(); }}
-              className="flex-1 bg-transparent outline-none text-slate-200 px-2 py-1.5 text-sm font-mono min-w-0 cursor-pointer appearance-none"
-            >
-              {pages.map((p) => (
-                <option key={p} value={p} className="bg-slate-800 text-slate-100">
-                  {p}
-                </option>
-              ))}
-            </select>
+              onChange={(v) => { setPagePath(v); reload(); }}
+              options={pages.map((p) => ({ value: p, label: p }))}
+              className="flex-1 bg-transparent outline-none text-slate-200 px-2 py-1.5 text-sm min-w-0"
+            />
             <button
               onClick={reload}
               title="Reload preview"
