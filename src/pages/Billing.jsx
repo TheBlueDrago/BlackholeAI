@@ -105,22 +105,24 @@ export default function Billing() {
 
         {error && <p className="mt-4 text-sm text-red-400 text-center">{error}</p>}
 
-        <label className="mt-5 flex items-start gap-3 cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={agreed}
-            onChange={(e) => setAgreed(e.target.checked)}
-            className="mt-0.5 w-5 h-5 rounded border-slate-600 bg-slate-800 accent-indigo-500 shrink-0"
-          />
-          <span className="text-xs text-slate-300 leading-relaxed">
-            I agree and acknowledge that I am responsible for this purchase. If I get into trouble for
-            buying this subscription, I take full responsibility for my decision.
-          </span>
-        </label>
+        {productId !== "secret" && (
+          <label className="mt-5 flex items-start gap-3 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={agreed}
+              onChange={(e) => setAgreed(e.target.checked)}
+              className="mt-0.5 w-5 h-5 rounded border-slate-600 bg-slate-800 accent-indigo-500 shrink-0"
+            />
+            <span className="text-xs text-slate-300 leading-relaxed">
+              I agree and acknowledge that I am responsible for this purchase. If I get into trouble for
+              buying this subscription, I take full responsibility for my decision.
+            </span>
+          </label>
+        )}
 
         <button
           onClick={startCheckout}
-          disabled={loading || !agreed}
+          disabled={loading || (productId !== "secret" && !agreed)}
           className={`mt-5 w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-br ${plan.gradient} text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : plan.button}
