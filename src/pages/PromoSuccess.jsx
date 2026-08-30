@@ -3,16 +3,13 @@ import { motion } from "framer-motion";
 import { Gift } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
+const AI_LABELS = { ai: "Blackhole AI", aiCode: "Blackhole Code", galaxy5: "Galaxy 5", space5: "Space 5" };
+
 export default function PromoSuccess() {
   const location = useLocation();
-  const expiresAt = location.state?.expiresAt;
-  const expiryText = expiresAt
-    ? new Date(expiresAt).toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : "in one month";
+  const aiModel = location.state?.aiModel ?? "ai";
+  const credits = location.state?.credits ?? 0;
+  const label = AI_LABELS[aiModel] ?? "Blackhole AI";
 
   return (
     <motion.div
@@ -25,15 +22,16 @@ export default function PromoSuccess() {
       <div className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center mb-5 shadow-lg shadow-emerald-500/30">
         <Gift className="w-9 h-9 text-white" />
       </div>
-      <h1 className="text-3xl sm:text-4xl font-bold text-white text-center">You've unlocked Pro!</h1>
+      <h1 className="text-3xl sm:text-4xl font-bold text-white text-center">Credits added!</h1>
       <p className="text-slate-300 mt-3 text-center max-w-md">
-        Enjoy the Pro plan free for one month — active until {expiryText}.
+        You got <span className="text-emerald-300 font-semibold">+{credits} {label}</span> credits. They're
+        added to your balance and stay until you use them.
       </p>
       <Link
         to="/chat"
         className="mt-8 inline-flex items-center gap-2 px-8 py-3 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white font-medium shadow-lg shadow-emerald-500/30 hover:opacity-90 transition-opacity"
       >
-        Start using Pro
+        Start chatting
       </Link>
     </motion.div>
   );

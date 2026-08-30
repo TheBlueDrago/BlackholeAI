@@ -37,6 +37,34 @@
     "blockReason": {
       "type": "string",
       "description": "Optional reason recorded by the admin when banning or blocking a user."
+    },
+    "bonus": {
+      "type": "object",
+      "description": "One-time bonus credit pools granted by promo codes. These are remaining credits (decremented as used) and persist across monthly resets until spent.",
+      "properties": {
+        "ai": {
+          "type": "number",
+          "default": 0
+        },
+        "aiCode": {
+          "type": "number",
+          "default": 0
+        },
+        "galaxy5": {
+          "type": "number",
+          "default": 0
+        },
+        "space5": {
+          "type": "number",
+          "default": 0
+        }
+      },
+      "default": {
+        "ai": 0,
+        "aiCode": 0,
+        "galaxy5": 0,
+        "space5": 0
+      }
     }
   },
   "required": [

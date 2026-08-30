@@ -1,6 +1,9 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
 
 // Promo codes are managed entirely as rows in the PromoCode entity — none are hardcoded.
+// Each code grants a one-time credit boost to a chosen AI model.
+const MODELS = ["ai", "aiCode", "galaxy5", "space5"];
+
 export default async function (req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
@@ -19,20 +22,18 @@ export default async function (req: Request): Promise<Response> {
 
     if (action === "create") {
       const code = String(body.code ?? "").trim().toUpperCase();
-      const plan = String(body.plan ?? "pro");
       if (!code) return Response.json({ error: "Code is required." }, { status: 400 });
-      if (!["pro", "team", "secret"].includes(plan)) {
-        return Response.json({ error: "Invalid plan." }, { status: 400 });
+      const aiModel = MODELS.includes(String(body.aiModel)) ? String(body.aiModel) : "ai";
+      const credits = Number(body.credits) || 0;
+      if (credits <= 0) {
+        return Response.json({ error: "Credits must be greater than 0." }, { status: 400 });
       }
       const dup = await db.entities.PromoCode.filter({ code });
       if (dup?.length) return Response.json({ error: "That code already exists." }, { status: 400 });
       const rec = await db.entities.PromoCode.create({
         code,
-        plan,
-        days: Number(body.days ?? 30) || 0,
-        globalCap: Number(body.globalCap ?? 0) || 0,
-        perEmailLimit: Number(body.perEmailLimit ?? 0) || 0,
-        unlimited: !!body.unlimited,
+        aiModel,
+        credits,
         active: body.active !== false,
         label: String(body.label ?? ""),
       });
@@ -43,16 +44,13 @@ export default async function (req: Request): Promise<Response> {
       const id = String(body.id ?? "");
       if (!id) return Response.json({ error: "Missing id." }, { status: 400 });
       const patch: Record<string, any> = {};
-      if (body.plan !== undefined) {
-        if (!["pro", "team", "secret"].includes(String(body.plan))) {
-          return Response.json({ error: "Invalid plan." }, { status: 400 });
+      if (body.aiModel !== undefined) {
+        if (!MODELS.includes(String(body.aiModel))) {
+          return Response.json({ error: "Invalid AI model." }, { status: 400 });
         }
-        patch.plan = String(body.plan);
+        patch.aiModel = String(body.aiModel);
       }
-      if (body.days !== undefined) patch.days = Number(body.days) || 0;
-      if (body.globalCap !== undefined) patch.globalCap = Number(body.globalCap) || 0;
-      if (body.perEmailLimit !== undefined) patch.perEmailLimit = Number(body.perEmailLimit) || 0;
-      if (body.unlimited !== undefined) patch.unlimited = !!body.unlimited;
+      if (body.credits !== undefined) patch.credits = Number(body.credits) || 0;
       if (body.active !== undefined) patch.active = !!body.active;
       if (body.label !== undefined) patch.label = String(body.label);
       const rec = await db.entities.PromoCode.update(id, patch);

@@ -17,16 +17,27 @@
       "type": "string",
       "format": "date-time"
     },
-    "expiresAt": {
+    "aiModel": {
       "type": "string",
-      "format": "date-time",
-      "description": "When the granted Pro access expires."
+      "enum": [
+        "ai",
+        "aiCode",
+        "galaxy5",
+        "space5"
+      ],
+      "description": "AI model the credits were granted for."
+    },
+    "credits": {
+      "type": "number",
+      "description": "Credits granted by this redemption."
     }
   },
   "required": [
     "code",
     "userId",
-    "redeemedAt"
+    "redeemedAt",
+    "aiModel",
+    "credits"
   ],
   "rls": {
     "read": {

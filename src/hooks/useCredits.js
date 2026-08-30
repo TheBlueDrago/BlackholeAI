@@ -40,6 +40,7 @@ export function useCredits() {
   const [used, setUsed] = useState(loadUsed);
   const [plan, setPlan] = useState("free");
   const [team, setTeam] = useState(null);
+  const [bonus, setBonus] = useState({ ai: 0, aiCode: 0, galaxy5: 0, space5: 0 });
 
   useEffect(() => {
     let active = true;
@@ -48,6 +49,12 @@ export function useCredits() {
         const u = await base44.auth.me();
         if (!active) return;
         setPlan(effectivePlan(u));
+        setBonus({
+          ai: Number(u?.bonus?.ai ?? 0),
+          aiCode: Number(u?.bonus?.aiCode ?? 0),
+          galaxy5: Number(u?.bonus?.galaxy5 ?? 0),
+          space5: Number(u?.bonus?.space5 ?? 0),
+        });
         const r = await base44.functions.invoke("my-team").catch(() => null);
         const t = r?.data?.team;
         if (active && t && t.active) {
@@ -76,10 +83,10 @@ export function useCredits() {
 
   const totals = plan === "pro" ? PRO : plan === "team" ? TEAM : plan === "secret" ? SECRET : FREE;
 
-  const aiTotal = totals.aiTotal;
-  const aiCodeTotal = team?.isAdmin ? Infinity : totals.aiCodeTotal;
-  const galaxy5Total = totals.galaxy5Total;
-  const space5Total = totals.space5Total;
+  const aiTotal = totals.aiTotal === Infinity ? Infinity : totals.aiTotal + bonus.ai;
+  const aiCodeTotal = team?.isAdmin ? Infinity : totals.aiCodeTotal === Infinity ? Infinity : totals.aiCodeTotal + bonus.aiCode;
+  const galaxy5Total = totals.galaxy5Total === Infinity ? Infinity : totals.galaxy5Total + bonus.galaxy5;
+  const space5Total = totals.space5Total === Infinity ? Infinity : totals.space5Total + bonus.space5;
   const aiUsed = plan === "secret" ? 0 : used.aiUsed;
   const aiCodeUsed = plan === "team" ? team?.aiCodeUsed ?? 0 : plan === "secret" ? 0 : used.aiCodeUsed;
   const galaxy5Used = plan === "secret" ? 0 : used.galaxy5Used;
@@ -88,30 +95,54 @@ export function useCredits() {
   const spendAI = useCallback(
     (amount = 1) => {
       if (plan === "secret") return; // unlimited
+      if (bonus.ai > 0) {
+        const next = { ...bonus, ai: bonus.ai - amount };
+        setBonus(next);
+        base44.auth.updateMe({ bonus: next }).catch(() => {});
+        return;
+      }
       setUsed((u) => ({ ...u, aiUsed: u.aiUsed + amount }));
     },
-    [plan]
+    [plan, bonus]
   );
 
   const spendGalaxy5 = useCallback(
     (amount = 1) => {
       if (plan === "secret") return; // unlimited
+      if (bonus.galaxy5 > 0) {
+        const next = { ...bonus, galaxy5: bonus.galaxy5 - amount };
+        setBonus(next);
+        base44.auth.updateMe({ bonus: next }).catch(() => {});
+        return;
+      }
       setUsed((u) => ({ ...u, galaxy5Used: u.galaxy5Used + amount }));
     },
-    [plan]
+    [plan, bonus]
   );
 
   const spendSpace5 = useCallback(
     (amount = 1) => {
       if (plan === "secret") return; // unlimited
+      if (bonus.space5 > 0) {
+        const next = { ...bonus, space5: bonus.space5 - amount };
+        setBonus(next);
+        base44.auth.updateMe({ bonus: next }).catch(() => {});
+        return;
+      }
       setUsed((u) => ({ ...u, space5Used: u.space5Used + amount }));
     },
-    [plan]
+    [plan, bonus]
   );
 
   const spendAICode = useCallback(
     (amount = 1) => {
       if (plan === "secret") return; // unlimited
+      if (bonus.aiCode > 0) {
+        const next = { ...bonus, aiCode: bonus.aiCode - amount };
+        setBonus(next);
+        base44.auth.updateMe({ bonus: next }).catch(() => {});
+        return;
+      }
       if (plan === "team") {
         if (team?.isAdmin) return; // admins: free forever, no shared-pool counting
         // Shared pool lives on the server so every member's spend counts.
@@ -128,7 +159,7 @@ export function useCredits() {
       }
       setUsed((u) => ({ ...u, aiCodeUsed: Math.min(u.aiCodeUsed + amount, aiCodeTotal) }));
     },
-    [plan, aiCodeTotal]
+    [plan, bonus, team, aiCodeTotal]
   );
 
   const aiRemaining = aiTotal === Infinity ? Infinity : Math.max(0, aiTotal - aiUsed);

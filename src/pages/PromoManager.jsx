@@ -3,7 +3,12 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Plus, Loader2, Trash2, Ticket, Save } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
-const PLANS = ["pro", "team", "secret"];
+const MODELS = [
+  { id: "ai", label: "Blackhole AI" },
+  { id: "aiCode", label: "Blackhole Code" },
+  { id: "galaxy5", label: "Galaxy 5" },
+  { id: "space5", label: "Space 5" },
+];
 
 const inputCls =
   "w-full bg-slate-800/70 border border-slate-700/50 focus:border-indigo-500/50 rounded-lg px-2.5 py-2 text-sm text-white placeholder:text-slate-500 outline-none transition-colors";
@@ -17,13 +22,14 @@ function Field({ label, children }) {
   );
 }
 
+function modelLabel(id) {
+  return MODELS.find((m) => m.id === id)?.label ?? id;
+}
+
 function CodeCard({ code, onSave, onDelete, busy }) {
   const [f, setF] = useState({
-    plan: code.plan ?? "pro",
-    days: code.days ?? 30,
-    globalCap: code.globalCap ?? 0,
-    perEmailLimit: code.perEmailLimit ?? 0,
-    unlimited: !!code.unlimited,
+    aiModel: code.aiModel ?? "ai",
+    credits: code.credits ?? 10,
     active: code.active !== false,
     label: code.label ?? "",
   });
@@ -34,27 +40,25 @@ function CodeCard({ code, onSave, onDelete, busy }) {
       <div className="flex items-center gap-2 mb-3 flex-wrap">
         <Ticket className="w-4 h-4 text-sky-300" />
         <span className="text-sm font-semibold text-white tracking-wide">{code.code}</span>
-        <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">{code.plan}</span>
+        <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+          +{code.credits} {modelLabel(code.aiModel)}
+        </span>
         {!f.active && (
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/15 text-red-300 border border-red-500/30">inactive</span>
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/15 text-red-300 border border-red-500/30">
+            used / inactive
+          </span>
         )}
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Plan">
-          <select value={f.plan} onChange={(e) => set("plan", e.target.value)} className={inputCls}>
-            {PLANS.map((p) => (
-              <option key={p} value={p}>{p}</option>
+        <Field label="AI model">
+          <select value={f.aiModel} onChange={(e) => set("aiModel", e.target.value)} className={inputCls}>
+            {MODELS.map((m) => (
+              <option key={m.id} value={m.id}>{m.label}</option>
             ))}
           </select>
         </Field>
-        <Field label="Days (0 = forever)">
-          <input type="number" min="0" value={f.days} onChange={(e) => set("days", Number(e.target.value))} className={inputCls} />
-        </Field>
-        <Field label="Global cap (0 = ∞)">
-          <input type="number" min="0" value={f.globalCap} onChange={(e) => set("globalCap", Number(e.target.value))} className={inputCls} />
-        </Field>
-        <Field label="Per-account limit (0 = ∞)">
-          <input type="number" min="0" value={f.perEmailLimit} onChange={(e) => set("perEmailLimit", Number(e.target.value))} className={inputCls} />
+        <Field label="Credits">
+          <input type="number" min="1" value={f.credits} onChange={(e) => set("credits", Number(e.target.value))} className={inputCls} />
         </Field>
         <Field label="Label (note)">
           <input type="text" value={f.label} onChange={(e) => set("label", e.target.value)} placeholder="optional" className={inputCls} />
@@ -62,14 +66,11 @@ function CodeCard({ code, onSave, onDelete, busy }) {
       </div>
       <div className="flex items-center gap-4 mt-3 flex-wrap">
         <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
-          <input type="checkbox" checked={f.unlimited} onChange={(e) => set("unlimited", e.target.checked)} className="w-4 h-4 accent-indigo-500" />
-          Unlimited (skip 1/month rule)
-        </label>
-        <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
           <input type="checkbox" checked={f.active} onChange={(e) => set("active", e.target.checked)} className="w-4 h-4 accent-indigo-500" />
           Active
         </label>
       </div>
+      <p className="text-[11px] text-slate-500 mt-2">Each code works once — it expires after the first redemption.</p>
       <div className="flex gap-2 mt-4">
         <button
           onClick={() => onSave(code.id, f)}
@@ -92,7 +93,7 @@ function CodeCard({ code, onSave, onDelete, busy }) {
 }
 
 function NewCard({ onCreate, busy }) {
-  const [f, setF] = useState({ code: "", plan: "pro", days: 30, globalCap: 0, perEmailLimit: 0, unlimited: false, active: true, label: "" });
+  const [f, setF] = useState({ code: "", aiModel: "ai", credits: 10, active: true, label: "" });
   const set = (k, v) => setF((s) => ({ ...s, [k]: v }));
   return (
     <div className="bg-slate-900/70 border-2 border-emerald-500/40 rounded-2xl p-4">
@@ -104,35 +105,19 @@ function NewCard({ onCreate, busy }) {
         <Field label="Code">
           <input type="text" value={f.code} onChange={(e) => set("code", e.target.value.toUpperCase())} placeholder="NEWCODE" className={inputCls + " uppercase tracking-wide"} />
         </Field>
-        <Field label="Plan">
-          <select value={f.plan} onChange={(e) => set("plan", e.target.value)} className={inputCls}>
-            {PLANS.map((p) => (
-              <option key={p} value={p}>{p}</option>
+        <Field label="AI model">
+          <select value={f.aiModel} onChange={(e) => set("aiModel", e.target.value)} className={inputCls}>
+            {MODELS.map((m) => (
+              <option key={m.id} value={m.id}>{m.label}</option>
             ))}
           </select>
         </Field>
-        <Field label="Days (0 = forever)">
-          <input type="number" min="0" value={f.days} onChange={(e) => set("days", Number(e.target.value))} className={inputCls} />
-        </Field>
-        <Field label="Global cap (0 = ∞)">
-          <input type="number" min="0" value={f.globalCap} onChange={(e) => set("globalCap", Number(e.target.value))} className={inputCls} />
-        </Field>
-        <Field label="Per-account limit (0 = ∞)">
-          <input type="number" min="0" value={f.perEmailLimit} onChange={(e) => set("perEmailLimit", Number(e.target.value))} className={inputCls} />
+        <Field label="Credits">
+          <input type="number" min="1" value={f.credits} onChange={(e) => set("credits", Number(e.target.value))} className={inputCls} />
         </Field>
         <Field label="Label (note)">
           <input type="text" value={f.label} onChange={(e) => set("label", e.target.value)} placeholder="optional" className={inputCls} />
         </Field>
-      </div>
-      <div className="flex items-center gap-4 mt-3 flex-wrap">
-        <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
-          <input type="checkbox" checked={f.unlimited} onChange={(e) => set("unlimited", e.target.checked)} className="w-4 h-4 accent-indigo-500" />
-          Unlimited (skip 1/month rule)
-        </label>
-        <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
-          <input type="checkbox" checked={f.active} onChange={(e) => set("active", e.target.checked)} className="w-4 h-4 accent-indigo-500" />
-          Active
-        </label>
       </div>
       <button
         onClick={() => onCreate(f)}
@@ -226,7 +211,7 @@ export default function PromoManager({ onBack }) {
       <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-center">
         <span className="bg-gradient-to-r from-white via-emerald-200 to-sky-200 bg-clip-text text-transparent">Promo Codes</span>
       </h1>
-      <p className="text-slate-400 mt-2 text-center text-sm">Create and edit promo codes</p>
+      <p className="text-slate-400 mt-2 text-center text-sm">Create single-use codes that grant extra credits</p>
 
       <div className="mt-8 w-full max-w-2xl space-y-4">
         {loading ? (

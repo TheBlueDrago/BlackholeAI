@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Check, ArrowRight, Loader2, Gift, Users, Plus, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
@@ -222,28 +222,15 @@ export default function Subscriptions({ onFree, onPro, onTeam, onSecret }) {
   const [promoInput, setPromoInput] = useState("");
   const [promoBusy, setPromoBusy] = useState(false);
   const [promoError, setPromoError] = useState("");
-  const [currentPlan, setCurrentPlan] = useState("free");
-  const [showChangeConfirm, setShowChangeConfirm] = useState(false);
 
-  useEffect(() => {
-    base44.auth
-      .me()
-      .then((u) => {
-        const active =
-          u?.plan && u.plan !== "free" && (!u.planExpiresAt || new Date(u.planExpiresAt) > new Date());
-        setCurrentPlan(active ? u.plan : "free");
-      })
-      .catch(() => setCurrentPlan("free"));
-  }, []);
-
-  const doRedeem = async (force = false) => {
+  const doRedeem = async () => {
     const code = promoInput.trim();
     if (!code || promoBusy) return;
     setPromoError("");
     setPromoBusy(true);
     try {
-      const res = await base44.functions.invoke("redeem-promo", { code, force });
-      navigate("/promo-success", { state: { expiresAt: res.data?.expiresAt } });
+      const res = await base44.functions.invoke("redeem-promo", { code });
+      navigate("/promo-success", { state: { aiModel: res.data?.aiModel, credits: res.data?.credits } });
     } catch (e) {
       setPromoError(e?.response?.data?.error || e?.message || "Could not redeem code.");
     } finally {
@@ -253,11 +240,7 @@ export default function Subscriptions({ onFree, onPro, onTeam, onSecret }) {
 
   const redeem = () => {
     if (!promoInput.trim() || promoBusy) return;
-    if (currentPlan !== "free") {
-      setShowChangeConfirm(true);
-      return;
-    }
-    doRedeem(false);
+    doRedeem();
   };
 
   return (
@@ -322,44 +305,6 @@ export default function Subscriptions({ onFree, onPro, onTeam, onSecret }) {
         {promoError && <p className="text-center text-sm text-red-400 mt-2">{promoError}</p>}
       </div>
 
-      <AnimatePresence>
-        {showChangeConfirm && (
-          <motion.div
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setShowChangeConfirm(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-sm bg-slate-900 border border-slate-700/60 rounded-2xl p-6 text-center"
-            >
-              <p className="text-slate-200 text-base font-medium">Are you sure you want to change plans?</p>
-              <div className="flex gap-3 mt-5">
-                <button
-                  onClick={() => setShowChangeConfirm(false)}
-                  className="flex-1 py-2.5 rounded-xl bg-red-600 text-white font-medium hover:bg-red-500"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => {
-                    setShowChangeConfirm(false);
-                    doRedeem(true);
-                  }}
-                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white font-medium hover:opacity-90"
-                >
-                  Yes
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </motion.div>
   );
 }

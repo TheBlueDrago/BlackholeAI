@@ -6,40 +6,26 @@
       "type": "string",
       "description": "Promo code (uppercased). What users type to redeem."
     },
-    "plan": {
+    "aiModel": {
       "type": "string",
       "enum": [
-        "pro",
-        "team",
-        "secret"
+        "ai",
+        "aiCode",
+        "galaxy5",
+        "space5"
       ],
-      "default": "pro",
-      "description": "Subscription plan this code grants."
+      "default": "ai",
+      "description": "Which AI model the granted credits apply to."
     },
-    "days": {
+    "credits": {
       "type": "number",
-      "default": 30,
-      "description": "Duration in days. 0 = never expires (forever)."
-    },
-    "globalCap": {
-      "type": "number",
-      "default": 0,
-      "description": "Max total redemptions across all accounts. 0 = unlimited."
-    },
-    "perEmailLimit": {
-      "type": "number",
-      "default": 0,
-      "description": "Max redemptions per account. 0 = unlimited."
-    },
-    "unlimited": {
-      "type": "boolean",
-      "default": false,
-      "description": "Bypass the one-redemption-per-month rule."
+      "default": 10,
+      "description": "Number of credits granted on redemption."
     },
     "active": {
       "type": "boolean",
       "default": true,
-      "description": "Inactive codes cannot be redeemed."
+      "description": "Inactive/expired codes cannot be redeemed. Set to false automatically after the single redemption."
     },
     "label": {
       "type": "string",
@@ -49,7 +35,8 @@
   },
   "required": [
     "code",
-    "plan"
+    "aiModel",
+    "credits"
   ],
   "rls": {
     "read": {

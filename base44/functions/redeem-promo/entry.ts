@@ -1,10 +1,10 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.40";
 import { notifyAdmins } from "../../shared/adminNotify.ts";
 
-// Promo codes are defined entirely in the admin-managed PromoCode entity — none are
-// hardcoded in source. Limits are enforced by email (deleting/recreating an account
-// can't reset them). Each code grants a plan for a number of days.
-const MONTH_MS = 30 * 24 * 60 * 60 * 1000;
+// Promo codes grant a one-time chunk of credits for a chosen AI model. Each code
+// is single-use: it expires after the first redemption. Granted credits are stored
+// on the user as a "bonus" pool that persists across monthly resets until spent.
+const MODELS = ["ai", "aiCode", "galaxy5", "space5"];
 
 export default async function (req: Request): Promise<Response> {
   try {
@@ -17,105 +17,54 @@ export default async function (req: Request): Promise<Response> {
     const body = await req.json().catch(() => ({}));
     const code = String(body.code ?? "").trim().toUpperCase();
     if (!code) return Response.json({ error: "Enter a promo code." }, { status: 400 });
-    const force = !!body.force;
 
     const email = String(user.email ?? "").trim().toLowerCase();
-    if (!email) return Response.json({ error: "Your account has no email address." }, { status: 400 });
-
-    // The Secret plan is the top tier (infinite credits, forever) — never let another promo overwrite it.
-    if (user.plan === "secret") {
-      return Response.json({ error: "You already have the Secret membership." }, { status: 400 });
-    }
-
     const db = base44.asServiceRole;
-    const now = new Date();
-    const nowIso = now.toISOString();
 
-    // Look up the code solely in the admin-managed PromoCode entity — no codes are hardcoded.
     const rec = (await db.entities.PromoCode.filter({ code }))?.[0];
     if (!rec || rec.active === false) {
       return Response.json({ error: "That promo code is not valid." }, { status: 400 });
     }
-    const def = {
-      plan: rec.plan,
-      days: Number(rec.days) || 0,
-      forever: !rec.days || Number(rec.days) <= 0,
-      globalCap: Number(rec.globalCap) || 0,
-      perEmailLimit: Number(rec.perEmailLimit) || 0,
-      unlimited: !!rec.unlimited,
+    const aiModel = MODELS.includes(String(rec.aiModel)) ? String(rec.aiModel) : "ai";
+    const credits = Number(rec.credits) || 0;
+    if (credits <= 0) {
+      return Response.json({ error: "That promo code is not valid." }, { status: 400 });
+    }
+
+    // Single-use: the code expires after the first redemption.
+    const already = await db.entities.PromoRedemption.filter({ code });
+    if (already?.length) {
+      return Response.json({ error: "This promo code has already been used." }, { status: 400 });
+    }
+
+    const cur = (user as any).bonus ?? {};
+    const newBonus = {
+      ai: Number(cur.ai ?? 0) + (aiModel === "ai" ? credits : 0),
+      aiCode: Number(cur.aiCode ?? 0) + (aiModel === "aiCode" ? credits : 0),
+      galaxy5: Number(cur.galaxy5 ?? 0) + (aiModel === "galaxy5" ? credits : 0),
+      space5: Number(cur.space5 ?? 0) + (aiModel === "space5" ? credits : 0),
     };
+    await db.entities.User.update(user.id, { bonus: newBonus });
+    await db.entities.PromoCode.update(rec.id, { active: false });
 
-    // Auto-revert an expired promo-granted plan so state stays clean.
-    if ((user.plan === "pro" || user.plan === "team") && user.planExpiresAt && new Date(user.planExpiresAt) < now) {
-      await db.entities.User.update(user.id, { plan: "free", planExpiresAt: null });
-      if (user.plan === "team") {
-        const t = (await db.entities.Team.filter({ ownerId: user.id }))?.[0];
-        if (t) await db.entities.Team.update(t.id, { status: "inactive" });
-      }
-    }
+    const nowIso = new Date().toISOString();
+    await db.entities.PromoRedemption.create({
+      code,
+      userId: user.id,
+      userEmail: email,
+      redeemedAt: nowIso,
+      aiModel,
+      credits,
+    });
 
-    // 1 redemption per email per rolling 30 days (keyed on email, not the recyclable userId).
-    const byEmail = await db.entities.PromoRedemption.filter({ userEmail: email });
-    const withinMonth = byEmail.filter((r) => now.getTime() - new Date(r.redeemedAt).getTime() < MONTH_MS);
-    if (!def.unlimited && withinMonth.length > 0 && !force) {
-      return Response.json({ error: "You can only redeem one promo code per month." }, { status: 400 });
-    }
-
-    if (def.perEmailLimit) {
-      const uses = byEmail.filter((r) => r.code === code).length;
-      if (uses >= def.perEmailLimit) {
-        return Response.json(
-          { error: `This code has reached its limit for your account (${def.perEmailLimit} use).` },
-          { status: 400 }
-        );
-      }
-    }
-    if (def.globalCap) {
-      const allForCode = await db.entities.PromoRedemption.filter({ code });
-      if (allForCode.length >= def.globalCap) {
-        return Response.json({ error: "This promo is no longer available." }, { status: 400 });
-      }
-    }
-
-    const expiresAt = def.forever ? null : new Date(now.getTime() + def.days * 24 * 60 * 60 * 1000).toISOString();
-    await db.entities.User.update(user.id, { plan: def.plan, planExpiresAt: expiresAt });
-
-    // Team grants also (re)activate the team record with a fresh shared credit pool, stamped to the
-    // current month so the monthly reset (in my-team) is anchored — no stacking across periods.
-    if (def.plan === "team" || def.plan === "secret") {
-      const pk = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-      const existing = (await db.entities.Team.filter({ ownerId: user.id }))?.[0];
-      if (existing) {
-        await db.entities.Team.update(existing.id, {
-          status: "active",
-          aiCodeUsed: 0,
-          periodKey: pk,
-          memberEmails: existing.memberEmails ?? [],
-          pendingRemovalEmails: [],
-          ownerLeaving: false,
-        });
-      } else {
-        await db.entities.Team.create({
-          ownerId: user.id,
-          memberEmails: [],
-          pendingRemovalEmails: [],
-          ownerLeaving: false,
-          aiCodeUsed: 0,
-          periodKey: pk,
-          status: "active",
-        });
-      }
-    }
-
-    await db.entities.PromoRedemption.create({ code, userId: user.id, userEmail: email, redeemedAt: nowIso, expiresAt });
-    console.log("redeem-promo: granted", { userId: user.id, email, code, plan: def.plan, expiresAt });
+    console.log("redeem-promo: granted credits", { userId: user.id, email, code, aiModel, credits });
     const rName = String(user.full_name ?? "").trim() || email;
     await notifyAdmins(
       db,
-      "Infinity AI promo redeemed",
-      `${rName} redeemed a promo code.\n\nName: ${rName}\nEmail: ${email}\nCode: ${code}\nPlan: ${def.plan}${expiresAt ? `\nExpires: ${expiresAt}` : ""}`
+      "Blackhole AI promo redeemed",
+      `${rName} redeemed a promo code.\n\nName: ${rName}\nEmail: ${email}\nCode: ${code}\nCredits: +${credits} ${aiModel}`
     );
-    return Response.json({ ok: true, code, plan: def.plan, expiresAt });
+    return Response.json({ ok: true, code, aiModel, credits });
   } catch (error) {
     console.error("redeem-promo: unhandled error", error);
     return Response.json({ error: "Something went wrong redeeming your code." }, { status: 500 });
