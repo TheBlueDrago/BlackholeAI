@@ -8,7 +8,8 @@ export default function CodePage({ aiCodeExhausted, onSpendAICode, userInitial }
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef(null);
-  const cancelRef = useRef(false);
+  const reqIdRef = useRef(0);
+  const lastTextRef = useRef("");
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -17,8 +18,9 @@ export default function CodePage({ aiCodeExhausted, onSpendAICode, userInitial }
   }, [messages, loading]);
 
   const stop = () => {
-    cancelRef.current = true;
+    reqIdRef.current++;
     setLoading(false);
+    if (lastTextRef.current) setInput(lastTextRef.current);
   };
 
   const send = async () => {
@@ -26,30 +28,28 @@ export default function CodePage({ aiCodeExhausted, onSpendAICode, userInitial }
     if (!text || loading || aiCodeExhausted) return;
 
     setMessages((m) => [...m, { role: "user", content: text }]);
+    lastTextRef.current = text;
     setInput("");
     setLoading(true);
-    cancelRef.current = false;
+    const myId = ++reqIdRef.current;
     onSpendAICode?.();
-    const startedAt = Date.now();
 
     try {
       const res = await base44.functions.invoke("chatCompletion", {
         prompt: text,
         model: "claude-sonnet-5",
       });
-      const elapsed = Date.now() - startedAt;
-      if (elapsed < 600) await new Promise((r) => setTimeout(r, 600 - elapsed));
-      if (cancelRef.current) return;
+      if (reqIdRef.current !== myId) return;
       const content = res.data?.content ?? "";
       setMessages((m) => [...m, { role: "ai", content }]);
     } catch {
-      if (cancelRef.current) return;
+      if (reqIdRef.current !== myId) return;
       setMessages((m) => [
         ...m,
         { role: "ai", content: "Sorry, something went wrong. Please try again." },
       ]);
     } finally {
-      if (!cancelRef.current) setLoading(false);
+      if (reqIdRef.current === myId) setLoading(false);
     }
   };
 

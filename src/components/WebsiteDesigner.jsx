@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Loader2, Globe, Search, RefreshCw, Plus, X, Crown, Rocket, Paperclip } from "lucide-react";
+import { Send, Loader2, Globe, Search, RefreshCw, Plus, X, Crown, Rocket, Paperclip, Square } from "lucide-react";
 import BlackholeIcon from "@/components/BlackholeIcon";
 import { base44 } from "@/api/base44Client";
 import AiChooser from "@/components/AiChooser";
@@ -120,6 +120,8 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   const [files, setFiles] = useState([]);
   const fileInputRef = useRef(null);
   const scrollRef = useRef(null);
+  const reqIdRef = useRef(0);
+  const lastTextRef = useRef("");
 
   const lastAi = [...messages].reverse().find((m) => m.role === "ai");
   const previewHtml = lastAi ? extractHtml(lastAi.content) : "";
@@ -148,14 +150,22 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   const isSpace = selectedAi === "fable";
   const sendExhausted = isCodeAi ? aiCodeExhausted : isGalaxy ? galaxy5Exhausted : isSpace ? space5Exhausted : aiExhausted;
 
+  const stop = () => {
+    reqIdRef.current++;
+    setLoading(false);
+    if (lastTextRef.current) setInput(lastTextRef.current);
+  };
+
   const send = async () => {
     const text = input.trim();
     if (!text || loading || sendExhausted) return;
     const fileNote = files.length ? `\n[Attached files: ${files.map((f) => f.name).join(", ")}]` : "";
     const userMsg = { role: "user", content: text + (files.length ? ` (attached: ${files.map((f) => f.name).join(", ")})` : "") };
     setMessages((prev) => [...prev, userMsg]);
+    lastTextRef.current = text;
     setInput("");
     setLoading(true);
+    const myId = ++reqIdRef.current;
     (isCodeAi ? onSpendAICode : isGalaxy ? onSpendGalaxy5 : isSpace ? onSpendSpace5 : onSpendAI)?.();
     try {
       const lastHtml = messages.filter((m) => m.role === "ai").pop()?.content || "";
@@ -167,15 +177,17 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
         `Latest request: ${text}${fileNote}\n\nOutput the complete updated HTML document now.`;
       const model = { ai: "automatic", code: MODEL, opus5: "claude_opus_4_8", fable: MODEL }[selectedAi] || "automatic";
       const res = await base44.functions.invoke("chatCompletion", { prompt, model });
+      if (reqIdRef.current !== myId) return;
       const content = res.data?.content ?? "";
       setMessages((prev) => [...prev, { role: "ai", content }]);
     } catch {
+      if (reqIdRef.current !== myId) return;
       setMessages((prev) => [
         ...prev,
         { role: "ai", content: "Sorry, something went wrong generating your website. Please try again." },
       ]);
     } finally {
-      setLoading(false);
+      if (reqIdRef.current === myId) setLoading(false);
     }
   };
 
@@ -455,13 +467,23 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
                 rows={1}
                 className="flex-1 bg-transparent resize-none outline-none text-slate-100 placeholder:text-slate-500 px-4 py-3 max-h-32 text-sm"
               />
-              <button
-                onClick={send}
-                disabled={!input.trim() || loading || sendExhausted}
-                className="m-1.5 p-2.5 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-500 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
-              >
-                <Send className="w-5 h-5" />
-              </button>
+              {loading ? (
+                <button
+                  onClick={stop}
+                  className="m-1.5 p-2.5 rounded-xl bg-red-600 text-white hover:bg-red-500 transition-colors"
+                  title="Stop generating"
+                >
+                  <Square className="w-5 h-5" />
+                </button>
+              ) : (
+                <button
+                  onClick={send}
+                  disabled={!input.trim() || sendExhausted}
+                  className="m-1.5 p-2.5 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-500 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
+                >
+                  <Send className="w-5 h-5" />
+                </button>
+              )}
             </div>
             <div className="flex items-center gap-2 mt-2">
               <button

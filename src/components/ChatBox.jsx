@@ -13,7 +13,8 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
   const [files, setFiles] = useState([]);
   const fileInputRef = useRef(null);
   const scrollRef = useRef(null);
-  const cancelRef = useRef(false);
+  const reqIdRef = useRef(0);
+  const lastTextRef = useRef("");
 
   const messages = conversation?.messages || [];
   const isCodeAi = selectedAi === "code";
@@ -24,8 +25,9 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
   }, [messages, loading]);
 
   const stop = () => {
-    cancelRef.current = true;
+    reqIdRef.current++;
     setLoading(false);
+    if (lastTextRef.current) setInput(lastTextRef.current);
   };
 
   const send = async () => {
@@ -40,17 +42,15 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
     const sysPrefix = selectedAi === "code" ? CODE_SYS : selectedAi === "fable" ? FABLE_SYS : "";
     const fullPrompt = `${sysPrefix ? sysPrefix + "\n\n" : ""}${text}${fileNote}`;
     addMessage(convId, { role: "user", content: text + (files.length ? ` (attached: ${files.map((f) => f.name).join(", ")})` : "") });
+    lastTextRef.current = text;
     setInput("");
     setLoading(true);
-    cancelRef.current = false;
+    const myId = ++reqIdRef.current;
     (isCodeAi ? onSpendAICode : onSpendAI)?.();
-    const startedAt = Date.now();
     try {
       const model = selectedAi === "ai" ? "automatic" : "claude_sonnet_4_6";
       const res = await base44.functions.invoke("chatCompletion", { prompt: fullPrompt, model });
-      const elapsed = Date.now() - startedAt;
-      if (elapsed < 600) await new Promise((r) => setTimeout(r, 600 - elapsed));
-      if (cancelRef.current) return;
+      if (reqIdRef.current !== myId) return;
       const content = res.data?.content ?? "";
       addMessage(convId, { role: "ai", content });
 
@@ -60,14 +60,14 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
             prompt: `Create a very short title (max 4 words, no quotes, no trailing punctuation) summarizing what this chat is about based on the user's first message: "${text}". Respond with only the title.`,
           });
           const title = (titleRes.data?.content ?? "").trim().slice(0, 50);
-          if (title && !cancelRef.current) renameConversation(convId, title);
+          if (title && reqIdRef.current === myId) renameConversation(convId, title);
         } catch {}
       }
     } catch {
-      if (cancelRef.current) return;
+      if (reqIdRef.current !== myId) return;
       addMessage(convId, { role: "ai", content: "Sorry, something went wrong. Please try again." });
     } finally {
-      if (!cancelRef.current) setLoading(false);
+      if (reqIdRef.current === myId) setLoading(false);
     }
   };
 
