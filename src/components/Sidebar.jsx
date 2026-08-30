@@ -103,15 +103,6 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
               <span className="text-[13px] font-medium">Blackhole Code</span>
             </button>
             <button
-              onClick={onNewChat}
-              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-slate-300 hover:bg-slate-800/70 transition-colors"
-            >
-              <div className="w-6 h-6 rounded-md bg-slate-800 flex items-center justify-center">
-                <Plus className="w-3.5 h-3.5 text-slate-300" />
-              </div>
-              <span className="text-[13px] font-medium">New Chat</span>
-            </button>
-            <button
               onClick={onGoDesigner}
               className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-slate-300 hover:bg-slate-800/70 transition-colors"
             >
@@ -128,6 +119,15 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
                 <CreditCard className="w-3.5 h-3.5 text-amber-300" />
               </div>
               <span className="text-[13px] font-medium">Plans</span>
+            </button>
+            <button
+              onClick={onNewChat}
+              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-slate-300 hover:bg-slate-800/70 transition-colors"
+            >
+              <div className="w-6 h-6 rounded-md bg-slate-800 flex items-center justify-center">
+                <Plus className="w-3.5 h-3.5 text-slate-300" />
+              </div>
+              <span className="text-[13px] font-medium">New Chat</span>
             </button>
           </div>
 
