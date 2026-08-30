@@ -79,7 +79,8 @@ function TeamCard({ onTeam }) {
     "4 AI's (Galaxy 5 and Space 5 in Website Designer)",
     "25 Blackhole Code credits",
     "50 Blackhole AI credits",
-    "∞ Galaxy 5 credits",
+    "40 Galaxy 5 credits",
+    "25 Space 5 credits",
     "Add up to 2 people — everyone shares the credits",
   ];
   return (

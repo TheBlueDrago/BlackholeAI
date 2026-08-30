@@ -109,7 +109,7 @@ export default function Chat() {
                   onGoDesigner={goDesigner}
                   onGoMonitor={() => switchMode("monitor")}
                   isAdmin={isAdmin}
-                  credits={{ aiTotal: credits.aiTotal, aiUsed: credits.aiUsed, aiCodeTotal: credits.aiCodeTotal, aiCodeUsed: credits.aiCodeUsed, galaxy5Total: credits.galaxy5Total, galaxy5Used: credits.galaxy5Used }}
+                  credits={{ aiTotal: credits.aiTotal, aiUsed: credits.aiUsed, aiCodeTotal: credits.aiCodeTotal, aiCodeUsed: credits.aiCodeUsed, galaxy5Total: credits.galaxy5Total, galaxy5Used: credits.galaxy5Used, space5Total: credits.space5Total, space5Used: credits.space5Used }}
                 />
               </div>
             )}
@@ -127,6 +127,8 @@ export default function Chat() {
             onSpendAICode={credits.spendAICode}
             galaxy5Exhausted={credits.galaxy5Exhausted}
             onSpendGalaxy5={credits.spendGalaxy5}
+            space5Exhausted={credits.space5Exhausted}
+            onSpendSpace5={credits.spendSpace5}
           />
         </div>
       ) : (
@@ -174,7 +176,7 @@ export default function Chat() {
                   onGoDesigner={goDesigner}
                   onGoMonitor={() => switchMode("monitor")}
                   isAdmin={isAdmin}
-                  credits={{ aiTotal: credits.aiTotal, aiUsed: credits.aiUsed, aiCodeTotal: credits.aiCodeTotal, aiCodeUsed: credits.aiCodeUsed, galaxy5Total: credits.galaxy5Total, galaxy5Used: credits.galaxy5Used }}
+                  credits={{ aiTotal: credits.aiTotal, aiUsed: credits.aiUsed, aiCodeTotal: credits.aiCodeTotal, aiCodeUsed: credits.aiCodeUsed, galaxy5Total: credits.galaxy5Total, galaxy5Used: credits.galaxy5Used, space5Total: credits.space5Total, space5Used: credits.space5Used }}
                 />
               )}
             </AnimatePresence>

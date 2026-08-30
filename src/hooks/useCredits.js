@@ -2,10 +2,10 @@ import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 
 const KEY = "infinity-ai-credits-v2";
-const FREE = { aiTotal: 10, aiCodeTotal: 5, galaxy5Total: 0 };
-const PRO = { aiTotal: 25, aiCodeTotal: 15, galaxy5Total: 25 };
-const TEAM = { aiTotal: 50, aiCodeTotal: 25, galaxy5Total: Infinity };
-const SECRET = { aiTotal: Infinity, aiCodeTotal: Infinity, galaxy5Total: Infinity };
+const FREE = { aiTotal: 10, aiCodeTotal: 5, galaxy5Total: 0, space5Total: 0 };
+const PRO = { aiTotal: 25, aiCodeTotal: 15, galaxy5Total: 25, space5Total: 0 };
+const TEAM = { aiTotal: 50, aiCodeTotal: 25, galaxy5Total: 40, space5Total: 25 };
+const SECRET = { aiTotal: Infinity, aiCodeTotal: Infinity, galaxy5Total: Infinity, space5Total: Infinity };
 
 function monthKey(d = new Date()) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
@@ -18,12 +18,12 @@ function loadUsed() {
       const p = JSON.parse(raw);
       // New calendar month → reset to plan total (unused credits don't stack).
       if (p.periodKey && p.periodKey !== monthKey()) {
-        return { aiUsed: 0, aiCodeUsed: 0, galaxy5Used: 0 };
+        return { aiUsed: 0, aiCodeUsed: 0, galaxy5Used: 0, space5Used: 0 };
       }
-      return { aiUsed: p.aiUsed ?? 0, aiCodeUsed: p.aiCodeUsed ?? 0, galaxy5Used: p.galaxy5Used ?? 0 };
+      return { aiUsed: p.aiUsed ?? 0, aiCodeUsed: p.aiCodeUsed ?? 0, galaxy5Used: p.galaxy5Used ?? 0, space5Used: p.space5Used ?? 0 };
     }
   } catch {}
-  return { aiUsed: 0, aiCodeUsed: 0, galaxy5Used: 0 };
+  return { aiUsed: 0, aiCodeUsed: 0, galaxy5Used: 0, space5Used: 0 };
 }
 
 // Effective plan: Pro only counts while not expired (promo grants carry planExpiresAt).
@@ -79,9 +79,11 @@ export function useCredits() {
   const aiTotal = totals.aiTotal;
   const aiCodeTotal = team?.isAdmin ? Infinity : totals.aiCodeTotal;
   const galaxy5Total = totals.galaxy5Total;
+  const space5Total = totals.space5Total;
   const aiUsed = plan === "secret" ? 0 : used.aiUsed;
   const aiCodeUsed = plan === "team" ? team?.aiCodeUsed ?? 0 : plan === "secret" ? 0 : used.aiCodeUsed;
-  const galaxy5Used = plan === "team" || plan === "secret" ? 0 : used.galaxy5Used;
+  const galaxy5Used = plan === "secret" ? 0 : used.galaxy5Used;
+  const space5Used = plan === "secret" ? 0 : used.space5Used;
 
   const spendAI = useCallback(
     (amount = 1) => {
@@ -93,8 +95,16 @@ export function useCredits() {
 
   const spendGalaxy5 = useCallback(
     (amount = 1) => {
-      if (plan === "team" || plan === "secret") return; // unlimited
+      if (plan === "secret") return; // unlimited
       setUsed((u) => ({ ...u, galaxy5Used: u.galaxy5Used + amount }));
+    },
+    [plan]
+  );
+
+  const spendSpace5 = useCallback(
+    (amount = 1) => {
+      if (plan === "secret") return; // unlimited
+      setUsed((u) => ({ ...u, space5Used: u.space5Used + amount }));
     },
     [plan]
   );
@@ -124,9 +134,11 @@ export function useCredits() {
   const aiRemaining = aiTotal === Infinity ? Infinity : Math.max(0, aiTotal - aiUsed);
   const aiCodeRemaining = Math.max(0, aiCodeTotal - aiCodeUsed);
   const galaxy5Remaining = galaxy5Total === Infinity ? Infinity : Math.max(0, galaxy5Total - galaxy5Used);
+  const space5Remaining = space5Total === Infinity ? Infinity : Math.max(0, space5Total - space5Used);
   const aiExhausted = aiRemaining <= 0;
   const aiCodeExhausted = aiCodeRemaining <= 0;
   const galaxy5Exhausted = galaxy5Remaining <= 0;
+  const space5Exhausted = space5Remaining <= 0;
 
   return {
     aiTotal,
@@ -135,16 +147,21 @@ export function useCredits() {
     aiCodeUsed,
     galaxy5Total,
     galaxy5Used,
+    space5Total,
+    space5Used,
     aiRemaining,
     aiCodeRemaining,
     galaxy5Remaining,
+    space5Remaining,
     aiExhausted,
     aiCodeExhausted,
     galaxy5Exhausted,
+    space5Exhausted,
     plan,
     team,
     spendAI,
     spendAICode,
     spendGalaxy5,
+    spendSpace5,
   };
 }
