@@ -123,7 +123,7 @@ export default function Billing() {
           disabled={loading || !agreed}
           className={`mt-5 w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-br ${plan.gradient} text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed`}
         >
-          {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : agreed ? plan.button : "Agree to continue"}
+          {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : plan.button}
         </button>
         <p className="mt-3 text-center text-xs text-slate-500">Secure checkout via Base44 Payments</p>
       </div>
