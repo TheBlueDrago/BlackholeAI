@@ -3,7 +3,7 @@ import { Send, Terminal, Square } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import BlackholeIcon from "@/components/BlackholeIcon";
 
-export default function CodePage({ aiCodeExhausted, onSpendAICode }) {
+export default function CodePage({ aiCodeExhausted, onSpendAICode, userInitial }) {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -75,7 +75,7 @@ export default function CodePage({ aiCodeExhausted, onSpendAICode }) {
           )}
 
           {messages.map((m, i) => (
-            <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+            <div key={i} className={`flex items-end gap-2 ${m.role === "user" ? "justify-end" : "justify-start"}`}>
               <div
                 className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
                   m.role === "user"
@@ -85,6 +85,11 @@ export default function CodePage({ aiCodeExhausted, onSpendAICode }) {
               >
                 {m.content}
               </div>
+              {m.role === "user" && (
+                <div className="keep-color w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-xs font-bold text-white shrink-0">
+                  {userInitial || "U"}
+                </div>
+              )}
             </div>
           ))}
 

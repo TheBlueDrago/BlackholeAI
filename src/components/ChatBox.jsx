@@ -6,7 +6,7 @@ import { base44 } from "@/api/base44Client";
 const CODE_SYS = "You are Blackhole Code Assistant. Help with programming. Give clear, correct code with brief explanations.";
 const FABLE_SYS = "You are Space 5, Blackhole AI's premium creative model. Be imaginative and high-quality.";
 
-export default function ChatBox({ conversation, createConversation, addMessage, renameConversation, plan, aiExhausted, aiCodeExhausted, onSpendAI, onSpendAICode }) {
+export default function ChatBox({ conversation, createConversation, addMessage, renameConversation, plan, aiExhausted, aiCodeExhausted, onSpendAI, onSpendAICode, userInitial }) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedAi, setSelectedAi] = useState("ai");
@@ -93,7 +93,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
           )}
 
           {messages.map((m, i) => (
-            <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+            <div key={i} className={`flex items-end gap-2 ${m.role === "user" ? "justify-end" : "justify-start"}`}>
               <div
                 className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
                   m.role === "user"
@@ -103,6 +103,11 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
               >
                 {m.content}
               </div>
+              {m.role === "user" && (
+                <div className="keep-color w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-xs font-bold text-white shrink-0">
+                  {userInitial || "U"}
+                </div>
+              )}
             </div>
           ))}
 

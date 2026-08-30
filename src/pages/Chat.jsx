@@ -191,9 +191,10 @@ export default function Chat() {
                 aiCodeExhausted={credits.aiCodeExhausted}
                 onSpendAI={credits.spendAI}
                 onSpendAICode={credits.spendAICode}
+                userInitial={avatarInitial}
               />
             ) : (
-              <CodePage aiCodeExhausted={credits.aiCodeExhausted} onSpendAICode={credits.spendAICode} />
+              <CodePage aiCodeExhausted={credits.aiCodeExhausted} onSpendAICode={credits.spendAICode} userInitial={avatarInitial} />
             )}
           </div>
 
