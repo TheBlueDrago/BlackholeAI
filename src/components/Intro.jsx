@@ -4,7 +4,7 @@ import BlackholeIcon from "@/components/BlackholeIcon";
 
 export default function Intro() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-black overflow-hidden relative flex items-center justify-center px-6">
+    <div className="min-h-screen bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#000000] overflow-hidden relative flex items-center justify-center px-6">
       {/* Ambient glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute top-1/3 left-1/3 w-[400px] h-[400px] bg-fuchsia-600/10 rounded-full blur-[100px] pointer-events-none" />
@@ -27,7 +27,7 @@ export default function Intro() {
           transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
           className="text-6xl sm:text-7xl md:text-8xl font-bold tracking-tight"
         >
-          <span className="bg-gradient-to-r from-white via-indigo-200 to-fuchsia-200 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-[#ffffff] via-indigo-200 to-fuchsia-200 bg-clip-text text-transparent">
             Blackhole AI
           </span>
         </motion.h1>
