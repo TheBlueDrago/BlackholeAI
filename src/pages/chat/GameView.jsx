@@ -52,7 +52,12 @@ export default function GameView() {
             <Loader2 className="w-6 h-6 animate-spin" />
           </div>
         ) : game ? (
-          <iframe srcDoc={game.html} title={game.name} sandbox="allow-scripts" className="w-full h-full" />
+          <iframe
+            {...(game.html && /^https?:\/\//.test(game.html) ? { src: game.html } : { srcDoc: game.html })}
+            title={game.name}
+            sandbox="allow-scripts"
+            className="w-full h-full"
+          />
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-slate-400">
             <Gamepad2 className="w-10 h-10 mb-2" />
