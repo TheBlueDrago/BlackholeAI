@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 
 function FreeCard({ onFree }) {
-  const features = ["10 Blackhole AI credits", "2 AI's (AI + Blackhole Code)", "5 Blackhole Code credits"];
+  const features = ["10 Blackhole AI credits", "5 Blackhole Code credits"];
   return (
     <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-indigo-500/60 rounded-3xl p-6 shadow-2xl shadow-indigo-500/10 flex flex-col">
       <div className="flex items-center justify-between">
@@ -76,7 +76,7 @@ function Plan2Card({ onPro }) {
 
 function TeamCard({ onTeam }) {
   const features = [
-    "4 AI's (Galaxy 5 and Space 5 in Website Designer)",
+    "4 AI's (incl. Galaxy 5 and Space 5 in Website Designer)",
     "25 Blackhole Code credits",
     "50 Blackhole AI credits",
     "40 Galaxy 5 credits",
