@@ -85,6 +85,29 @@ function BigCard({ g, idx, onPlay }) {
   );
 }
 
+function FeaturedCard({ g, onPlay }) {
+  const Icon = genreIcon(g);
+  return (
+    <button onClick={() => onPlay(g.name)} className="group text-left w-full">
+      <div className={`relative aspect-video rounded-2xl bg-gradient-to-br ${thumb(g)} overflow-hidden ring-1 ring-white/15`}>
+        <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wider bg-black/40 px-2 py-1 rounded text-white/90">#1 Featured</span>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Icon className="w-16 h-16 text-white/70" />
+        </div>
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity w-16 h-16 rounded-full bg-white/90 flex items-center justify-center">
+            <Play className="w-8 h-8 text-slate-900" />
+          </div>
+        </div>
+        <div className="absolute bottom-3 left-3 right-3">
+          <p className="text-2xl font-extrabold text-white drop-shadow truncate">{g.title || g.name}</p>
+          <p className="text-xs text-white/80">{GENRE_LABEL[g.genre] || "Game"} · {g.plays || 0} plays</p>
+        </div>
+      </div>
+    </button>
+  );
+}
+
 function EmptyState({ onCreate }) {
   return (
     <div className="h-full flex flex-col items-center justify-center text-center">
@@ -137,7 +160,9 @@ export default function GamesFront() {
     return g;
   }, [games, cat, q]);
 
-  const top5 = useMemo(() => [...games].sort((a, b) => (b.plays || 0) - (a.plays || 0)).slice(0, 5), [games]);
+  const ranked = useMemo(() => [...games].sort((a, b) => (b.plays || 0) - (a.plays || 0)), [games]);
+  const featured = useMemo(() => games.find((g) => g.featured) || ranked[0] || null, [games, ranked]);
+  const mediumTop = useMemo(() => ranked.filter((g) => g.id !== (featured && featured.id)).slice(0, 5), [ranked, featured]);
   const showTop = cat === "home";
   const play = (name) => navigate(`/chat/game/${name}`);
 
@@ -262,15 +287,22 @@ export default function GamesFront() {
             <EmptyState onCreate={goGameDesigner} />
           ) : (
             <>
-              {showTop && top5.length > 0 && (
+              {showTop && games.length > 0 && (
                 <section className="mb-6">
                   <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-300 mb-3">
                     <Flame className="w-4 h-4 text-orange-400" /> Top Games
                   </h2>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-                    {top5.map((g, idx) => (
-                      <BigCard key={g.id} g={g} idx={idx} onPlay={play} />
-                    ))}
+                  <div className="flex flex-col lg:flex-row gap-4">
+                    {featured && (
+                      <div className="lg:w-[42%]">
+                        <FeaturedCard g={featured} onPlay={play} />
+                      </div>
+                    )}
+                    <div className="lg:flex-1 grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {mediumTop.map((g) => (
+                        <GameCard key={g.id} g={g} onPlay={play} />
+                      ))}
+                    </div>
                   </div>
                 </section>
               )}

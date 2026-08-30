@@ -40,6 +40,11 @@
       "type": "number",
       "default": 0,
       "description": "Play counter; drives the Top 5 ranking."
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false,
+      "description": "If true, the game is pinned to the Top Games section as the big featured card."
     }
   },
   "required": [
