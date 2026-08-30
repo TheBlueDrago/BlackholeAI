@@ -1,0 +1,33 @@
+import React from "react";
+
+export default function BlackholeIcon({ className = "" }) {
+  return (
+    <svg viewBox="0 0 64 64" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* background stars */}
+      <circle cx="11" cy="13" r="1" fill="#fff" />
+      <circle cx="53" cy="15" r="1.2" fill="#fff" />
+      <circle cx="15" cy="49" r="1" fill="#fff" />
+      <circle cx="50" cy="47" r="0.9" fill="#fff" />
+      <circle cx="22" cy="9" r="0.8" fill="#fff" />
+      <circle cx="43" cy="54" r="0.8" fill="#fff" />
+      <circle cx="7" cy="34" r="0.7" fill="#fff" />
+      <circle cx="57" cy="35" r="0.7" fill="#fff" />
+      {/* accretion ring */}
+      <ellipse cx="32" cy="32" rx="22" ry="8.5" stroke="url(#bh-icon)" strokeWidth="4" transform="rotate(-18 32 32)" opacity="0.95" />
+      <ellipse cx="32" cy="32" rx="16" ry="5.5" stroke="#c084fc" strokeWidth="2" transform="rotate(-18 32 32)" opacity="0.6" />
+      {/* stars circling */}
+      <circle cx="52" cy="26" r="1.4" fill="#fde68a" />
+      <circle cx="12" cy="38" r="1.2" fill="#bfdbfe" />
+      {/* event horizon */}
+      <circle cx="32" cy="32" r="9" fill="#05050a" />
+      <circle cx="32" cy="32" r="9" stroke="#a855f7" strokeWidth="1.5" opacity="0.85" />
+      <defs>
+        <linearGradient id="bh-icon" x1="6" y1="6" x2="58" y2="58" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#fb923c" />
+          <stop offset="0.5" stopColor="#f472b6" />
+          <stop offset="1" stopColor="#818cf8" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}

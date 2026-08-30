@@ -1,0 +1,11 @@
+{
+  "name": "Blackhole AI",
+  "short_name": "Blackhole AI",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#05050a",
+  "theme_color": "#05050a",
+  "icons": [
+    { "src": "/blackhole.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

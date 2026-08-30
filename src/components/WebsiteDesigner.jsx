@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Sparkles, Loader2, Globe, Search, RefreshCw, Plus, X, Crown, Rocket, Paperclip } from "lucide-react";
+import { Send, Loader2, Globe, Search, RefreshCw, Plus, X, Crown, Rocket, Paperclip } from "lucide-react";
+import BlackholeIcon from "@/components/BlackholeIcon";
 import { base44 } from "@/api/base44Client";
 import AiChooser from "@/components/AiChooser";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -11,7 +12,7 @@ const MODEL = "claude_sonnet_4_6";
 
 const RESERVED = ["home", "www", "admin", "api", "mail", "infinity", "ai", "app", "login", "register", "support", "blog"];
 
-const SYSTEM = `You are Infinity AI Website Designer. The user describes a website and you build it.
+const SYSTEM = `You are Blackhole AI Website Designer. The user describes a website and you build it.
 ALWAYS respond with a single complete, self-contained HTML document: include <!DOCTYPE html>, <html>, <head> with inline <style> CSS, and <body> with inline <script> for any interactivity.
 Make it modern, responsive, and visually polished — clean typography, good spacing, a tasteful color palette, and smooth interactions. Use placeholder content that fits the site's purpose.
 Do NOT wrap the HTML in markdown code fences. Do NOT add any explanation before or after the HTML — output ONLY the raw HTML document.
@@ -251,7 +252,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
       <header className="relative z-20 flex items-center gap-2 sm:gap-3 h-14 px-3 sm:px-4 border-b border-slate-700/50 bg-slate-900/70 backdrop-blur-xl">
         <button onClick={onToggleSidebar} title="Menu" className="p-1.5 rounded-lg hover:bg-slate-800 transition-colors shrink-0">
           <div className="keep-color w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-white" />
+            <BlackholeIcon className="w-5 h-5" />
           </div>
         </button>
         <span className="h-6 w-px bg-slate-700 shrink-0" />
@@ -392,7 +393,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
                   <Globe className="w-6 h-6 text-white" />
                 </div>
                 <p className="text-slate-300 font-medium">Describe your website</p>
-                <p className="text-slate-500 text-sm mt-1">Infinity AI will build it live</p>
+                <p className="text-slate-500 text-sm mt-1">Blackhole AI will build it live</p>
               </div>
             )}
 

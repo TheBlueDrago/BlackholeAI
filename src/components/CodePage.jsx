@@ -57,7 +57,7 @@ export default function CodePage({ aiCodeExhausted, onSpendAICode }) {
                 <Terminal className="w-6 h-6 text-white" />
               </div>
               <p className="text-slate-200 font-medium text-lg">Let's start coding</p>
-              <p className="text-slate-500 text-sm mt-1">Infinity AI Code is ready to build</p>
+              <p className="text-slate-500 text-sm mt-1">Blackhole AI Code is ready to build</p>
             </div>
           )}
 
@@ -90,7 +90,7 @@ export default function CodePage({ aiCodeExhausted, onSpendAICode }) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Message Infinity AI..."
+              placeholder="Message Blackhole AI..."
               rows={1}
               className="flex-1 bg-transparent resize-none outline-none text-slate-100 placeholder:text-slate-500 px-4 py-3 max-h-32 text-sm"
             />
@@ -105,7 +105,7 @@ export default function CodePage({ aiCodeExhausted, onSpendAICode }) {
           {aiCodeExhausted && (
             <p className="text-center text-xs text-red-400 mt-2">You're out of AI Code credits.</p>
           )}
-          <p className="text-center text-xs text-slate-600 mt-2">Infinity AI can make mistakes. Check important info.</p>
+          <p className="text-center text-xs text-slate-600 mt-2">Blackhole AI can make mistakes. Check important info.</p>
         </div>
       </div>
     </div>

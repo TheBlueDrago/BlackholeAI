@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Pen, Plus, Code, Sparkles, Check, X, CreditCard, Globe } from "lucide-react";
+import BlackholeIcon from "@/components/BlackholeIcon";
 
 const SKIP_KEY = "infinity-ai-skip-delete-confirm";
 
@@ -85,9 +86,9 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
               className="w-full flex items-center gap-2 px-2 py-2 rounded-xl text-white hover:bg-slate-800/70 transition-colors"
             >
               <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-white" />
+                <BlackholeIcon className="w-5 h-5" />
               </div>
-              <span className="font-semibold">AI</span>
+              <span className="font-semibold">Blackhole AI</span>
             </button>
             <button
               onClick={onGoCode}

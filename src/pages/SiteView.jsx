@@ -35,7 +35,7 @@ export default function SiteView() {
           No published site named “{name}”.
         </p>
         <Link to="/" className="mt-4 text-indigo-400 hover:underline text-sm">
-          Back to Infinity AI
+          Back to Blackhole AI
         </Link>
       </div>
     );

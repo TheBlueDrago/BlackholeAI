@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Mail, Lock, Loader2 } from "lucide-react";
 import GoogleIcon from "@/components/GoogleIcon";
+import BlackholeIcon from "@/components/BlackholeIcon";
 import { safeReturnTo } from "@/lib/authReturnTo";
 
 export default function Login() {
@@ -41,13 +42,11 @@ export default function Login() {
           {/* Logo */}
           <div className="flex justify-center mb-6">
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-              <svg viewBox="0 0 24 24" className="w-8 h-8 text-white" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18.178 8c5.296 0 5.296 8 0 8-5.295 0-7.895-8-13.181-8-5.296 0-5.296 8 0 8 5.295 0 7.895-8 13.181-8z" />
-              </svg>
+              <BlackholeIcon className="w-9 h-9" />
             </div>
           </div>
 
-          <h1 className="text-2xl font-bold text-white text-center">Sign in to Infinity AI</h1>
+          <h1 className="text-2xl font-bold text-white text-center">Sign in to Blackhole AI</h1>
           <p className="text-slate-400 text-sm text-center mt-1.5">Welcome back</p>
 
           <button

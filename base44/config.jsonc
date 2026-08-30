@@ -1,5 +1,5 @@
 {
-  "name": "Infinity AI",
+  "name": "Blackhole AI",
   "site": {
     "installCommand": "npm install",
     "buildCommand": "npm run build",

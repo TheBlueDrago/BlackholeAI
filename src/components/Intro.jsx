@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import BlackholeIcon from "@/components/BlackholeIcon";
 
 export default function Intro() {
   return (
@@ -16,9 +17,7 @@ export default function Intro() {
           className="mb-6 flex justify-center"
         >
           <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center shadow-2xl shadow-indigo-500/30">
-            <svg viewBox="0 0 24 24" className="w-11 h-11 text-white" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18.178 8c5.296 0 5.296 8 0 8-5.295 0-7.895-8-13.181-8-5.296 0-5.296 8 0 8 5.295 0 7.895-8 13.181-8z" />
-            </svg>
+            <BlackholeIcon className="w-12 h-12" />
           </div>
         </motion.div>
 
@@ -29,7 +28,7 @@ export default function Intro() {
           className="text-6xl sm:text-7xl md:text-8xl font-bold tracking-tight"
         >
           <span className="bg-gradient-to-r from-white via-indigo-200 to-fuchsia-200 bg-clip-text text-transparent">
-            Infinity AI
+            Blackhole AI
           </span>
         </motion.h1>
 

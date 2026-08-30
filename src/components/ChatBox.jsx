@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Sparkles, Loader2, Plus, X, Paperclip } from "lucide-react";
+import { Send, Loader2, Plus, X, Paperclip } from "lucide-react";
+import BlackholeIcon from "@/components/BlackholeIcon";
 import { base44 } from "@/api/base44Client";
 
-const CODE_SYS = "You are Infinity AI Code Assistant. Help with programming. Give clear, correct code with brief explanations.";
-const FABLE_SYS = "You are Fable 5, Infinity AI's premium creative model. Be imaginative and high-quality.";
+const CODE_SYS = "You are Blackhole AI Code Assistant. Help with programming. Give clear, correct code with brief explanations.";
+const FABLE_SYS = "You are Fable 5, Blackhole AI's premium creative model. Be imaginative and high-quality.";
 
 export default function ChatBox({ conversation, createConversation, addMessage, renameConversation, plan, aiExhausted, aiCodeExhausted, onSpendAI, onSpendAICode }) {
   const [input, setInput] = useState("");
@@ -72,10 +73,10 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
           {messages.length === 0 && !loading && (
             <div className="h-full flex flex-col items-center justify-center text-center">
               <div className="keep-color w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center mb-3">
-                <Sparkles className="w-6 h-6 text-white" />
+                <BlackholeIcon className="w-7 h-7" />
               </div>
               <p className="text-slate-300 font-medium">Ask me anything</p>
-              <p className="text-slate-500 text-sm mt-1">Infinity AI is ready to help</p>
+              <p className="text-slate-500 text-sm mt-1">Blackhole AI is ready to help</p>
             </div>
           )}
 
@@ -121,7 +122,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Message Infinity AI..."
+              placeholder="Message Blackhole AI..."
               rows={1}
               className="flex-1 bg-transparent resize-none outline-none text-slate-100 placeholder:text-slate-500 px-4 py-3 max-h-32 text-sm"
             />
@@ -158,7 +159,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
               e.target.value = "";
             }}
           />
-          <p className="text-center text-xs text-slate-600 mt-2">Infinity AI can make mistakes. Check important info.</p>
+          <p className="text-center text-xs text-slate-600 mt-2">Blackhole AI can make mistakes. Check important info.</p>
         </div>
       </div>
     </div>

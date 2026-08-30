@@ -135,7 +135,7 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                   ) : user ? (
                     <>
                       <h3 className="mt-4 text-lg font-semibold text-white">
-                        {user.full_name || "Infinity User"}
+                        {user.full_name || "Blackhole User"}
                       </h3>
                       {isSecret ? (
                         <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-black text-slate-100 border border-slate-700">
