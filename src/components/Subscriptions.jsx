@@ -25,7 +25,7 @@ function FreeCard({ onFree }) {
       </ul>
       <div className="mt-4 pt-4 border-t border-slate-700/40">
         <p className="text-xs text-slate-400 leading-relaxed">
-          Credits are the units Base44 uses when you interact with Base44's AI or connect your app to external tools. Credit usage adjusts dynamically based on how much work the builder needs to do behind the scenes.
+          Credits are the units Blackhole AI uses when you interact with Blackhole AI's. Credit usage adjusts dynamically based on how much work the builder needs to do behind the scenes.
         </p>
       </div>
       <button
@@ -60,7 +60,7 @@ function Plan2Card({ onPro }) {
       </ul>
       <div className="mt-4 pt-4 border-t border-slate-700/40">
         <p className="text-xs text-slate-400 leading-relaxed">
-          Credits are the units Base44 uses when you interact with Base44's AI or connect your app to external tools. Credit usage adjusts dynamically based on how much work the builder needs to do behind the scenes.
+          Credits are the units Blackhole AI uses when you interact with Blackhole AI's. Credit usage adjusts dynamically based on how much work the builder needs to do behind the scenes.
         </p>
       </div>
       <button
