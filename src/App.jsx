@@ -11,6 +11,7 @@ import Home from '@/pages/Home';
 import Chat from '@/pages/Chat';
 import Billing from '@/pages/Billing';
 import ThankYou from '@/pages/ThankYou';
+import Plans from '@/pages/Plans';
 import PromoSuccess from '@/pages/PromoSuccess';
 import SiteView from '@/pages/SiteView';
 import Login from '@/pages/Login';
@@ -51,6 +52,7 @@ const AuthenticatedApp = () => {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/" element={<Home />} />
       <Route path="/ThankYou" element={<ThankYou />} />
+      <Route path="/plans" element={<Plans />} />
       <Route path="/site/:name" element={<SiteView />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route path="/chat" element={<Chat />} />

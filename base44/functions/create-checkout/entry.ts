@@ -129,7 +129,7 @@ Deno.serve(async (req: Request) => {
     const subscriptionInfo = product.subscriptionInfo;
     // Where Wix returns the buyer. Both MUST be real, PUBLICLY reachable routes.
     const thankYouPath = "/ThankYou";
-    const postFlowPath = "/chat";
+    const postFlowPath = "/plans";
     // ===== END APP-SPECIFIC =====
 
     const total = parseFloat(price) * quantity;
