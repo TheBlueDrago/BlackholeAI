@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Pen, Plus, Code, Sparkles, Gem, Star, Check, X, CreditCard, Globe } from "lucide-react";
 import BlackholeIcon from "@/components/BlackholeIcon";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const SKIP_KEY = "infinity-ai-skip-delete-confirm";
 
@@ -11,18 +12,18 @@ function CreditBar({ icon, label, used, total, gradient }) {
   const pct = unlimited ? 100 : Math.min(100, Math.round((used / safeTotal) * 100));
   const remaining = unlimited ? "∞" : Math.max(0, total - used);
   return (
-    <div className="px-3 py-2 rounded-xl bg-slate-800/50 border border-slate-700/40">
-      <div className="flex items-center justify-between text-xs mb-1.5">
+    <div className="px-2.5 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700/40">
+      <div className="flex items-center justify-between text-[11px] mb-1">
         <span className="text-slate-300 font-medium flex items-center gap-1.5">
           {icon}
           {label}
         </span>
         <span className="text-slate-400">{unlimited ? `${used} / ∞` : `${used} / ${total}`}</span>
       </div>
-      <div className="h-1.5 rounded-full bg-slate-700/60 overflow-hidden">
+      <div className="h-1 rounded-full bg-slate-700/60 overflow-hidden">
         <div className={`h-full bg-gradient-to-r ${gradient}`} style={{ width: `${pct}%` }} />
       </div>
-      <p className="text-[10px] text-slate-500 mt-1">{unlimited ? "Unlimited" : `${remaining} left`}</p>
+      <p className="text-[9px] text-slate-500 mt-0.5">{unlimited ? "Unlimited" : `${remaining} left`}</p>
     </div>
   );
 }
@@ -32,6 +33,8 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
   const [editValue, setEditValue] = useState("");
   const [confirmId, setConfirmId] = useState(null);
   const [neverShow, setNeverShow] = useState(false);
+  const isMobile = useIsMobile();
+  const targetWidth = isMobile ? Math.min((typeof window !== "undefined" ? window.innerWidth : 400) * 0.86, 320) : 220;
 
   const startEdit = (conv) => {
     setEditingId(conv.id);
@@ -68,68 +71,66 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
     <>
       <motion.div
         initial={{ width: 0, opacity: 0 }}
-        animate={{ width: 264, opacity: 1 }}
+        animate={{ width: targetWidth, opacity: 1 }}
         exit={{ width: 0, opacity: 0 }}
         transition={{ type: "spring", stiffness: 240, damping: 28 }}
-        className="shrink-0 h-[524px] overflow-hidden"
+        className={`shrink-0 overflow-hidden ${isMobile ? "fixed left-0 top-0 z-40 h-[100dvh]" : "h-[524px]"}`}
       >
-        <motion.div
-          initial={{ x: 90 }}
-          animate={{ x: 0 }}
-          transition={{ type: "spring", stiffness: 240, damping: 28 }}
-          className="w-[264px] h-full bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-3xl shadow-2xl flex flex-col"
+        <div
+          style={{ width: targetWidth }}
+          className={`h-full flex flex-col ${isMobile ? "bg-slate-900/95 backdrop-blur-xl border-r border-slate-700/50 shadow-2xl" : "bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-3xl shadow-2xl"}`}
         >
           {/* Header */}
-          <div className="p-4 space-y-1">
+          <div className="p-3 space-y-0.5">
             <button
               onClick={onGoHome}
-              className="w-full flex items-center gap-2 px-2 py-2 rounded-xl text-white hover:bg-slate-800/70 transition-colors"
+              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-white hover:bg-slate-800/70 transition-colors"
             >
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center">
-                <BlackholeIcon className="w-5 h-5" />
+              <div className="w-6 h-6 rounded-md bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center">
+                <BlackholeIcon className="w-4 h-4" />
               </div>
-              <span className="font-semibold">Blackhole AI</span>
+              <span className="text-[13px] font-semibold">Blackhole AI</span>
             </button>
             <button
               onClick={onGoCode}
-              className="w-full flex items-center gap-2 px-2 py-2 rounded-xl text-slate-300 hover:bg-slate-800/70 transition-colors"
+              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-slate-300 hover:bg-slate-800/70 transition-colors"
             >
-              <div className="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center">
-                <Code className="w-4 h-4 text-emerald-300" />
+              <div className="w-6 h-6 rounded-md bg-slate-800 flex items-center justify-center">
+                <Code className="w-3.5 h-3.5 text-emerald-300" />
               </div>
-              <span className="font-medium">Blackhole Code</span>
+              <span className="text-[13px] font-medium">Blackhole Code</span>
             </button>
             <button
               onClick={onNewChat}
-              className="w-full flex items-center gap-2 px-2 py-2 rounded-xl text-slate-300 hover:bg-slate-800/70 transition-colors"
+              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-slate-300 hover:bg-slate-800/70 transition-colors"
             >
-              <div className="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center">
-                <Plus className="w-4 h-4 text-slate-300" />
+              <div className="w-6 h-6 rounded-md bg-slate-800 flex items-center justify-center">
+                <Plus className="w-3.5 h-3.5 text-slate-300" />
               </div>
-              <span className="font-medium">New Chat</span>
+              <span className="text-[13px] font-medium">New Chat</span>
             </button>
             <button
               onClick={onGoDesigner}
-              className="w-full flex items-center gap-2 px-2 py-2 rounded-xl text-slate-300 hover:bg-slate-800/70 transition-colors"
+              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-slate-300 hover:bg-slate-800/70 transition-colors"
             >
-              <div className="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center">
-                <Globe className="w-4 h-4 text-sky-300" />
+              <div className="w-6 h-6 rounded-md bg-slate-800 flex items-center justify-center">
+                <Globe className="w-3.5 h-3.5 text-sky-300" />
               </div>
-              <span className="font-medium">Website Designer</span>
+              <span className="text-[13px] font-medium">Website Designer</span>
             </button>
             <button
               onClick={onGoSubscriptions}
-              className="w-full flex items-center gap-2 px-2 py-2 rounded-xl text-slate-300 hover:bg-slate-800/70 transition-colors"
+              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-slate-300 hover:bg-slate-800/70 transition-colors"
             >
-              <div className="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center">
-                <CreditCard className="w-4 h-4 text-amber-300" />
+              <div className="w-6 h-6 rounded-md bg-slate-800 flex items-center justify-center">
+                <CreditCard className="w-3.5 h-3.5 text-amber-300" />
               </div>
-              <span className="font-medium">Plans</span>
+              <span className="text-[13px] font-medium">Plans</span>
             </button>
           </div>
 
           {/* Credit bars */}
-          <div className="px-4 space-y-2 pb-2">
+          <div className="px-3 space-y-1.5 pb-1.5">
             <CreditBar
               icon={<Sparkles className="w-3 h-3 text-indigo-400" />}
               label="AI"
@@ -165,24 +166,24 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
           </div>
 
           {/* Previous chats label (non-clickable) */}
-          <div className="px-4 pb-2">
-            <div className="px-2 py-2 text-slate-500 text-sm font-medium cursor-default select-none">
+          <div className="px-3 pb-1.5">
+            <div className="px-2 py-1 text-slate-500 text-[11px] font-medium cursor-default select-none">
               Previous Chats
             </div>
           </div>
 
-          <div className="mx-4 h-px bg-slate-700/50" />
+          <div className="mx-3 h-px bg-slate-700/50" />
 
           {/* Chat list */}
-          <div className="flex-1 overflow-y-auto p-2 space-y-1">
+          <div className="sidebar-scroll flex-1 overflow-y-auto p-1.5 space-y-0.5">
             {conversations.length === 0 && (
-              <p className="text-center text-slate-600 text-sm py-6">No chats yet</p>
+              <p className="text-center text-slate-600 text-xs py-6">No chats yet</p>
             )}
             {conversations.map((conv) => (
               <div
                 key={conv.id}
                 onClick={() => editingId !== conv.id && onSelect(conv.id)}
-                className={`group relative rounded-xl px-2 py-2 transition-colors cursor-pointer ${
+                className={`group relative rounded-lg px-2 py-1.5 transition-colors cursor-pointer ${
                   conv.id === activeId ? "bg-slate-800/80" : "hover:bg-slate-800/40"
                 }`}
               >
@@ -197,7 +198,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
                         if (e.key === "Escape") setEditingId(null);
                       }}
                       onClick={(e) => e.stopPropagation()}
-                      className="flex-1 min-w-0 bg-slate-900 border border-indigo-500/50 rounded-lg px-2 py-1 text-sm text-white outline-none"
+                      className="flex-1 min-w-0 bg-slate-900 border border-indigo-500/50 rounded-md px-2 py-1 text-xs text-white outline-none"
                     />
                     <button
                       onClick={(e) => { e.stopPropagation(); saveEdit(); }}
@@ -208,21 +209,21 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
                   </div>
                 ) : (
                   <>
-                    <p className="text-sm text-slate-200 truncate pr-[60px]">{conv.title}</p>
-                    <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <p className="text-xs text-slate-200 truncate pr-[52px]">{conv.title}</p>
+                    <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={(e) => { e.stopPropagation(); startEdit(conv); }}
-                        className="p-1.5 rounded-md bg-slate-700/80 border border-slate-600/50 text-slate-300 hover:text-white"
+                        className="p-1 rounded-md bg-slate-700/80 border border-slate-600/50 text-slate-300 hover:text-white"
                         title="Rename"
                       >
-                        <Pen className="w-3 h-3" />
+                        <Pen className="w-2.5 h-2.5" />
                       </button>
                       <button
                         onClick={(e) => askDelete(e, conv)}
-                        className="p-1.5 rounded-md bg-slate-700/80 border border-slate-600/50 text-slate-300 hover:text-red-400"
+                        className="p-1 rounded-md bg-slate-700/80 border border-slate-600/50 text-slate-300 hover:text-red-400"
                         title="Delete"
                       >
-                        <X className="w-3 h-3" />
+                        <X className="w-2.5 h-2.5" />
                       </button>
                     </div>
                   </>
@@ -230,7 +231,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
               </div>
             ))}
           </div>
-        </motion.div>
+        </div>
       </motion.div>
 
       <AnimatePresence>

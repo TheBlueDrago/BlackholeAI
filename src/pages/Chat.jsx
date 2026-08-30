@@ -160,6 +160,18 @@ export default function Chat() {
             </button>
           </div>
 
+          <AnimatePresence>
+            {sidebarOpen && (
+              <motion.div
+                className="sm:hidden fixed inset-0 z-30 bg-black/50 backdrop-blur-sm"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setSidebarOpen(false)}
+              />
+            )}
+          </AnimatePresence>
+
           <div className="flex items-center justify-center gap-5 w-full min-h-[60vh] sm:min-h-[524px]">
             <AnimatePresence>
               {sidebarOpen && (
