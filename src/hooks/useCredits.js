@@ -5,7 +5,8 @@ const KEY = "infinity-ai-credits-v2";
 const FREE = { aiTotal: 10, aiCodeTotal: 5, galaxy5Total: 0, space5Total: 0 };
 const PRO = { aiTotal: 25, aiCodeTotal: 15, galaxy5Total: 25, space5Total: 0 };
 const TEAM = { aiTotal: 50, aiCodeTotal: 25, galaxy5Total: 40, space5Total: 25 };
-const SECRET = { aiTotal: Infinity, aiCodeTotal: Infinity, galaxy5Total: Infinity, space5Total: Infinity };
+const SECRET = { aiTotal: 50, aiCodeTotal: 25, galaxy5Total: 40, space5Total: 25 };
+const ADMIN = { aiTotal: Infinity, aiCodeTotal: Infinity, galaxy5Total: Infinity, space5Total: Infinity };
 
 function monthKey(d = new Date()) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
@@ -29,7 +30,7 @@ function loadUsed() {
 // Effective plan: Pro only counts while not expired (promo grants carry planExpiresAt).
 function effectivePlan(user) {
   if (!user) return "free";
-  if (user.role === "admin") return "secret";
+  if (user.role === "admin") return "admin";
   if (user.plan === "secret") return "secret";
   if (user.plan !== "pro") return "free";
   if (user.planExpiresAt && new Date(user.planExpiresAt) < new Date()) return "free";
@@ -81,20 +82,20 @@ export function useCredits() {
     } catch {}
   }, [used]);
 
-  const totals = plan === "pro" ? PRO : plan === "team" ? TEAM : plan === "secret" ? SECRET : FREE;
+  const totals = plan === "pro" ? PRO : plan === "team" ? TEAM : plan === "secret" ? SECRET : plan === "admin" ? ADMIN : FREE;
 
   const aiTotal = totals.aiTotal === Infinity ? Infinity : totals.aiTotal + bonus.ai;
   const aiCodeTotal = team?.isAdmin ? Infinity : totals.aiCodeTotal === Infinity ? Infinity : totals.aiCodeTotal + bonus.aiCode;
   const galaxy5Total = totals.galaxy5Total === Infinity ? Infinity : totals.galaxy5Total + bonus.galaxy5;
   const space5Total = totals.space5Total === Infinity ? Infinity : totals.space5Total + bonus.space5;
-  const aiUsed = plan === "secret" ? 0 : used.aiUsed;
-  const aiCodeUsed = plan === "team" ? team?.aiCodeUsed ?? 0 : plan === "secret" ? 0 : used.aiCodeUsed;
-  const galaxy5Used = plan === "secret" ? 0 : used.galaxy5Used;
-  const space5Used = plan === "secret" ? 0 : used.space5Used;
+  const aiUsed = plan === "admin" ? 0 : used.aiUsed;
+  const aiCodeUsed = plan === "team" || plan === "secret" ? team?.aiCodeUsed ?? 0 : plan === "admin" ? 0 : used.aiCodeUsed;
+  const galaxy5Used = plan === "admin" ? 0 : used.galaxy5Used;
+  const space5Used = plan === "admin" ? 0 : used.space5Used;
 
   const spendAI = useCallback(
     (amount = 1) => {
-      if (plan === "secret") return; // unlimited
+      if (plan === "admin") return; // unlimited
       if (bonus.ai > 0) {
         const next = { ...bonus, ai: bonus.ai - amount };
         setBonus(next);
@@ -108,7 +109,7 @@ export function useCredits() {
 
   const spendGalaxy5 = useCallback(
     (amount = 1) => {
-      if (plan === "secret") return; // unlimited
+      if (plan === "admin") return; // unlimited
       if (bonus.galaxy5 > 0) {
         const next = { ...bonus, galaxy5: bonus.galaxy5 - amount };
         setBonus(next);
@@ -122,7 +123,7 @@ export function useCredits() {
 
   const spendSpace5 = useCallback(
     (amount = 1) => {
-      if (plan === "secret") return; // unlimited
+      if (plan === "admin") return; // unlimited
       if (bonus.space5 > 0) {
         const next = { ...bonus, space5: bonus.space5 - amount };
         setBonus(next);
@@ -136,14 +137,14 @@ export function useCredits() {
 
   const spendAICode = useCallback(
     (amount = 1) => {
-      if (plan === "secret") return; // unlimited
+      if (plan === "admin") return; // unlimited
       if (bonus.aiCode > 0) {
         const next = { ...bonus, aiCode: bonus.aiCode - amount };
         setBonus(next);
         base44.auth.updateMe({ bonus: next }).catch(() => {});
         return;
       }
-      if (plan === "team") {
+      if (plan === "team" || plan === "secret") {
         if (team?.isAdmin) return; // admins: free forever, no shared-pool counting
         // Shared pool lives on the server so every member's spend counts.
         base44.functions

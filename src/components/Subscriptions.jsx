@@ -162,7 +162,7 @@ function TeamPanel() {
       <p className="text-slate-400 text-sm">
         Shared Blackhole Code credits:{" "}
         <span className="text-sky-200 font-medium">
-          {isSecretTeam ? "Unlimited" : `${team.aiCodeUsed ?? 0} / 25`}
+          {team.aiCodeUsed ?? 0} / 25
         </span>
       </p>
 

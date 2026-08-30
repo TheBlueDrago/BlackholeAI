@@ -29,7 +29,7 @@ export default async function (req: Request): Promise<Response> {
 
     // Active only if the record is active AND the owner still pays for the team plan.
     const owner = await db.entities.User.get(team.ownerId).catch(() => null);
-    if (team.status !== "active" || owner?.plan !== "team") {
+    if (team.status !== "active" || (owner?.plan !== "team" && owner?.plan !== "secret")) {
       return Response.json({ error: "This team is no longer active." }, { status: 403 });
     }
 

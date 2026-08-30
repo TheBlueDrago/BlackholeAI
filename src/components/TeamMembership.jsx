@@ -315,7 +315,7 @@ export default function TeamMembership({ onBack }) {
         </div>
         <div className="flex justify-between">
           <span className="text-slate-400">Shared Blackhole Code credits</span>
-          <span className="text-slate-200">{isSecretTeam ? "Unlimited" : `${team.aiCodeUsed ?? 0} / 25`}</span>
+          <span className="text-slate-200">{team.aiCodeUsed ?? 0} / 25</span>
         </div>
         {team.isPromo && team.ownerPlanExpiresAt && (
           <div className="flex justify-between">
