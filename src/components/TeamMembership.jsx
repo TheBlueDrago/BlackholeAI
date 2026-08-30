@@ -186,10 +186,10 @@ export default function TeamMembership({ onBack }) {
         <h3 className="text-center text-lg font-bold text-white">Team Membership</h3>
         <div className="mt-6 rounded-2xl bg-slate-800/40 border border-slate-700/40 p-4 space-y-2 text-sm">
           <div className="flex justify-between"><span className="text-slate-400">Plan</span><span className="text-slate-200">Secret (Admin)</span></div>
-          <div className="flex justify-between"><span className="text-slate-400">Blackhole AI credits</span><span className="text-slate-200">Unlimited</span></div>
-          <div className="flex justify-between"><span className="text-slate-400">Blackhole Code credits</span><span className="text-slate-200">Unlimited</span></div>
-          <div className="flex justify-between"><span className="text-slate-400">Galaxy 5 credits</span><span className="text-slate-200">Unlimited</span></div>
-          <div className="flex justify-between"><span className="text-slate-400">Space 5 credits</span><span className="text-slate-200">Unlimited</span></div>
+          <div className="flex justify-between"><span className="text-slate-400">Blackhole AI credits</span><span className="text-slate-200">50</span></div>
+          <div className="flex justify-between"><span className="text-slate-400">Blackhole Code credits</span><span className="text-slate-200">25</span></div>
+          <div className="flex justify-between"><span className="text-slate-400">Galaxy 5 credits</span><span className="text-slate-200">40</span></div>
+          <div className="flex justify-between"><span className="text-slate-400">Space 5 credits</span><span className="text-slate-200">25</span></div>
           <div className="flex justify-between"><span className="text-slate-400">Expires</span><span className="text-slate-200">Never</span></div>
         </div>
         <p className="mt-4 text-center text-xs text-slate-500">Admins get the Secret membership for free, forever.</p>
