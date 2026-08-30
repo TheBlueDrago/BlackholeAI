@@ -6,26 +6,30 @@ import { base44 } from "@/api/base44Client";
 export default function GameView() {
   const { name } = useParams();
   const navigate = useNavigate();
-  const [game, setGame] = useState(null);
+  const [html, setHtml] = useState("");
+  const [title, setTitle] = useState(name);
+  const [genre, setGenre] = useState("");
   const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     let done = false;
     (async () => {
       try {
-        const list = await base44.entities.PublishedGame.filter({ name });
-        const g = list && list[0];
-        if (!g) {
-          setGame(null);
-          setLoading(false);
+        const res = await base44.functions.invoke("get-game-html", { name });
+        const d = res.data;
+        if (!d || d.error || !d.html) {
+          if (!done) { setNotFound(true); setLoading(false); }
           return;
         }
-        setGame(g);
-        // increment plays (client SDK bypasses RLS)
+        setHtml(d.html);
+        setTitle(d.title || name);
+        setGenre(d.genre || "");
         try {
-          await base44.entities.PublishedGame.update(g.id, { plays: (g.plays || 0) + 1 });
+          if (d.id) await base44.entities.PublishedGame.update(d.id, { plays: (d.plays || 0) + 1 });
         } catch {}
       } catch {
+        if (!done) setNotFound(true);
       } finally {
         if (!done) setLoading(false);
         done = true;
@@ -43,26 +47,21 @@ export default function GameView() {
         >
           <ArrowLeft className="w-5 h-5 text-slate-200" />
         </button>
-        <span className="font-semibold text-slate-100 truncate">{game?.title || game?.name || name}</span>
-        {game?.genre && <span className="text-xs text-slate-400 capitalize">· {game.genre}</span>}
+        <span className="font-semibold text-slate-100 truncate">{title}</span>
+        {genre && <span className="text-xs text-slate-400 capitalize">· {genre}</span>}
       </header>
       <div className="flex-1 relative bg-black">
         {loading ? (
           <div className="flex items-center justify-center h-full text-slate-500">
             <Loader2 className="w-6 h-6 animate-spin" />
           </div>
-        ) : game ? (
-          <iframe
-            {...(game.html && /^https?:\/\//.test(game.html) ? { src: game.html } : { srcDoc: game.html })}
-            title={game.name}
-            sandbox="allow-scripts"
-            className="w-full h-full"
-          />
-        ) : (
+        ) : notFound ? (
           <div className="flex flex-col items-center justify-center h-full text-slate-400">
             <Gamepad2 className="w-10 h-10 mb-2" />
             <p>Game not found.</p>
           </div>
+        ) : (
+          <iframe srcDoc={html} title={name} sandbox="allow-scripts" className="w-full h-full" />
         )}
       </div>
     </div>
