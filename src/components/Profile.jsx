@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { LogOut, Mail, Shield, KeyRound, ArrowLeft, Loader2, Crown, Settings, Users, Lock, ShieldCheck, Ticket } from "lucide-react";
+import { LogOut, Mail, Shield, KeyRound, ArrowLeft, Loader2, Crown, Settings, Users, Lock, ShieldCheck, Ticket, Trash2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import TeamMembership from "@/components/TeamMembership";
 
@@ -14,12 +14,21 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
   const [pwBusy, setPwBusy] = useState(false);
   const [pwError, setPwError] = useState("");
 
+  // Account deletion confirmation
+  const [delText, setDelText] = useState("");
+  const [delAck, setDelAck] = useState(false);
+  const [delBusy, setDelBusy] = useState(false);
+  const [delError, setDelError] = useState("");
+
   useEffect(() => {
     if (open) {
       setLoading(true);
       setView(initialView);
       setPwStep("idle");
       setPwError("");
+      setDelText("");
+      setDelAck(false);
+      setDelError("");
       base44.auth
         .me()
         .then((u) => setUser(u))
@@ -47,6 +56,18 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
       setPwError(e.message || "Could not send reset email");
     } finally {
       setPwBusy(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setDelError("");
+    setDelBusy(true);
+    try {
+      await base44.functions.invoke("delete-account");
+      base44.auth.logout();
+    } catch (e) {
+      setDelError(e?.response?.data?.error || e?.message || "Could not delete account");
+      setDelBusy(false);
     }
   };
 
@@ -100,6 +121,50 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
               </div>
             ) : view === "membership" ? (
               <TeamMembership onBack={() => setView("settings")} />
+            ) : view === "delete" ? (
+              <div className="p-6">
+                <button
+                  onClick={() => setView("settings")}
+                  className="flex items-center gap-1.5 text-slate-400 text-sm hover:text-slate-200 transition-colors mb-4"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Back
+                </button>
+                <div className="flex items-center gap-2 mb-3">
+                  <Trash2 className="w-5 h-5 text-red-400" />
+                  <h3 className="text-lg font-semibold text-white">Delete Account</h3>
+                </div>
+                <p className="text-sm text-slate-300 mb-4 leading-relaxed">
+                  This permanently deletes your account and all associated data. This action cannot be undone.
+                </p>
+                <label className="text-xs text-slate-400">
+                  Type <span className="font-semibold text-red-400">DELETE</span> to confirm
+                </label>
+                <input
+                  value={delText}
+                  onChange={(e) => setDelText(e.target.value)}
+                  placeholder="DELETE"
+                  className="w-full mt-1 mb-3 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-red-500 transition-colors uppercase tracking-wide"
+                />
+                <label className="flex items-start gap-2 text-xs text-slate-300 mb-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={delAck}
+                    onChange={(e) => setDelAck(e.target.checked)}
+                    className="mt-0.5 w-4 h-4 rounded border-slate-600 bg-slate-800 accent-red-500 shrink-0"
+                  />
+                  <span>I understand this is permanent and cannot be undone.</span>
+                </label>
+                {delError && <p className="text-sm text-red-400 mb-2">{delError}</p>}
+                <button
+                  onClick={handleDeleteAccount}
+                  disabled={delBusy || !delAck || delText !== "DELETE"}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-600 text-white font-medium hover:bg-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {delBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                  Delete account
+                </button>
+              </div>
             ) : view === "settings" ? (
               <div className="p-6">
                 <button
@@ -122,8 +187,18 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                     Membership
                   </span>
                   <ArrowLeft className="w-4 h-4 rotate-180 text-slate-500" />
-                </button>
-              </div>
+                  </button>
+                  <button
+                  onClick={() => setView("delete")}
+                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-red-900/40 text-red-300 hover:bg-red-900/60 transition-colors border border-red-800/50"
+                  >
+                  <span className="flex items-center gap-2 font-medium">
+                    <Trash2 className="w-4 h-4" />
+                    Delete account
+                  </span>
+                  <ArrowLeft className="w-4 h-4 rotate-180 text-red-500" />
+                  </button>
+                  </div>
             ) : (
               <>
                 <div className="p-6 flex flex-col items-center text-center">

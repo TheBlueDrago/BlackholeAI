@@ -88,7 +88,29 @@
 
   body {
     @apply bg-background text-foreground font-body;
+    overscroll-behavior-y: none;
   }
+
+  button, a, [role="button"] {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  svg {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .overflow-y-auto, .overflow-auto, .sidebar-scroll {
+    overscroll-behavior-y: none;
+  }
+}
+
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .light-mode {

@@ -14,12 +14,19 @@ import PromoManager from "@/pages/PromoManager";
 import WebsiteDesigner from "@/components/WebsiteDesigner";
 import ThemeToggle from "@/components/ThemeToggle";
 import BanScreen from "@/components/BanScreen";
+import MobileTabBar from "@/components/MobileTabBar";
 import { useConversations } from "@/hooks/useConversations";
 import { useCredits } from "@/hooks/useCredits";
 import { useNavigate } from "react-router-dom";
 
 export default function Chat() {
-  const [mode, setMode] = useState("ai"); // "ai" | "code" | "subscriptions"
+  const [mode, setMode] = useState(() => {
+    try {
+      const t = new URLSearchParams(window.location.search).get("tab");
+      if (t === "code" || t === "designer") return t;
+    } catch {}
+    return "ai";
+  }); // "ai" | "code" | "subscriptions"
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [profileInitialView, setProfileInitialView] = useState("main");
@@ -43,6 +50,16 @@ export default function Chat() {
       setLightMode(localStorage.getItem("infinity-ai-light-" + currentUser.id) === "1");
     } catch {}
   }, [currentUser?.id]);
+
+  // Reflect the active tab in the URL (?tab=) so it stays shareable without a router navigation.
+  useEffect(() => {
+    try {
+      const url = new URL(window.location.href);
+      if (mode === "ai") url.searchParams.delete("tab");
+      else url.searchParams.set("tab", mode);
+      window.history.replaceState({}, "", url);
+    } catch {}
+  }, [mode]);
 
   const toggleLight = () => {
     setLightMode((prev) => {
@@ -92,7 +109,7 @@ export default function Chat() {
       ) : mode === "promos" ? (
         <PromoManager onBack={() => setMode("ai")} />
       ) : mode === "designer" ? (
-        <div className="relative z-10 h-screen">
+        <div className="relative z-10 h-screen pb-14 sm:pb-0">
           <AnimatePresence>
             {sidebarOpen && (
               <div className="absolute top-20 left-4 z-40">
@@ -133,19 +150,19 @@ export default function Chat() {
         </div>
       ) : (
         <motion.div
-          className="relative z-10 min-h-screen flex flex-col items-center justify-center py-4 sm:py-10"
+          className="relative z-10 min-h-screen flex flex-col items-center justify-center pt-4 sm:pt-10 pb-24 sm:pb-10"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, ease: "easeInOut" }}
         >
           <button
             onClick={() => setSidebarOpen((o) => !o)}
-            className="fixed top-4 left-4 sm:top-5 sm:left-5 z-30 p-2 sm:p-2.5 rounded-xl bg-slate-800/70 border border-slate-700/50 text-slate-200 hover:bg-slate-700/70 transition-colors"
+            className="fixed top-[max(1rem,env(safe-area-inset-top))] left-4 sm:top-5 sm:left-5 z-30 p-2 sm:p-2.5 rounded-xl bg-slate-800/70 border border-slate-700/50 text-slate-200 hover:bg-slate-700/70 transition-colors"
             title="Menu"
           >
             <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
-          <div className="fixed top-4 right-4 sm:top-5 sm:right-5 z-30 flex items-center gap-2">
+          <div className="fixed top-[max(1rem,env(safe-area-inset-top))] right-4 sm:top-5 sm:right-5 z-30 flex items-center gap-2">
             <ThemeToggle light={lightMode} onToggle={toggleLight} />
             <span className="h-8 w-px bg-slate-500/60" />
             <button
@@ -235,6 +252,16 @@ export default function Chat() {
         }}
       />
       <PromoExpiredPopup />
+      {!isBanned && !isBlocked && (mode === "ai" || mode === "code" || mode === "designer") && (
+        <MobileTabBar
+          active={mode}
+          onChat={goHome}
+          onCode={goCode}
+          onDesigner={goDesigner}
+          onSettings={() => { setProfileInitialView("main"); setProfileOpen(true); }}
+          profileOpen={profileOpen}
+        />
+      )}
     </div>
   );
 }
