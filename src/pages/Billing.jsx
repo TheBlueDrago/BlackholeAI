@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Loader2, ShieldCheck, Users, Lock } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -11,8 +11,6 @@ export default function Billing() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [agreed, setAgreed] = useState(false);
-  const [showNotice, setShowNotice] = useState(false);
-  const noticeRef = useRef(null);
 
   const PLANS = {
     secret: {
@@ -47,12 +45,6 @@ export default function Billing() {
 
   const startCheckout = async () => {
     setError("");
-    if (!agreed) {
-      setShowNotice(true);
-      setTimeout(() => noticeRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }), 50);
-      return;
-    }
-    setShowNotice(false);
     setLoading(true);
     try {
       const res = await base44.functions.invoke("create-checkout", { productId });
@@ -128,17 +120,12 @@ export default function Billing() {
 
         <button
           onClick={startCheckout}
-          disabled={loading}
+          disabled={loading || !agreed}
           className={`mt-5 w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-br ${plan.gradient} text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : plan.button}
         </button>
         <p className="mt-3 text-center text-xs text-slate-500">Secure checkout via Base44 Payments</p>
-        {showNotice && (
-          <p ref={noticeRef} className="mt-4 text-center text-sm font-bold text-red-500 animate-pulse">
-            Complete everything before paying
-          </p>
-        )}
       </div>
     </motion.div>
   );

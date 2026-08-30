@@ -146,7 +146,7 @@ Deno.serve(async (req: Request) => {
       },
       callbackUrls: {
         thankYouPageUrl: `${appUrl}${thankYouPath}`,
-        postFlowUrl: `${appUrl}${postFlowPath}`,
+        postFlowUrl: `https://infinity-ai-site.base44.app${postFlowPath}`,
       },
     };
 
