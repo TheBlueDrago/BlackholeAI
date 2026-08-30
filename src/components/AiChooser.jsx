@@ -4,9 +4,9 @@ import { Sparkles, Code, Gem, Star, ChevronDown, Lock } from "lucide-react";
 
 const OPTIONS = [
   { id: "ai", label: "AI", icon: Sparkles, color: "text-indigo-400" },
-  { id: "code", label: "AI Code", icon: Code, color: "text-emerald-300" },
-  { id: "opus5", label: "Opus 5", icon: Gem, color: "text-sky-300" },
-  { id: "fable", label: "Fable 5", icon: Star, color: "text-fuchsia-300" },
+  { id: "code", label: "Blackhole Code", icon: Code, color: "text-emerald-300" },
+  { id: "opus5", label: "Galaxy 5", icon: Gem, color: "text-sky-300" },
+  { id: "fable", label: "Space 5", icon: Star, color: "text-fuchsia-300" },
 ];
 
 export default function AiChooser({ value, onChange, plan, allowFable }) {
@@ -75,13 +75,13 @@ export default function AiChooser({ value, onChange, plan, allowFable }) {
               );
             })}
             {!allowFable && (
-              <p className="px-2.5 py-1 text-[10px] text-slate-500">Opus 5 & Fable 5: Website Designer only</p>
+              <p className="px-2.5 py-1 text-[10px] text-slate-500">Galaxy 5 & Space 5: Website Designer only</p>
             )}
             {allowFable && plan === "free" && (
-              <p className="px-2.5 py-1 text-[10px] text-slate-500">Opus 5: Pro+ · Fable 5: Team+</p>
+              <p className="px-2.5 py-1 text-[10px] text-slate-500">Galaxy 5: Pro+ · Space 5: Team+</p>
             )}
             {allowFable && plan === "pro" && (
-              <p className="px-2.5 py-1 text-[10px] text-slate-500">Fable 5: Team plan only</p>
+              <p className="px-2.5 py-1 text-[10px] text-slate-500">Space 5: Team plan only</p>
             )}
           </motion.div>
         )}

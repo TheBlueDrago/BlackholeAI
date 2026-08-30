@@ -97,7 +97,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
               <div className="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center">
                 <Code className="w-4 h-4 text-emerald-300" />
               </div>
-              <span className="font-medium">AI Code</span>
+              <span className="font-medium">Blackhole Code</span>
             </button>
             <button
               onClick={onNewChat}
@@ -139,7 +139,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
             />
             <CreditBar
               icon={<Code className="w-3 h-3 text-emerald-300" />}
-              label="AI Code"
+              label="Blackhole Code"
               used={credits.aiCodeUsed ?? 0}
               total={credits.aiCodeTotal ?? 0}
               gradient="from-emerald-500 to-teal-500"

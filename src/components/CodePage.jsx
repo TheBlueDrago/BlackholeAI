@@ -57,7 +57,7 @@ export default function CodePage({ aiCodeExhausted, onSpendAICode }) {
                 <Terminal className="w-6 h-6 text-white" />
               </div>
               <p className="text-slate-200 font-medium text-lg">Let's start coding</p>
-              <p className="text-slate-500 text-sm mt-1">Blackhole AI Code is ready to build</p>
+              <p className="text-slate-500 text-sm mt-1">Blackhole Code is ready to build</p>
             </div>
           )}
 

@@ -3,8 +3,8 @@ import { Send, Loader2, Plus, X, Paperclip } from "lucide-react";
 import BlackholeIcon from "@/components/BlackholeIcon";
 import { base44 } from "@/api/base44Client";
 
-const CODE_SYS = "You are Blackhole AI Code Assistant. Help with programming. Give clear, correct code with brief explanations.";
-const FABLE_SYS = "You are Fable 5, Blackhole AI's premium creative model. Be imaginative and high-quality.";
+const CODE_SYS = "You are Blackhole Code Assistant. Help with programming. Give clear, correct code with brief explanations.";
+const FABLE_SYS = "You are Space 5, Blackhole AI's premium creative model. Be imaginative and high-quality.";
 
 export default function ChatBox({ conversation, createConversation, addMessage, renameConversation, plan, aiExhausted, aiCodeExhausted, onSpendAI, onSpendAICode }) {
   const [input, setInput] = useState("");

@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 
 function FreeCard({ onFree }) {
-  const features = ["10 normal AI credits", "2 AI's (AI + Code AI)", "5 AI code credits"];
+  const features = ["10 normal AI credits", "2 AI's (AI + Blackhole Code)", "5 Blackhole Code credits"];
   return (
     <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-indigo-500/60 rounded-3xl p-6 shadow-2xl shadow-indigo-500/10 flex flex-col">
       <div className="flex items-center justify-between">
@@ -40,7 +40,7 @@ function FreeCard({ onFree }) {
 }
 
 function Plan2Card({ onPro }) {
-  const features = ["3 AI's (incl. Opus 5 in Website Designer)", "100 AI code credits", "∞ normal AI credits"];
+  const features = ["3 AI's (incl. Galaxy 5 in Website Designer)", "100 Blackhole Code credits", "∞ normal AI credits"];
   return (
     <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-emerald-500/60 rounded-3xl p-6 shadow-2xl shadow-emerald-500/10 flex flex-col">
       <div className="flex items-center justify-between">
@@ -76,8 +76,8 @@ function Plan2Card({ onPro }) {
 
 function TeamCard({ onTeam }) {
   const features = [
-    "4 AI's (Opus 5 and Fable 5 in Website Designer)",
-    "1000 AI code credits",
+    "4 AI's (Galaxy 5 and Space 5 in Website Designer)",
+    "1000 Blackhole Code credits",
     "∞ normal AI credits",
     "Add up to 2 people — everyone shares the credits",
   ];
@@ -158,7 +158,7 @@ function TeamPanel() {
         <h3 className="text-lg font-bold text-white">Your Team</h3>
       </div>
       <p className="text-slate-400 text-sm">
-        Shared AI code credits:{" "}
+        Shared Blackhole Code credits:{" "}
         <span className="text-sky-200 font-medium">
           {isSecretTeam ? "Unlimited" : `${team.aiCodeUsed ?? 0} / 1000`}
         </span>
