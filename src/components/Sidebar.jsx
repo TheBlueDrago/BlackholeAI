@@ -78,7 +78,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
       >
         <div
           style={{ width: targetWidth }}
-          className={`h-full flex flex-col ${isMobile ? "bg-slate-900/95 backdrop-blur-xl border-r border-slate-700/50 shadow-2xl" : "bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-3xl shadow-2xl"}`}
+          className={`h-full sidebar-scroll overflow-y-auto ${isMobile ? "bg-slate-900/95 backdrop-blur-xl border-r border-slate-700/50 shadow-2xl" : "bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 rounded-3xl shadow-2xl"}`}
         >
           {/* Header */}
           <div className="p-3 space-y-0.5">
@@ -175,7 +175,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
           <div className="mx-3 h-px bg-slate-700/50" />
 
           {/* Chat list */}
-          <div className="sidebar-scroll flex-1 overflow-y-auto p-1.5 space-y-0.5">
+          <div className="p-1.5 space-y-0.5 pb-3">
             {conversations.length === 0 && (
               <p className="text-center text-slate-600 text-xs py-6">No chats yet</p>
             )}
