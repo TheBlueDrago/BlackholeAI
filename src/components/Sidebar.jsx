@@ -118,7 +118,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
               <div className="w-6 h-6 rounded-md bg-slate-800 flex items-center justify-center">
                 <Gamepad2 className="w-3.5 h-3.5 text-fuchsia-300" />
               </div>
-              <span className="text-[13px] font-medium">Games Designer</span>
+              <span className="text-[13px] font-medium">Blackhole Games</span>
             </button>
             <button
               onClick={onGoSubscriptions}
