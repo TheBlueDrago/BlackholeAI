@@ -22,6 +22,9 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import { WorkspaceShell, ChatWorkspace, CodeWorkspace } from '@/components/WorkspaceShell';
 import DesignerWorkspace from '@/components/DesignerWorkspace';
 import { PlansView, MonitorView, PromosView, SettingsView } from '@/pages/chat/Views';
+import GamesFront from '@/pages/chat/GamesFront';
+import GamesDesignerWorkspace from '@/components/GamesDesignerWorkspace';
+import GameView from '@/pages/chat/GameView';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -64,6 +67,9 @@ const AuthenticatedApp = () => {
             <Route path="code" element={<CodeWorkspace />} />
           </Route>
           <Route path="designer" element={<DesignerWorkspace />} />
+          <Route path="games" element={<GamesFront />} />
+          <Route path="game-designer" element={<GamesDesignerWorkspace />} />
+          <Route path="game/:name" element={<GameView />} />
           <Route path="plans" element={<PlansView />} />
           <Route path="monitor" element={<MonitorView />} />
           <Route path="promos" element={<PromosView />} />

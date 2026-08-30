@@ -1,0 +1,77 @@
+{
+  "name": "PublishedGame",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Unique game slug (lowercase letters and hyphens). Used in the /chat/game/:name URL."
+    },
+    "title": {
+      "type": "string",
+      "default": "",
+      "description": "Display title of the game."
+    },
+    "html": {
+      "type": "string",
+      "description": "Full self-contained HTML5 game document."
+    },
+    "genre": {
+      "type": "string",
+      "enum": [
+        "io",
+        "shooting",
+        "horror",
+        "action",
+        "arcade",
+        "puzzle",
+        "racing",
+        "sports",
+        "adventure",
+        "strategy"
+      ],
+      "default": "io",
+      "description": "Game genre used for grouping on the games front."
+    },
+    "ownerName": {
+      "type": "string",
+      "default": ""
+    },
+    "plays": {
+      "type": "number",
+      "default": 0,
+      "description": "Play counter; drives the Top 5 ranking."
+    }
+  },
+  "required": [
+    "name",
+    "html"
+  ],
+  "rls": {
+    "read": {},
+    "create": {},
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

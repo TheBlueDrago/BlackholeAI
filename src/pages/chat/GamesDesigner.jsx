@@ -1,0 +1,549 @@
+import React, { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Send, Loader2, Gamepad2, RefreshCw, Plus, X, Crown, Rocket, Paperclip, Square } from "lucide-react";
+import BlackholeIcon from "@/components/BlackholeIcon";
+import { base44 } from "@/api/base44Client";
+import AiChooser from "@/components/AiChooser";
+import SheetSelect from "@/components/SheetSelect";
+import ThemeToggle from "@/components/ThemeToggle";
+
+const STORE_KEY = "infinity-ai-game-designer";
+const TAKEN_KEY = "infinity-ai-taken-games";
+const MODEL = "claude_sonnet_4_6";
+
+const RESERVED = ["home", "www", "admin", "api", "mail", "infinity", "ai", "app", "login", "register", "support", "blog", "game", "games"];
+
+const GENRES = [
+  { id: "io", label: ".io" },
+  { id: "shooting", label: "Shooting" },
+  { id: "horror", label: "Horror" },
+  { id: "action", label: "Action" },
+  { id: "arcade", label: "Arcade" },
+  { id: "puzzle", label: "Puzzle" },
+  { id: "racing", label: "Racing" },
+  { id: "sports", label: "Sports" },
+  { id: "adventure", label: "Adventure" },
+  { id: "strategy", label: "Strategy" },
+];
+
+const SYSTEM = `You are Blackhole AI Games Designer. The user describes a game and you build it as a fully playable HTML5 game.
+ALWAYS respond with a single complete, self-contained HTML document: include <!DOCTYPE html>, <html>, <head> with inline <style> CSS, and <body> with a <canvas> element and inline <script> implementing the entire game.
+The game MUST be genuinely playable with keyboard and/or mouse: include a start screen, a scoring system, increasing difficulty, and a game-over screen with a restart button. Use a smooth requestAnimationFrame loop, a responsive canvas that fills the viewport, and clean neon visuals. No external assets, scripts, or network calls — everything must run offline inside the single document.
+Do NOT wrap the HTML in markdown code fences. Do NOT add any explanation before or after the HTML — output ONLY the raw HTML document.
+When the user asks for changes, output the FULL updated HTML document every time, not just the diff.`;
+
+function extractHtml(text) {
+  if (!text) return "";
+  const f = text.match(/```(?:html)?\s*([\s\S]*?)```/i);
+  return f ? f[1].trim() : text.trim();
+}
+
+function genId() {
+  return (crypto.randomUUID && crypto.randomUUID()) || String(Date.now());
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) {
+      const p = JSON.parse(raw);
+      return { gameName: p.gameName || "my-game", title: p.title || "", genre: p.genre || "io", messages: p.messages || [], projectId: p.projectId || genId() };
+    }
+  } catch {}
+  return { gameName: "my-game", title: "", genre: "io", messages: [], projectId: genId() };
+}
+
+function getTaken() {
+  try {
+    return JSON.parse(localStorage.getItem(TAKEN_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function ownerOf(n) {
+  return getTaken().find((e) => e.name === n)?.projectId;
+}
+
+function isTakenFor(n, projectId) {
+  if (!n || RESERVED.includes(n)) return true;
+  const o = ownerOf(n);
+  return !!o && o !== projectId;
+}
+
+function suggestNames(n, projectId) {
+  const base = n || "my-game";
+  const out = [];
+  let i = 1;
+  while (out.length < 3 && i < 30) {
+    const c = `${base}-${i}`;
+    if (!isTakenFor(c, projectId)) out.push(c);
+    i++;
+  }
+  return out;
+}
+
+function sanitize(s) {
+  return s.toLowerCase().replace(/[^a-z-]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrade, aiExhausted, onSpendAI, aiCodeExhausted, onSpendAICode, galaxy5Exhausted, onSpendGalaxy5, space5Exhausted, onSpendSpace5, plan, lightMode, onToggleLight }) {
+  const initial = loadState();
+  const projectId = initial.projectId;
+  const [gameName, setGameName] = useState(initial.gameName);
+  const [title, setTitle] = useState(initial.title);
+  const [genre, setGenre] = useState(initial.genre);
+  const [messages, setMessages] = useState(initial.messages);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
+  const [previewMode, setPreviewMode] = useState("preview");
+  const [reloadKey, setReloadKey] = useState(0);
+  const [showPublish, setShowPublish] = useState(false);
+  const [published, setPublished] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [publishErr, setPublishErr] = useState("");
+  const [publishUrl, setPublishUrl] = useState("");
+  const [files, setFiles] = useState([]);
+  const opusAllowed = plan === "pro" || plan === "team" || plan === "secret";
+  const fableAllowed = plan === "team" || plan === "secret";
+  const [selectedAi, setSelectedAi] = useState(fableAllowed ? "fable" : opusAllowed ? "opus5" : "ai");
+  const fileInputRef = useRef(null);
+  const scrollRef = useRef(null);
+  const reqIdRef = useRef(0);
+  const lastTextRef = useRef("");
+
+  const lastAi = [...messages].reverse().find((m) => m.role === "ai");
+  const previewHtml = lastAi ? extractHtml(lastAi.content) : "";
+
+  useEffect(() => {
+    base44.auth.me().then(setUser).catch(() => setUser(null));
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify({ gameName, title, genre, messages, projectId }));
+    } catch {}
+  }, [gameName, title, genre, messages]);
+
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [messages, loading]);
+
+  const isCodeAi = selectedAi === "code";
+  const isGalaxy = selectedAi === "opus5";
+  const isSpace = selectedAi === "fable";
+  const sendExhausted = isCodeAi ? aiCodeExhausted : isGalaxy ? galaxy5Exhausted : isSpace ? space5Exhausted : aiExhausted;
+
+  const stop = () => {
+    reqIdRef.current++;
+    setLoading(false);
+    if (lastTextRef.current) setInput(lastTextRef.current);
+  };
+
+  const send = async () => {
+    const text = input.trim();
+    if (!text || loading || sendExhausted) return;
+    const fileNote = files.length ? `\n[Attached files: ${files.map((f) => f.name).join(", ")}]` : "";
+    const userMsg = { role: "user", content: text + (files.length ? ` (attached: ${files.map((f) => f.name).join(", ")})` : "") };
+    setMessages((p) => [...p, userMsg]);
+    lastTextRef.current = text;
+    setInput("");
+    setLoading(true);
+    const myId = ++reqIdRef.current;
+    (isCodeAi ? onSpendAICode : isGalaxy ? onSpendGalaxy5 : isSpace ? onSpendSpace5 : onSpendAI)?.();
+    try {
+      const lastHtml = messages.filter((m) => m.role === "ai").pop()?.content || "";
+      const userTurns = messages.filter((m) => m.role === "user").map((m) => m.content);
+      const prompt =
+        `${SYSTEM}\n\n` +
+        (lastHtml ? `Current game HTML:\n${lastHtml}\n\n` : "") +
+        `Requests so far:\n${userTurns.length ? userTurns.map((u, i) => `${i + 1}. ${u}`).join("\n") : "(none)"}\n\n` +
+        `Latest request: ${text}${fileNote}\n\nOutput the complete updated HTML game document now.`;
+      const model = { ai: "automatic", code: MODEL, opus5: "claude_opus_4_8", fable: MODEL }[selectedAi] || "automatic";
+      const res = await base44.functions.invoke("chatCompletion", { prompt, model });
+      if (reqIdRef.current !== myId) return;
+      const content = res.data?.content ?? "";
+      setMessages((p) => [...p, { role: "ai", content }]);
+    } catch {
+      if (reqIdRef.current !== myId) return;
+      setMessages((p) => [...p, { role: "ai", content: "Sorry, something went wrong generating your game. Please try again." }]);
+    } finally {
+      if (reqIdRef.current === myId) setLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      send();
+    }
+  };
+
+  const confirmPublish = async () => {
+    const n = sanitize(gameName).toLowerCase();
+    if (!n) {
+      setPublishErr("Enter a game name (slug).");
+      return;
+    }
+    if (!previewHtml) {
+      setPublishErr("Generate a game first.");
+      return;
+    }
+    setPublishErr("");
+    setPublishing(true);
+    try {
+      const existing = await base44.entities.PublishedGame.filter({ name: n });
+      const mine = existing.find((s) => s.created_by_id === user?.id);
+      if (existing.length && !mine) {
+        setPublishErr("That name is taken. Try another.");
+        return;
+      }
+      const ownerName = user?.email || user?.full_name || "";
+      const dispTitle = title.trim() || n;
+      if (mine) {
+        await base44.entities.PublishedGame.update(mine.id, { html: previewHtml, genre, title: dispTitle, ownerName });
+      } else {
+        await base44.entities.PublishedGame.create({ name: n, html: previewHtml, genre, title: dispTitle, ownerName });
+      }
+      const list = getTaken().filter((e) => e.name !== n);
+      list.push({ name: n, projectId });
+      localStorage.setItem(TAKEN_KEY, JSON.stringify(list));
+      setPublishUrl(`${window.location.origin}/chat/game/${n}`);
+      setShowPublish(false);
+      setPublished(true);
+      setTimeout(() => setPublished(false), 2500);
+    } catch (e) {
+      setPublishErr(e?.response?.data?.error || e?.message || "Could not publish.");
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const reload = () => setReloadKey((k) => k + 1);
+  const taken = isTakenFor(gameName, projectId);
+  const ownerInitial = (user?.full_name || user?.email || "U").trim().charAt(0).toUpperCase();
+
+  return (
+    <div className="h-full flex flex-col bg-gradient-to-br from-slate-950 via-slate-900 to-black overflow-hidden">
+      <div className="pointer-events-none absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-fuchsia-600/15 rounded-full blur-[120px]" />
+
+      {/* Top bar */}
+      <header className="relative z-20 flex items-center gap-2 sm:gap-3 h-[calc(3.5rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] px-3 sm:px-4 border-b border-slate-700/50 bg-slate-900/70 backdrop-blur-xl">
+        <button onClick={onToggleSidebar} title="Menu" className="p-1.5 rounded-lg hover:bg-slate-800 transition-colors shrink-0">
+          <div className="keep-color w-7 h-7 rounded-lg bg-gradient-to-br from-fuchsia-500 to-indigo-500 flex items-center justify-center">
+            <BlackholeIcon className="w-5 h-5" />
+          </div>
+        </button>
+        <span className="h-6 w-px bg-slate-700 shrink-0" />
+        <button
+          onClick={onOpenProfile}
+          title="Account"
+          className="keep-color w-8 h-8 rounded-full bg-gradient-to-br from-fuchsia-500 to-indigo-500 flex items-center justify-center text-xs font-bold text-white hover:opacity-90 transition-opacity shrink-0"
+        >
+          {ownerInitial}
+        </button>
+        <span className="h-6 w-px bg-slate-500/60 shrink-0" />
+        <ThemeToggle light={lightMode} onToggle={onToggleLight} />
+        <input
+          value={gameName}
+          onChange={(e) => setGameName(sanitize(e.target.value))}
+          placeholder="my-game"
+          title="Game name (letters and hyphens only)"
+          className="bg-slate-800/70 border border-slate-700/50 rounded-lg px-2.5 py-1.5 text-sm text-white outline-none focus:border-fuchsia-500/50 w-28 sm:w-40 font-medium shrink-0"
+        />
+
+        {/* Genre selector */}
+        <div className="flex-1 flex justify-center px-2 min-w-0">
+          <div className="flex items-center w-full max-w-md bg-slate-800/70 rounded-lg border border-slate-700/50 focus-within:border-fuchsia-500/50 transition-colors">
+            <Gamepad2 className="w-4 h-4 text-fuchsia-400 ml-2.5 shrink-0" />
+            <SheetSelect
+              value={genre}
+              onChange={setGenre}
+              options={GENRES.map((g) => ({ value: g.id, label: g.label }))}
+              className="flex-1 bg-transparent outline-none text-slate-200 px-2 py-1.5 text-sm min-w-0"
+            />
+            <button
+              onClick={reload}
+              title="Reload preview"
+              className="p-1.5 mr-1 rounded-md text-slate-400 hover:text-slate-200 hover:bg-slate-700/60 transition-colors shrink-0"
+            >
+              <RefreshCw className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <button
+            onClick={onUpgrade}
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 text-white text-sm font-medium hover:opacity-90 transition-opacity"
+          >
+            <Crown className="w-4 h-4" /> Upgrade
+          </button>
+          <button
+            onClick={() => setShowPublish(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-fuchsia-500 text-white text-sm font-medium hover:bg-fuchsia-400 transition-colors"
+          >
+            <Rocket className="w-4 h-4" /> Publish
+          </button>
+        </div>
+      </header>
+
+      {/* Body */}
+      <div className="relative z-10 flex-1 flex flex-col md:flex-row overflow-hidden">
+        {/* Chat */}
+        <section className="md:w-[40%] w-full md:h-full h-[45%] flex flex-col border-b md:border-b-0 md:border-r border-slate-700/50 bg-slate-900/40">
+          <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 scroll-smooth">
+            {messages.length === 0 && !loading && (
+              <div className="h-full flex flex-col items-center justify-center text-center px-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-fuchsia-500 to-indigo-500 flex items-center justify-center mb-3">
+                  <Gamepad2 className="w-6 h-6 text-white" />
+                </div>
+                <p className="text-slate-300 font-medium">Describe your game</p>
+                <p className="text-slate-500 text-sm mt-1">Blackhole AI will build it live</p>
+              </div>
+            )}
+
+            {messages.map((m, i) => {
+              if (m.role === "user") {
+                return (
+                  <div key={i} className="flex justify-end">
+                    <div className="max-w-[85%] px-3.5 py-2.5 rounded-2xl rounded-br-sm bg-gradient-to-br from-fuchsia-500 to-indigo-600 text-white text-sm">
+                      {m.content}
+                    </div>
+                  </div>
+                );
+              }
+              const isHtml = /<[a-z!][\s\S]*>/i.test(m.content);
+              return (
+                <div key={i} className="flex justify-start">
+                  <div className="max-w-[85%] px-3.5 py-2.5 rounded-2xl rounded-bl-sm bg-slate-800 text-slate-100 border border-slate-700/50 text-sm">
+                    {isHtml ? (
+                      <span className="text-fuchsia-300 font-medium">✓ Game updated</span>
+                    ) : (
+                      <span className="whitespace-pre-wrap">{m.content}</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+
+            {loading && (
+              <div className="flex justify-start">
+                <div className="bg-slate-800 border border-slate-700/50 px-4 py-3 rounded-2xl rounded-bl-sm">
+                  <Loader2 className="w-5 h-5 text-fuchsia-400 animate-spin" />
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="p-3 border-t border-slate-700/50">
+            {files.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-2">
+                {files.map((f, i) => (
+                  <div key={i} className="flex items-center gap-1.5 bg-slate-800 border border-slate-700/50 rounded-lg px-2 py-1 text-xs text-slate-200">
+                    <Paperclip className="w-3 h-3 text-slate-400" />
+                    <span className="max-w-[120px] truncate">{f.name}</span>
+                    <button onClick={() => setFiles((fs) => fs.filter((_, j) => j !== i))} className="text-slate-400 hover:text-red-400">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="flex items-end gap-2 bg-slate-800/70 rounded-2xl border border-slate-700/50 focus-within:border-fuchsia-500/50 transition-colors">
+              <textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Describe the game you want..."
+                rows={1}
+                className="flex-1 bg-transparent resize-none outline-none text-slate-100 placeholder:text-slate-500 px-4 py-3 max-h-32 text-sm"
+              />
+              {loading ? (
+                <button onClick={stop} className="m-1.5 p-2.5 rounded-xl bg-red-600 text-white hover:bg-red-500 transition-colors" title="Stop generating">
+                  <Square className="w-5 h-5" />
+                </button>
+              ) : (
+                <button
+                  onClick={send}
+                  disabled={!input.trim() || sendExhausted}
+                  className="m-1.5 p-2.5 rounded-xl bg-gradient-to-br from-fuchsia-500 to-indigo-500 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
+                >
+                  <Send className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                title="Attach images or files"
+                className="p-1.5 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+              <AiChooser value={selectedAi} onChange={setSelectedAi} plan={plan} allowFable={true} />
+              {sendExhausted && (
+                <p className="text-xs text-red-400 ml-auto">
+                  You're out of {isCodeAi ? "Blackhole Code" : isGalaxy ? "Galaxy 5" : isSpace ? "Space 5" : "Blackhole AI"} credits. Switch AI or upgrade.
+                </p>
+              )}
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              className="hidden"
+              onChange={(e) => {
+                const fs = Array.from(e.target.files || []);
+                if (fs.length) setFiles((prev) => [...prev, ...fs]);
+                e.target.value = "";
+              }}
+            />
+          </div>
+        </section>
+
+        {/* Preview */}
+        <section className="md:flex-1 w-full md:h-full h-[55%] flex flex-col bg-slate-950">
+          <div className="flex items-center gap-1 px-3 h-10 border-b border-slate-700/50 bg-slate-900/60">
+            <button
+              onClick={() => setPreviewMode("preview")}
+              className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${previewMode === "preview" ? "bg-slate-800 text-white" : "text-slate-400 hover:text-slate-200"}`}
+            >
+              Preview
+            </button>
+            <button
+              onClick={() => setPreviewMode("info")}
+              className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${previewMode === "info" ? "bg-slate-800 text-white" : "text-slate-400 hover:text-slate-200"}`}
+            >
+              Info
+            </button>
+          </div>
+
+          <div className="flex-1 relative overflow-hidden bg-black">
+            {previewMode === "info" ? (
+              <div className="w-full h-full bg-slate-950 p-6 overflow-y-auto text-slate-200">
+                <h2 className="text-lg font-semibold">{title || gameName}</h2>
+                <p className="text-slate-400 text-sm mt-1">
+                  Genre: <span className="text-slate-200">{GENRES.find((g) => g.id === genre)?.label || genre}</span>
+                </p>
+                <p className="text-slate-400 text-sm mt-3">
+                  Publish your game and it will appear on the Games front page, grouped by genre. The most-played games rise to the Top 5.
+                </p>
+              </div>
+            ) : previewHtml ? (
+              <iframe key={reloadKey} srcDoc={previewHtml} title="Game preview" sandbox="allow-scripts" className="w-full h-full bg-black" />
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center bg-slate-950 text-center p-6">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-fuchsia-500 to-indigo-500 flex items-center justify-center mb-3">
+                  <Gamepad2 className="w-7 h-7 text-white" />
+                </div>
+                <p className="text-slate-300 font-medium">Your game preview will appear here</p>
+                <p className="text-slate-500 text-sm mt-1">Describe what you want to build in the chat</p>
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
+
+      {/* Publish dialog */}
+      <AnimatePresence>
+        {showPublish && (
+          <motion.div
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowPublish(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-md bg-slate-900 border border-slate-700/60 rounded-2xl shadow-2xl p-6"
+            >
+              <h3 className="text-lg font-semibold text-white">Publish your game</h3>
+              <p className="text-slate-400 text-sm mt-1">Your game will be live at:</p>
+              <div className="mt-3 flex items-center gap-2 bg-slate-800/70 border border-slate-700/50 rounded-xl px-3 py-2.5">
+                <Gamepad2 className="w-4 h-4 text-fuchsia-300 shrink-0" />
+                <span className="text-slate-100 text-sm font-mono truncate">
+                  {window.location.origin}/chat/game/{sanitize(gameName || "your-game")}
+                </span>
+              </div>
+
+              <label className="block mt-4 text-xs text-slate-400 mb-1">Game title</label>
+              <input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="My Awesome Game"
+                className="w-full bg-slate-800/70 border border-slate-700/50 rounded-xl px-3 py-2.5 text-sm text-white outline-none focus:border-fuchsia-500/50"
+              />
+
+              <label className="block mt-3 text-xs text-slate-400 mb-1">Genre</label>
+              <div className="w-full bg-slate-800/70 border border-slate-700/50 rounded-xl px-3 py-2.5">
+                <SheetSelect
+                  value={genre}
+                  onChange={setGenre}
+                  options={GENRES.map((g) => ({ value: g.id, label: g.label }))}
+                  className="w-full bg-transparent outline-none text-slate-200 text-sm"
+                />
+              </div>
+
+              {taken && (
+                <div className="mt-3">
+                  <p className="text-amber-300 text-xs">That name is taken. Try one of these:</p>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {suggestNames(gameName || "my-game", projectId).map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => setGameName(s)}
+                        className="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700/50 text-slate-200 text-xs hover:bg-slate-700 transition-colors"
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-3 mt-5">
+                <button
+                  onClick={() => setShowPublish(false)}
+                  className="flex-1 py-2.5 rounded-xl bg-black text-white font-medium hover:bg-slate-900 border border-slate-700 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmPublish}
+                  disabled={!gameName || publishing || !previewHtml}
+                  className="flex-1 py-2.5 rounded-xl bg-fuchsia-500 text-white font-medium hover:bg-fuchsia-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  {publishing ? "Publishing…" : "Publish"}
+                </button>
+              </div>
+              {publishErr && <p className="text-sm text-red-400 mt-3">{publishErr}</p>}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {published && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="fixed top-20 right-6 z-50 bg-emerald-500 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 text-sm font-medium"
+          >
+            <Rocket className="w-4 h-4" /> Game published!
+            {publishUrl && (
+              <a href={publishUrl} target="_blank" rel="noreferrer" className="underline ml-1">Play</a>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}

@@ -1,0 +1,316 @@
+import React, { useState, useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Menu, Search, Plus, Settings, Gamepad2, Flame, Sparkles, Ghost, Crosshair,
+  Puzzle, Car, Trophy, Sword, Compass, Brain, Zap, Play, Home as HomeIcon, Loader2,
+} from "lucide-react";
+import { useAppShell } from "@/components/AppShellContext";
+import { base44 } from "@/api/base44Client";
+import Sidebar from "@/components/Sidebar";
+import ThemeToggle from "@/components/ThemeToggle";
+
+const GENRES = [
+  { id: "io", label: ".io", icon: Zap },
+  { id: "shooting", label: "Shooting", icon: Crosshair },
+  { id: "horror", label: "Horror", icon: Ghost },
+  { id: "action", label: "Action", icon: Sword },
+  { id: "arcade", label: "Arcade", icon: Gamepad2 },
+  { id: "puzzle", label: "Puzzle", icon: Puzzle },
+  { id: "racing", label: "Racing", icon: Car },
+  { id: "sports", label: "Sports", icon: Trophy },
+  { id: "adventure", label: "Adventure", icon: Compass },
+  { id: "strategy", label: "Strategy", icon: Brain },
+];
+const GENRE_LABEL = Object.fromEntries(GENRES.map((g) => [g.id, g.label]));
+const RAILS = [
+  { id: "home", label: "Home", icon: HomeIcon },
+  { id: "new", label: "New", icon: Sparkles },
+  { id: "top", label: "Top", icon: Flame },
+  ...GENRES,
+];
+
+const THUMB = {
+  io: "from-fuchsia-500 to-indigo-500",
+  shooting: "from-red-500 to-orange-500",
+  horror: "from-purple-700 to-slate-900",
+  action: "from-amber-500 to-rose-500",
+  arcade: "from-cyan-500 to-blue-500",
+  puzzle: "from-emerald-500 to-teal-500",
+  racing: "from-yellow-500 to-orange-500",
+  sports: "from-green-500 to-emerald-600",
+  adventure: "from-teal-500 to-cyan-600",
+  strategy: "from-slate-500 to-slate-700",
+};
+const thumb = (g) => THUMB[g.genre] || "from-indigo-500 to-fuchsia-500";
+const genreIcon = (g) => (GENRES.find((x) => x.id === g.genre) || {}).icon || Gamepad2;
+
+function GameCard({ g, onPlay }) {
+  const Icon = genreIcon(g);
+  return (
+    <button onClick={() => onPlay(g.name)} className="group text-left">
+      <div className={`relative aspect-square rounded-xl bg-gradient-to-br ${thumb(g)} overflow-hidden ring-1 ring-white/10`}>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Icon className="w-8 h-8 text-white/70" />
+        </div>
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity w-10 h-10 rounded-full bg-white/90 flex items-center justify-center">
+            <Play className="w-5 h-5 text-slate-900" />
+          </div>
+        </div>
+      </div>
+      <p className="mt-1.5 text-xs font-medium text-slate-200 truncate">{g.title || g.name}</p>
+      <p className="text-[10px] text-slate-500">{GENRE_LABEL[g.genre] || "Game"} · {g.plays || 0} plays</p>
+    </button>
+  );
+}
+
+function BigCard({ g, idx, onPlay }) {
+  const Icon = genreIcon(g);
+  return (
+    <button onClick={() => onPlay(g.name)} className="group text-left">
+      <div className={`relative aspect-video rounded-xl bg-gradient-to-br ${thumb(g)} overflow-hidden ring-1 ring-white/10`}>
+        <span className="absolute top-2 left-2 text-2xl font-black text-white/80">#{idx + 1}</span>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Icon className="w-10 h-10 text-white/70" />
+        </div>
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
+            <Play className="w-6 h-6 text-slate-900" />
+          </div>
+        </div>
+      </div>
+      <p className="mt-1.5 text-sm font-semibold text-white truncate">{g.title || g.name}</p>
+      <p className="text-[11px] text-slate-400">{g.plays || 0} plays · {GENRE_LABEL[g.genre] || "Game"}</p>
+    </button>
+  );
+}
+
+function EmptyState({ onCreate }) {
+  return (
+    <div className="h-full flex flex-col items-center justify-center text-center">
+      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-fuchsia-500 to-indigo-500 flex items-center justify-center mb-4">
+        <Gamepad2 className="w-8 h-8 text-white" />
+      </div>
+      <h2 className="text-xl font-bold text-white">No games yet</h2>
+      <p className="text-slate-500 text-sm mt-1">Be the first to create a game with AI.</p>
+      <button
+        onClick={onCreate}
+        className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-br from-fuchsia-500 to-indigo-500 text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+      >
+        <Plus className="w-4 h-4" /> Create a game
+      </button>
+    </div>
+  );
+}
+
+export default function GamesFront() {
+  const shell = useAppShell();
+  const { sidebarOpen, setSidebarOpen, openProfile, avatarInitial, lightMode, toggleLight, navigate, goGameDesigner, conv, credits, isAdmin } = shell;
+  const [games, setGames] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [cat, setCat] = useState("home");
+  const [q, setQ] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const load = async () => {
+    try {
+      const list = await base44.entities.PublishedGame.list("-plays", 500);
+      setGames(list || []);
+    } catch {
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    load();
+  }, []);
+
+  const filtered = useMemo(() => {
+    let g = games;
+    if (q.trim()) {
+      const s = q.toLowerCase();
+      g = g.filter((x) => (x.title || x.name).toLowerCase().includes(s));
+    }
+    if (cat === "new") return [...g].sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+    if (cat === "top") return [...g].sort((a, b) => (b.plays || 0) - (a.plays || 0));
+    if (GENRES.some((x) => x.id === cat)) return g.filter((x) => x.genre === cat);
+    return g;
+  }, [games, cat, q]);
+
+  const top5 = useMemo(() => [...games].sort((a, b) => (b.plays || 0) - (a.plays || 0)).slice(0, 5), [games]);
+  const showTop = cat === "home";
+  const play = (name) => navigate(`/chat/game/${name}`);
+
+  return (
+    <div className="h-screen flex flex-col bg-[#0b0f1a] text-slate-100 overflow-hidden relative">
+      <AnimatePresence>
+        {sidebarOpen && (
+          <>
+            <motion.div
+              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSidebarOpen(false)}
+            />
+            <div className="absolute top-16 left-4 z-50">
+              <Sidebar
+                conversations={conv.conversations}
+                activeId={conv.activeId}
+                onSelect={(id) => { conv.selectConversation(id); navigate("/chat"); }}
+                onRename={conv.renameConversation}
+                onDelete={conv.deleteConversation}
+                onRefresh={conv.reload}
+                onGoHome={shell.goHome}
+                onGoCode={shell.goCode}
+                onNewChat={shell.newChat}
+                onGoSubscriptions={shell.goPlans}
+                onGoDesigner={shell.goDesigner}
+                onGoGames={shell.goGames}
+                onGoMonitor={shell.goMonitor}
+                isAdmin={isAdmin}
+                credits={credits}
+              />
+            </div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Top bar */}
+      <header className="h-14 shrink-0 flex items-center gap-3 px-4 border-b border-white/10 bg-[#0b0f1a]/90 backdrop-blur z-30">
+        <button onClick={() => setSidebarOpen((o) => !o)} className="p-2 rounded-lg hover:bg-white/10 transition-colors" title="Menu">
+          <Menu className="w-5 h-5" />
+        </button>
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-fuchsia-500 to-indigo-500 flex items-center justify-center">
+            <Gamepad2 className="w-4 h-4 text-white" />
+          </div>
+          <span className="font-bold tracking-tight">Blackhole <span className="text-fuchsia-400">Games</span></span>
+        </div>
+        <div className="flex-1 max-w-md mx-auto">
+          <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 h-9">
+            <Search className="w-4 h-4 text-slate-400" />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search games"
+              className="bg-transparent outline-none text-sm flex-1 text-slate-100 placeholder:text-slate-500"
+            />
+          </div>
+        </div>
+        <ThemeToggle light={lightMode} onToggle={toggleLight} />
+        <div className="relative">
+          <button
+            onClick={() => setMenuOpen((o) => !o)}
+            className="keep-color w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-sm font-bold text-white"
+            title="Account"
+          >
+            {avatarInitial}
+          </button>
+          <AnimatePresence>
+            {menuOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                className="absolute right-0 mt-2 w-48 bg-[#11172a] border border-white/10 rounded-xl shadow-2xl py-1 z-50"
+              >
+                <button
+                  onClick={() => { setMenuOpen(false); openProfile("main"); }}
+                  className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-white/10 transition-colors"
+                >
+                  <Settings className="w-4 h-4" /> Settings
+                </button>
+                <button
+                  onClick={() => { setMenuOpen(false); goGameDesigner(); }}
+                  className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-white/10 transition-colors text-fuchsia-300"
+                >
+                  <Plus className="w-4 h-4" /> Create a game
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </header>
+
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left rail */}
+        <nav className="w-16 sm:w-52 shrink-0 border-r border-white/10 bg-[#0b0f1a] overflow-y-auto sidebar-scroll py-2">
+          {RAILS.map((r) => {
+            const Icon = r.icon;
+            const active = cat === r.id;
+            return (
+              <button
+                key={r.id}
+                onClick={() => setCat(r.id)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm transition-colors ${active ? "bg-white/10 text-white" : "text-slate-400 hover:text-slate-200 hover:bg-white/5"}`}
+              >
+                <Icon className="w-5 h-5 shrink-0" />
+                <span className="hidden sm:inline">{r.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Main */}
+        <main className="flex-1 overflow-y-auto sidebar-scroll p-4 sm:p-6">
+          {loading ? (
+            <div className="flex items-center justify-center h-full text-slate-500">
+              <Loader2 className="w-6 h-6 animate-spin" />
+            </div>
+          ) : games.length === 0 ? (
+            <EmptyState onCreate={goGameDesigner} />
+          ) : (
+            <>
+              {showTop && top5.length > 0 && (
+                <section className="mb-6">
+                  <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-300 mb-3">
+                    <Flame className="w-4 h-4 text-orange-400" /> Top Games
+                  </h2>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                    {top5.map((g, idx) => (
+                      <BigCard key={g.id} g={g} idx={idx} onPlay={play} />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {cat === "home" ? (
+                GENRES.map((genre) => {
+                  const list = games.filter((g) => g.genre === genre.id);
+                  if (!list.length) return null;
+                  const Icon = genre.icon;
+                  return (
+                    <section key={genre.id} className="mb-6">
+                      <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-300 mb-3">
+                        <Icon className="w-4 h-4" /> {genre.label}
+                      </h2>
+                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                        {list.map((g) => (
+                          <GameCard key={g.id} g={g} onPlay={play} />
+                        ))}
+                      </div>
+                    </section>
+                  );
+                })
+              ) : (
+                <section>
+                  <h2 className="text-sm font-semibold text-slate-300 mb-3">{RAILS.find((r) => r.id === cat)?.label} Games</h2>
+                  {filtered.length ? (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                      {filtered.map((g) => (
+                        <GameCard key={g.id} g={g} onPlay={play} />
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-slate-500 text-sm">No games here yet.</p>
+                  )}
+                </section>
+              )}
+            </>
+          )}
+        </main>
+      </div>
+    </div>
+  );
+}

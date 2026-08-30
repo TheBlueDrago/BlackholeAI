@@ -2,9 +2,9 @@ import React from "react";
 import { AnimatePresence } from "framer-motion";
 import { useAppShell } from "@/components/AppShellContext";
 import Sidebar from "@/components/Sidebar";
-import WebsiteDesigner from "@/components/WebsiteDesigner";
+import GamesDesigner from "@/pages/chat/GamesDesigner";
 
-export default function DesignerWorkspace() {
+export default function GamesDesignerWorkspace() {
   const shell = useAppShell();
   const { sidebarOpen, setSidebarOpen, openProfile, conv, credits, lightMode, toggleLight, effPlan, isAdmin } = shell;
 
@@ -33,7 +33,7 @@ export default function DesignerWorkspace() {
           </div>
         )}
       </AnimatePresence>
-      <WebsiteDesigner
+      <GamesDesigner
         onToggleSidebar={() => setSidebarOpen((o) => !o)}
         onOpenProfile={() => openProfile("main")}
         onUpgrade={() => shell.navigate("/chat/plans")}
