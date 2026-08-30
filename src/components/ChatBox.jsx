@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Loader2, Plus, X, Paperclip } from "lucide-react";
+import { Send, Square, Plus, X, Paperclip } from "lucide-react";
 import BlackholeIcon from "@/components/BlackholeIcon";
 import { base44 } from "@/api/base44Client";
 
@@ -13,6 +13,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
   const [files, setFiles] = useState([]);
   const fileInputRef = useRef(null);
   const scrollRef = useRef(null);
+  const cancelRef = useRef(false);
 
   const messages = conversation?.messages || [];
   const isCodeAi = selectedAi === "code";
@@ -21,6 +22,11 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, loading]);
+
+  const stop = () => {
+    cancelRef.current = true;
+    setLoading(false);
+  };
 
   const send = async () => {
     const text = input.trim();
@@ -36,10 +42,15 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
     addMessage(convId, { role: "user", content: text + (files.length ? ` (attached: ${files.map((f) => f.name).join(", ")})` : "") });
     setInput("");
     setLoading(true);
+    cancelRef.current = false;
     (isCodeAi ? onSpendAICode : onSpendAI)?.();
+    const startedAt = Date.now();
     try {
       const model = selectedAi === "ai" ? "automatic" : "claude_sonnet_4_6";
       const res = await base44.functions.invoke("chatCompletion", { prompt: fullPrompt, model });
+      const elapsed = Date.now() - startedAt;
+      if (elapsed < 600) await new Promise((r) => setTimeout(r, 600 - elapsed));
+      if (cancelRef.current) return;
       const content = res.data?.content ?? "";
       addMessage(convId, { role: "ai", content });
 
@@ -49,13 +60,14 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
             prompt: `Create a very short title (max 4 words, no quotes, no trailing punctuation) summarizing what this chat is about based on the user's first message: "${text}". Respond with only the title.`,
           });
           const title = (titleRes.data?.content ?? "").trim().slice(0, 50);
-          if (title) renameConversation(convId, title);
+          if (title && !cancelRef.current) renameConversation(convId, title);
         } catch {}
       }
     } catch {
+      if (cancelRef.current) return;
       addMessage(convId, { role: "ai", content: "Sorry, something went wrong. Please try again." });
     } finally {
-      setLoading(false);
+      if (!cancelRef.current) setLoading(false);
     }
   };
 
@@ -96,8 +108,9 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
 
           {loading && (
             <div className="flex justify-start">
-              <div className="bg-slate-800 border border-slate-700/50 px-4 py-3 rounded-2xl rounded-bl-sm">
-                <Loader2 className="w-5 h-5 text-indigo-400 animate-spin" />
+              <div className="bg-slate-800 border border-slate-700/50 px-4 py-3 rounded-2xl rounded-bl-sm flex items-center gap-2.5">
+                <BlackholeIcon className="w-5 h-5 animate-spin" />
+                <span className="text-slate-300 text-sm animate-pulse">Thinking...</span>
               </div>
             </div>
           )}
@@ -126,13 +139,23 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
               rows={1}
               className="flex-1 bg-transparent resize-none outline-none text-slate-100 placeholder:text-slate-500 px-4 py-3 max-h-32 text-sm"
             />
-            <button
-              onClick={send}
-              disabled={!input.trim() || loading || exhausted}
-              className="m-1.5 p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
-            >
-              <Send className="w-5 h-5" />
-            </button>
+            {loading ? (
+              <button
+                onClick={stop}
+                className="m-1.5 p-2.5 rounded-xl bg-red-600 text-white hover:bg-red-500 transition-colors"
+                title="Stop generating"
+              >
+                <Square className="w-5 h-5" />
+              </button>
+            ) : (
+              <button
+                onClick={send}
+                disabled={!input.trim() || exhausted}
+                className="m-1.5 p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
+              >
+                <Send className="w-5 h-5" />
+              </button>
+            )}
           </div>
           <div className="flex items-center gap-2 mt-2">
             <button

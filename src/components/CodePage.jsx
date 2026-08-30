@@ -1,18 +1,25 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Terminal, Loader2 } from "lucide-react";
+import { Send, Terminal, Square } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import BlackholeIcon from "@/components/BlackholeIcon";
 
 export default function CodePage({ aiCodeExhausted, onSpendAICode }) {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef(null);
+  const cancelRef = useRef(false);
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, loading]);
+
+  const stop = () => {
+    cancelRef.current = true;
+    setLoading(false);
+  };
 
   const send = async () => {
     const text = input.trim();
@@ -21,22 +28,28 @@ export default function CodePage({ aiCodeExhausted, onSpendAICode }) {
     setMessages((m) => [...m, { role: "user", content: text }]);
     setInput("");
     setLoading(true);
+    cancelRef.current = false;
     onSpendAICode?.();
+    const startedAt = Date.now();
 
     try {
       const res = await base44.functions.invoke("chatCompletion", {
         prompt: text,
         model: "claude-sonnet-5",
       });
+      const elapsed = Date.now() - startedAt;
+      if (elapsed < 600) await new Promise((r) => setTimeout(r, 600 - elapsed));
+      if (cancelRef.current) return;
       const content = res.data?.content ?? "";
       setMessages((m) => [...m, { role: "ai", content }]);
     } catch {
+      if (cancelRef.current) return;
       setMessages((m) => [
         ...m,
         { role: "ai", content: "Sorry, something went wrong. Please try again." },
       ]);
     } finally {
-      setLoading(false);
+      if (!cancelRef.current) setLoading(false);
     }
   };
 
@@ -77,8 +90,9 @@ export default function CodePage({ aiCodeExhausted, onSpendAICode }) {
 
           {loading && (
             <div className="flex justify-start">
-              <div className="bg-slate-800 border border-emerald-700/40 px-4 py-3 rounded-2xl rounded-bl-sm">
-                <Loader2 className="w-5 h-5 text-emerald-400 animate-spin" />
+              <div className="bg-slate-800 border border-emerald-700/40 px-4 py-3 rounded-2xl rounded-bl-sm flex items-center gap-2.5">
+                <BlackholeIcon className="w-5 h-5 animate-spin" />
+                <span className="text-slate-300 text-sm animate-pulse">Thinking...</span>
               </div>
             </div>
           )}
@@ -94,13 +108,23 @@ export default function CodePage({ aiCodeExhausted, onSpendAICode }) {
               rows={1}
               className="flex-1 bg-transparent resize-none outline-none text-slate-100 placeholder:text-slate-500 px-4 py-3 max-h-32 text-sm"
             />
-            <button
-              onClick={send}
-              disabled={!input.trim() || loading || aiCodeExhausted}
-              className="m-1.5 p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
-            >
-              <Send className="w-5 h-5" />
-            </button>
+            {loading ? (
+              <button
+                onClick={stop}
+                className="m-1.5 p-2.5 rounded-xl bg-red-600 text-white hover:bg-red-500 transition-colors"
+                title="Stop generating"
+              >
+                <Square className="w-5 h-5" />
+              </button>
+            ) : (
+              <button
+                onClick={send}
+                disabled={!input.trim() || aiCodeExhausted}
+                className="m-1.5 p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
+              >
+                <Send className="w-5 h-5" />
+              </button>
+            )}
           </div>
           {aiCodeExhausted && (
             <p className="text-center text-xs text-red-400 mt-2">You're out of AI Code credits.</p>
