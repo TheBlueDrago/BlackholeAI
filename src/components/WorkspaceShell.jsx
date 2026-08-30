@@ -87,6 +87,7 @@ export function ChatWorkspace() {
       conversation={conv.activeConversation}
       createConversation={conv.createConversation}
       addMessage={conv.addMessage}
+      removeMessage={conv.removeMessage}
       renameConversation={conv.renameConversation}
       plan={effPlan}
       aiExhausted={credits.aiExhausted}

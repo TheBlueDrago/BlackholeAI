@@ -46,6 +46,12 @@ export function useConversations() {
     setConversations((prev) => prev.map((c) => (c.id === id ? { ...c, title } : c)));
   }, []);
 
+  const removeMessage = useCallback((convId, index) => {
+    setConversations((prev) =>
+      prev.map((c) => (c.id === convId ? { ...c, messages: c.messages.filter((_, i) => i !== index) } : c))
+    );
+  }, []);
+
   const deleteConversation = useCallback((id) => {
     setConversations((prev) => prev.filter((c) => c.id !== id));
     setActiveId((cur) => (cur === id ? null : cur));
@@ -63,6 +69,7 @@ export function useConversations() {
     selectConversation,
     addMessage,
     renameConversation,
+    removeMessage,
     deleteConversation,
     reload,
   };
