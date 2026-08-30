@@ -109,7 +109,7 @@ export default function Chat() {
                   onGoDesigner={goDesigner}
                   onGoMonitor={() => switchMode("monitor")}
                   isAdmin={isAdmin}
-                  credits={{ aiTotal: credits.aiTotal, aiUsed: credits.aiUsed, aiCodeTotal: credits.aiCodeTotal, aiCodeUsed: credits.aiCodeUsed }}
+                  credits={{ aiTotal: credits.aiTotal, aiUsed: credits.aiUsed, aiCodeTotal: credits.aiCodeTotal, aiCodeUsed: credits.aiCodeUsed, galaxy5Total: credits.galaxy5Total, galaxy5Used: credits.galaxy5Used }}
                 />
               </div>
             )}
@@ -125,6 +125,8 @@ export default function Chat() {
             aiCodeExhausted={credits.aiCodeExhausted}
             onSpendAI={credits.spendAI}
             onSpendAICode={credits.spendAICode}
+            galaxy5Exhausted={credits.galaxy5Exhausted}
+            onSpendGalaxy5={credits.spendGalaxy5}
           />
         </div>
       ) : (
@@ -172,7 +174,7 @@ export default function Chat() {
                   onGoDesigner={goDesigner}
                   onGoMonitor={() => switchMode("monitor")}
                   isAdmin={isAdmin}
-                  credits={{ aiTotal: credits.aiTotal, aiUsed: credits.aiUsed, aiCodeTotal: credits.aiCodeTotal, aiCodeUsed: credits.aiCodeUsed }}
+                  credits={{ aiTotal: credits.aiTotal, aiUsed: credits.aiUsed, aiCodeTotal: credits.aiCodeTotal, aiCodeUsed: credits.aiCodeUsed, galaxy5Total: credits.galaxy5Total, galaxy5Used: credits.galaxy5Used }}
                 />
               )}
             </AnimatePresence>

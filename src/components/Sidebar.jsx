@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Pen, Plus, Code, Sparkles, Check, X, CreditCard, Globe } from "lucide-react";
+import { Pen, Plus, Code, Sparkles, Gem, Check, X, CreditCard, Globe } from "lucide-react";
 import BlackholeIcon from "@/components/BlackholeIcon";
 
 const SKIP_KEY = "infinity-ai-skip-delete-confirm";
@@ -144,6 +144,15 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
               total={credits.aiCodeTotal ?? 0}
               gradient="from-emerald-500 to-teal-500"
             />
+            {credits.galaxy5Total > 0 && (
+              <CreditBar
+                icon={<Gem className="w-3 h-3 text-sky-300" />}
+                label="Galaxy 5"
+                used={credits.galaxy5Used ?? 0}
+                total={credits.galaxy5Total ?? 0}
+                gradient="from-sky-500 to-indigo-500"
+              />
+            )}
           </div>
 
           {/* Previous chats label (non-clickable) */}

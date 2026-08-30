@@ -94,7 +94,7 @@ function initialOf(s) {
   return (s || "?").trim().charAt(0).toUpperCase();
 }
 
-export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgrade, aiExhausted, onSpendAI, aiCodeExhausted, onSpendAICode, plan, lightMode, onToggleLight }) {
+export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgrade, aiExhausted, onSpendAI, aiCodeExhausted, onSpendAICode, galaxy5Exhausted, onSpendGalaxy5, plan, lightMode, onToggleLight }) {
   const initial = loadState();
   const projectId = initial.projectId;
   const [siteName, setSiteName] = useState(initial.siteName);
@@ -144,7 +144,8 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   const canAdd = members.length < cap - 1;
 
   const isCodeAi = selectedAi === "code";
-  const sendExhausted = isCodeAi ? aiCodeExhausted : aiExhausted;
+  const isGalaxy = selectedAi === "opus5";
+  const sendExhausted = isCodeAi ? aiCodeExhausted : isGalaxy ? galaxy5Exhausted : aiExhausted;
 
   const send = async () => {
     const text = input.trim();
@@ -154,7 +155,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setLoading(true);
-    (isCodeAi ? onSpendAICode : onSpendAI)?.();
+    (isCodeAi ? onSpendAICode : isGalaxy ? onSpendGalaxy5 : onSpendAI)?.();
     try {
       const lastHtml = messages.filter((m) => m.role === "ai").pop()?.content || "";
       const userTurns = messages.filter((m) => m.role === "user").map((m) => m.content);
@@ -472,7 +473,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
               <AiChooser value={selectedAi} onChange={setSelectedAi} plan={plan} allowFable={true} />
               {sendExhausted && (
                 <p className="text-xs text-red-400 ml-auto">
-                  You're out of {isCodeAi ? "AI Code" : "AI"} credits. Switch AI or upgrade.
+                  You're out of {isCodeAi ? "Blackhole Code" : isGalaxy ? "Galaxy 5" : "Blackhole AI"} credits. Switch AI or upgrade.
                 </p>
               )}
             </div>

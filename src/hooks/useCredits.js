@@ -2,10 +2,10 @@ import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 
 const KEY = "infinity-ai-credits-v2";
-const FREE = { aiTotal: 10, aiCodeTotal: 5 };
-const PRO = { aiTotal: Infinity, aiCodeTotal: 100 };
-const TEAM = { aiTotal: Infinity, aiCodeTotal: 1000 };
-const SECRET = { aiTotal: Infinity, aiCodeTotal: Infinity };
+const FREE = { aiTotal: 10, aiCodeTotal: 5, galaxy5Total: 0 };
+const PRO = { aiTotal: 25, aiCodeTotal: 15, galaxy5Total: 25 };
+const TEAM = { aiTotal: Infinity, aiCodeTotal: 1000, galaxy5Total: Infinity };
+const SECRET = { aiTotal: Infinity, aiCodeTotal: Infinity, galaxy5Total: Infinity };
 
 function monthKey(d = new Date()) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
@@ -18,12 +18,12 @@ function loadUsed() {
       const p = JSON.parse(raw);
       // New calendar month → reset to plan total (unused credits don't stack).
       if (p.periodKey && p.periodKey !== monthKey()) {
-        return { aiUsed: 0, aiCodeUsed: 0 };
+        return { aiUsed: 0, aiCodeUsed: 0, galaxy5Used: 0 };
       }
-      return { aiUsed: p.aiUsed ?? 0, aiCodeUsed: p.aiCodeUsed ?? 0 };
+      return { aiUsed: p.aiUsed ?? 0, aiCodeUsed: p.aiCodeUsed ?? 0, galaxy5Used: p.galaxy5Used ?? 0 };
     }
   } catch {}
-  return { aiUsed: 0, aiCodeUsed: 0 };
+  return { aiUsed: 0, aiCodeUsed: 0, galaxy5Used: 0 };
 }
 
 // Effective plan: Pro only counts while not expired (promo grants carry planExpiresAt).
@@ -78,13 +78,23 @@ export function useCredits() {
 
   const aiTotal = totals.aiTotal;
   const aiCodeTotal = team?.isAdmin ? Infinity : totals.aiCodeTotal;
+  const galaxy5Total = totals.galaxy5Total;
   const aiUsed = plan === "team" || plan === "secret" ? 0 : used.aiUsed;
   const aiCodeUsed = plan === "team" ? team?.aiCodeUsed ?? 0 : plan === "secret" ? 0 : used.aiCodeUsed;
+  const galaxy5Used = plan === "team" || plan === "secret" ? 0 : used.galaxy5Used;
 
   const spendAI = useCallback(
     (amount = 1) => {
       if (plan === "team" || plan === "secret") return; // unlimited
       setUsed((u) => ({ ...u, aiUsed: u.aiUsed + amount }));
+    },
+    [plan]
+  );
+
+  const spendGalaxy5 = useCallback(
+    (amount = 1) => {
+      if (plan === "team" || plan === "secret") return; // unlimited
+      setUsed((u) => ({ ...u, galaxy5Used: u.galaxy5Used + amount }));
     },
     [plan]
   );
@@ -113,21 +123,28 @@ export function useCredits() {
 
   const aiRemaining = aiTotal === Infinity ? Infinity : Math.max(0, aiTotal - aiUsed);
   const aiCodeRemaining = Math.max(0, aiCodeTotal - aiCodeUsed);
+  const galaxy5Remaining = galaxy5Total === Infinity ? Infinity : Math.max(0, galaxy5Total - galaxy5Used);
   const aiExhausted = aiRemaining <= 0;
   const aiCodeExhausted = aiCodeRemaining <= 0;
+  const galaxy5Exhausted = galaxy5Remaining <= 0;
 
   return {
     aiTotal,
     aiUsed,
     aiCodeTotal,
     aiCodeUsed,
+    galaxy5Total,
+    galaxy5Used,
     aiRemaining,
     aiCodeRemaining,
+    galaxy5Remaining,
     aiExhausted,
     aiCodeExhausted,
+    galaxy5Exhausted,
     plan,
     team,
     spendAI,
     spendAICode,
+    spendGalaxy5,
   };
 }
