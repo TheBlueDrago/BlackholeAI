@@ -465,13 +465,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
               className="w-full max-w-md bg-slate-900 border border-slate-700/60 rounded-2xl shadow-2xl p-6"
             >
               <h3 className="text-lg font-semibold text-white">Publish your game</h3>
-              <p className="text-slate-400 text-sm mt-1">Your game will be live at:</p>
-              <div className="mt-3 flex items-center gap-2 bg-slate-800/70 border border-slate-700/50 rounded-xl px-3 py-2.5">
-                <Gamepad2 className="w-4 h-4 text-fuchsia-300 shrink-0" />
-                <span className="text-slate-100 text-sm font-mono truncate">
-                  {window.location.origin}/chat/game/{sanitize(gameName || "your-game")}
-                </span>
-              </div>
+              <p className="text-slate-400 text-sm mt-1">Your game will go live on the Games front page.</p>
 
               <label className="block mt-4 text-xs text-slate-400 mb-1">Game title</label>
               <input
@@ -538,9 +532,6 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
             className="fixed top-20 right-6 z-50 bg-emerald-500 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 text-sm font-medium"
           >
             <Rocket className="w-4 h-4" /> Game published!
-            {publishUrl && (
-              <a href={publishUrl} target="_blank" rel="noreferrer" className="underline ml-1">Play</a>
-            )}
           </motion.div>
         )}
       </AnimatePresence>
