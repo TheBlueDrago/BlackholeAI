@@ -27,9 +27,6 @@ export default function GameView() {
         setHtml(d.html);
         setTitle(d.title || name);
         setGenre(d.genre || "");
-        try {
-          if (d.id) await base44.entities.PublishedGame.update(d.id, { plays: (d.plays || 0) + 1 });
-        } catch {}
       } catch {
         if (!done) setNotFound(true);
       } finally {

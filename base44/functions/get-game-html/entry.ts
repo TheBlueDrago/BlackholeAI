@@ -14,6 +14,17 @@ export default async function(req) {
       const r = await fetch(html);
       html = await r.text();
     }
+    // Count plays once per person (per account), server-side.
+    try {
+      const user = await base44.auth.me();
+      if (user) {
+        const played = await base44.asServiceRole.entities.GamePlay.filter({ gameName: name, userId: user.id });
+        if (!played || !played.length) {
+          await base44.asServiceRole.entities.GamePlay.create({ gameName: name, userId: user.id });
+          await base44.asServiceRole.entities.PublishedGame.update(g.id, { plays: (g.plays || 0) + 1 });
+        }
+      }
+    } catch {}
     return Response.json({
       html,
       id: g.id,
