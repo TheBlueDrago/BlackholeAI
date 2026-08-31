@@ -112,7 +112,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
   const [publishUrl, setPublishUrl] = useState("");
   const [files, setFiles] = useState([]);
   const opusAllowed = plan === "pro" || plan === "team" || plan === "secret";
-  const fableAllowed = plan === "team" || plan === "secret";
+  const fableAllowed = plan === "team" || plan === "secret" || plan === "admin";
   const [selectedAi, setSelectedAi] = useState(fableAllowed ? "fable" : opusAllowed ? "opus5" : "ai");
   const fileInputRef = useRef(null);
   const scrollRef = useRef(null);
