@@ -6,6 +6,8 @@ import { base44 } from "@/api/base44Client";
 import AiChooser from "@/components/AiChooser";
 import SheetSelect from "@/components/SheetSelect";
 import ThemeToggle from "@/components/ThemeToggle";
+import { useLocation } from "react-router-dom";
+import { STARTER_GAME_HTML } from "@/lib/gameTemplate";
 
 const STORE_KEY = "infinity-ai-game-designer";
 const TAKEN_KEY = "infinity-ai-taken-games";
@@ -88,7 +90,11 @@ function sanitize(s) {
 }
 
 export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrade, aiExhausted, onSpendAI, aiCodeExhausted, onSpendAICode, galaxy5Exhausted, onSpendGalaxy5, space5Exhausted, onSpendSpace5, plan, lightMode, onToggleLight }) {
-  const initial = loadState();
+  const location = useLocation();
+  const startFresh = !!location.state?.fresh;
+  const initial = startFresh
+    ? { gameName: "my-game", title: "", genre: "io", messages: [{ role: "ai", content: STARTER_GAME_HTML }], projectId: genId() }
+    : loadState();
   const projectId = initial.projectId;
   const [gameName, setGameName] = useState(initial.gameName);
   const [title, setTitle] = useState(initial.title);
@@ -148,6 +154,13 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
 
   useEffect(() => {
     (async () => {
+      if (startFresh) {
+        // Brand new game: forget the previous draft entirely.
+        try { localStorage.removeItem(STORE_KEY); } catch {}
+        await base44.functions.invoke("game-draft", { action: "clear" }).catch(() => {});
+        loadedRef.current = true;
+        return;
+      }
       try {
         const res = await base44.functions.invoke("game-draft", { action: "load" });
         const d = res.data?.draft;
