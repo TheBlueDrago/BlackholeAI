@@ -13,7 +13,7 @@
     },
     "html": {
       "type": "string",
-      "description": "Full self-contained HTML5 game document."
+      "description": "Full self-contained HTML5 game document, or a file URL to the hosted HTML."
     },
     "genre": {
       "type": "string",
@@ -45,6 +45,11 @@
       "type": "boolean",
       "default": false,
       "description": "If true, the game is pinned to the Top Games section as the big featured card."
+    },
+    "hidden": {
+      "type": "boolean",
+      "default": false,
+      "description": "If true, the game is unpublished (hidden from the Games front) but not deleted."
     }
   },
   "required": [
@@ -53,7 +58,18 @@
   ],
   "rls": {
     "read": {},
-    "create": {},
+    "create": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "update": {
       "$or": [
         {
