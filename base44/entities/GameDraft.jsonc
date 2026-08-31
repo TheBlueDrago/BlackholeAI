@@ -1,0 +1,78 @@
+{
+  "name": "GameDraft",
+  "type": "object",
+  "properties": {
+    "gameName": {
+      "type": "string",
+      "default": "my-game"
+    },
+    "title": {
+      "type": "string",
+      "default": ""
+    },
+    "genre": {
+      "type": "string",
+      "default": "io"
+    },
+    "htmlUrl": {
+      "type": "string",
+      "default": "",
+      "description": "File URL of the latest game HTML (stored as a file to avoid field size limits)."
+    },
+    "userTurns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "projectId": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "required": [
+    "gameName"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

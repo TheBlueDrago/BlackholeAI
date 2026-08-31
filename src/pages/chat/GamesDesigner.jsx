@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Loader2, Gamepad2, RefreshCw, Plus, X, Crown, Rocket, Paperclip, Square } from "lucide-react";
 import BlackholeIcon from "@/components/BlackholeIcon";
@@ -125,6 +125,44 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
       localStorage.setItem(STORE_KEY, JSON.stringify({ gameName, title, genre, messages, projectId }));
     } catch {}
   }, [gameName, title, genre, messages]);
+
+  // Server-side autosave so logging out (which can clear local storage) never loses progress.
+  const userTurns = useMemo(() => messages.filter((m) => m.role === "user").map((m) => m.content), [messages]);
+  const loadedRef = useRef(false);
+  const saveDraftRef = useRef(() => {});
+  saveDraftRef.current = () => {
+    if (!loadedRef.current) return;
+    base44.functions.invoke("game-draft", { action: "save", gameName, title, genre, html: previewHtml, userTurns, projectId }).catch(() => {});
+  };
+
+  useEffect(() => {
+    const t = setTimeout(() => saveDraftRef.current(), 1500);
+    return () => clearTimeout(t);
+  }, [gameName, title, genre, previewHtml, userTurns]);
+
+  useEffect(() => {
+    const h = () => saveDraftRef.current();
+    window.addEventListener("beforeunload", h);
+    return () => window.removeEventListener("beforeunload", h);
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await base44.functions.invoke("game-draft", { action: "load" });
+        const d = res.data?.draft;
+        if (d && d.html && messages.length === 0) {
+          if (d.gameName) setGameName(d.gameName);
+          if (d.title) setTitle(d.title);
+          if (d.genre) setGenre(d.genre);
+          const um = (d.userTurns || []).map((t) => ({ role: "user", content: t }));
+          setMessages([...um, { role: "ai", content: d.html }]);
+        }
+      } catch {}
+      loadedRef.current = true;
+    })();
+    return () => { try { saveDraftRef.current(); } catch {} };
+  }, []);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;

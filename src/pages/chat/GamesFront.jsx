@@ -138,7 +138,7 @@ export default function GamesFront() {
   const load = async () => {
     try {
       const list = await base44.entities.PublishedGame.list("-plays", 500);
-      setGames(list || []);
+      setGames((list || []).filter((g) => !g.hidden));
     } catch {
     } finally {
       setLoading(false);

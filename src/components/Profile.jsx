@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { LogOut, Mail, Shield, KeyRound, ArrowLeft, Loader2, Crown, Settings, Users, Lock, ShieldCheck, Ticket, Trash2 } from "lucide-react";
+import { LogOut, Mail, Shield, KeyRound, ArrowLeft, Loader2, Crown, Settings, Users, Lock, ShieldCheck, Ticket, Trash2, Gamepad2, Pencil, Eye, EyeOff } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import TeamMembership from "@/components/TeamMembership";
 
 export default function Profile({ open, onClose, initialView = "main", onMonitor, onPromos }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState("main"); // main | settings | membership
+  const [view, setView] = useState("main"); // main | settings | membership | games
+  const navigate = useNavigate();
+  const [games, setGames] = useState([]);
+  const [gamesLoading, setGamesLoading] = useState(false);
+  const [gamesErr, setGamesErr] = useState("");
 
   // Password reset flow: idle -> sent
   const [pwStep, setPwStep] = useState("idle");
@@ -68,6 +73,55 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
     } catch (e) {
       setDelError(e?.response?.data?.error || e?.message || "Could not delete account");
       setDelBusy(false);
+    }
+  };
+
+  const loadGames = async () => {
+    setGamesLoading(true);
+    setGamesErr("");
+    try {
+      const list = await base44.entities.PublishedGame.list("-updated_date", 200);
+      setGames((list || []).filter((g) => user?.role === "admin" || g.created_by_id === user?.id));
+    } catch (e) {
+      setGamesErr(e?.message || "Could not load games");
+    } finally {
+      setGamesLoading(false);
+    }
+  };
+  const editGame = async (g) => {
+    setGamesErr("");
+    try {
+      const res = await base44.functions.invoke("get-game-html", { name: g.name });
+      const d = res.data || {};
+      const html = d.html || "";
+      localStorage.setItem("infinity-ai-game-designer", JSON.stringify({
+        gameName: g.name,
+        title: d.title || g.title || "",
+        genre: d.genre || g.genre || "io",
+        messages: html ? [{ role: "ai", content: html }] : [],
+        projectId: (crypto.randomUUID && crypto.randomUUID()) || String(Date.now())
+      }));
+      onClose();
+      navigate("/chat/game-designer");
+    } catch (e) {
+      setGamesErr(e?.message || "Could not open game");
+    }
+  };
+  const toggleHidden = async (g) => {
+    try {
+      await base44.entities.PublishedGame.update(g.id, { hidden: !g.hidden });
+      loadGames();
+    } catch (e) {
+      setGamesErr(e?.message);
+    }
+  };
+  const deleteGame = async (g) => {
+    if (!window.confirm(`Delete "${g.title || g.name}"? This cannot be undone.`)) return;
+    try {
+      await base44.entities.PublishedGame.delete(g.id);
+      loadGames();
+    } catch (e) {
+      setGamesErr(e?.message);
     }
   };
 
@@ -165,6 +219,46 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                   Delete account
                 </button>
               </div>
+            ) : view === "games" ? (
+              <div className="p-6">
+                <button
+                  onClick={() => setView("settings")}
+                  className="flex items-center gap-1.5 text-slate-400 text-sm hover:text-slate-200 transition-colors mb-4"
+                >
+                  <ArrowLeft className="w-4 h-4" /> Back
+                </button>
+                <div className="flex items-center gap-2 mb-4">
+                  <Gamepad2 className="w-5 h-5 text-fuchsia-300" />
+                  <h3 className="text-lg font-semibold text-white">Published Games</h3>
+                </div>
+                {gamesLoading ? (
+                  <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-slate-400" /></div>
+                ) : games.length === 0 ? (
+                  <p className="text-slate-500 text-sm py-6 text-center">You haven't published any games yet.</p>
+                ) : (
+                  <div className="space-y-2 max-h-72 overflow-y-auto sidebar-scroll pr-1">
+                    {games.map((g) => (
+                      <div key={g.id} className="rounded-xl bg-slate-800 border border-slate-700/50 p-3">
+                        <p className="text-sm font-medium text-slate-100 truncate">{g.title || g.name}</p>
+                        <p className="text-[11px] text-slate-500 truncate">{g.name} · {g.plays || 0} plays{g.hidden ? " · hidden" : ""}{g.featured ? " · featured" : ""}</p>
+                        <div className="flex items-center gap-1.5 mt-2">
+                          <button onClick={() => editGame(g)} className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg bg-slate-700 text-slate-200 text-xs hover:bg-slate-600 transition-colors">
+                            <Pencil className="w-3.5 h-3.5" /> Edit
+                          </button>
+                          <button onClick={() => toggleHidden(g)} className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-xs transition-colors ${g.hidden ? "bg-emerald-600/80 text-white hover:bg-emerald-500" : "bg-slate-700 text-slate-200 hover:bg-slate-600"}`}>
+                            {g.hidden ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                            {g.hidden ? "Republish" : "Unpublish"}
+                          </button>
+                          <button onClick={() => deleteGame(g)} className="flex items-center justify-center px-2.5 py-1.5 rounded-lg bg-red-900/50 text-red-300 text-xs hover:bg-red-900/70 transition-colors">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {gamesErr && <p className="text-sm text-red-400 mt-3">{gamesErr}</p>}
+              </div>
             ) : view === "settings" ? (
               <div className="p-6">
                 <button
@@ -187,7 +281,17 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                     Membership
                   </span>
                   <ArrowLeft className="w-4 h-4 rotate-180 text-slate-500" />
-                  </button>
+                </button>
+                <button
+                  onClick={() => { setView("games"); loadGames(); }}
+                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 transition-colors"
+                >
+                  <span className="flex items-center gap-2 font-medium">
+                    <Gamepad2 className="w-4 h-4 text-fuchsia-300" />
+                    Published Games
+                  </span>
+                  <ArrowLeft className="w-4 h-4 rotate-180 text-slate-500" />
+                </button>
                   <button
                   onClick={() => setView("delete")}
                   className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-red-900/40 text-red-300 hover:bg-red-900/60 transition-colors border border-red-800/50"
