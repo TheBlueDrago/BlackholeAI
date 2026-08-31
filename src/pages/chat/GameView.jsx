@@ -2,10 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader2, Gamepad2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { useAppShell } from "@/components/AppShellContext";
 
 export default function GameView() {
   const { name } = useParams();
   const navigate = useNavigate();
+  const { openProfile, avatarInitial } = useAppShell();
   const [html, setHtml] = useState("");
   const [title, setTitle] = useState(name);
   const [genre, setGenre] = useState("");
@@ -49,6 +51,15 @@ export default function GameView() {
         </button>
         <span className="font-semibold text-slate-100 truncate">{title}</span>
         {genre && <span className="text-xs text-slate-400 capitalize">· {genre}</span>}
+        <div className="ml-auto flex items-center gap-2">
+          <button
+            onClick={() => openProfile("main")}
+            className="keep-color w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-sm font-bold text-white hover:opacity-90 transition-opacity shrink-0"
+            title="Account"
+          >
+            {avatarInitial}
+          </button>
+        </div>
       </header>
       <div className="flex-1 relative bg-black">
         {loading ? (
