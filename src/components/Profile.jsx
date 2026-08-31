@@ -101,8 +101,7 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
         messages: html ? [{ role: "ai", content: html }] : [],
         projectId: (crypto.randomUUID && crypto.randomUUID()) || String(Date.now())
       }));
-      onClose();
-      navigate("/chat/game-designer");
+      navigate("/chat/game-designer", { replace: true });
     } catch (e) {
       setGamesErr(e?.message || "Could not open game");
     }
