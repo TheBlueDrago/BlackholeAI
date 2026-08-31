@@ -49,8 +49,10 @@ export default function GameView() {
         >
           <ArrowLeft className="w-5 h-5 text-slate-200" />
         </button>
-        <span className="font-semibold text-slate-100 truncate">{title}</span>
-        {genre && <span className="text-xs text-slate-400 capitalize">· {genre}</span>}
+        <div className="flex-1 min-w-0 flex items-center gap-2">
+          <span className="font-semibold text-slate-100 truncate">{title}</span>
+          {genre && <span className="text-xs text-slate-400 capitalize shrink-0">· {genre}</span>}
+        </div>
         <div className="ml-auto flex items-center gap-2">
           <button
             onClick={() => openProfile("main")}
