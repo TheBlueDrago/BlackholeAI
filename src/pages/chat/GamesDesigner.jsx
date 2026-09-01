@@ -244,18 +244,18 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
     setPublishErr("");
     setPublishing(true);
     try {
-      const existing = await base44.entities.PublishedGame.filter({ name: n });
-      const mine = existing.find((s) => s.created_by_id === user?.id);
-      if (existing.length && !mine) {
-        setPublishErr("That name is taken. Try another.");
-        return;
-      }
       const ownerName = user?.email || user?.full_name || "";
       const dispTitle = title.trim() || n;
-      if (mine) {
-        await base44.entities.PublishedGame.update(mine.id, { html: previewHtml, genre, title: dispTitle, ownerName });
-      } else {
-        await base44.entities.PublishedGame.create({ name: n, html: previewHtml, genre, title: dispTitle, ownerName });
+      const res = await base44.functions.invoke("publish-game", {
+        name: n,
+        html: previewHtml,
+        title: dispTitle,
+        genre,
+        ownerName,
+      });
+      if (res?.data?.error) {
+        setPublishErr(res.data.error);
+        return;
       }
       const list = getTaken().filter((e) => e.name !== n);
       list.push({ name: n, projectId });
