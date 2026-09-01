@@ -115,8 +115,8 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   const [publishing, setPublishing] = useState(false);
   const [publishErr, setPublishErr] = useState("");
   const [publishUrl, setPublishUrl] = useState("");
-  const opusAllowed = plan === "pro" || plan === "team" || plan === "secret";
-  const fableAllowed = plan === "team" || plan === "secret";
+  const opusAllowed = plan === "pro" || plan === "team" || plan === "secret" || plan === "admin";
+  const fableAllowed = plan === "team" || plan === "secret" || plan === "admin";
   const [selectedAi, setSelectedAi] = useState(fableAllowed ? "fable" : opusAllowed ? "opus5" : "ai");
   const [files, setFiles] = useState([]);
   const fileInputRef = useRef(null);
