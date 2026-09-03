@@ -48,6 +48,7 @@ export default function GamesDesignerWorkspace() {
         onSpendGalaxy5={credits.spendGalaxy5}
         space5Exhausted={credits.space5Exhausted}
         onSpendSpace5={credits.spendSpace5}
+        remaining={{ ai: credits.aiRemaining, code: credits.aiCodeRemaining, opus5: credits.galaxy5Remaining, fable: credits.space5Remaining }}
       />
     </div>
   );

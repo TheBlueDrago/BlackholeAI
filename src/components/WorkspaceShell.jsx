@@ -90,12 +90,9 @@ export function ChatWorkspace() {
       removeMessage={conv.removeMessage}
       renameConversation={conv.renameConversation}
       plan={effPlan}
-      aiExhausted={credits.aiExhausted}
-      aiCodeExhausted={credits.aiCodeExhausted}
-      aiRemaining={credits.aiRemaining}
-      aiCodeRemaining={credits.aiCodeRemaining}
-      onSpendAI={credits.spendAI}
-      onSpendAICode={credits.spendAICode}
+      exhausted={{ ai: credits.aiExhausted, code: credits.aiCodeExhausted, opus5: credits.galaxy5Exhausted, fable: credits.space5Exhausted }}
+      remaining={{ ai: credits.aiRemaining, code: credits.aiCodeRemaining, opus5: credits.galaxy5Remaining, fable: credits.space5Remaining }}
+      spend={{ ai: credits.spendAI, code: credits.spendAICode, opus5: credits.spendGalaxy5, fable: credits.spendSpace5 }}
       userInitial={avatarInitial}
     />
   );
@@ -104,5 +101,5 @@ export function ChatWorkspace() {
 export function CodeWorkspace() {
   const shell = useAppShell();
   const { credits, avatarInitial } = shell;
-  return <CodePage aiCodeExhausted={credits.aiCodeExhausted} onSpendAICode={credits.spendAICode} userInitial={avatarInitial} />;
+  return <CodePage aiCodeExhausted={credits.aiCodeExhausted} aiCodeRemaining={credits.aiCodeRemaining} onSpendAICode={credits.spendAICode} userInitial={avatarInitial} />;
 }

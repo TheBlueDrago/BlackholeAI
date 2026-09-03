@@ -1,121 +1,49 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Square, Plus, X, Paperclip } from "lucide-react";
+import { Plus, X, Paperclip } from "lucide-react";
 import BlackholeIcon from "@/components/BlackholeIcon";
 import AiChooser from "@/components/AiChooser";
 import QueueList from "@/components/chat/QueueList";
+import SendOrStopButton from "@/components/chat/SendOrStopButton";
+import useMessageQueue from "@/hooks/useMessageQueue";
 import { base44 } from "@/api/base44Client";
 
 const CODE_SYS = "You are Blackhole Code Assistant. Help with programming. Give clear, correct code with brief explanations.";
-const AI_NAMES = { ai: "Blackhole AI", code: "Blackhole Code" };
+const FABLE_SYS = "You are Space 5, Blackhole AI's premium creative model. Be imaginative and high-quality.";
+const AI_NAMES = { ai: "Blackhole AI", code: "Blackhole Code", opus5: "Galaxy 5", fable: "Space 5" };
+const MODELS = { ai: "automatic", code: "claude_sonnet_4_6", opus5: "claude_opus_4_8", fable: "claude-sonnet-5" };
 
-export default function ChatBox({ conversation, createConversation, addMessage, removeMessage, renameConversation, plan, aiExhausted, aiCodeExhausted, aiRemaining, aiCodeRemaining, onSpendAI, onSpendAICode, userInitial }) {
+export default function ChatBox({ conversation, createConversation, addMessage, removeMessage, renameConversation, plan, exhausted, remaining, spend, userInitial }) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [queue, setQueue] = useState([]);
-  const [paused, setPaused] = useState(false);
   const [focused, setFocused] = useState(false);
-  const [notice, setNotice] = useState("");
   const [selectedAi, setSelectedAi] = useState("ai");
   const [files, setFiles] = useState([]);
   const fileInputRef = useRef(null);
   const scrollRef = useRef(null);
   const reqIdRef = useRef(0);
-  const queueRef = useRef([]);
-  const pausedRef = useRef(false);
-  const selectedAiRef = useRef("ai");
-  const remainingRef = useRef({});
-  const qIdRef = useRef(0);
+  const convIdRef = useRef(null);
 
   const messages = conversation?.messages || [];
-  const isCodeAi = selectedAi === "code";
-  const exhausted = isCodeAi ? aiCodeExhausted : aiExhausted;
-  remainingRef.current = { ai: aiRemaining ?? (aiExhausted ? 0 : 1), code: aiCodeRemaining ?? (aiCodeExhausted ? 0 : 1) };
-
-  useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [messages, loading, queue.length]);
-
-  useEffect(() => {
-    if (!notice) return;
-    const t = setTimeout(() => setNotice(""), 6000);
-    return () => clearTimeout(t);
-  }, [notice]);
-
-  const chooseAi = (id) => {
-    selectedAiRef.current = id;
-    setSelectedAi(id);
-  };
-
-  const commitQueue = (updater) => {
-    setQueue((prev) => {
-      const next = typeof updater === "function" ? updater(prev) : updater;
-      queueRef.current = next;
-      return next;
-    });
-  };
-
-  const qPush = (text) => commitQueue((q) => [...q, { id: ++qIdRef.current, text }]);
-  const qUpdate = (id, text) => commitQueue((q) => q.map((x) => (x.id === id ? { ...x, text } : x)));
-  const qRemove = (id) => commitQueue((q) => q.filter((x) => x.id !== id));
-  const qMove = (id, dir) =>
-    commitQueue((q) => {
-      const i = q.findIndex((x) => x.id === id);
-      const j = i + dir;
-      if (i < 0 || j < 0 || j >= q.length) return q;
-      const n = [...q];
-      [n[i], n[j]] = [n[j], n[i]];
-      return n;
-    });
-
-  const stop = () => {
-    reqIdRef.current++;
-    setLoading(false);
-    const convId = conversation?.id;
-    const msgs = conversation?.messages || [];
-    if (convId && msgs.length && msgs[msgs.length - 1].role === "user") {
-      removeMessage?.(convId, msgs.length - 1);
-    }
-    setInput("");
-  };
-
-  // Runs the next queued message, switching AI to the one with the most credits if the current one is out.
-  const runNext = () => {
-    if (pausedRef.current) return;
-    const q = queueRef.current;
-    if (!q.length) return;
-    let ai = selectedAiRef.current;
-    const rem = remainingRef.current;
-    if (rem[ai] <= 0) {
-      const best = Object.keys(AI_NAMES).sort((a, b) => rem[b] - rem[a])[0];
-      if (rem[best] <= 0) return;
-      setNotice(`You ran out of ${AI_NAMES[ai]} credits so we changed your ai to ${AI_NAMES[best]}`);
-      chooseAi(best);
-      ai = best;
-    }
-    const [next, ...rest] = q;
-    queueRef.current = rest;
-    setQueue(rest);
-    runPrompt(next.text, ai);
-  };
+  const isExhausted = !!exhausted?.[selectedAi];
 
   const runPrompt = async (text, ai) => {
-    let convId = conversation?.id;
-    const isFirst = !convId || (conversation?.messages?.length === 0);
+    let convId = conversation?.id || convIdRef.current;
+    const isFirst = !convId || messages.length === 0;
     if (!convId) convId = createConversation();
+    convIdRef.current = convId;
 
     const fileNote = files.length ? `\n[Attached files: ${files.map((f) => f.name).join(", ")}]` : "";
-    const fullPrompt = `${ai === "code" ? CODE_SYS + "\n\n" : ""}${text}${fileNote}`;
+    const sys = ai === "code" ? CODE_SYS : ai === "fable" ? FABLE_SYS : "";
+    const fullPrompt = `${sys ? sys + "\n\n" : ""}${text}${fileNote}`;
     addMessage(convId, { role: "user", content: text + (files.length ? ` (attached: ${files.map((f) => f.name).join(", ")})` : "") });
     setInput("");
     setLoading(true);
     const myId = ++reqIdRef.current;
-    (ai === "code" ? onSpendAICode : onSpendAI)?.();
+    spend?.[ai]?.();
     try {
-      const model = ai === "code" ? "claude_sonnet_4_6" : "automatic";
-      const res = await base44.functions.invoke("chatCompletion", { prompt: fullPrompt, model });
+      const res = await base44.functions.invoke("chatCompletion", { prompt: fullPrompt, model: MODELS[ai] || "automatic" });
       if (reqIdRef.current !== myId) return;
       addMessage(convId, { role: "ai", content: res.data?.content ?? "" });
-
       if (isFirst) {
         try {
           const titleRes = await base44.functions.invoke("chatCompletion", {
@@ -131,29 +59,42 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
     } finally {
       if (reqIdRef.current === myId) {
         setLoading(false);
-        runNext();
+        q.runNext();
       }
     }
+  };
+
+  const q = useMessageQueue({ run: runPrompt, remaining, names: AI_NAMES, selectedAi, onChangeAi: setSelectedAi });
+
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [messages, loading, q.queue.length]);
+
+  useEffect(() => {
+    convIdRef.current = conversation?.id || null;
+  }, [conversation?.id]);
+
+  const stop = () => {
+    reqIdRef.current++;
+    setLoading(false);
+    const convId = conversation?.id;
+    if (convId && messages.length && messages[messages.length - 1].role === "user") {
+      removeMessage?.(convId, messages.length - 1);
+    }
+    setInput("");
   };
 
   const send = () => {
     const text = input.trim();
     if (!text) return;
-    if (loading || paused || queueRef.current.length > 0) {
-      qPush(text);
+    if (q.shouldQueue(loading)) {
+      q.push(text);
       setInput("");
-      if (!loading) runNext();
+      if (!loading) q.runNext();
       return;
     }
-    if (exhausted) return;
+    if (isExhausted) return;
     runPrompt(text, selectedAi);
-  };
-
-  const togglePause = () => {
-    const next = !paused;
-    pausedRef.current = next;
-    setPaused(next);
-    if (!next && !loading) runNext();
   };
 
   const handleKeyDown = (e) => {
@@ -163,8 +104,8 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
     }
   };
 
-  const canSend = input.trim().length > 0 && (loading || paused || !exhausted);
-  const showStop = loading && !focused;
+  const queued = loading || q.paused;
+  const canSend = input.trim().length > 0 && (queued || !isExhausted);
 
   return (
     <div className="w-full max-w-3xl px-3 sm:px-4">
@@ -204,7 +145,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
               <div className="bg-slate-800 border border-slate-700/50 px-4 py-3 rounded-2xl rounded-bl-sm flex items-center gap-2.5">
                 <BlackholeIcon className="w-5 h-5 animate-spin" />
                 <span className="text-slate-300 text-sm animate-pulse">
-                  Thinking...{queue.length > 0 ? ` (${queue.length} queued)` : ""}
+                  Thinking...{q.queue.length > 0 ? ` (${q.queue.length} queued)` : ""}
                 </span>
               </div>
             </div>
@@ -212,16 +153,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
         </div>
 
         <div className="border-t border-slate-700/50 p-3">
-          {notice && (
-            <div className="mb-2 flex items-start gap-2 bg-indigo-900/30 border border-indigo-500/40 rounded-lg px-3 py-2 text-xs text-indigo-100">
-              <span className="flex-1">{notice}</span>
-              <button onClick={() => setNotice("")} className="text-indigo-300 hover:text-white" title="Dismiss">
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          )}
-
-          <QueueList queue={queue} paused={paused} onTogglePause={togglePause} onUpdate={qUpdate} onRemove={qRemove} onMove={qMove} />
+          <QueueList q={q} loading={loading} />
 
           {files.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-2">
@@ -243,29 +175,11 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
               onKeyDown={handleKeyDown}
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
-              placeholder={loading || paused ? "Type to queue your next message…" : "Message Blackhole AI..."}
+              placeholder={queued ? "Type to queue your next message…" : "Message Blackhole AI..."}
               rows={1}
               className="flex-1 bg-transparent resize-none outline-none text-slate-100 placeholder:text-slate-500 px-4 py-3 max-h-32 text-sm"
             />
-            {showStop ? (
-              <button
-                onClick={stop}
-                className="m-1.5 p-2.5 rounded-xl bg-red-600 text-white hover:bg-red-500 transition-colors shrink-0"
-                title="Stop generating"
-              >
-                <Square className="w-5 h-5" />
-              </button>
-            ) : (
-              <button
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={send}
-                disabled={!canSend}
-                className="m-1.5 p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity shrink-0"
-                title={loading || paused ? "Add to queue" : "Send"}
-              >
-                <Send className="w-5 h-5" />
-              </button>
-            )}
+            <SendOrStopButton loading={loading} focused={focused} queued={queued} canSend={canSend} onSend={send} onStop={stop} />
           </div>
           <div className="flex items-center gap-2 mt-2">
             <button
@@ -275,8 +189,8 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
             >
               <Plus className="w-4 h-4" />
             </button>
-            <AiChooser value={selectedAi} onChange={chooseAi} plan={plan} allowFable={false} />
-            {exhausted && (
+            <AiChooser value={selectedAi} onChange={setSelectedAi} plan={plan} allowFable={true} />
+            {isExhausted && (
               <p className="text-xs text-red-400 ml-auto">
                 You're out of {AI_NAMES[selectedAi]} credits. Switch AI or upgrade.
               </p>

@@ -1,56 +1,63 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Terminal, Square } from "lucide-react";
+import { Terminal } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import BlackholeIcon from "@/components/BlackholeIcon";
+import QueueList from "@/components/chat/QueueList";
+import SendOrStopButton from "@/components/chat/SendOrStopButton";
+import useMessageQueue from "@/hooks/useMessageQueue";
 
-export default function CodePage({ aiCodeExhausted, onSpendAICode, userInitial }) {
+export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICode, userInitial }) {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [focused, setFocused] = useState(false);
   const scrollRef = useRef(null);
   const reqIdRef = useRef(0);
-  const lastTextRef = useRef("");
 
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages, loading]);
-
-  const stop = () => {
-    reqIdRef.current++;
-    setLoading(false);
-    if (lastTextRef.current) setInput(lastTextRef.current);
-  };
-
-  const send = async () => {
-    const text = input.trim();
-    if (!text || loading || aiCodeExhausted) return;
-
+  const runPrompt = async (text) => {
     setMessages((m) => [...m, { role: "user", content: text }]);
-    lastTextRef.current = text;
     setInput("");
     setLoading(true);
     const myId = ++reqIdRef.current;
     onSpendAICode?.();
-
     try {
-      const res = await base44.functions.invoke("chatCompletion", {
-        prompt: text,
-        model: "claude-sonnet-5",
-      });
+      const res = await base44.functions.invoke("chatCompletion", { prompt: text, model: "claude-sonnet-5" });
       if (reqIdRef.current !== myId) return;
-      const content = res.data?.content ?? "";
-      setMessages((m) => [...m, { role: "ai", content }]);
+      setMessages((m) => [...m, { role: "ai", content: res.data?.content ?? "" }]);
     } catch {
       if (reqIdRef.current !== myId) return;
-      setMessages((m) => [
-        ...m,
-        { role: "ai", content: "Sorry, something went wrong. Please try again." },
-      ]);
+      setMessages((m) => [...m, { role: "ai", content: "Sorry, something went wrong. Please try again." }]);
     } finally {
-      if (reqIdRef.current === myId) setLoading(false);
+      if (reqIdRef.current === myId) {
+        setLoading(false);
+        q.runNext();
+      }
     }
+  };
+
+  const q = useMessageQueue({ run: runPrompt, remaining: { code: aiCodeRemaining ?? (aiCodeExhausted ? 0 : Infinity) }, names: { code: "Blackhole Code" }, selectedAi: "code" });
+
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [messages, loading, q.queue.length]);
+
+  const stop = () => {
+    reqIdRef.current++;
+    setLoading(false);
+    setInput("");
+  };
+
+  const send = () => {
+    const text = input.trim();
+    if (!text) return;
+    if (q.shouldQueue(loading)) {
+      q.push(text);
+      setInput("");
+      if (!loading) q.runNext();
+      return;
+    }
+    if (aiCodeExhausted) return;
+    runPrompt(text);
   };
 
   const handleKeyDown = (e) => {
@@ -59,6 +66,9 @@ export default function CodePage({ aiCodeExhausted, onSpendAICode, userInitial }
       send();
     }
   };
+
+  const queued = loading || q.paused;
+  const canSend = input.trim().length > 0 && (queued || !aiCodeExhausted);
 
   return (
     <div className="w-full max-w-3xl px-3 sm:px-4">
@@ -97,39 +107,28 @@ export default function CodePage({ aiCodeExhausted, onSpendAICode, userInitial }
             <div className="flex justify-start">
               <div className="bg-slate-800 border border-emerald-700/40 px-4 py-3 rounded-2xl rounded-bl-sm flex items-center gap-2.5">
                 <BlackholeIcon className="w-5 h-5 animate-spin" />
-                <span className="text-slate-300 text-sm animate-pulse">Thinking...</span>
+                <span className="text-slate-300 text-sm animate-pulse">
+                  Thinking...{q.queue.length > 0 ? ` (${q.queue.length} queued)` : ""}
+                </span>
               </div>
             </div>
           )}
         </div>
 
         <div className="border-t border-emerald-700/40 p-3">
+          <QueueList q={q} loading={loading} />
           <div className="flex items-end gap-2 bg-slate-800/70 rounded-2xl border border-emerald-700/40 focus-within:border-emerald-500/50 transition-colors">
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Message Blackhole AI..."
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
+              placeholder={queued ? "Type to queue your next message…" : "Message Blackhole AI..."}
               rows={1}
               className="flex-1 bg-transparent resize-none outline-none text-slate-100 placeholder:text-slate-500 px-4 py-3 max-h-32 text-sm"
             />
-            {loading ? (
-              <button
-                onClick={stop}
-                className="m-1.5 p-2.5 rounded-xl bg-red-600 text-white hover:bg-red-500 transition-colors"
-                title="Stop generating"
-              >
-                <Square className="w-5 h-5" />
-              </button>
-            ) : (
-              <button
-                onClick={send}
-                disabled={!input.trim() || aiCodeExhausted}
-                className="m-1.5 p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
-              >
-                <Send className="w-5 h-5" />
-              </button>
-            )}
+            <SendOrStopButton loading={loading} focused={focused} queued={queued} canSend={canSend} onSend={send} onStop={stop} gradient="from-emerald-500 to-teal-500" />
           </div>
           {aiCodeExhausted && (
             <p className="text-center text-xs text-red-400 mt-2">You're out of AI Code credits.</p>

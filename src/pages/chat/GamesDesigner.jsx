@@ -1,7 +1,10 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Loader2, Gamepad2, RefreshCw, Plus, X, Crown, Rocket, Paperclip, Square } from "lucide-react";
+import { Loader2, Gamepad2, RefreshCw, Plus, X, Crown, Rocket, Paperclip } from "lucide-react";
 import BlackholeIcon from "@/components/BlackholeIcon";
+import QueueList from "@/components/chat/QueueList";
+import SendOrStopButton from "@/components/chat/SendOrStopButton";
+import useMessageQueue from "@/hooks/useMessageQueue";
 import { base44 } from "@/api/base44Client";
 import AiChooser from "@/components/AiChooser";
 import SheetSelect from "@/components/SheetSelect";
@@ -13,6 +16,8 @@ const STORE_KEY = "infinity-ai-game-designer";
 const TAKEN_KEY = "infinity-ai-taken-games";
 const MODEL = "claude_sonnet_4_6";
 const SPACE5_MODEL = "claude-sonnet-5";
+const MODELS = { ai: "automatic", code: MODEL, opus5: "claude_opus_4_8", fable: SPACE5_MODEL };
+const AI_NAMES = { ai: "Blackhole AI", code: "Blackhole Code", opus5: "Galaxy 5", fable: "Space 5" };
 
 const RESERVED = ["home", "www", "admin", "api", "mail", "infinity", "ai", "app", "login", "register", "support", "blog", "game", "games"];
 
@@ -90,7 +95,7 @@ function sanitize(s) {
   return s.toLowerCase().replace(/[^a-z-]+/g, "-").replace(/^-+|-+$/g, "");
 }
 
-export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrade, aiExhausted, onSpendAI, aiCodeExhausted, onSpendAICode, galaxy5Exhausted, onSpendGalaxy5, space5Exhausted, onSpendSpace5, plan, lightMode, onToggleLight }) {
+export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrade, aiExhausted, onSpendAI, aiCodeExhausted, onSpendAICode, galaxy5Exhausted, onSpendGalaxy5, space5Exhausted, onSpendSpace5, remaining, plan, lightMode, onToggleLight }) {
   const location = useLocation();
   const startFresh = !!location.state?.fresh;
   const initial = startFresh
@@ -112,13 +117,15 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
   const [publishErr, setPublishErr] = useState("");
   const [publishUrl, setPublishUrl] = useState("");
   const [files, setFiles] = useState([]);
+  const [focused, setFocused] = useState(false);
   const opusAllowed = plan === "pro" || plan === "team" || plan === "secret";
   const fableAllowed = plan === "team" || plan === "secret" || plan === "admin";
   const [selectedAi, setSelectedAi] = useState(fableAllowed ? "fable" : opusAllowed ? "opus5" : "ai");
   const fileInputRef = useRef(null);
   const scrollRef = useRef(null);
   const reqIdRef = useRef(0);
-  const lastTextRef = useRef("");
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
 
   const lastAi = [...messages].reverse().find((m) => m.role === "ai");
   const previewHtml = lastAi ? extractHtml(lastAi.content) : "";
@@ -187,43 +194,66 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
   const isSpace = selectedAi === "fable";
   const sendExhausted = isCodeAi ? aiCodeExhausted : isGalaxy ? galaxy5Exhausted : isSpace ? space5Exhausted : aiExhausted;
 
+  const pushMsg = (m) => {
+    messagesRef.current = [...messagesRef.current, m];
+    setMessages(messagesRef.current);
+  };
+
   const stop = () => {
     reqIdRef.current++;
     setLoading(false);
     setInput("");
   };
 
-  const send = async () => {
-    const text = input.trim();
-    if (!text || loading || sendExhausted) return;
+  const runPrompt = async (text, ai) => {
     const fileNote = files.length ? `\n[Attached files: ${files.map((f) => f.name).join(", ")}]` : "";
-    const userMsg = { role: "user", content: text + (files.length ? ` (attached: ${files.map((f) => f.name).join(", ")})` : "") };
-    setMessages((p) => [...p, userMsg]);
-    lastTextRef.current = text;
+    const prior = messagesRef.current;
+    pushMsg({ role: "user", content: text + (files.length ? ` (attached: ${files.map((f) => f.name).join(", ")})` : "") });
     setInput("");
     setLoading(true);
     const myId = ++reqIdRef.current;
-    (isCodeAi ? onSpendAICode : isGalaxy ? onSpendGalaxy5 : isSpace ? onSpendSpace5 : onSpendAI)?.();
+    const spendFor = { ai: onSpendAI, code: onSpendAICode, opus5: onSpendGalaxy5, fable: onSpendSpace5 };
+    spendFor[ai]?.();
     try {
-      const lastHtml = messages.filter((m) => m.role === "ai").pop()?.content || "";
-      const userTurns = messages.filter((m) => m.role === "user").map((m) => m.content);
+      const lastHtml = prior.filter((m) => m.role === "ai").pop()?.content || "";
+      const userTurns = prior.filter((m) => m.role === "user").map((m) => m.content);
       const prompt =
         `${SYSTEM}\n\n` +
         (lastHtml ? `Current game HTML:\n${lastHtml}\n\n` : "") +
         `Requests so far:\n${userTurns.length ? userTurns.map((u, i) => `${i + 1}. ${u}`).join("\n") : "(none)"}\n\n` +
         `Latest request: ${text}${fileNote}\n\nOutput the complete updated HTML game document now.`;
-      const model = { ai: "automatic", code: MODEL, opus5: "claude_opus_4_8", fable: SPACE5_MODEL }[selectedAi] || "automatic";
+      const model = MODELS[ai] || "automatic";
       const res = await base44.functions.invoke("chatCompletion", { prompt, model });
       if (reqIdRef.current !== myId) return;
-      const content = res.data?.content ?? "";
-      setMessages((p) => [...p, { role: "ai", content }]);
+      pushMsg({ role: "ai", content: res.data?.content ?? "" });
     } catch {
       if (reqIdRef.current !== myId) return;
-      setMessages((p) => [...p, { role: "ai", content: "Sorry, something went wrong generating your game. Please try again." }]);
+      pushMsg({ role: "ai", content: "Sorry, something went wrong generating your game. Please try again." });
     } finally {
-      if (reqIdRef.current === myId) setLoading(false);
+      if (reqIdRef.current === myId) {
+        setLoading(false);
+        q.runNext();
+      }
     }
   };
+
+  const q = useMessageQueue({ run: runPrompt, remaining, names: AI_NAMES, selectedAi, onChangeAi: setSelectedAi });
+
+  const send = () => {
+    const text = input.trim();
+    if (!text) return;
+    if (q.shouldQueue(loading)) {
+      q.push(text);
+      setInput("");
+      if (!loading) q.runNext();
+      return;
+    }
+    if (sendExhausted) return;
+    runPrompt(text, selectedAi);
+  };
+
+  const queued = loading || q.paused;
+  const canSend = input.trim().length > 0 && (queued || !sendExhausted);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -390,6 +420,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
           </div>
 
           <div className="p-3 border-t border-slate-700/50">
+            <QueueList q={q} loading={loading} />
             {files.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-2">
                 {files.map((f, i) => (
@@ -408,23 +439,13 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Describe the game you want..."
+                onFocus={() => setFocused(true)}
+                onBlur={() => setFocused(false)}
+                placeholder={queued ? "Type to queue your next message…" : "Describe the game you want..."}
                 rows={1}
                 className="flex-1 bg-transparent resize-none outline-none text-slate-100 placeholder:text-slate-500 px-4 py-3 max-h-32 text-sm"
               />
-              {loading ? (
-                <button onClick={stop} className="m-1.5 p-2.5 rounded-xl bg-red-600 text-white hover:bg-red-500 transition-colors" title="Stop generating">
-                  <Square className="w-5 h-5" />
-                </button>
-              ) : (
-                <button
-                  onClick={send}
-                  disabled={!input.trim() || sendExhausted}
-                  className="m-1.5 p-2.5 rounded-xl bg-gradient-to-br from-fuchsia-500 to-indigo-500 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
-                >
-                  <Send className="w-5 h-5" />
-                </button>
-              )}
+              <SendOrStopButton loading={loading} focused={focused} queued={queued} canSend={canSend} onSend={send} onStop={stop} gradient="from-fuchsia-500 to-indigo-500" />
             </div>
             <div className="flex items-center gap-2 mt-2">
               <button
