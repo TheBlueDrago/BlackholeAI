@@ -92,6 +92,8 @@ export function ChatWorkspace() {
       plan={effPlan}
       aiExhausted={credits.aiExhausted}
       aiCodeExhausted={credits.aiCodeExhausted}
+      aiRemaining={credits.aiRemaining}
+      aiCodeRemaining={credits.aiCodeRemaining}
       onSpendAI={credits.spendAI}
       onSpendAICode={credits.spendAICode}
       userInitial={avatarInitial}

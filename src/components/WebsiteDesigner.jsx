@@ -154,7 +154,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   const stop = () => {
     reqIdRef.current++;
     setLoading(false);
-    if (lastTextRef.current) setInput(lastTextRef.current);
+    setInput("");
   };
 
   const send = async () => {
@@ -176,7 +176,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
         (lastHtml ? `Current website HTML:\n${lastHtml}\n\n` : "") +
         `Requests so far:\n${userTurns.length ? userTurns.map((u, i) => `${i + 1}. ${u}`).join("\n") : "(none)"}\n\n` +
         `Latest request: ${text}${fileNote}\n\nOutput the complete updated HTML document now.`;
-      const model = { ai: "automatic", code: MODEL, opus5: "claude_opus_4_8", fable: MODEL }[selectedAi] || "automatic";
+      const model = { ai: "automatic", code: MODEL, opus5: "claude_opus_4_8", fable: "claude-sonnet-5" }[selectedAi] || "automatic";
       const res = await base44.functions.invoke("chatCompletion", { prompt, model });
       if (reqIdRef.current !== myId) return;
       const content = res.data?.content ?? "";

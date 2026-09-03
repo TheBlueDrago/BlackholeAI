@@ -12,6 +12,7 @@ import { STARTER_GAME_HTML } from "@/lib/gameTemplate";
 const STORE_KEY = "infinity-ai-game-designer";
 const TAKEN_KEY = "infinity-ai-taken-games";
 const MODEL = "claude_sonnet_4_6";
+const SPACE5_MODEL = "claude-sonnet-5";
 
 const RESERVED = ["home", "www", "admin", "api", "mail", "infinity", "ai", "app", "login", "register", "support", "blog", "game", "games"];
 
@@ -189,7 +190,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
   const stop = () => {
     reqIdRef.current++;
     setLoading(false);
-    if (lastTextRef.current) setInput(lastTextRef.current);
+    setInput("");
   };
 
   const send = async () => {
@@ -211,7 +212,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
         (lastHtml ? `Current game HTML:\n${lastHtml}\n\n` : "") +
         `Requests so far:\n${userTurns.length ? userTurns.map((u, i) => `${i + 1}. ${u}`).join("\n") : "(none)"}\n\n` +
         `Latest request: ${text}${fileNote}\n\nOutput the complete updated HTML game document now.`;
-      const model = { ai: "automatic", code: MODEL, opus5: "claude_opus_4_8", fable: MODEL }[selectedAi] || "automatic";
+      const model = { ai: "automatic", code: MODEL, opus5: "claude_opus_4_8", fable: SPACE5_MODEL }[selectedAi] || "automatic";
       const res = await base44.functions.invoke("chatCompletion", { prompt, model });
       if (reqIdRef.current !== myId) return;
       const content = res.data?.content ?? "";
