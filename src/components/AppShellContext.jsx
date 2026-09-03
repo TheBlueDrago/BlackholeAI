@@ -47,9 +47,8 @@ export function AppShellProvider({ children }) {
   const isBanned = currentUser?.banned === true;
   const blockedUntil = currentUser?.blockedUntil ? new Date(currentUser.blockedUntil) : null;
   const isBlocked = !!(blockedUntil && blockedUntil > new Date());
-  const planActive =
-    currentUser?.plan && currentUser.plan !== "free" && (!currentUser?.planExpiresAt || new Date(currentUser.planExpiresAt) > new Date());
-  const effPlan = planActive ? currentUser.plan : "free";
+  // Single source of truth for the effective plan (handles admin, secret, team membership and Pro expiry).
+  const effPlan = credits.plan;
   const avatarInitial = (currentUser?.full_name || currentUser?.email || "U").trim().charAt(0).toUpperCase();
 
   const goHome = useCallback(() => { navigate("/chat"); setSidebarOpen(false); }, [navigate]);
