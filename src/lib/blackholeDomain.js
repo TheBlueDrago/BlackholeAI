@@ -1,11 +1,34 @@
 export const BLACKHOLE_TLD = ".blackhole";
 
-// Every published site lives at <name>.blackhole — the ending is fixed, only the name is chosen.
+// Game genre → address ending. A shooter called "shooter.io" lives at shooter.io.shooter.
+export const GAME_TLDS = {
+  io: "io",
+  shooting: "shooter",
+  horror: "horror",
+  action: "action",
+  arcade: "arcade",
+  puzzle: "puzzle",
+  racing: "racing",
+  sports: "sports",
+  adventure: "adventure",
+  strategy: "strategy",
+};
+
+// Every published website lives at <name>.blackhole — the ending is fixed, only the name is chosen.
 export const domainOf = (name) => `${(name || "your-site").toLowerCase()}${BLACKHOLE_TLD}`;
 
-// Turn whatever was typed into the address bar into a site slug, or null if it's a plain search.
-export function slugFromAddress(q) {
-  const s = (q || "").trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/.*$/, "");
-  if (s.endsWith(BLACKHOLE_TLD)) return s.slice(0, -BLACKHOLE_TLD.length);
+export const gameDomainOf = (name, genre) => `${(name || "my-game").toLowerCase()}.${GAME_TLDS[genre] || "game"}`;
+
+export const cleanAddress = (q) =>
+  (q || "").trim().toLowerCase().replace(/^https?:\/\//, "").replace(/\/.*$/, "");
+
+// Resolve what was typed into the address bar to a site or a game, or null for a plain search.
+export function resolveAddress(q, sites = [], games = []) {
+  const a = cleanAddress(q);
+  if (!a) return null;
+  const site = sites.find((s) => domainOf(s.name) === a || s.name === a);
+  if (site) return { kind: "site", item: site };
+  const game = games.find((g) => gameDomainOf(g.name, g.genre) === a || g.name === a);
+  if (game) return { kind: "game", item: game };
   return null;
 }

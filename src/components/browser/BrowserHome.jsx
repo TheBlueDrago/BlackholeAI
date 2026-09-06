@@ -8,15 +8,7 @@ export default function BrowserHome({ value, onChange, onSubmit, onLucky }) {
       <div className="flex items-center gap-3 mb-8 select-none">
         <BlackholeIcon className="w-14 h-14" />
         <h1 className="text-5xl sm:text-6xl font-bold tracking-tight">
-          <span className="text-indigo-400">B</span>
-          <span className="text-rose-400">l</span>
-          <span className="text-amber-300">a</span>
-          <span className="text-indigo-400">c</span>
-          <span className="text-emerald-300">k</span>
-          <span className="text-rose-400">h</span>
-          <span className="text-sky-300">o</span>
-          <span className="text-amber-300">l</span>
-          <span className="text-indigo-400">e</span>
+          <span className="bg-gradient-to-r from-[#ffffff] via-indigo-200 to-fuchsia-200 bg-clip-text text-transparent">Blackhole</span>
         </h1>
       </div>
       <form
@@ -29,7 +21,7 @@ export default function BrowserHome({ value, onChange, onSubmit, onLucky }) {
             autoFocus
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            placeholder="Search Blackhole or type a .blackhole address"
+            placeholder="Search Blackhole or type an address (name.blackhole, name.io…)"
             className="flex-1 bg-transparent outline-none text-slate-100 placeholder:text-slate-500 text-base"
           />
         </div>
@@ -42,7 +34,7 @@ export default function BrowserHome({ value, onChange, onSubmit, onLucky }) {
           </button>
         </div>
       </form>
-      <p className="text-slate-500 text-xs mt-10">Every website published with Website Designer lives at <span className="text-slate-300 font-mono">name.blackhole</span></p>
+      <p className="text-slate-500 text-xs mt-10">Websites live at <span className="text-slate-300 font-mono">name.blackhole</span> · games at <span className="text-slate-300 font-mono">name.io</span>, <span className="text-slate-300 font-mono">name.shooter</span>…</p>
     </div>
   );
 }

@@ -11,6 +11,7 @@ import SheetSelect from "@/components/SheetSelect";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useLocation } from "react-router-dom";
 import { STARTER_GAME_HTML } from "@/lib/gameTemplate";
+import { GAME_TLDS } from "@/lib/blackholeDomain";
 
 const STORE_KEY = "infinity-ai-game-designer";
 const TAKEN_KEY = "infinity-ai-taken-games";
@@ -92,7 +93,8 @@ function suggestNames(n, projectId) {
 }
 
 function sanitize(s) {
-  return s.toLowerCase().replace(/[^a-z-]+/g, "-").replace(/^-+|-+$/g, "");
+  // Letters, hyphens and dots (so a name like "shooter.io" is allowed); no leading/trailing separators.
+  return s.toLowerCase().replace(/[^a-z.-]+/g, "-").replace(/\.{2,}/g, ".").replace(/^[-.]+|[-.]+$/g, "");
 }
 
 export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrade, aiExhausted, onSpendAI, aiCodeExhausted, onSpendAICode, galaxy5Exhausted, onSpendGalaxy5, space5Exhausted, onSpendSpace5, remaining, plan, lightMode, onToggleLight }) {
@@ -331,7 +333,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
           value={gameName}
           onChange={(e) => setGameName(sanitize(e.target.value))}
           placeholder="my-game"
-          title="Game name (letters and hyphens only)"
+          title="Game name (letters, hyphens and dots)"
           className="bg-slate-800/70 border border-slate-700/50 rounded-lg px-2.5 py-1.5 text-sm text-white outline-none focus:border-fuchsia-500/50 w-28 sm:w-40 font-medium shrink-0"
         />
 
@@ -538,7 +540,14 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
               className="w-full max-w-md bg-slate-900 border border-slate-700/60 rounded-2xl shadow-2xl p-6"
             >
               <h3 className="text-lg font-semibold text-white">Publish your game</h3>
-              <p className="text-slate-400 text-sm mt-1">Your game will go live on the Games front page.</p>
+              <p className="text-slate-400 text-sm mt-1">Your game will go live on the Games front page and in Blackhole Browser at:</p>
+              <div className="mt-3 flex items-center gap-2 bg-slate-800/70 border border-slate-700/50 rounded-xl px-3 py-2.5">
+                <Gamepad2 className="w-4 h-4 text-fuchsia-300 shrink-0" />
+                <span className="text-slate-100 text-sm font-mono truncate">
+                  {sanitize(gameName || "my-game")}<span className="text-fuchsia-300">.{GAME_TLDS[genre] || "game"}</span>
+                </span>
+              </div>
+              <p className="text-slate-500 text-xs mt-2">The ending comes from the genre you pick.</p>
 
               <label className="block mt-4 text-xs text-slate-400 mb-1">Game title</label>
               <input

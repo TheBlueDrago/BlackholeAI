@@ -8,7 +8,8 @@ import Sidebar from "@/components/Sidebar";
 import ThemeToggle from "@/components/ThemeToggle";
 import BrowserHome from "@/components/browser/BrowserHome";
 import BrowserResults from "@/components/browser/BrowserResults";
-import { domainOf, slugFromAddress } from "@/lib/blackholeDomain";
+import BrowserGameFrame from "@/components/browser/BrowserGameFrame";
+import { domainOf, gameDomainOf, cleanAddress, resolveAddress } from "@/lib/blackholeDomain";
 
 export default function BlackholeBrowser() {
   const shell = useAppShell();
@@ -17,28 +18,39 @@ export default function BlackholeBrowser() {
   const q = params.get("q") || "";
   const [input, setInput] = useState(q);
   const [sites, setSites] = useState([]);
+  const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
-    base44.entities.PublishedSite.list("-created_date", 500)
-      .then((rows) => setSites(rows || []))
-      .catch(() => setSites([]))
+    Promise.all([
+      base44.entities.PublishedSite.list("-created_date", 500).catch(() => []),
+      base44.entities.PublishedGame.list("-plays", 500).catch(() => []),
+    ])
+      .then(([s, g]) => {
+        setSites(s || []);
+        setGames((g || []).filter((x) => !x.hidden));
+      })
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => setInput(q), [q]);
 
-  const byName = (n) => sites.find((s) => s.name === n);
   const query = q.trim().toLowerCase();
-  const directSlug = slugFromAddress(query) ?? (/^[a-z-]+$/.test(query) && byName(query) ? query : null);
-  const site = directSlug ? byName(directSlug) : null;
+  const hit = resolveAddress(query, sites, games);
 
   const results = useMemo(() => {
     if (!query) return [];
-    const term = slugFromAddress(query) ?? query;
-    return sites.filter((s) => s.name.includes(term) || (s.ownerName || "").toLowerCase().includes(term));
-  }, [sites, query]);
+    const term = cleanAddress(query);
+    const match = (...fields) => fields.some((f) => (f || "").toLowerCase().includes(term));
+    const siteRows = sites
+      .filter((s) => match(s.name, domainOf(s.name), s.ownerName))
+      .map((s) => ({ id: s.id, kind: "site", address: domainOf(s.name), title: s.name, owner: s.ownerName, description: `Website built with Blackhole AI Website Designer. Open ${domainOf(s.name)} in Blackhole Browser.` }));
+    const gameRows = games
+      .filter((g) => match(g.name, g.title, gameDomainOf(g.name, g.genre), g.ownerName))
+      .map((g) => ({ id: g.id, kind: "game", address: gameDomainOf(g.name, g.genre), title: g.title || g.name, owner: g.ownerName, description: `${g.genre} game on Blackhole Games · ${g.plays || 0} plays. Play ${gameDomainOf(g.name, g.genre)} in Blackhole Browser.` }));
+    return [...siteRows, ...gameRows];
+  }, [sites, games, query]);
 
   const go = (text) => {
     const t = (text ?? input).trim();
@@ -48,12 +60,14 @@ export default function BlackholeBrowser() {
   const goHome = () => setParams({});
   const lucky = () => {
     const term = input.trim().toLowerCase();
-    const first = term ? sites.find((s) => s.name.includes(term)) : sites[0];
-    if (first) go(domainOf(first.name));
+    const s = term ? sites.find((x) => x.name.includes(term)) : sites[0];
+    const g = term ? games.find((x) => x.name.includes(term) || (x.title || "").toLowerCase().includes(term)) : games[0];
+    if (s) go(domainOf(s.name));
+    else if (g) go(gameDomainOf(g.name, g.genre));
     else go();
   };
 
-  const mode = !query ? "home" : site ? "site" : "results";
+  const mode = !query ? "home" : hit ? hit.kind : "results";
 
   return (
     <div className="h-screen flex flex-col bg-[#0b0f1a] text-slate-100 overflow-hidden relative">
@@ -101,11 +115,11 @@ export default function BlackholeBrowser() {
         </button>
         <form onSubmit={(e) => { e.preventDefault(); go(); }} className="flex-1 max-w-2xl mx-auto">
           <div className="flex items-center gap-2 bg-white/5 border border-white/10 focus-within:border-white/30 rounded-full px-3 h-9 transition-colors">
-            {mode === "site" ? <Lock className="w-3.5 h-3.5 text-emerald-300" /> : <Search className="w-4 h-4 text-slate-400" />}
+            {hit ? <Lock className="w-3.5 h-3.5 text-emerald-300" /> : <Search className="w-4 h-4 text-slate-400" />}
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Search Blackhole or type a .blackhole address"
+              placeholder="Search Blackhole or type an address (name.blackhole, name.io…)"
               className="bg-transparent outline-none text-sm flex-1 text-slate-100 placeholder:text-slate-500"
             />
           </div>
@@ -121,9 +135,11 @@ export default function BlackholeBrowser() {
       ) : mode === "home" ? (
         <BrowserHome value={input} onChange={setInput} onSubmit={go} onLucky={lucky} />
       ) : mode === "site" ? (
-        <iframe key={reloadKey} srcDoc={site.html} title={domainOf(site.name)} sandbox="allow-scripts" className="flex-1 w-full bg-white border-0" />
+        <iframe key={reloadKey} srcDoc={hit.item.html} title={domainOf(hit.item.name)} sandbox="allow-scripts" className="flex-1 w-full bg-white border-0" />
+      ) : mode === "game" ? (
+        <BrowserGameFrame name={hit.item.name} reloadKey={reloadKey} />
       ) : (
-        <BrowserResults query={q} results={results} onOpen={(n) => go(domainOf(n))} />
+        <BrowserResults query={q} results={results} onOpen={go} />
       )}
     </div>
   );
