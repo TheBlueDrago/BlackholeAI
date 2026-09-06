@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 
-const KEY = "infinity-ai-credits-v2";
+const KEY = "infinity-ai-credits-v3";
 const FREE = { aiTotal: 10, aiCodeTotal: 5, galaxy5Total: 0, space5Total: 0 };
 const PRO = { aiTotal: 25, aiCodeTotal: 15, galaxy5Total: 25, space5Total: 0 };
 const TEAM = { aiTotal: 50, aiCodeTotal: 25, galaxy5Total: 40, space5Total: 25 };
