@@ -3,11 +3,13 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Search, Loader2, ShieldCheck } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import UserCard from "@/components/monitor/UserCard";
+import UserDetail from "@/components/monitor/UserDetail";
 
 export default function Monitor({ onBack }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
+  const [detailUser, setDetailUser] = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -75,7 +77,7 @@ export default function Monitor({ onBack }) {
         <div className="w-full max-w-3xl mt-6 space-y-3">
           <p className="text-slate-400 text-sm">{filtered.length} result(s)</p>
           {filtered.map((u) => (
-            <UserCard key={u.id} user={u} onApply={apply} />
+            <UserCard key={u.id} user={u} onApply={apply} onOpenDetail={setDetailUser} />
           ))}
         </div>
       ) : (
@@ -83,10 +85,12 @@ export default function Monitor({ onBack }) {
           <p className="text-slate-300 text-sm font-medium">Recently joined</p>
           {recent.length === 0 && <p className="text-slate-500 text-sm">No users yet.</p>}
           {recent.map((u) => (
-            <UserCard key={u.id} user={u} onApply={apply} />
+            <UserCard key={u.id} user={u} onApply={apply} onOpenDetail={setDetailUser} />
           ))}
         </div>
       )}
+
+      {detailUser && <UserDetail user={detailUser} onClose={() => setDetailUser(null)} />}
     </motion.div>
   );
 }

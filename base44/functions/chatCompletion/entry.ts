@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { MODEL_BUCKET } from '../../shared/planCredits.ts';
 
 export default async function(req) {
   try {
@@ -12,6 +13,17 @@ export default async function(req) {
     if (prompt.length > 8000) return Response.json({ error: 'Prompt too long' }, { status: 400 });
 
     const model = typeof body.model === 'string' && body.model ? body.model : 'automatic';
+
+    // Record the question so admins can review a user's AI activity in Monitor.
+    if (body.internal !== true) {
+      await base44.asServiceRole.entities.AiActivity.create({
+        userId: user.id,
+        userEmail: user.email || '',
+        model,
+        bucket: MODEL_BUCKET[model] || 'other',
+        prompt: prompt.slice(0, 300),
+      }).catch((e) => console.error('activity log failed', e));
+    }
 
     const result = await base44.asServiceRole.integrations.Core.InvokeLLM({ prompt, model });
     const content = typeof result === 'string'

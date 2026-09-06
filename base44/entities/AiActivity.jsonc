@@ -1,0 +1,68 @@
+{
+  "name": "AiActivity",
+  "type": "object",
+  "properties": {
+    "userId": {
+      "type": "string",
+      "description": "App user who sent the prompt."
+    },
+    "userEmail": {
+      "type": "string",
+      "default": ""
+    },
+    "model": {
+      "type": "string",
+      "default": "",
+      "description": "LLM model id used for the request."
+    },
+    "bucket": {
+      "type": "string",
+      "enum": [
+        "ai",
+        "aiCode",
+        "galaxy5",
+        "space5",
+        "other"
+      ],
+      "default": "other",
+      "description": "Which credit pool this request belongs to."
+    },
+    "prompt": {
+      "type": "string",
+      "default": "",
+      "description": "First 300 characters of the user's question."
+    }
+  },
+  "required": [
+    "userId"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.userId": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

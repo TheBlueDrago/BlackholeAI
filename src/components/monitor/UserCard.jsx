@@ -20,11 +20,17 @@ function StatusBadge({ user }) {
   return <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200 border border-emerald-400/40">Active</span>;
 }
 
-export default function UserCard({ user, onApply }) {
+export default function UserCard({ user, onApply, onOpenDetail }) {
   return (
     <div className="bg-slate-900/70 border border-slate-700/50 rounded-2xl p-4">
       <div className="flex items-center gap-2 flex-wrap">
-        <p className="text-white font-medium truncate max-w-[60%]">{user.full_name || "Unnamed"}</p>
+        <button
+          onClick={() => onOpenDetail?.(user)}
+          title="View credits and AI activity"
+          className="text-white font-medium truncate max-w-[60%] hover:text-sky-300 hover:underline transition-colors"
+        >
+          {user.full_name || "Unnamed"}
+        </button>
         <PlanBadge plan={user.plan} />
         <StatusBadge user={user} />
       </div>

@@ -48,6 +48,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
         try {
           const titleRes = await base44.functions.invoke("chatCompletion", {
             prompt: `Create a very short title (max 4 words, no quotes, no trailing punctuation) summarizing what this chat is about based on the user's first message: "${text}". Respond with only the title.`,
+            internal: true,
           });
           const title = (titleRes.data?.content ?? "").trim().slice(0, 50);
           if (title && reqIdRef.current === myId) renameConversation(convId, title);
