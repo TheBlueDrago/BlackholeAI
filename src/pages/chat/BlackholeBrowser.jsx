@@ -10,6 +10,7 @@ import BrowserHome from "@/components/browser/BrowserHome";
 import BrowserResults from "@/components/browser/BrowserResults";
 import BrowserGameFrame from "@/components/browser/BrowserGameFrame";
 import { domainOf, gameDomainOf, cleanAddress, resolveAddress } from "@/lib/blackholeDomain";
+import { useWebSearch } from "@/hooks/useWebSearch";
 
 export default function BlackholeBrowser() {
   const shell = useAppShell();
@@ -68,6 +69,7 @@ export default function BlackholeBrowser() {
   };
 
   const mode = !query ? "home" : hit ? hit.kind : "results";
+  const web = useWebSearch(q.trim(), mode === "results");
 
   return (
     <div className="h-screen flex flex-col bg-[#0b0f1a] text-slate-100 overflow-hidden relative">
@@ -139,7 +141,7 @@ export default function BlackholeBrowser() {
       ) : mode === "game" ? (
         <BrowserGameFrame name={hit.item.name} reloadKey={reloadKey} />
       ) : (
-        <BrowserResults query={q} results={results} onOpen={go} />
+        <BrowserResults query={q} results={results} web={web} onOpen={go} />
       )}
     </div>
   );
