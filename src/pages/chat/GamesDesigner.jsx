@@ -119,6 +119,8 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
   const [publishing, setPublishing] = useState(false);
   const [publishErr, setPublishErr] = useState("");
   const [publishUrl, setPublishUrl] = useState("");
+  const [nameTaken, setNameTaken] = useState(false);
+  const [isRepublish, setIsRepublish] = useState(false);
   const [files, setFiles] = useState([]);
   const [focused, setFocused] = useState(false);
   const opusAllowed = plan === "pro" || plan === "team" || plan === "secret";
@@ -191,6 +193,36 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, loading]);
+
+  // A published game name is claimed forever, unless it's your own game being re-published.
+  useEffect(() => {
+    const n = sanitize(gameName || "");
+    if (!showPublish || !n) {
+      setNameTaken(false);
+      setIsRepublish(false);
+      return;
+    }
+    if (RESERVED.includes(n)) {
+      setNameTaken(true);
+      setIsRepublish(false);
+      return;
+    }
+    let alive = true;
+    base44.entities.PublishedGame.filter({ name: n })
+      .then((rows) => {
+        if (!alive) return;
+        setNameTaken((rows || []).some((g) => g.created_by_id !== user?.id));
+        setIsRepublish((rows || []).some((g) => g.created_by_id === user?.id));
+      })
+      .catch(() => {
+        if (!alive) return;
+        setNameTaken(false);
+        setIsRepublish(false);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [gameName, showPublish, user?.id]);
 
   const isCodeAi = selectedAi === "code";
   const isGalaxy = selectedAi === "opus5";
@@ -317,7 +349,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
   };
 
   const reload = () => setReloadKey((k) => k + 1);
-  const taken = isTakenFor(gameName, projectId);
+  const taken = nameTaken;
   const ownerInitial = (user?.full_name || user?.email || "U").trim().charAt(0).toUpperCase();
 
   return (
@@ -551,7 +583,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
               onClick={(e) => e.stopPropagation()}
               className="w-full max-w-md bg-slate-900 border border-slate-700/60 rounded-2xl shadow-2xl p-6"
             >
-              <h3 className="text-lg font-semibold text-white">Publish your game</h3>
+              <h3 className="text-lg font-semibold text-white">{isRepublish ? "Re-publish your game" : "Publish your game"}</h3>
               <p className="text-slate-400 text-sm mt-1">Your game will go live on the Games front page and in Blackhole Browser at:</p>
               <div className="mt-3 flex items-center gap-2 bg-slate-800/70 border border-slate-700/50 rounded-xl px-3 py-2.5">
                 <Gamepad2 className="w-4 h-4 text-fuchsia-300 shrink-0" />
@@ -605,10 +637,10 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
                 </button>
                 <button
                   onClick={confirmPublish}
-                  disabled={!gameName || publishing || !previewHtml}
+                  disabled={!gameName || publishing || !previewHtml || taken}
                   className="flex-1 py-2.5 rounded-xl bg-fuchsia-500 text-white font-medium hover:bg-fuchsia-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
-                  {publishing ? "Publishing…" : "Publish"}
+                  {publishing ? (isRepublish ? "Re-publishing…" : "Publishing…") : isRepublish ? "Re-publish" : "Publish"}
                 </button>
               </div>
               {publishErr && <p className="text-sm text-red-400 mt-3">{publishErr}</p>}
@@ -625,7 +657,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
             exit={{ opacity: 0, y: -10 }}
             className="fixed top-20 right-6 z-50 bg-emerald-500 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 text-sm font-medium"
           >
-            <Rocket className="w-4 h-4" /> Game published!
+            <Rocket className="w-4 h-4" /> {isRepublish ? "Game updated!" : "Game published!"}
           </motion.div>
         )}
       </AnimatePresence>

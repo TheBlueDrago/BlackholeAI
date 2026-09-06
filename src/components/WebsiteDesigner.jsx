@@ -133,6 +133,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   const [publishUrl, setPublishUrl] = useState("");
   const [saveState, setSaveState] = useState("saved");
   const [nameTaken, setNameTaken] = useState(false);
+  const [isRepublish, setIsRepublish] = useState(false);
   const opusAllowed = plan === "pro" || plan === "team" || plan === "secret" || plan === "admin";
   const fableAllowed = plan === "team" || plan === "secret" || plan === "admin";
   const [selectedAi, setSelectedAi] = useState(fableAllowed ? "fable" : opusAllowed ? "opus5" : "ai");
@@ -180,20 +181,26 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
     const n = sanitizeSite(siteName || "");
     if (!showPublish || !n) {
       setNameTaken(false);
+      setIsRepublish(false);
       return;
     }
     if (RESERVED.includes(n)) {
       setNameTaken(true);
+      setIsRepublish(false);
       return;
     }
     let alive = true;
     base44.entities.PublishedSite.filter({ name: n })
       .then((rows) => {
         if (!alive) return;
-        const other = (rows || []).some((s) => s.created_by_id !== user?.id);
-        setNameTaken(other);
+        setNameTaken((rows || []).some((s) => s.created_by_id !== user?.id));
+        setIsRepublish((rows || []).some((s) => s.created_by_id === user?.id));
       })
-      .catch(() => alive && setNameTaken(false));
+      .catch(() => {
+        if (!alive) return;
+        setNameTaken(false);
+        setIsRepublish(false);
+      });
     return () => {
       alive = false;
     };
@@ -333,12 +340,14 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
       setShowPublish(false);
       setPublished(true);
       setTimeout(() => setPublished(false), 2500);
-      // Start a clean project so the next visit isn't the site you just published.
-      setMessages([]);
-      messagesRef.current = [];
-      setMembers([]);
-      setSiteName("my-site");
-      setProjectId(genId());
+      if (!mine) {
+        // Brand new site: start a clean project so the next visit isn't the site you just published.
+        setMessages([]);
+        messagesRef.current = [];
+        setMembers([]);
+        setSiteName("my-site");
+        setProjectId(genId());
+      }
     } catch (e) {
       setPublishErr(e?.response?.data?.error || e?.message || "Could not publish.");
     } finally {
@@ -681,7 +690,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
               onClick={(e) => e.stopPropagation()}
               className="w-full max-w-md bg-slate-900 border border-slate-700/60 rounded-2xl shadow-2xl p-6"
             >
-              <h3 className="text-lg font-semibold text-white">Publish your website</h3>
+              <h3 className="text-lg font-semibold text-white">{isRepublish ? "Re-publish your website" : "Publish your website"}</h3>
               <p className="text-slate-400 text-sm mt-1">Your website will be live in Blackhole Browser at:</p>
               <div className="mt-3 flex items-center gap-2 bg-slate-800/70 border border-slate-700/50 rounded-xl px-3 py-2.5">
                 <Globe className="w-4 h-4 text-sky-300 shrink-0" />
@@ -722,7 +731,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
                   disabled={!siteName || publishing || !previewHtml || taken}
                   className="flex-1 py-2.5 rounded-xl bg-indigo-500 text-white font-medium hover:bg-indigo-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
-                  {publishing ? "Publishing…" : "Publish"}
+                  {publishing ? (isRepublish ? "Re-publishing…" : "Publishing…") : isRepublish ? "Re-publish" : "Publish"}
                 </button>
               </div>
               {publishErr && <p className="text-sm text-red-400 mt-3">{publishErr}</p>}
@@ -740,7 +749,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
             exit={{ opacity: 0, y: -10 }}
             className="fixed top-20 right-6 z-50 bg-emerald-500 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 text-sm font-medium"
           >
-            <Rocket className="w-4 h-4" /> Website published!
+            <Rocket className="w-4 h-4" /> {isRepublish ? "Website updated!" : "Website published!"}
             {publishUrl && (
               <a href={publishUrl} className="underline ml-1">View</a>
             )}
