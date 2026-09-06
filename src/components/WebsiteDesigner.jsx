@@ -132,6 +132,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   const [publishErr, setPublishErr] = useState("");
   const [publishUrl, setPublishUrl] = useState("");
   const [saveState, setSaveState] = useState("saved");
+  const [nameTaken, setNameTaken] = useState(false);
   const opusAllowed = plan === "pro" || plan === "team" || plan === "secret" || plan === "admin";
   const fableAllowed = plan === "team" || plan === "secret" || plan === "admin";
   const [selectedAi, setSelectedAi] = useState(fableAllowed ? "fable" : opusAllowed ? "opus5" : "ai");
@@ -173,6 +174,30 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, loading]);
+
+  // A published name is claimed forever, unless it's your own site being republished.
+  useEffect(() => {
+    const n = sanitizeSite(siteName || "");
+    if (!showPublish || !n) {
+      setNameTaken(false);
+      return;
+    }
+    if (RESERVED.includes(n)) {
+      setNameTaken(true);
+      return;
+    }
+    let alive = true;
+    base44.entities.PublishedSite.filter({ name: n })
+      .then((rows) => {
+        if (!alive) return;
+        const other = (rows || []).some((s) => s.created_by_id !== user?.id);
+        setNameTaken(other);
+      })
+      .catch(() => alive && setNameTaken(false));
+    return () => {
+      alive = false;
+    };
+  }, [siteName, showPublish, user?.id]);
 
   const effPlan = plan;
   const cap = capFor(plan);
@@ -323,7 +348,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
 
   const reload = () => setReloadKey((k) => k + 1);
 
-  const taken = isTakenFor(siteName, projectId);
+  const taken = nameTaken;
   const pages = detectPages(previewHtml);
   const safePagePath = pages.includes(pagePath) ? pagePath : pages[0];
 
@@ -694,7 +719,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
                 </button>
                 <button
                   onClick={confirmPublish}
-                  disabled={!siteName || publishing || !previewHtml}
+                  disabled={!siteName || publishing || !previewHtml || taken}
                   className="flex-1 py-2.5 rounded-xl bg-indigo-500 text-white font-medium hover:bg-indigo-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   {publishing ? "Publishing…" : "Publish"}
