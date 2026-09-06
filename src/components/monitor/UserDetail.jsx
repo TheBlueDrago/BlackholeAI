@@ -57,7 +57,13 @@ export default function UserDetail({ user, onClose }) {
                 return (
                   <div key={k} className="bg-slate-800/60 border border-slate-700/50 rounded-xl px-3 py-2">
                     <p className="text-[11px] text-slate-400">{LABELS[k]}</p>
-                    <p className="text-white text-sm font-semibold">{c.remaining} <span className="text-slate-500 font-normal">/ {c.total} left</span></p>
+                    {c.total === 0 ? (
+                      <p className="text-slate-500 text-sm font-medium">Not in their plan</p>
+                    ) : (
+                      <p className="text-white text-sm font-semibold">
+                        {c.remaining} <span className="text-slate-500 font-normal">of {c.total} left</span>
+                      </p>
+                    )}
                   </div>
                 );
               })}
