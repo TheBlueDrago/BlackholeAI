@@ -12,6 +12,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { domainOf } from "@/lib/blackholeDomain";
 import { siteLimit } from "@/lib/publishLimits";
 import { syncSiteProducts } from "@/lib/siteProducts";
+import SaveStatus from "@/components/designer/SaveStatus";
 
 const STORE_KEY = "infinity-ai-designer";
 const TAKEN_KEY = "infinity-ai-taken-sites";
@@ -27,7 +28,7 @@ Make it modern, responsive, and visually polished — clean typography, good spa
 Do NOT wrap the HTML in markdown code fences. Do NOT add any explanation before or after the HTML — output ONLY the raw HTML document.
 When the user asks for changes, output the FULL updated HTML document every time, not just the diff.
 
-PAYMENTS: if the user asks for a billing, checkout, pricing, payment or "buy" page, use Blackhole's built-in payment system — the same hosted checkout this platform uses. Never use Stripe, PayPal, or your own card form, and never ask the buyer for card numbers.
+PAYMENTS: never add a checkout, billing, payment or "buy" page unless the user explicitly asks for one — a normal site has no products, no prices and no payment buttons. Only when the user asks for a billing, checkout, pricing, payment or "buy" page, use Blackhole's built-in payment system — the same hosted checkout this platform uses. Never use Stripe, PayPal, or your own card form, and never ask the buyer for card numbers.
 1) Declare the products inside the document exactly like this:
 <script type="application/json" id="blackhole-products">[{"id":"basic","name":"Basic","price":"9.99","currency":"USD"}]</script>
 Product ids are lowercase letters, numbers and hyphens; price is major units as a string and must be at least 0.50.
@@ -130,6 +131,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   const [publishing, setPublishing] = useState(false);
   const [publishErr, setPublishErr] = useState("");
   const [publishUrl, setPublishUrl] = useState("");
+  const [saveState, setSaveState] = useState("saved");
   const opusAllowed = plan === "pro" || plan === "team" || plan === "secret" || plan === "admin";
   const fableAllowed = plan === "team" || plan === "secret" || plan === "admin";
   const [selectedAi, setSelectedAi] = useState(fableAllowed ? "fable" : opusAllowed ? "opus5" : "ai");
@@ -148,10 +150,24 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
     base44.auth.me().then(setUser).catch(() => setUser(null));
   }, []);
 
+  // Auto-save: persist the project a moment after every change, and again on exit.
   useEffect(() => {
-    try {
-      localStorage.setItem(STORE_KEY, JSON.stringify({ siteName, messages, members, projectId }));
-    } catch {}
+    setSaveState("saving");
+    const save = () => {
+      try {
+        localStorage.setItem(STORE_KEY, JSON.stringify({ siteName, messages, members, projectId }));
+      } catch {}
+    };
+    const t = setTimeout(() => {
+      save();
+      setSaveState("saved");
+    }, 600);
+    window.addEventListener("beforeunload", save);
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener("beforeunload", save);
+      save();
+    };
   }, [siteName, messages, members, projectId]);
 
   useEffect(() => {
@@ -339,6 +355,8 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
           title="Website name (letters and hyphens only)"
           className="bg-slate-800/70 border border-slate-700/50 rounded-lg px-2.5 py-1.5 text-sm text-white outline-none focus:border-indigo-500/50 w-28 sm:w-40 font-medium shrink-0"
         />
+
+        <SaveStatus state={saveState} />
 
         {/* Page path / search bar */}
         <div className="flex-1 flex justify-center px-2 min-w-0">
