@@ -29,7 +29,7 @@ export default function BlackholeBrowser() {
       base44.entities.PublishedGame.list("-plays", 500).catch(() => []),
     ])
       .then(([s, g]) => {
-        setSites(s || []);
+        setSites((s || []).filter((x) => !x.hidden));
         setGames((g || []).filter((x) => !x.hidden));
       })
       .finally(() => setLoading(false));

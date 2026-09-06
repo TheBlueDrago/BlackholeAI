@@ -10,6 +10,7 @@ import AiChooser from "@/components/AiChooser";
 import SheetSelect from "@/components/SheetSelect";
 import ThemeToggle from "@/components/ThemeToggle";
 import { domainOf } from "@/lib/blackholeDomain";
+import { siteLimit } from "@/lib/publishLimits";
 
 const STORE_KEY = "infinity-ai-designer";
 const TAKEN_KEY = "infinity-ai-taken-sites";
@@ -103,7 +104,7 @@ function initialOf(s) {
 
 export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgrade, aiExhausted, onSpendAI, aiCodeExhausted, onSpendAICode, galaxy5Exhausted, onSpendGalaxy5, space5Exhausted, onSpendSpace5, remaining, plan, lightMode, onToggleLight }) {
   const initial = loadState();
-  const projectId = initial.projectId;
+  const [projectId, setProjectId] = useState(initial.projectId);
   const [siteName, setSiteName] = useState(initial.siteName);
   const [messages, setMessages] = useState(initial.messages);
   const [members, setMembers] = useState(initial.members);
@@ -143,7 +144,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
     try {
       localStorage.setItem(STORE_KEY, JSON.stringify({ siteName, messages, members, projectId }));
     } catch {}
-  }, [siteName, messages, members]);
+  }, [siteName, messages, members, projectId]);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -263,8 +264,15 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
       }
       const ownerName = user?.email || user?.full_name || "";
       if (mine) {
-        await base44.entities.PublishedSite.update(mine.id, { html: previewHtml, ownerName });
+        await base44.entities.PublishedSite.update(mine.id, { html: previewHtml, ownerName, hidden: false });
       } else {
+        // Websites are a lifetime allowance per plan; deleting one frees a slot.
+        const lim = siteLimit(plan);
+        const owned = await base44.entities.PublishedSite.filter({ created_by_id: user?.id });
+        if ((owned || []).length >= lim) {
+          setPublishErr(`Your ${plan} plan allows ${lim} website${lim === 1 ? "" : "s"}. Delete one in Settings → Published Websites or upgrade.`);
+          return;
+        }
         await base44.entities.PublishedSite.create({ name: n, html: previewHtml, ownerName });
       }
       const list = getTaken().filter((e) => e.name !== n);
@@ -274,6 +282,12 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
       setShowPublish(false);
       setPublished(true);
       setTimeout(() => setPublished(false), 2500);
+      // Start a clean project so the next visit isn't the site you just published.
+      setMessages([]);
+      messagesRef.current = [];
+      setMembers([]);
+      setSiteName("my-site");
+      setProjectId(genId());
     } catch (e) {
       setPublishErr(e?.response?.data?.error || e?.message || "Could not publish.");
     } finally {

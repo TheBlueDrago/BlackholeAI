@@ -12,6 +12,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { useLocation } from "react-router-dom";
 import { STARTER_GAME_HTML } from "@/lib/gameTemplate";
 import { GAME_TLDS } from "@/lib/blackholeDomain";
+import { gameLimit, inThisMonth } from "@/lib/publishLimits";
 
 const STORE_KEY = "infinity-ai-game-designer";
 const TAKEN_KEY = "infinity-ai-taken-games";
@@ -277,6 +278,17 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
     setPublishErr("");
     setPublishing(true);
     try {
+      // Games are a monthly allowance per plan; deleting one frees a slot this month.
+      const owned = await base44.entities.PublishedGame.filter({ created_by_id: user?.id });
+      const isUpdate = (owned || []).some((g) => g.name === n);
+      if (!isUpdate) {
+        const lim = gameLimit(plan);
+        const usedThisMonth = (owned || []).filter((g) => inThisMonth(g.created_date)).length;
+        if (usedThisMonth >= lim) {
+          setPublishErr(`Your ${plan} plan allows ${lim} new game${lim === 1 ? "" : "s"} per month. Delete one in Settings → Published Games or upgrade.`);
+          return;
+        }
+      }
       const ownerName = user?.email || user?.full_name || "";
       const dispTitle = title.trim() || n;
       const res = await base44.functions.invoke("publish-game", {

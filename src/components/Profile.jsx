@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { LogOut, Mail, Shield, KeyRound, ArrowLeft, Loader2, Crown, Settings, Users, Lock, ShieldCheck, Ticket, Trash2, Gamepad2, Pencil, Eye, EyeOff } from "lucide-react";
+import { LogOut, Mail, Shield, KeyRound, ArrowLeft, Loader2, Crown, Settings, Users, Lock, ShieldCheck, Ticket, Trash2, Gamepad2, Pencil, Eye, EyeOff, Globe } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import TeamMembership from "@/components/TeamMembership";
+import PublishedSites from "@/components/profile/PublishedSites";
 
 export default function Profile({ open, onClose, initialView = "main", onMonitor, onPromos }) {
   const [user, setUser] = useState(null);
@@ -134,6 +135,7 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
   const isPro = user?.plan === "pro" && (!user?.planExpiresAt || new Date(user.planExpiresAt) > new Date());
   const isTeam = user?.plan === "team" && (!user?.planExpiresAt || new Date(user.planExpiresAt) > new Date());
   const isSecret = user?.role === "admin" || (user?.plan === "secret" && (!user?.planExpiresAt || new Date(user.planExpiresAt) > new Date()));
+  const effPlan = isSecret ? "secret" : isTeam ? "team" : isPro ? "pro" : "free";
 
   return (
     <AnimatePresence>
@@ -218,6 +220,8 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                   Delete account
                 </button>
               </div>
+            ) : view === "sites" ? (
+              <PublishedSites user={user} plan={effPlan} onBack={() => setView("settings")} />
             ) : view === "games" ? (
               <div className="p-6">
                 <button
@@ -288,6 +292,16 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                   <span className="flex items-center gap-2 font-medium">
                     <Gamepad2 className="w-4 h-4 text-fuchsia-300" />
                     Published Games
+                  </span>
+                  <ArrowLeft className="w-4 h-4 rotate-180 text-slate-500" />
+                </button>
+                <button
+                  onClick={() => setView("sites")}
+                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 transition-colors"
+                >
+                  <span className="flex items-center gap-2 font-medium">
+                    <Globe className="w-4 h-4 text-sky-300" />
+                    Published Websites
                   </span>
                   <ArrowLeft className="w-4 h-4 rotate-180 text-slate-500" />
                 </button>
