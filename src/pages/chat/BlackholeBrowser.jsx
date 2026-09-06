@@ -11,6 +11,7 @@ import BrowserResults from "@/components/browser/BrowserResults";
 import BrowserGameFrame from "@/components/browser/BrowserGameFrame";
 import { domainOf, gameDomainOf, cleanAddress, resolveAddress } from "@/lib/blackholeDomain";
 import { useWebSearch } from "@/hooks/useWebSearch";
+import useSiteCheckout from "@/hooks/useSiteCheckout";
 
 const LUCKY_PLACES = ["Kyoto, Japan", "Reykjavik, Iceland", "Machu Picchu", "Marrakech, Morocco", "Queenstown, New Zealand", "Santorini, Greece", "Banff National Park", "Petra, Jordan"];
 
@@ -75,6 +76,7 @@ export default function BlackholeBrowser() {
   };
 
   const mode = !query ? "home" : hit ? hit.kind : "results";
+  useSiteCheckout(hit?.kind === "site" ? hit.item.name : null);
   const web = useWebSearch(q.trim(), mode === "results");
 
   return (

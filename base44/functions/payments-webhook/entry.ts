@@ -119,6 +119,22 @@ async function handleOrderApproved(db: any, eventData: any): Promise<Response> {
     return new Response("OK", { status: 200 });
   }
 
+  // A purchase made on a user-published Blackhole website: settle the SiteSale (platform cut +
+  // creator payout were computed at checkout) and stop — there's no plan to grant.
+  const siteSales = await db.entities.SiteSale.filter({ checkoutSessionId: checkoutId });
+  const sale = siteSales?.[0];
+  if (sale) {
+    if (sale.status !== "paid") {
+      await db.entities.SiteSale.update(sale.id, {
+        status: "paid",
+        buyerEmail: sale.buyerEmail || extractBuyerEmail(order) || "",
+        paidAt: new Date().toISOString(),
+      });
+      console.log("payments-webhook: site sale paid", { saleId: sale.id, siteName: sale.siteName, orderId });
+    }
+    return new Response("OK", { status: 200 });
+  }
+
   // Resolve the pending purchase created by `create-checkout` (join key: checkoutSessionId).
   const matches = await db.entities.Base44Purchase.filter({ checkoutSessionId: checkoutId });
   const purchase = matches?.[0];

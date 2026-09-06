@@ -11,6 +11,7 @@ import SheetSelect from "@/components/SheetSelect";
 import ThemeToggle from "@/components/ThemeToggle";
 import { domainOf } from "@/lib/blackholeDomain";
 import { siteLimit } from "@/lib/publishLimits";
+import { syncSiteProducts } from "@/lib/siteProducts";
 
 const STORE_KEY = "infinity-ai-designer";
 const TAKEN_KEY = "infinity-ai-taken-sites";
@@ -24,7 +25,14 @@ const SYSTEM = `You are Blackhole AI Website Designer. The user describes a webs
 ALWAYS respond with a single complete, self-contained HTML document: include <!DOCTYPE html>, <html>, <head> with inline <style> CSS, and <body> with inline <script> for any interactivity.
 Make it modern, responsive, and visually polished — clean typography, good spacing, a tasteful color palette, and smooth interactions. Use placeholder content that fits the site's purpose.
 Do NOT wrap the HTML in markdown code fences. Do NOT add any explanation before or after the HTML — output ONLY the raw HTML document.
-When the user asks for changes, output the FULL updated HTML document every time, not just the diff.`;
+When the user asks for changes, output the FULL updated HTML document every time, not just the diff.
+
+PAYMENTS: if the user asks for a billing, checkout, pricing, payment or "buy" page, use Blackhole's built-in payment system — the same hosted checkout this platform uses. Never use Stripe, PayPal, or your own card form, and never ask the buyer for card numbers.
+1) Declare the products inside the document exactly like this:
+<script type="application/json" id="blackhole-products">[{"id":"basic","name":"Basic","price":"9.99","currency":"USD"}]</script>
+Product ids are lowercase letters, numbers and hyphens; price is major units as a string and must be at least 0.50.
+2) Every buy button must call: parent.postMessage({ type: 'blackhole-checkout', productId: 'basic', quantity: 1 }, '*')
+Blackhole then opens the secure hosted checkout, collects the buyer's card, email and address, and the site owner is paid out after platform fees and taxes. Design the page beautifully, but never collect payment details yourself.`;
 
 function extractHtml(text) {
   if (!text) return "";
@@ -275,6 +283,8 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
         }
         await base44.entities.PublishedSite.create({ name: n, html: previewHtml, ownerName });
       }
+      // Mirror any products the page sells so checkout prices are server-side and sales are tracked.
+      await syncSiteProducts(n, previewHtml, user).catch(() => {});
       const list = getTaken().filter((e) => e.name !== n);
       list.push({ name: n, projectId });
       localStorage.setItem(TAKEN_KEY, JSON.stringify(list));

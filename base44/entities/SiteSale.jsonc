@@ -1,0 +1,105 @@
+{
+  "name": "SiteSale",
+  "type": "object",
+  "properties": {
+    "checkoutSessionId": {
+      "type": "string",
+      "description": "Wix checkout session id; ties the payment back to this sale."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "paid",
+        "canceled"
+      ],
+      "default": "pending"
+    },
+    "siteName": {
+      "type": "string",
+      "description": "Website the purchase was made on."
+    },
+    "creatorId": {
+      "type": "string",
+      "default": "",
+      "description": "App user id of the site creator owed the payout."
+    },
+    "creatorEmail": {
+      "type": "string",
+      "default": ""
+    },
+    "productId": {
+      "type": "string",
+      "default": ""
+    },
+    "productName": {
+      "type": "string",
+      "default": ""
+    },
+    "quantity": {
+      "type": "number",
+      "default": 1
+    },
+    "currency": {
+      "type": "string",
+      "default": "USD"
+    },
+    "gross": {
+      "type": "string",
+      "default": "",
+      "description": "Total charged to the buyer, major units."
+    },
+    "platformFee": {
+      "type": "string",
+      "default": "",
+      "description": "Platform + tax cut kept by Blackhole."
+    },
+    "creatorPayout": {
+      "type": "string",
+      "default": "",
+      "description": "Amount owed to the site creator after the platform cut."
+    },
+    "buyerEmail": {
+      "type": "string",
+      "default": ""
+    },
+    "paidAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "checkoutSessionId",
+    "status",
+    "siteName"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.creatorId": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

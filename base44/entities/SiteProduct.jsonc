@@ -1,0 +1,79 @@
+{
+  "name": "SiteProduct",
+  "type": "object",
+  "properties": {
+    "siteName": {
+      "type": "string",
+      "description": "Slug of the published website that sells this product."
+    },
+    "productId": {
+      "type": "string",
+      "description": "Product id used by the site's buy buttons (lowercase letters, numbers, hyphens)."
+    },
+    "name": {
+      "type": "string",
+      "default": "",
+      "description": "Display name shown on the hosted checkout."
+    },
+    "price": {
+      "type": "string",
+      "default": "",
+      "description": "Unit price in major units, e.g. \"9.99\". Authoritative source used at checkout."
+    },
+    "currency": {
+      "type": "string",
+      "default": "USD"
+    },
+    "creatorEmail": {
+      "type": "string",
+      "default": "",
+      "description": "Email of the site creator who gets paid out for these sales."
+    }
+  },
+  "required": [
+    "siteName",
+    "productId",
+    "price"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

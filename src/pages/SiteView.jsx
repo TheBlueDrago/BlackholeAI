@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import useSiteCheckout from "@/hooks/useSiteCheckout";
 
 export default function SiteView() {
   const { name } = useParams();
   const [site, setSite] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  useSiteCheckout(site?.name);
 
   useEffect(() => {
     const n = (name || "").toLowerCase();
