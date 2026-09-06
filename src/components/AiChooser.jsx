@@ -23,7 +23,7 @@ export default function AiChooser({ value, onChange, plan, allowFable }) {
 
   const canUse = (id) => {
     if (id === "ai" || id === "code") return true;
-    if (id === "opus5") return allowFable && (plan === "pro" || plan === "team" || plan === "secret");
+    if (id === "opus5") return allowFable && (plan === "pro" || plan === "team" || plan === "secret" || plan === "admin");
     if (id === "fable") return allowFable && (plan === "team" || plan === "secret" || plan === "admin");
     return false;
   };
