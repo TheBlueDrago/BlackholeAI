@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Pen, Plus, Code, Sparkles, Gem, Star, Check, X, CreditCard, Globe, Gamepad2 } from "lucide-react";
+import { Pen, Plus, Code, Sparkles, Gem, Star, Check, X, CreditCard, Globe, Gamepad2, Compass } from "lucide-react";
 import BlackholeIcon from "@/components/BlackholeIcon";
 import PullToRefresh from "@/components/PullToRefresh";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -29,7 +29,7 @@ function CreditBar({ icon, label, used, total, gradient }) {
   );
 }
 
-export default function Sidebar({ conversations, activeId, onSelect, onRename, onDelete, onRefresh, onGoHome, onGoCode, onNewChat, onGoSubscriptions, onGoDesigner, onGoGames, onGoMonitor, isAdmin, credits = {} }) {
+export default function Sidebar({ conversations, activeId, onSelect, onRename, onDelete, onRefresh, onGoHome, onGoCode, onNewChat, onGoSubscriptions, onGoDesigner, onGoBrowser, onGoGames, onGoMonitor, isAdmin, credits = {} }) {
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState("");
   const [confirmId, setConfirmId] = useState(null);
@@ -110,6 +110,15 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
                 <Globe className="w-3.5 h-3.5 text-sky-300" />
               </div>
               <span className="text-[13px] font-medium">Website Designer</span>
+            </button>
+            <button
+              onClick={onGoBrowser}
+              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-slate-300 hover:bg-slate-800/70 transition-colors"
+            >
+              <div className="w-6 h-6 rounded-md bg-slate-800 flex items-center justify-center">
+                <Compass className="w-3.5 h-3.5 text-rose-300" />
+              </div>
+              <span className="text-[13px] font-medium">Blackhole Browser</span>
             </button>
             <button
               onClick={onGoGames}

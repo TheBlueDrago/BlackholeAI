@@ -25,6 +25,7 @@ import { PlansView, MonitorView, PromosView, SettingsView } from '@/pages/chat/V
 import GamesFront from '@/pages/chat/GamesFront';
 import GamesDesignerWorkspace from '@/components/GamesDesignerWorkspace';
 import GameView from '@/pages/chat/GameView';
+import BlackholeBrowser from '@/pages/chat/BlackholeBrowser';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -67,6 +68,7 @@ const AuthenticatedApp = () => {
             <Route path="code" element={<CodeWorkspace />} />
           </Route>
           <Route path="designer" element={<DesignerWorkspace />} />
+          <Route path="browser" element={<BlackholeBrowser />} />
           <Route path="games" element={<GamesFront />} />
           <Route path="game-designer" element={<GamesDesignerWorkspace />} />
           <Route path="game/:name" element={<GameView />} />

@@ -54,6 +54,7 @@ export function AppShellProvider({ children }) {
   const goHome = useCallback(() => { navigate("/chat"); setSidebarOpen(false); }, [navigate]);
   const goCode = useCallback(() => { navigate("/chat/code"); setSidebarOpen(false); }, [navigate]);
   const goDesigner = useCallback(() => { navigate("/chat/designer"); setSidebarOpen(false); }, [navigate]);
+  const goBrowser = useCallback(() => { navigate("/chat/browser"); setSidebarOpen(false); }, [navigate]);
   const goGames = useCallback(() => { navigate("/chat/games"); setSidebarOpen(false); }, [navigate]);
   const goGameDesigner = useCallback(() => { navigate("/chat/game-designer", { state: { fresh: Date.now() } }); setSidebarOpen(false); }, [navigate]);
   const goPlans = useCallback(() => { navigate("/chat/plans"); setSidebarOpen(false); }, [navigate]);
@@ -67,7 +68,7 @@ export function AppShellProvider({ children }) {
     currentUser, conv, credits, lightMode, toggleLight,
     isAdmin, isBanned, isBlocked, blockedUntil, effPlan, avatarInitial,
     sidebarOpen, setSidebarOpen,
-    navigate, goHome, goCode, goDesigner, goGames, goGameDesigner, goPlans, goMonitor, goPromos, newChat, goBilling, openProfile,
+    navigate, goHome, goCode, goDesigner, goBrowser, goGames, goGameDesigner, goPlans, goMonitor, goPromos, newChat, goBilling, openProfile,
   };
 
   return <AppShellContext.Provider value={value}>{children}</AppShellContext.Provider>;

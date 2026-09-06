@@ -191,6 +191,7 @@ export default function GamesFront() {
                 onNewChat={shell.newChat}
                 onGoSubscriptions={shell.goPlans}
                 onGoDesigner={shell.goDesigner}
+                onGoBrowser={shell.goBrowser}
                 onGoGames={shell.goGames}
                 onGoMonitor={shell.goMonitor}
                 isAdmin={isAdmin}

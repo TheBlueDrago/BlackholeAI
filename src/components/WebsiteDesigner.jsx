@@ -9,6 +9,7 @@ import { base44 } from "@/api/base44Client";
 import AiChooser from "@/components/AiChooser";
 import SheetSelect from "@/components/SheetSelect";
 import ThemeToggle from "@/components/ThemeToggle";
+import { domainOf } from "@/lib/blackholeDomain";
 
 const STORE_KEY = "infinity-ai-designer";
 const TAKEN_KEY = "infinity-ai-taken-sites";
@@ -269,7 +270,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
       const list = getTaken().filter((e) => e.name !== n);
       list.push({ name: n, projectId });
       localStorage.setItem(TAKEN_KEY, JSON.stringify(list));
-      setPublishUrl(`${window.location.origin}/site/${n}`);
+      setPublishUrl(`/chat/browser?q=${domainOf(n)}`);
       setShowPublish(false);
       setPublished(true);
       setTimeout(() => setPublished(false), 2500);
@@ -614,13 +615,14 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
               className="w-full max-w-md bg-slate-900 border border-slate-700/60 rounded-2xl shadow-2xl p-6"
             >
               <h3 className="text-lg font-semibold text-white">Publish your website</h3>
-              <p className="text-slate-400 text-sm mt-1">Your website will be live at:</p>
+              <p className="text-slate-400 text-sm mt-1">Your website will be live in Blackhole Browser at:</p>
               <div className="mt-3 flex items-center gap-2 bg-slate-800/70 border border-slate-700/50 rounded-xl px-3 py-2.5">
                 <Globe className="w-4 h-4 text-sky-300 shrink-0" />
                 <span className="text-slate-100 text-sm font-mono truncate">
-                  {window.location.origin}/site/{sanitizeSite(siteName || "your-site")}
+                  {sanitizeSite(siteName || "your-site")}<span className="text-sky-300">.blackhole</span>
                 </span>
               </div>
+              <p className="text-slate-500 text-xs mt-2">You pick the name — the .blackhole ending always stays.</p>
 
               {taken && (
                 <div className="mt-3">
@@ -673,7 +675,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
           >
             <Rocket className="w-4 h-4" /> Website published!
             {publishUrl && (
-              <a href={publishUrl} target="_blank" rel="noreferrer" className="underline ml-1">View</a>
+              <a href={publishUrl} className="underline ml-1">View</a>
             )}
           </motion.div>
         )}
