@@ -60,9 +60,10 @@ export default function UserDetail({ user, onClose }) {
                     {c.total === 0 ? (
                       <p className="text-slate-500 text-sm font-medium">Not in their plan</p>
                     ) : (
-                      <p className="text-white text-sm font-semibold">
-                        {c.remaining} <span className="text-slate-500 font-normal">of {c.total} left</span>
-                      </p>
+                      <>
+                        <p className="text-white text-sm font-semibold">{c.remaining} left</p>
+                        <p className="text-[11px] text-slate-500">{c.used} used of {c.total}</p>
+                      </>
                     )}
                   </div>
                 );
