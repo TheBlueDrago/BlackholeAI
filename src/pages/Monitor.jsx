@@ -4,6 +4,7 @@ import { ArrowLeft, Search, Loader2, ShieldCheck } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import UserCard from "@/components/monitor/UserCard";
 import UserDetail from "@/components/monitor/UserDetail";
+import RevenueAnalytics from "@/components/monitor/RevenueAnalytics";
 
 export default function Monitor({ onBack }) {
   const [users, setUsers] = useState([]);
@@ -89,6 +90,8 @@ export default function Monitor({ onBack }) {
           ))}
         </div>
       )}
+
+      {!loading && !q && <RevenueAnalytics />}
 
       {detailUser && <UserDetail user={detailUser} onClose={() => setDetailUser(null)} />}
     </motion.div>
