@@ -12,6 +12,8 @@ import BrowserGameFrame from "@/components/browser/BrowserGameFrame";
 import { domainOf, gameDomainOf, cleanAddress, resolveAddress } from "@/lib/blackholeDomain";
 import { useWebSearch } from "@/hooks/useWebSearch";
 
+const LUCKY_PLACES = ["Kyoto, Japan", "Reykjavik, Iceland", "Machu Picchu", "Marrakech, Morocco", "Queenstown, New Zealand", "Santorini, Greece", "Banff National Park", "Petra, Jordan"];
+
 export default function BlackholeBrowser() {
   const shell = useAppShell();
   const { sidebarOpen, setSidebarOpen, openProfile, avatarInitial, lightMode, toggleLight, navigate, conv, credits, isAdmin } = shell;
@@ -60,12 +62,16 @@ export default function BlackholeBrowser() {
   };
   const goHome = () => setParams({});
   const lucky = () => {
-    const term = input.trim().toLowerCase();
-    const s = term ? sites.find((x) => x.name.includes(term)) : sites[0];
-    const g = term ? games.find((x) => x.name.includes(term) || (x.title || "").toLowerCase().includes(term)) : games[0];
-    if (s) go(domainOf(s.name));
-    else if (g) go(gameDomainOf(g.name, g.genre));
-    else go();
+    const pool = [
+      ...games.map((g) => gameDomainOf(g.name, g.genre)),
+      ...sites.map((s) => domainOf(s.name)),
+    ];
+    if (pool.length) {
+      go(pool[Math.floor(Math.random() * pool.length)]);
+      return;
+    }
+    // Nothing published yet — surprise them with a random place to read about.
+    go(LUCKY_PLACES[Math.floor(Math.random() * LUCKY_PLACES.length)]);
   };
 
   const mode = !query ? "home" : hit ? hit.kind : "results";

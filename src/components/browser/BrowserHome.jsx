@@ -26,9 +26,6 @@ export default function BrowserHome({ value, onChange, onSubmit, onLucky }) {
           />
         </div>
         <div className="flex justify-center gap-3 mt-6">
-          <button type="submit" className="px-4 py-2 rounded-md bg-slate-800 border border-slate-700/60 text-slate-200 text-sm hover:border-slate-500 transition-colors">
-            Blackhole Search
-          </button>
           <button type="button" onClick={onLucky} className="px-4 py-2 rounded-md bg-slate-800 border border-slate-700/60 text-slate-200 text-sm hover:border-slate-500 transition-colors">
             I'm Feeling Lucky
           </button>
