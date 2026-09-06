@@ -261,9 +261,10 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
       const res = await base44.functions.invoke("chatCompletion", { prompt, model });
       if (reqIdRef.current !== myId) return;
       pushMsg({ role: "ai", content: res.data?.content ?? "" });
-    } catch {
+    } catch (e) {
       if (reqIdRef.current !== myId) return;
-      pushMsg({ role: "ai", content: "Sorry, something went wrong generating your game. Please try again." });
+      const why = e?.response?.data?.error || e?.message || "";
+      pushMsg({ role: "ai", content: `Sorry, something went wrong generating your game.${why ? ` (${why})` : ""} Please try again.` });
     } finally {
       if (reqIdRef.current === myId) {
         setLoading(false);

@@ -10,7 +10,8 @@ export default async function(req) {
     const body = await req.json().catch(() => ({}));
     const prompt = typeof body.prompt === 'string' ? body.prompt : '';
     if (!prompt.trim()) return Response.json({ error: 'Prompt is required' }, { status: 400 });
-    if (prompt.length > 8000) return Response.json({ error: 'Prompt too long' }, { status: 400 });
+    // Designer prompts include the full current HTML document, so the cap must be generous.
+    if (prompt.length > 400000) return Response.json({ error: 'Prompt too long' }, { status: 400 });
 
     const model = typeof body.model === 'string' && body.model ? body.model : 'automatic';
 
