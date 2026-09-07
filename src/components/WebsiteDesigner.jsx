@@ -56,6 +56,21 @@ function detectPages(html) {
   return Array.from(paths).sort();
 }
 
+// Only the newest HTML version is worth keeping — older copies are huge and blow the
+// browser storage quota, which is what made saves silently fail.
+function trimForStorage(messages) {
+  let keptHtml = false;
+  return [...messages]
+    .reverse()
+    .filter((m) => {
+      if (!isHtmlMsg(m)) return true;
+      if (keptHtml) return false;
+      keptHtml = true;
+      return true;
+    })
+    .reverse();
+}
+
 function loadState() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
@@ -162,7 +177,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
     setSaveState("saving");
     const save = () => {
       try {
-        localStorage.setItem(STORE_KEY, JSON.stringify({ siteName, messages, members, projectId }));
+        localStorage.setItem(STORE_KEY, JSON.stringify({ siteName, messages: trimForStorage(messages), members, projectId }));
       } catch {}
     };
     const t = setTimeout(() => {
@@ -350,14 +365,6 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
       setShowPublish(false);
       setPublished(true);
       setTimeout(() => setPublished(false), 2500);
-      if (!mine) {
-        // Brand new site: start a clean project so the next visit isn't the site you just published.
-        setMessages([]);
-        messagesRef.current = [];
-        setMembers([]);
-        setSiteName("my-site");
-        setProjectId(genId());
-      }
     } catch (e) {
       setPublishErr(e?.response?.data?.error || e?.message || "Could not publish.");
     } finally {
