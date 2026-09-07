@@ -260,13 +260,15 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
     spendFor[ai]?.(intent.cost);
     try {
       const lastHtml = prior.filter(isHtmlMsg).pop()?.content || "";
-      const userTurns = prior.filter((m) => m.role === "user").map((m) => m.content);
+      // Only the last few requests are sent: a long history on top of a big page makes the
+      // model take longer than the 120s request window and the generation fails.
+      const userTurns = prior.filter((m) => m.role === "user").map((m) => m.content).slice(-6);
       const discuss = !intent.build;
       const prompt =
         `${SYSTEM}\n\n` +
         (discuss ? `${DISCUSS_NOTE}\n\n` : "") +
         (lastHtml ? `Current website HTML:\n${lastHtml}\n\n` : "") +
-        `Requests so far:\n${userTurns.length ? userTurns.map((u, i) => `${i + 1}. ${u}`).join("\n") : "(none)"}\n\n` +
+        `Recent requests:\n${userTurns.length ? userTurns.map((u, i) => `${i + 1}. ${u}`).join("\n") : "(none)"}\n\n` +
         `Latest request: ${text}${fileNote}\n\n` +
         (discuss ? "Reply in plain text only — do not output HTML." : "Output the complete updated HTML document now.");
       const model = MODELS[ai] || "automatic";
@@ -276,7 +278,13 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
     } catch (e) {
       if (reqIdRef.current !== myId) return;
       const why = e?.response?.data?.error || e?.message || "";
-      pushMsg({ role: "ai", content: `Sorry, something went wrong generating your website.${why ? ` (${why})` : ""} Please try again.` });
+      const timedOut = /timeout|timed out|504|took too long/i.test(why);
+      pushMsg({
+        role: "ai",
+        content: timedOut
+          ? "That took too long to generate — your website is big, so rewriting the whole page can run past the time limit. Ask for one smaller change at a time (e.g. \"change the pricing section\") and it will go through."
+          : `Sorry, something went wrong generating your website.${why ? ` (${why})` : ""} Please try again.`,
+      });
     } finally {
       if (reqIdRef.current === myId) {
         setLoading(false);

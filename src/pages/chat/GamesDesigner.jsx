@@ -258,7 +258,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
     spendFor[ai]?.(intent.cost);
     try {
       const lastHtml = prior.filter(isHtmlMsg).pop()?.content || "";
-      const userTurns = prior.filter((m) => m.role === "user").map((m) => m.content);
+      const userTurns = prior.filter((m) => m.role === "user").map((m) => m.content).slice(-6);
       const discuss = !intent.build;
       const prompt =
         `${SYSTEM}\n\n` +
