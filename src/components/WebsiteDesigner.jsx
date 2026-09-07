@@ -330,9 +330,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
         return;
       }
       const ownerName = user?.email || user?.full_name || "";
-      if (mine) {
-        await base44.entities.PublishedSite.update(mine.id, { html: previewHtml, ownerName, hidden: false });
-      } else {
+      if (!mine) {
         // Websites are a lifetime allowance per plan; deleting one frees a slot.
         const lim = siteLimit(plan);
         const owned = await base44.entities.PublishedSite.filter({ created_by_id: user?.id });
@@ -340,8 +338,9 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
           setPublishErr(`Your ${plan} plan allows ${lim} website${lim === 1 ? "" : "s"}. Delete one in Settings → Published Websites or upgrade.`);
           return;
         }
-        await base44.entities.PublishedSite.create({ name: n, html: previewHtml, ownerName });
       }
+      // The HTML is uploaded as a hosted file, so big websites publish fine.
+      await base44.functions.invoke("publish-site", { name: n, html: previewHtml, ownerName });
       // Mirror any products the page sells so checkout prices are server-side and sales are tracked.
       await syncSiteProducts(n, previewHtml, user).catch(() => {});
       const list = getTaken().filter((e) => e.name !== n);

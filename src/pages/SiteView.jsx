@@ -12,9 +12,10 @@ export default function SiteView() {
 
   useEffect(() => {
     const n = (name || "").toLowerCase();
-    base44.entities.PublishedSite.filter({ name: n })
-      .then((rows) => {
-        if (rows && rows.length) setSite(rows[0]);
+    base44.functions
+      .invoke("get-site-html", { name: n })
+      .then((r) => {
+        if (r.data?.html) setSite({ name: n, html: r.data.html });
         else setNotFound(true);
       })
       .catch(() => setNotFound(true))

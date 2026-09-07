@@ -27,12 +27,19 @@ export default function PublishedSites({ user, plan, onBack }) {
     load();
   }, []);
 
-  const edit = (s) => {
+  const edit = async (s) => {
+    let html = s.html || "";
+    if (/^https?:\/\//.test(html)) {
+      html = await base44.functions
+        .invoke("get-site-html", { name: s.name })
+        .then((r) => r.data?.html || "")
+        .catch(() => "");
+    }
     localStorage.setItem(
       "infinity-ai-designer",
       JSON.stringify({
         siteName: s.name,
-        messages: s.html ? [{ role: "ai", content: s.html }] : [],
+        messages: html ? [{ role: "ai", content: html }] : [],
         members: [],
         projectId: (crypto.randomUUID && crypto.randomUUID()) || String(Date.now()),
       })

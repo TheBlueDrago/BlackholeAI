@@ -9,6 +9,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import BrowserHome from "@/components/browser/BrowserHome";
 import BrowserResults from "@/components/browser/BrowserResults";
 import BrowserGameFrame from "@/components/browser/BrowserGameFrame";
+import BrowserSiteFrame from "@/components/browser/BrowserSiteFrame";
 import { domainOf, gameDomainOf, cleanAddress, resolveAddress } from "@/lib/blackholeDomain";
 import { useWebSearch } from "@/hooks/useWebSearch";
 import useSiteCheckout from "@/hooks/useSiteCheckout";
@@ -145,7 +146,7 @@ export default function BlackholeBrowser() {
       ) : mode === "home" ? (
         <BrowserHome value={input} onChange={setInput} onSubmit={go} onLucky={lucky} />
       ) : mode === "site" ? (
-        <iframe key={reloadKey} srcDoc={hit.item.html} title={domainOf(hit.item.name)} sandbox="allow-scripts" className="flex-1 w-full bg-white border-0" />
+        <BrowserSiteFrame name={hit.item.name} title={domainOf(hit.item.name)} reloadKey={reloadKey} />
       ) : mode === "game" ? (
         <BrowserGameFrame name={hit.item.name} reloadKey={reloadKey} />
       ) : (
