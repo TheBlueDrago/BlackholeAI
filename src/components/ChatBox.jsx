@@ -5,7 +5,7 @@ import AiChooser from "@/components/AiChooser";
 import QueueList from "@/components/chat/QueueList";
 import SendOrStopButton from "@/components/chat/SendOrStopButton";
 import useMessageQueue from "@/hooks/useMessageQueue";
-import useBuildMode, { BUILD_NOTE, DISCUSS_NOTE } from "@/hooks/useBuildMode";
+import useBuildMode, { BUILD_NOTE, ANSWER_NOTE, resolveIntent } from "@/hooks/useBuildMode";
 import ModeToggle from "@/components/chat/ModeToggle";
 import { base44 } from "@/api/base44Client";
 
@@ -37,13 +37,15 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
 
     const fileNote = files.length ? `\n[Attached files: ${files.map((f) => f.name).join(", ")}]` : "";
     const sys = ai === "code" ? CODE_SYS : ai === "fable" ? FABLE_SYS : "";
-    const modeNote = ai !== "ai" ? (buildMode.mode === "build" ? BUILD_NOTE : DISCUSS_NOTE) + "\n\n" : "";
+    // Normal Blackhole AI always costs 1; the code AIs cost 1 to build and 0.3 to answer a question.
+    const intent = ai !== "ai" ? resolveIntent(text, buildMode.mode) : { build: true, cost: 1 };
+    const modeNote = ai !== "ai" ? (intent.build ? BUILD_NOTE : ANSWER_NOTE) + "\n\n" : "";
     const fullPrompt = `${sys ? sys + "\n\n" : ""}${modeNote}${text}${fileNote}`;
     addMessage(convId, { role: "user", content: text + (files.length ? ` (attached: ${files.map((f) => f.name).join(", ")})` : "") });
     setInput("");
     setLoading(true);
     const myId = ++reqIdRef.current;
-    spend?.[ai]?.();
+    spend?.[ai]?.(intent.cost);
     try {
       const res = await base44.functions.invoke("chatCompletion", { prompt: fullPrompt, model: MODELS[ai] || "automatic" });
       if (reqIdRef.current !== myId) return;

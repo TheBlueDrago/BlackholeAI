@@ -5,7 +5,7 @@ import BlackholeIcon from "@/components/BlackholeIcon";
 import QueueList from "@/components/chat/QueueList";
 import SendOrStopButton from "@/components/chat/SendOrStopButton";
 import useMessageQueue from "@/hooks/useMessageQueue";
-import useBuildMode, { BUILD_NOTE, DISCUSS_NOTE } from "@/hooks/useBuildMode";
+import useBuildMode, { BUILD_NOTE, ANSWER_NOTE, resolveIntent } from "@/hooks/useBuildMode";
 import ModeToggle from "@/components/chat/ModeToggle";
 
 export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICode, userInitial }) {
@@ -22,9 +22,10 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
     setInput("");
     setLoading(true);
     const myId = ++reqIdRef.current;
-    onSpendAICode?.();
+    const intent = resolveIntent(text, buildMode.mode);
+    onSpendAICode?.(intent.cost);
     try {
-      const modeNote = buildMode.mode === "build" ? BUILD_NOTE : DISCUSS_NOTE;
+      const modeNote = intent.build ? BUILD_NOTE : ANSWER_NOTE;
       const res = await base44.functions.invoke("chatCompletion", { prompt: `${modeNote}\n\n${text}`, model: "claude-sonnet-5" });
       if (reqIdRef.current !== myId) return;
       setMessages((m) => [...m, { role: "ai", content: res.data?.content ?? "" }]);

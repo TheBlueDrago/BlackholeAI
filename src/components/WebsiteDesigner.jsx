@@ -5,7 +5,7 @@ import BlackholeIcon from "@/components/BlackholeIcon";
 import QueueList from "@/components/chat/QueueList";
 import SendOrStopButton from "@/components/chat/SendOrStopButton";
 import useMessageQueue from "@/hooks/useMessageQueue";
-import useBuildMode, { DISCUSS_NOTE } from "@/hooks/useBuildMode";
+import useBuildMode, { DISCUSS_NOTE, resolveIntent } from "@/hooks/useBuildMode";
 import ModeToggle from "@/components/chat/ModeToggle";
 import { base44 } from "@/api/base44Client";
 import AiChooser from "@/components/AiChooser";
@@ -240,11 +240,13 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
     setLoading(true);
     const myId = ++reqIdRef.current;
     const spendFor = { ai: onSpendAI, code: onSpendAICode, opus5: onSpendGalaxy5, fable: onSpendSpace5 };
-    spendFor[ai]?.();
+    // Normal Blackhole AI always builds for 1 credit; the code AIs cost 1 to build and 0.3 to answer a question.
+    const intent = ai !== "ai" ? resolveIntent(text, buildMode.mode) : { build: true, cost: 1 };
+    spendFor[ai]?.(intent.cost);
     try {
       const lastHtml = prior.filter(isHtmlMsg).pop()?.content || "";
       const userTurns = prior.filter((m) => m.role === "user").map((m) => m.content);
-      const discuss = ai !== "ai" && buildMode.mode === "discuss";
+      const discuss = !intent.build;
       const prompt =
         `${SYSTEM}\n\n` +
         (discuss ? `${DISCUSS_NOTE}\n\n` : "") +
