@@ -5,6 +5,8 @@ import AiChooser from "@/components/AiChooser";
 import QueueList from "@/components/chat/QueueList";
 import SendOrStopButton from "@/components/chat/SendOrStopButton";
 import useMessageQueue from "@/hooks/useMessageQueue";
+import useBuildMode, { BUILD_NOTE, DISCUSS_NOTE } from "@/hooks/useBuildMode";
+import ModeToggle from "@/components/chat/ModeToggle";
 import { base44 } from "@/api/base44Client";
 
 const CODE_SYS = "You are Blackhole Code Assistant. Help with programming. Give clear, correct code with brief explanations.";
@@ -18,6 +20,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
   const [focused, setFocused] = useState(false);
   const [selectedAi, setSelectedAi] = useState("ai");
   const [files, setFiles] = useState([]);
+  const buildMode = useBuildMode(selectedAi);
   const fileInputRef = useRef(null);
   const scrollRef = useRef(null);
   const reqIdRef = useRef(0);
@@ -34,7 +37,8 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
 
     const fileNote = files.length ? `\n[Attached files: ${files.map((f) => f.name).join(", ")}]` : "";
     const sys = ai === "code" ? CODE_SYS : ai === "fable" ? FABLE_SYS : "";
-    const fullPrompt = `${sys ? sys + "\n\n" : ""}${text}${fileNote}`;
+    const modeNote = ai !== "ai" ? (buildMode.mode === "build" ? BUILD_NOTE : DISCUSS_NOTE) + "\n\n" : "";
+    const fullPrompt = `${sys ? sys + "\n\n" : ""}${modeNote}${text}${fileNote}`;
     addMessage(convId, { role: "user", content: text + (files.length ? ` (attached: ${files.map((f) => f.name).join(", ")})` : "") });
     setInput("");
     setLoading(true);
@@ -191,6 +195,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
               <Plus className="w-4 h-4" />
             </button>
             <AiChooser value={selectedAi} onChange={setSelectedAi} plan={plan} allowFable={true} />
+            {buildMode.visible && <ModeToggle mode={buildMode.mode} onChange={buildMode.setMode} />}
             {isExhausted && (
               <p className="text-xs text-red-400 ml-auto">
                 You're out of {AI_NAMES[selectedAi]} credits. Switch AI or upgrade.

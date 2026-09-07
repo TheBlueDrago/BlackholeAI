@@ -5,8 +5,11 @@ import BlackholeIcon from "@/components/BlackholeIcon";
 import QueueList from "@/components/chat/QueueList";
 import SendOrStopButton from "@/components/chat/SendOrStopButton";
 import useMessageQueue from "@/hooks/useMessageQueue";
+import useBuildMode, { BUILD_NOTE, DISCUSS_NOTE } from "@/hooks/useBuildMode";
+import ModeToggle from "@/components/chat/ModeToggle";
 
 export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICode, userInitial }) {
+  const buildMode = useBuildMode("code");
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -21,7 +24,8 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
     const myId = ++reqIdRef.current;
     onSpendAICode?.();
     try {
-      const res = await base44.functions.invoke("chatCompletion", { prompt: text, model: "claude-sonnet-5" });
+      const modeNote = buildMode.mode === "build" ? BUILD_NOTE : DISCUSS_NOTE;
+      const res = await base44.functions.invoke("chatCompletion", { prompt: `${modeNote}\n\n${text}`, model: "claude-sonnet-5" });
       if (reqIdRef.current !== myId) return;
       setMessages((m) => [...m, { role: "ai", content: res.data?.content ?? "" }]);
     } catch {
@@ -130,9 +134,10 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
             />
             <SendOrStopButton loading={loading} focused={focused} queued={queued} canSend={canSend} onSend={send} onStop={stop} gradient="from-emerald-500 to-teal-500" />
           </div>
-          {aiCodeExhausted && (
-            <p className="text-center text-xs text-red-400 mt-2">You're out of AI Code credits.</p>
-          )}
+          <div className="flex items-center gap-2 mt-2">
+            <ModeToggle mode={buildMode.mode} onChange={buildMode.setMode} />
+            {aiCodeExhausted && <p className="text-xs text-red-400 ml-auto">You're out of AI Code credits.</p>}
+          </div>
           <p className="text-center text-xs text-slate-600 mt-2">Blackhole AI can make mistakes. Check important info.</p>
         </div>
       </div>

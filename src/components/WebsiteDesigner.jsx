@@ -5,6 +5,8 @@ import BlackholeIcon from "@/components/BlackholeIcon";
 import QueueList from "@/components/chat/QueueList";
 import SendOrStopButton from "@/components/chat/SendOrStopButton";
 import useMessageQueue from "@/hooks/useMessageQueue";
+import useBuildMode, { DISCUSS_NOTE } from "@/hooks/useBuildMode";
+import ModeToggle from "@/components/chat/ModeToggle";
 import { base44 } from "@/api/base44Client";
 import AiChooser from "@/components/AiChooser";
 import SheetSelect from "@/components/SheetSelect";
@@ -41,6 +43,8 @@ function extractHtml(text) {
   if (fence) return fence[1].trim();
   return text.trim();
 }
+
+const isHtmlMsg = (m) => m.role === "ai" && /<[a-z!][\s\S]*>/i.test(m.content);
 
 function detectPages(html) {
   const paths = new Set(["/home"]);
@@ -139,13 +143,14 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   const [selectedAi, setSelectedAi] = useState(fableAllowed ? "fable" : opusAllowed ? "opus5" : "ai");
   const [files, setFiles] = useState([]);
   const [focused, setFocused] = useState(false);
+  const buildMode = useBuildMode(selectedAi);
   const fileInputRef = useRef(null);
   const scrollRef = useRef(null);
   const reqIdRef = useRef(0);
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
 
-  const lastAi = [...messages].reverse().find((m) => m.role === "ai");
+  const lastAi = [...messages].reverse().find(isHtmlMsg);
   const previewHtml = lastAi ? extractHtml(lastAi.content) : "";
 
   useEffect(() => {
@@ -237,13 +242,16 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
     const spendFor = { ai: onSpendAI, code: onSpendAICode, opus5: onSpendGalaxy5, fable: onSpendSpace5 };
     spendFor[ai]?.();
     try {
-      const lastHtml = prior.filter((m) => m.role === "ai").pop()?.content || "";
+      const lastHtml = prior.filter(isHtmlMsg).pop()?.content || "";
       const userTurns = prior.filter((m) => m.role === "user").map((m) => m.content);
+      const discuss = ai !== "ai" && buildMode.mode === "discuss";
       const prompt =
         `${SYSTEM}\n\n` +
+        (discuss ? `${DISCUSS_NOTE}\n\n` : "") +
         (lastHtml ? `Current website HTML:\n${lastHtml}\n\n` : "") +
         `Requests so far:\n${userTurns.length ? userTurns.map((u, i) => `${i + 1}. ${u}`).join("\n") : "(none)"}\n\n` +
-        `Latest request: ${text}${fileNote}\n\nOutput the complete updated HTML document now.`;
+        `Latest request: ${text}${fileNote}\n\n` +
+        (discuss ? "Reply in plain text only — do not output HTML." : "Output the complete updated HTML document now.");
       const model = MODELS[ai] || "automatic";
       const res = await base44.functions.invoke("chatCompletion", { prompt, model });
       if (reqIdRef.current !== myId) return;
@@ -582,6 +590,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
                 <Plus className="w-4 h-4" />
               </button>
               <AiChooser value={selectedAi} onChange={setSelectedAi} plan={plan} allowFable={true} />
+              {buildMode.visible && <ModeToggle mode={buildMode.mode} onChange={buildMode.setMode} />}
               {sendExhausted && (
                 <p className="text-xs text-red-400 ml-auto">
                   You're out of {isCodeAi ? "Blackhole Code" : isGalaxy ? "Galaxy 5" : isSpace ? "Space 5" : "Blackhole AI"} credits. Switch AI or upgrade.
