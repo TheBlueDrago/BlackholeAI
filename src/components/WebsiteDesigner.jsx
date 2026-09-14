@@ -15,6 +15,7 @@ import { domainOf } from "@/lib/blackholeDomain";
 import { siteLimit } from "@/lib/publishLimits";
 import { syncSiteProducts } from "@/lib/siteProducts";
 import SaveStatus from "@/components/designer/SaveStatus";
+import { EDIT_NOTE, hasEditBlocks, applyEdits } from "@/lib/htmlEdits";
 
 const STORE_KEY = "infinity-ai-designer";
 const TAKEN_KEY = "infinity-ai-taken-sites";
@@ -28,7 +29,7 @@ const SYSTEM = `You are Blackhole AI Website Designer. The user describes a webs
 ALWAYS respond with a single complete, self-contained HTML document: include <!DOCTYPE html>, <html>, <head> with inline <style> CSS, and <body> with inline <script> for any interactivity.
 Make it modern, responsive, and visually polished — clean typography, good spacing, a tasteful color palette, and smooth interactions. Use placeholder content that fits the site's purpose.
 Do NOT wrap the HTML in markdown code fences. Do NOT add any explanation before or after the HTML — output ONLY the raw HTML document.
-When the user asks for changes, output the FULL updated HTML document every time, not just the diff.
+When the user asks for changes to an existing site, follow the EDIT MODE instructions if given; otherwise output the FULL updated HTML document.
 
 PAYMENTS: never add a checkout, billing, payment or "buy" page unless the user explicitly asks for one — a normal site has no products, no prices and no payment buttons. Only when the user asks for a billing, checkout, pricing, payment or "buy" page, use Blackhole's built-in payment system — the same hosted checkout this platform uses. Never use Stripe, PayPal, or your own card form, and never ask the buyer for card numbers.
 1) Declare the products inside the document exactly like this:
@@ -264,17 +265,26 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
       // model take longer than the 120s request window and the generation fails.
       const userTurns = prior.filter((m) => m.role === "user").map((m) => m.content).slice(-6);
       const discuss = !intent.build;
+      const editMode = !discuss && !!lastHtml;
       const prompt =
         `${SYSTEM}\n\n` +
         (discuss ? `${DISCUSS_NOTE}\n\n` : "") +
+        (editMode ? `${EDIT_NOTE}\n\n` : "") +
         (lastHtml ? `Current website HTML:\n${lastHtml}\n\n` : "") +
         `Recent requests:\n${userTurns.length ? userTurns.map((u, i) => `${i + 1}. ${u}`).join("\n") : "(none)"}\n\n` +
         `Latest request: ${text}${fileNote}\n\n` +
-        (discuss ? "Reply in plain text only — do not output HTML." : "Output the complete updated HTML document now.");
+        (discuss ? "Reply in plain text only — do not output HTML." : editMode ? "Output the edit blocks now." : "Output the complete updated HTML document now.");
       const model = MODELS[ai] || "automatic";
       const res = await base44.functions.invoke("chatCompletion", { prompt, model });
       if (reqIdRef.current !== myId) return;
-      pushMsg({ role: "ai", content: res.data?.content ?? "" });
+      const content = res.data?.content ?? "";
+      if (editMode && hasEditBlocks(content)) {
+        const { html, failed } = applyEdits(lastHtml, content);
+        if (html !== lastHtml) pushMsg({ role: "ai", content: html });
+        if (failed.length) pushMsg({ role: "ai", content: `${failed.length} of the changes couldn't be placed in the page — ask again for just that part.` });
+        return;
+      }
+      pushMsg({ role: "ai", content });
     } catch (e) {
       if (reqIdRef.current !== myId) return;
       const why = e?.response?.data?.error || e?.message || "";
