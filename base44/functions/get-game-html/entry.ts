@@ -14,6 +14,13 @@ export default async function(req) {
       const r = await fetch(html);
       html = await r.text();
     }
+    // Fix: player 3D mesh position (x,z) and rotation were never updated in the game loop.
+    if (name === 'shooting-io') {
+      html = html.replace(
+        'player.g.position.y=player.y;',
+        'player.g.position.y=player.y;player.g.position.x=player.x;player.g.position.z=player.z;player.g.rotation.y=yaw;'
+      );
+    }
     // Count plays once per person (per account), server-side.
     try {
       const user = await base44.auth.me();
