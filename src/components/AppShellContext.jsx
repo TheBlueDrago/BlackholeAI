@@ -52,7 +52,10 @@ export function AppShellProvider({ children }) {
   const avatarInitial = (currentUser?.full_name || currentUser?.email || "U").trim().charAt(0).toUpperCase();
 
   const goHome = useCallback(() => { navigate("/chat"); setSidebarOpen(false); }, [navigate]);
-  const goCode = useCallback(() => { navigate("/chat/code"); setSidebarOpen(false); }, [navigate]);
+  const goCode = useCallback(() => {
+    if (effPlan === "free") { navigate("/chat/plans"); } else { navigate("/chat/code"); }
+    setSidebarOpen(false);
+  }, [navigate, effPlan]);
   const goDesigner = useCallback(() => { navigate("/chat/designer"); setSidebarOpen(false); }, [navigate]);
   const goBrowser = useCallback(() => { navigate("/chat/browser"); setSidebarOpen(false); }, [navigate]);
   const goGames = useCallback(() => { navigate("/chat/games"); setSidebarOpen(false); }, [navigate]);

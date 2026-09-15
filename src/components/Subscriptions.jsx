@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 
 function FreeCard({ onFree }) {
-  const features = ["50 Blackhole AI credits", "5 Blackhole Code credits"];
+  const features = ["50 Blackhole AI credits"];
   return (
     <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-indigo-500/60 rounded-3xl p-6 shadow-2xl shadow-indigo-500/10 flex flex-col">
       <div className="flex items-center justify-between">
@@ -40,7 +40,7 @@ function FreeCard({ onFree }) {
 }
 
 function Plan2Card({ onPro }) {
-  const features = ["4 AI's (incl. Galaxy 5 and Space 5 in Website Designer)", "50 Blackhole Code credits", "100 Blackhole AI credits", "50 Galaxy 5 credits", "50 Space 5 credits"];
+  const features = ["4 AI's (incl. Galaxy 5 and Space 5 in Website Designer)", "50 Blackhole Code credits", "100 Blackhole AI credits", "50 Galaxy 5 credits", "50 Space 5 credits", "Push to GitHub (no 2-way sync)", "Download a ZIP of your website or game in the designers"];
   return (
     <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-emerald-500/60 rounded-3xl p-6 shadow-2xl shadow-emerald-500/10 flex flex-col">
       <div className="flex items-center justify-between">
@@ -82,6 +82,8 @@ function TeamCard({ onTeam }) {
     "100 Galaxy 5 credits",
     "100 Space 5 credits",
     "Add up to 2 people — everyone shares the credits",
+    "Push to GitHub (no 2-way sync)",
+    "Download a ZIP of your website or game in the designers",
   ];
   return (
     <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-sky-500/60 rounded-3xl p-6 shadow-2xl shadow-sky-500/10 flex flex-col">
