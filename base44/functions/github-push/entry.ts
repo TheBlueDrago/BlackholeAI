@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 
-const CONNECTOR_ID = '6aa89fba1b216971986db4cf';
+const CONNECTOR_ID = '6aa8a3d7b5e549c2a9d23e26';
 
 // UTF-8-safe base64 (handles multi-byte chars in website HTML without call-stack limits).
 function toBase64(str) {
