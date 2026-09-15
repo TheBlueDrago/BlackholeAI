@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Github, Loader2, Check, X, ChevronDown, Upload } from "lucide-react";
+import { Github, Loader2, Check, X, ChevronDown, Upload, Crown } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 const CONNECTOR_ID = "6aa89fba1b216971986db4cf";
 
-export default function GitHubPush({ html, siteName }) {
+export default function GitHubPush({ html, siteName, plan, onUpgrade }) {
+  const canConnect = plan === "pro" || plan === "team" || plan === "secret" || plan === "admin";
   const [open, setOpen] = useState(false);
   const [connected, setConnected] = useState(false);
   const [repos, setRepos] = useState([]);
@@ -121,15 +122,27 @@ export default function GitHubPush({ html, siteName }) {
             </div>
 
             {!connected ? (
-              <div className="text-center py-3">
-                <p className="text-slate-400 text-xs mb-3">Connect your GitHub account to push your website to a repository.</p>
-                <button
-                  onClick={handleConnect}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-br from-slate-700 to-slate-800 text-white text-sm font-medium hover:opacity-90 transition-opacity border border-slate-600"
-                >
-                  <Github className="w-4 h-4" /> Connect GitHub
-                </button>
-              </div>
+              canConnect ? (
+                <div className="text-center py-3">
+                  <p className="text-slate-400 text-xs mb-3">Connect your GitHub account to push your website to a repository.</p>
+                  <button
+                    onClick={handleConnect}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-br from-slate-700 to-slate-800 text-white text-sm font-medium hover:opacity-90 transition-opacity border border-slate-600"
+                  >
+                    <Github className="w-4 h-4" /> Connect GitHub
+                  </button>
+                </div>
+              ) : (
+                <div className="text-center py-3">
+                  <p className="text-slate-400 text-xs mb-3">GitHub integration requires Pro or above.</p>
+                  <button
+                    onClick={onUpgrade}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 text-white text-sm font-medium hover:opacity-90 transition-opacity"
+                  >
+                    <Crown className="w-4 h-4" /> Upgrade to Pro
+                  </button>
+                </div>
+              )
             ) : loadingRepos ? (
               <div className="flex items-center justify-center py-6">
                 <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />

@@ -9,6 +9,7 @@ import useBuildMode, { DISCUSS_NOTE, resolveIntent } from "@/hooks/useBuildMode"
 import ModeToggle from "@/components/chat/ModeToggle";
 import { base44 } from "@/api/base44Client";
 import AiChooser from "@/components/AiChooser";
+import GitHubPush from "@/components/designer/GitHubPush";
 import SheetSelect from "@/components/SheetSelect";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useLocation } from "react-router-dom";
@@ -419,6 +420,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
           >
             <Crown className="w-4 h-4" /> Upgrade
           </button>
+          <GitHubPush html={previewHtml} siteName={gameName} plan={plan} onUpgrade={onUpgrade} />
           <button
             onClick={() => setShowPublish(true)}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-fuchsia-500 text-white text-sm font-medium hover:bg-fuchsia-400 transition-colors"
