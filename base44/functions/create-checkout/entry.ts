@@ -95,7 +95,7 @@ Deno.serve(async (req: Request) => {
         subscriptionInfo: {
           subscriptionSettings: { frequency: "MONTH" },
           title: "Pro Plan",
-          description: "100 AI code credits and unlimited normal AI credits, billed monthly",
+          description: "100 Blackhole AI, 50 Code, 50 Galaxy 5, 50 Space 5 credits, billed monthly",
         },
       },
       team: {
@@ -105,7 +105,7 @@ Deno.serve(async (req: Request) => {
         subscriptionInfo: {
           subscriptionSettings: { frequency: "MONTH" },
           title: "Team Plan",
-          description: "1000 shared AI code credits, unlimited normal AI credits, and up to 2 members (3 with you), billed monthly",
+          description: "150 Blackhole AI, 100 Code, 100 Galaxy 5, 100 Space 5 shared credits, and up to 2 members (3 with you), billed monthly",
         },
       },
       secret: {
@@ -115,7 +115,7 @@ Deno.serve(async (req: Request) => {
         subscriptionInfo: {
           subscriptionSettings: { frequency: "MONTH" },
           title: "Secret Plan",
-          description: "Unlimited normal AI and AI code credits, and up to 4 members (5 with you), billed monthly",
+          description: "150 Blackhole AI, 100 Code, 100 Galaxy 5, 100 Space 5 shared credits, and up to 4 members (5 with you), billed monthly",
         },
       },
     };

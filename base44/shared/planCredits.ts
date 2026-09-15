@@ -1,10 +1,10 @@
 // Monthly credit totals per plan — must stay in sync with src/hooks/useCredits.js.
 export const PLAN_TOTALS = {
-  free: { ai: 10, aiCode: 5, galaxy5: 0, space5: 0 },
-  pro: { ai: 25, aiCode: 15, galaxy5: 25, space5: 0 },
-  team: { ai: 50, aiCode: 25, galaxy5: 40, space5: 25 },
-  secret: { ai: 50, aiCode: 25, galaxy5: 40, space5: 25 },
-  admin: { ai: 50, aiCode: 25, galaxy5: 40, space5: 25 },
+  free: { ai: 50, aiCode: 5, galaxy5: 0, space5: 0 },
+  pro: { ai: 100, aiCode: 50, galaxy5: 50, space5: 50 },
+  team: { ai: 150, aiCode: 100, galaxy5: 100, space5: 100 },
+  secret: { ai: 150, aiCode: 100, galaxy5: 100, space5: 100 },
+  admin: { ai: 150, aiCode: 100, galaxy5: 100, space5: 100 },
 };
 
 // Model id → credit pool.

@@ -24,7 +24,7 @@ export default function AiChooser({ value, onChange, plan, allowFable }) {
   const canUse = (id) => {
     if (id === "ai" || id === "code") return true;
     if (id === "opus5") return allowFable && (plan === "pro" || plan === "team" || plan === "secret" || plan === "admin");
-    if (id === "fable") return allowFable && (plan === "team" || plan === "secret" || plan === "admin");
+    if (id === "fable") return allowFable && (plan === "pro" || plan === "team" || plan === "secret" || plan === "admin");
     return false;
   };
 
@@ -38,6 +38,9 @@ export default function AiChooser({ value, onChange, plan, allowFable }) {
         className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800/70 border border-slate-700/50 text-slate-200 text-xs font-medium hover:bg-slate-700/70 transition-colors"
       >
         <current.icon className={`w-3.5 h-3.5 ${current.color}`} />
+        {current.id === "fable" && (
+          <span title="This AI uses more credits than the others" className="text-amber-400 font-bold cursor-help leading-none">!</span>
+        )}
         {current.label}
         <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
       </button>
@@ -68,6 +71,7 @@ export default function AiChooser({ value, onChange, plan, allowFable }) {
                 >
                   <span className="flex items-center gap-2">
                     <o.icon className={`w-4 h-4 ${o.color}`} />
+                    {o.id === "fable" && <span title="This AI uses more credits than the others" className="text-amber-400 font-bold cursor-help">!</span>}
                     {o.label}
                   </span>
                   {!allowed && <Lock className="w-3.5 h-3.5 text-slate-500" />}
@@ -80,8 +84,8 @@ export default function AiChooser({ value, onChange, plan, allowFable }) {
             {allowFable && plan === "free" && (
               <p className="px-2.5 py-1 text-[10px] text-slate-500">Galaxy 5: Pro+ · Space 5: Team+</p>
             )}
-            {allowFable && plan === "pro" && (
-              <p className="px-2.5 py-1 text-[10px] text-slate-500">Space 5: Team plan only</p>
+            {allowFable && plan === "free" && (
+              <p className="px-2.5 py-1 text-[10px] text-slate-500">Galaxy 5 & Space 5: Pro+ plans</p>
             )}
           </motion.div>
         )}
