@@ -10,6 +10,7 @@ import BrowserHome from "@/components/browser/BrowserHome";
 import BrowserResults from "@/components/browser/BrowserResults";
 import BrowserGameFrame from "@/components/browser/BrowserGameFrame";
 import BrowserSiteFrame from "@/components/browser/BrowserSiteFrame";
+import BrowserWebFrame from "@/components/browser/BrowserWebFrame";
 import { domainOf, gameDomainOf, cleanAddress, resolveAddress } from "@/lib/blackholeDomain";
 import { useWebSearch } from "@/hooks/useWebSearch";
 import useSiteCheckout from "@/hooks/useSiteCheckout";
@@ -21,7 +22,8 @@ export default function BlackholeBrowser() {
   const { sidebarOpen, setSidebarOpen, openProfile, avatarInitial, lightMode, toggleLight, navigate, conv, credits, isAdmin } = shell;
   const [params, setParams] = useSearchParams();
   const q = params.get("q") || "";
-  const [input, setInput] = useState(q);
+  const weburl = params.get("weburl") || "";
+  const [input, setInput] = useState(q || weburl);
   const [sites, setSites] = useState([]);
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -39,7 +41,7 @@ export default function BlackholeBrowser() {
       .finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => setInput(q), [q]);
+  useEffect(() => setInput(weburl || q), [q, weburl]);
 
   const query = q.trim().toLowerCase();
   const hit = resolveAddress(query, sites, games);
@@ -62,6 +64,7 @@ export default function BlackholeBrowser() {
     if (!t) return;
     setParams({ q: t });
   };
+  const openWeb = (url) => setParams({ q, weburl: url });
   const goHome = () => setParams({});
   const lucky = () => {
     const pool = [
@@ -76,7 +79,7 @@ export default function BlackholeBrowser() {
     go(LUCKY_PLACES[Math.floor(Math.random() * LUCKY_PLACES.length)]);
   };
 
-  const mode = !query ? "home" : hit ? hit.kind : "results";
+  const mode = weburl ? "web" : !query ? "home" : hit ? hit.kind : "results";
   useSiteCheckout(hit?.kind === "site" ? hit.item.name : null);
   const web = useWebSearch(q.trim(), mode === "results");
 
@@ -149,8 +152,10 @@ export default function BlackholeBrowser() {
         <BrowserSiteFrame name={hit.item.name} title={domainOf(hit.item.name)} reloadKey={reloadKey} />
       ) : mode === "game" ? (
         <BrowserGameFrame name={hit.item.name} reloadKey={reloadKey} />
+      ) : mode === "web" ? (
+        <BrowserWebFrame url={weburl} reloadKey={reloadKey} />
       ) : (
-        <BrowserResults query={q} results={results} web={web} onOpen={go} />
+        <BrowserResults query={q} results={results} web={web} onOpen={go} onOpenWeb={openWeb} />
       )}
     </div>
   );

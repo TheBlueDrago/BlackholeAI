@@ -6,11 +6,11 @@ import BrowserPagination from "@/components/browser/BrowserPagination";
 
 const PER_PAGE = 8;
 
-function ResultRow({ r, onOpen }) {
+function ResultRow({ r, onOpen, onOpenWeb }) {
   const isWeb = r.kind === "web";
   const Icon = r.kind === "game" ? Gamepad2 : isWeb ? ExternalLink : Globe;
   const iconColor = r.kind === "game" ? "text-fuchsia-300" : isWeb ? "text-slate-300" : "text-sky-300";
-  const open = () => (isWeb ? window.open(r.url, "_blank", "noopener") : onOpen(r.address));
+  const open = () => (isWeb ? onOpenWeb(r.url) : onOpen(r.address));
   return (
     <button onClick={open} className="group block text-left w-full">
       <div className="flex items-center gap-2.5 mb-1">
@@ -28,7 +28,7 @@ function ResultRow({ r, onOpen }) {
   );
 }
 
-export default function BrowserResults({ query, results, web, onOpen }) {
+export default function BrowserResults({ query, results, web, onOpen, onOpenWeb }) {
   const [tab, setTab] = useState("all");
   const [page, setPage] = useState(1);
 
@@ -76,7 +76,7 @@ export default function BrowserResults({ query, results, web, onOpen }) {
             </div>
           )}
           <div className="space-y-6">
-            {shown.map((r) => <ResultRow key={r.id} r={r} onOpen={onOpen} />)}
+            {shown.map((r) => <ResultRow key={r.id} r={r} onOpen={onOpen} onOpenWeb={onOpenWeb} />)}
           </div>
           <BrowserPagination page={page} pageCount={pageCount} onChange={setPage} />
         </div>
