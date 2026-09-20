@@ -124,6 +124,23 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
       setGamesErr(e?.message);
     }
   };
+  const [deletingAll, setDeletingAll] = useState(false);
+  const deleteAllGames = async () => {
+    if (!games.length) return;
+    if (!window.confirm(`Delete all ${games.length} game${games.length === 1 ? "" : "s"}? This cannot be undone.`)) return;
+    setDeletingAll(true);
+    setGamesErr("");
+    try {
+      for (const g of games) {
+        await base44.entities.PublishedGame.delete(g.id);
+      }
+      await loadGames();
+    } catch (e) {
+      setGamesErr(e?.message || "Could not delete all games");
+    } finally {
+      setDeletingAll(false);
+    }
+  };
 
   const initials = (user?.full_name || user?.email || "?")
     .split(" ")
@@ -230,9 +247,20 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                 >
                   <ArrowLeft className="w-4 h-4" /> Back
                 </button>
-                <div className="flex items-center gap-2 mb-4">
-                  <Gamepad2 className="w-5 h-5 text-fuchsia-300" />
-                  <h3 className="text-lg font-semibold text-white">Published Games</h3>
+                <div className="flex items-center justify-between gap-2 mb-4">
+                  <div className="flex items-center gap-2">
+                    <Gamepad2 className="w-5 h-5 text-fuchsia-300" />
+                    <h3 className="text-lg font-semibold text-white">Published Games</h3>
+                  </div>
+                  {games.length > 0 && (
+                    <button
+                      onClick={deleteAllGames}
+                      disabled={deletingAll}
+                      className="flex items-center gap-1 text-xs text-red-300 hover:text-red-200 disabled:opacity-50 transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" /> {deletingAll ? "Deleting…" : "Delete all"}
+                    </button>
+                  )}
                 </div>
                 {gamesLoading ? (
                   <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-slate-400" /></div>

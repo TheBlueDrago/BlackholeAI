@@ -2,14 +2,14 @@
 // with wave-based difficulty and full touch controls. No external assets/scripts/network
 // calls, matching every other game in Blackhole Games — same convention as gameTemplate.js.
 // genre "shooting" + name "veck" resolves to the veck.shooter address via gameDomainOf().
-export const VECK_SHOOTER_META = { name: "veck", title: "Veck.Shooter", genre: "shooting" };
+export const VECK_SHOOTER_META = { name: "veck", title: "Veck", genre: "shooting" };
 
 export const VECK_SHOOTER_HTML = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Veck.Shooter</title>
+<title>Veck</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
 html,body{width:100%;height:100%;overflow:hidden;background:#05060f;font-family:system-ui,-apple-system,sans-serif;touch-action:none}
@@ -51,7 +51,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#05060f;font-family:
 <div id="joyR" class="joy hidden"><div class="joyKnob" id="knobR"></div></div>
 
 <div id="start" class="overlay">
-  <h1>VECK.SHOOTER</h1>
+  <h1>VECK</h1>
   <p>Fight endless waves of bots in a zero-gravity arena. Survive, rack up kills, and watch the wave count climb.</p>
   <p id="ctrlHint" style="color:#818cf8"></p>
   <button class="btn" id="playBtn">PLAY</button>

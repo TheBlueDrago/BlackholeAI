@@ -125,7 +125,7 @@ function EmptyState({ onCreate, onTryTemplate }) {
         <Plus className="w-4 h-4" /> Create a game
       </button>
       <button onClick={onTryTemplate} className="mt-3 text-xs text-slate-500 hover:text-slate-300 transition-colors underline underline-offset-2">
-        or try the built-in Veck.Shooter template
+        or try the built-in Veck template
       </button>
     </div>
   );
@@ -266,7 +266,7 @@ export default function GamesFront() {
                   onClick={() => { setMenuOpen(false); tryShooterTemplate(); }}
                   className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-white/10 transition-colors text-sky-300"
                 >
-                  <Zap className="w-4 h-4" /> Try Veck.Shooter template
+                  <Zap className="w-4 h-4" /> Try Veck template
                 </button>
               </motion.div>
             )}
