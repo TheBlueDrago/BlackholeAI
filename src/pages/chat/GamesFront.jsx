@@ -9,7 +9,7 @@ import { base44 } from "@/api/base44Client";
 import Sidebar from "@/components/Sidebar";
 import ThemeToggle from "@/components/ThemeToggle";
 import { loadGameIntoDesigner } from "@/lib/gameDesignerStore";
-import { SHOOTER_IO_META, SHOOTER_IO_HTML } from "@/lib/shooterIoGame";
+import { VECK_SHOOTER_META, VECK_SHOOTER_HTML } from "@/lib/veckShooterGame";
 
 const GENRES = [
   { id: "io", label: ".io", icon: Zap },
@@ -125,7 +125,7 @@ function EmptyState({ onCreate, onTryTemplate }) {
         <Plus className="w-4 h-4" /> Create a game
       </button>
       <button onClick={onTryTemplate} className="mt-3 text-xs text-slate-500 hover:text-slate-300 transition-colors underline underline-offset-2">
-        or try the built-in Shooter.io template
+        or try the built-in Veck.Shooter template
       </button>
     </div>
   );
@@ -171,7 +171,7 @@ export default function GamesFront() {
   const showTop = cat === "home";
   const play = (name) => navigate(`/chat/game/${name}`);
   const tryShooterTemplate = () => {
-    loadGameIntoDesigner({ gameName: SHOOTER_IO_META.name, title: SHOOTER_IO_META.title, genre: SHOOTER_IO_META.genre, html: SHOOTER_IO_HTML });
+    loadGameIntoDesigner({ gameName: VECK_SHOOTER_META.name, title: VECK_SHOOTER_META.title, genre: VECK_SHOOTER_META.genre, html: VECK_SHOOTER_HTML });
     navigate("/chat/game-designer");
   };
 
@@ -266,7 +266,7 @@ export default function GamesFront() {
                   onClick={() => { setMenuOpen(false); tryShooterTemplate(); }}
                   className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-white/10 transition-colors text-sky-300"
                 >
-                  <Zap className="w-4 h-4" /> Try Shooter.io template
+                  <Zap className="w-4 h-4" /> Try Veck.Shooter template
                 </button>
               </motion.div>
             )}
