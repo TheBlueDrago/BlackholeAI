@@ -21,6 +21,7 @@ import ResetPassword from '@/pages/ResetPassword';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { WorkspaceShell, ChatWorkspace, CodeWorkspace } from '@/components/WorkspaceShell';
 import DesignerWorkspace from '@/components/DesignerWorkspace';
+import DesignerDashboard from '@/pages/chat/DesignerDashboard';
 import { PlansView, MonitorView, PromosView, SettingsView } from '@/pages/chat/Views';
 import GamesFront from '@/pages/chat/GamesFront';
 import GamesDesignerWorkspace from '@/components/GamesDesignerWorkspace';
@@ -67,7 +68,8 @@ const AuthenticatedApp = () => {
             <Route index element={<ChatWorkspace />} />
             <Route path="code" element={<CodeWorkspace />} />
           </Route>
-          <Route path="designer" element={<DesignerWorkspace />} />
+          <Route path="designer" element={<DesignerDashboard />} />
+          <Route path="designer/build" element={<DesignerWorkspace />} />
           <Route path="browser" element={<BlackholeBrowser />} />
           <Route path="games" element={<GamesFront />} />
           <Route path="game-designer" element={<GamesDesignerWorkspace />} />

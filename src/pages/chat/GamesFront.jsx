@@ -8,6 +8,8 @@ import { useAppShell } from "@/components/AppShellContext";
 import { base44 } from "@/api/base44Client";
 import Sidebar from "@/components/Sidebar";
 import ThemeToggle from "@/components/ThemeToggle";
+import { loadGameIntoDesigner } from "@/lib/gameDesignerStore";
+import { VECK_SHOOTER_META, VECK_SHOOTER_HTML } from "@/lib/veckShooterGame";
 
 const GENRES = [
   { id: "io", label: ".io", icon: Zap },
@@ -108,7 +110,7 @@ function FeaturedCard({ g, onPlay }) {
   );
 }
 
-function EmptyState({ onCreate }) {
+function EmptyState({ onCreate, onTryTemplate }) {
   return (
     <div className="h-full flex flex-col items-center justify-center text-center">
       <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-fuchsia-500 to-indigo-500 flex items-center justify-center mb-4">
@@ -121,6 +123,9 @@ function EmptyState({ onCreate }) {
         className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-br from-fuchsia-500 to-indigo-500 text-white text-sm font-semibold hover:opacity-90 transition-opacity"
       >
         <Plus className="w-4 h-4" /> Create a game
+      </button>
+      <button onClick={onTryTemplate} className="mt-3 text-xs text-slate-500 hover:text-slate-300 transition-colors underline underline-offset-2">
+        or try the built-in Veck.Shooter template
       </button>
     </div>
   );
@@ -165,6 +170,10 @@ export default function GamesFront() {
   const mediumTop = useMemo(() => ranked.filter((g) => g.id !== (featured && featured.id)).slice(0, 5), [ranked, featured]);
   const showTop = cat === "home";
   const play = (name) => navigate(`/chat/game/${name}`);
+  const tryShooterTemplate = () => {
+    loadGameIntoDesigner({ gameName: VECK_SHOOTER_META.name, title: VECK_SHOOTER_META.title, genre: VECK_SHOOTER_META.genre, html: VECK_SHOOTER_HTML });
+    navigate("/chat/game-designer");
+  };
 
   return (
     <div className="h-screen flex flex-col bg-[#0b0f1a] text-slate-100 overflow-hidden relative">
@@ -207,13 +216,13 @@ export default function GamesFront() {
         <button onClick={() => setSidebarOpen((o) => !o)} className="p-2 rounded-lg hover:bg-white/10 transition-colors" title="Menu">
           <Menu className="w-5 h-5" />
         </button>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-fuchsia-500 to-indigo-500 flex items-center justify-center">
             <Gamepad2 className="w-4 h-4 text-white" />
           </div>
-          <span className="font-bold tracking-tight">Blackhole <span className="text-fuchsia-400">Games</span></span>
+          <span className="font-bold tracking-tight hidden sm:inline">Blackhole <span className="text-fuchsia-400">Games</span></span>
         </div>
-        <div className="flex-1 max-w-md mx-auto">
+        <div className="flex-1 min-w-0 max-w-md mx-auto">
           <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 h-9">
             <Search className="w-4 h-4 text-slate-400" />
             <input
@@ -225,7 +234,7 @@ export default function GamesFront() {
           </div>
         </div>
         <ThemeToggle light={lightMode} onToggle={toggleLight} />
-        <div className="relative">
+        <div className="relative shrink-0">
           <button
             onClick={() => setMenuOpen((o) => !o)}
             className="keep-color w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-sm font-bold text-white"
@@ -252,6 +261,12 @@ export default function GamesFront() {
                   className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-white/10 transition-colors text-fuchsia-300"
                 >
                   <Plus className="w-4 h-4" /> Create a game
+                </button>
+                <button
+                  onClick={() => { setMenuOpen(false); tryShooterTemplate(); }}
+                  className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-white/10 transition-colors text-sky-300"
+                >
+                  <Zap className="w-4 h-4" /> Try Veck.Shooter template
                 </button>
               </motion.div>
             )}
@@ -285,7 +300,7 @@ export default function GamesFront() {
               <Loader2 className="w-6 h-6 animate-spin" />
             </div>
           ) : games.length === 0 ? (
-            <EmptyState onCreate={goGameDesigner} />
+            <EmptyState onCreate={goGameDesigner} onTryTemplate={tryShooterTemplate} />
           ) : (
             <>
               {showTop && games.length > 0 && (

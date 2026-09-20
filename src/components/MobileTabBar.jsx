@@ -12,7 +12,7 @@ export default function MobileTabBar({ active, onChat, onCode, onDesigner, onSet
     <nav className="sm:hidden fixed bottom-0 inset-x-0 z-40 safe-bottom border-t border-slate-700/50 bg-slate-900/90 backdrop-blur-xl">
       <div className="grid grid-cols-4">
         {TABS.map(({ path, label, Icon }) => {
-          const on = active === path;
+          const on = path === "/chat/designer" ? active.startsWith("/chat/designer") : active === path;
           const cb = path === "/chat" ? onChat : path === "/chat/code" ? onCode : onDesigner;
           return (
             <button

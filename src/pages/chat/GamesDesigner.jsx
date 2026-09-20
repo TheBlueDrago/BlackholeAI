@@ -16,8 +16,9 @@ import { useLocation } from "react-router-dom";
 import { STARTER_GAME_HTML } from "@/lib/gameTemplate";
 import { GAME_TLDS } from "@/lib/blackholeDomain";
 import { gameLimit, inThisMonth } from "@/lib/publishLimits";
+import { GAME_DESIGNER_STORE_KEY } from "@/lib/gameDesignerStore";
 
-const STORE_KEY = "infinity-ai-game-designer";
+const STORE_KEY = GAME_DESIGNER_STORE_KEY;
 const TAKEN_KEY = "infinity-ai-taken-games";
 const MODEL = "claude_sonnet_4_6";
 const SPACE5_MODEL = "claude-sonnet-5";
