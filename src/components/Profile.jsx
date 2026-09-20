@@ -5,6 +5,7 @@ import { LogOut, Mail, Shield, KeyRound, ArrowLeft, Loader2, Crown, Settings, Us
 import { base44 } from "@/api/base44Client";
 import TeamMembership from "@/components/TeamMembership";
 import PublishedSites from "@/components/profile/PublishedSites";
+import { notifyGamesChanged } from "@/lib/gameEvents";
 
 export default function Profile({ open, onClose, initialView = "main", onMonitor, onPromos }) {
   const [user, setUser] = useState(null);
@@ -111,6 +112,7 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
     try {
       await base44.entities.PublishedGame.update(g.id, { hidden: !g.hidden });
       loadGames();
+      notifyGamesChanged();
     } catch (e) {
       setGamesErr(e?.message);
     }
@@ -120,6 +122,7 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
     try {
       await base44.entities.PublishedGame.delete(g.id);
       loadGames();
+      notifyGamesChanged();
     } catch (e) {
       setGamesErr(e?.message);
     }
@@ -135,6 +138,7 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
         await base44.entities.PublishedGame.delete(g.id);
       }
       await loadGames();
+      notifyGamesChanged();
     } catch (e) {
       setGamesErr(e?.message || "Could not delete all games");
     } finally {

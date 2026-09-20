@@ -17,6 +17,7 @@ import { STARTER_GAME_HTML } from "@/lib/gameTemplate";
 import { GAME_TLDS } from "@/lib/blackholeDomain";
 import { gameLimit, inThisMonth } from "@/lib/publishLimits";
 import { GAME_DESIGNER_STORE_KEY } from "@/lib/gameDesignerStore";
+import { notifyGamesChanged } from "@/lib/gameEvents";
 
 const STORE_KEY = GAME_DESIGNER_STORE_KEY;
 const TAKEN_KEY = "infinity-ai-taken-games";
@@ -353,6 +354,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
       setPublishUrl(`${window.location.origin}/chat/game/${n}`);
       setShowPublish(false);
       setPublished(true);
+      notifyGamesChanged();
       setTimeout(() => setPublished(false), 2500);
     } catch (e) {
       setPublishErr(e?.response?.data?.error || e?.message || "Could not publish.");

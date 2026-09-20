@@ -9,6 +9,7 @@ import { base44 } from "@/api/base44Client";
 import Sidebar from "@/components/Sidebar";
 import ThemeToggle from "@/components/ThemeToggle";
 import { loadGameIntoDesigner } from "@/lib/gameDesignerStore";
+import { onGamesChanged } from "@/lib/gameEvents";
 import { VECK_SHOOTER_META, VECK_SHOOTER_HTML } from "@/lib/veckShooterGame";
 
 const GENRES = [
@@ -151,6 +152,7 @@ export default function GamesFront() {
   };
   useEffect(() => {
     load();
+    return onGamesChanged(load);
   }, []);
 
   const filtered = useMemo(() => {
