@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Globe, Search, RefreshCw, Plus, X, Crown, Rocket, Paperclip } from "lucide-react";
 import BlackholeIcon from "@/components/BlackholeIcon";
@@ -18,8 +19,9 @@ import { siteLimit } from "@/lib/publishLimits";
 import { syncSiteProducts } from "@/lib/siteProducts";
 import SaveStatus from "@/components/designer/SaveStatus";
 import { EDIT_NOTE, hasEditBlocks, applyEdits } from "@/lib/htmlEdits";
+import { DESIGNER_STORE_KEY } from "@/lib/designerStore";
 
-const STORE_KEY = "infinity-ai-designer";
+const STORE_KEY = DESIGNER_STORE_KEY;
 const TAKEN_KEY = "infinity-ai-taken-sites";
 const MODEL = "claude_sonnet_4_6";
 const MODELS = { ai: "automatic", code: MODEL, opus5: "claude_opus_4_8", fable: "claude-sonnet-5" };
@@ -167,12 +169,24 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   const reqIdRef = useRef(0);
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const lastAi = [...messages].reverse().find(isHtmlMsg);
   const previewHtml = lastAi ? extractHtml(lastAi.content) : "";
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => setUser(null));
+  }, []);
+
+  // Handoff from the Website Designer dashboard: a prompt typed there gets sent automatically once.
+  useEffect(() => {
+    const initialPrompt = location.state?.initialPrompt;
+    if (initialPrompt && messagesRef.current.length === 0) {
+      navigate(location.pathname, { replace: true, state: {} });
+      runPrompt(initialPrompt, selectedAi);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Auto-save: persist the project a moment after every change, and again on exit.

@@ -15,7 +15,7 @@ function ChatLayout() {
 
   const profileOpen = loc.pathname.startsWith("/chat/settings");
   const profileInitialView = loc.state?.initialView || "main";
-  const showTabbar = ["/chat", "/chat/code", "/chat/designer"].includes(loc.pathname) && !isBanned && !isBlocked;
+  const showTabbar = ["/chat", "/chat/code", "/chat/designer", "/chat/designer/build"].includes(loc.pathname) && !isBanned && !isBlocked;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-black overflow-hidden relative">

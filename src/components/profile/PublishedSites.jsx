@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Globe, Loader2, Pencil, Trash2, Eye, EyeOff } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { siteLimit } from "@/lib/publishLimits";
+import { loadDesignerHtmlIntoProject } from "@/lib/designerStore";
 
 export default function PublishedSites({ user, plan, onBack }) {
   const navigate = useNavigate();
@@ -35,16 +36,8 @@ export default function PublishedSites({ user, plan, onBack }) {
         .then((r) => r.data?.html || "")
         .catch(() => "");
     }
-    localStorage.setItem(
-      "infinity-ai-designer",
-      JSON.stringify({
-        siteName: s.name,
-        messages: html ? [{ role: "ai", content: html }] : [],
-        members: [],
-        projectId: (crypto.randomUUID && crypto.randomUUID()) || String(Date.now()),
-      })
-    );
-    navigate("/chat/designer", { replace: true });
+    loadDesignerHtmlIntoProject(s.name, html);
+    navigate("/chat/designer/build", { replace: true });
   };
 
   const toggleHidden = async (s) => {
