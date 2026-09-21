@@ -6,8 +6,8 @@ import { base44 } from "@/api/base44Client";
 const MODELS = [
   { id: "ai", label: "Blackhole AI" },
   { id: "aiCode", label: "Blackhole Code" },
-  { id: "galaxy5", label: "Galaxy 5" },
-  { id: "space5", label: "Space 5" },
+  { id: "galaxy5", label: "Galaxy" },
+  { id: "space5", label: "Space" },
 ];
 
 const inputCls =

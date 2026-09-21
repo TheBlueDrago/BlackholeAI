@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Gift } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
-const AI_LABELS = { ai: "Blackhole AI", aiCode: "Blackhole Code", galaxy5: "Galaxy 5", space5: "Space 5" };
+const AI_LABELS = { ai: "Blackhole AI", aiCode: "Blackhole Code", galaxy5: "Galaxy", space5: "Space" };
 
 export default function PromoSuccess() {
   const location = useLocation();

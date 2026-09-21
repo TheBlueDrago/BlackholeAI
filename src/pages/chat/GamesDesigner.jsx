@@ -24,7 +24,7 @@ const TAKEN_KEY = "infinity-ai-taken-games";
 const MODEL = "claude_sonnet_4_6";
 const SPACE5_MODEL = "claude-sonnet-5";
 const MODELS = { ai: "automatic", code: MODEL, opus5: "claude_opus_4_8", fable: SPACE5_MODEL };
-const AI_NAMES = { ai: "Blackhole AI", code: "Blackhole Code", opus5: "Galaxy 5", fable: "Space 5" };
+const AI_NAMES = { ai: "Blackhole AI", code: "Blackhole Code", opus5: "Galaxy", fable: "Space" };
 
 const RESERVED = ["home", "www", "admin", "api", "mail", "infinity", "ai", "app", "login", "register", "support", "blog", "game", "games"];
 
@@ -521,7 +521,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
               {buildMode.visible && <ModeToggle mode={buildMode.mode} onChange={buildMode.setMode} />}
               {sendExhausted && (
                 <p className="text-xs text-red-400 ml-auto">
-                  You're out of {isCodeAi ? "Blackhole Code" : isGalaxy ? "Galaxy 5" : isSpace ? "Space 5" : "Blackhole AI"} credits. Switch AI or upgrade.
+                  You're out of {isCodeAi ? "Blackhole Code" : isGalaxy ? "Galaxy" : isSpace ? "Space" : "Blackhole AI"} credits. Switch AI or upgrade.
                 </p>
               )}
             </div>

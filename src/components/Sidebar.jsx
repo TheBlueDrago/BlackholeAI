@@ -168,7 +168,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
             {credits.galaxy5Total > 0 && (
               <CreditBar
                 icon={<Gem className="w-3 h-3 text-sky-300" />}
-                label="Galaxy 5"
+                label="Galaxy"
                 used={credits.galaxy5Used ?? 0}
                 total={credits.galaxy5Total ?? 0}
                 gradient="from-sky-500 to-indigo-500"
@@ -177,7 +177,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
             {credits.space5Total > 0 && (
               <CreditBar
                 icon={<Star className="w-3 h-3 text-fuchsia-300" />}
-                label="Space 5"
+                label="Space"
                 used={credits.space5Used ?? 0}
                 total={credits.space5Total ?? 0}
                 gradient="from-fuchsia-500 to-pink-500"

@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { X, Loader2, Clock, MessageSquare } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
-const LABELS = { ai: "Blackhole AI", aiCode: "Blackhole Code", galaxy5: "Galaxy 5", space5: "Space 5" };
+const LABELS = { ai: "Blackhole AI", aiCode: "Blackhole Code", galaxy5: "Galaxy", space5: "Space" };
 
 function fmtTime(min) {
   if (!min) return "under a minute";

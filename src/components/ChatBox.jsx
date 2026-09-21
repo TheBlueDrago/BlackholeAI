@@ -10,8 +10,8 @@ import ModeToggle from "@/components/chat/ModeToggle";
 import { base44 } from "@/api/base44Client";
 
 const CODE_SYS = "You are Blackhole Code Assistant. Help with programming. Give clear, correct code with brief explanations.";
-const FABLE_SYS = "You are Space 5, Blackhole AI's premium creative model. Be imaginative and high-quality.";
-const AI_NAMES = { ai: "Blackhole AI", code: "Blackhole Code", opus5: "Galaxy 5", fable: "Space 5" };
+const FABLE_SYS = "You are Space, Blackhole AI's premium creative model. Be imaginative and high-quality.";
+const AI_NAMES = { ai: "Blackhole AI", code: "Blackhole Code", opus5: "Galaxy", fable: "Space" };
 const MODELS = { ai: "automatic", code: "claude_sonnet_4_6", opus5: "claude_opus_4_8", fable: "claude-sonnet-5" };
 
 export default function ChatBox({ conversation, createConversation, addMessage, removeMessage, renameConversation, plan, exhausted, remaining, spend, userInitial }) {

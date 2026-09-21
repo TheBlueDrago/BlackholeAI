@@ -40,7 +40,7 @@ function FreeCard({ onFree }) {
 }
 
 function Plan2Card({ onPro }) {
-  const features = ["4 AI's (incl. Galaxy 5 and Space 5 in Website Designer)", "50 Blackhole Code credits", "100 Blackhole AI credits", "50 Galaxy 5 credits", "50 Space 5 credits", "Push to GitHub (no 2-way sync)", "Download a ZIP of your website or game in the designers"];
+  const features = ["4 AI's (incl. Galaxy and Space in Website Designer)", "50 Blackhole Code credits", "100 Blackhole AI credits", "50 Galaxy credits", "50 Space credits", "Push to GitHub (no 2-way sync)", "Download a ZIP of your website or game in the designers"];
   return (
     <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-emerald-500/60 rounded-3xl p-6 shadow-2xl shadow-emerald-500/10 flex flex-col">
       <div className="flex items-center justify-between">
@@ -76,11 +76,11 @@ function Plan2Card({ onPro }) {
 
 function TeamCard({ onTeam }) {
   const features = [
-    "4 AI's (incl. Galaxy 5 and Space 5 in Website Designer)",
+    "4 AI's (incl. Galaxy and Space in Website Designer)",
     "100 Blackhole Code credits",
     "150 Blackhole AI credits",
-    "100 Galaxy 5 credits",
-    "100 Space 5 credits",
+    "100 Galaxy credits",
+    "100 Space credits",
     "Add up to 2 people — everyone shares the credits",
     "Push to GitHub (no 2-way sync)",
     "Download a ZIP of your website or game in the designers",

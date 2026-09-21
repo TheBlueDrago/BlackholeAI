@@ -5,8 +5,8 @@ import { Sparkles, Code, Gem, Star, ChevronDown, Lock } from "lucide-react";
 const OPTIONS = [
   { id: "ai", label: "AI", icon: Sparkles, color: "text-indigo-400" },
   { id: "code", label: "Blackhole Code", icon: Code, color: "text-emerald-300" },
-  { id: "opus5", label: "Galaxy 5", icon: Gem, color: "text-sky-300" },
-  { id: "fable", label: "Space 5", icon: Star, color: "text-fuchsia-300" },
+  { id: "opus5", label: "Galaxy", icon: Gem, color: "text-sky-300" },
+  { id: "fable", label: "Space", icon: Star, color: "text-fuchsia-300" },
 ];
 
 export default function AiChooser({ value, onChange, plan, allowFable }) {
@@ -79,13 +79,13 @@ export default function AiChooser({ value, onChange, plan, allowFable }) {
               );
             })}
             {!allowFable && (
-              <p className="px-2.5 py-1 text-[10px] text-slate-500">Galaxy 5 & Space 5: Website Designer only</p>
+              <p className="px-2.5 py-1 text-[10px] text-slate-500">Galaxy & Space: Website Designer only</p>
             )}
             {allowFable && plan === "free" && (
-              <p className="px-2.5 py-1 text-[10px] text-slate-500">Galaxy 5: Pro+ · Space 5: Team+</p>
+              <p className="px-2.5 py-1 text-[10px] text-slate-500">Galaxy: Pro+ · Space: Team+</p>
             )}
             {allowFable && plan === "free" && (
-              <p className="px-2.5 py-1 text-[10px] text-slate-500">Galaxy 5 & Space 5: Pro+ plans</p>
+              <p className="px-2.5 py-1 text-[10px] text-slate-500">Galaxy & Space: Pro+ plans</p>
             )}
           </motion.div>
         )}
