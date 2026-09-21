@@ -12,6 +12,7 @@ import BrowserGameFrame from "@/components/browser/BrowserGameFrame";
 import BrowserSiteFrame from "@/components/browser/BrowserSiteFrame";
 import BrowserWebFrame from "@/components/browser/BrowserWebFrame";
 import { domainOf, gameDomainOf, cleanAddress, resolveAddress } from "@/lib/blackholeDomain";
+import { builtInGameEntities } from "@/lib/builtInGames";
 import { useWebSearch } from "@/hooks/useWebSearch";
 import useSiteCheckout from "@/hooks/useSiteCheckout";
 
@@ -36,7 +37,9 @@ export default function BlackholeBrowser() {
     ])
       .then(([s, g]) => {
         setSites((s || []).filter((x) => !x.hidden));
-        setGames((g || []).filter((x) => !x.hidden));
+        const real = (g || []).filter((x) => !x.hidden);
+        const realNames = new Set(real.map((x) => x.name));
+        setGames([...builtInGameEntities().filter((x) => !realNames.has(x.name)), ...real]);
       })
       .finally(() => setLoading(false));
   }, []);

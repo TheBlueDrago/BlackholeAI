@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader2, Gamepad2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAppShell } from "@/components/AppShellContext";
+import { findBuiltInGame } from "@/lib/builtInGames";
 
 export default function GameView() {
   const { name } = useParams();
@@ -15,6 +16,14 @@ export default function GameView() {
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
+    const builtIn = findBuiltInGame(name);
+    if (builtIn) {
+      setHtml(builtIn.html);
+      setTitle(builtIn.title || name);
+      setGenre(builtIn.genre || "");
+      setLoading(false);
+      return;
+    }
     let done = false;
     (async () => {
       try {

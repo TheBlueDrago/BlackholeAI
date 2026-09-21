@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Loader2, Gamepad2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { findBuiltInGame } from "@/lib/builtInGames";
 
 export default function BrowserGameFrame({ name, reloadKey }) {
   const [html, setHtml] = useState("");
@@ -8,6 +9,13 @@ export default function BrowserGameFrame({ name, reloadKey }) {
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
+    const builtIn = findBuiltInGame(name);
+    if (builtIn) {
+      setHtml(builtIn.html);
+      setLoading(false);
+      setNotFound(false);
+      return;
+    }
     setLoading(true);
     setNotFound(false);
     base44.functions

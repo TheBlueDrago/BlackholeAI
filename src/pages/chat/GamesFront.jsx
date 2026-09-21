@@ -8,10 +8,8 @@ import { useAppShell } from "@/components/AppShellContext";
 import { base44 } from "@/api/base44Client";
 import Sidebar from "@/components/Sidebar";
 import ThemeToggle from "@/components/ThemeToggle";
-import { loadGameIntoDesigner } from "@/lib/gameDesignerStore";
 import { onGamesChanged } from "@/lib/gameEvents";
-import { VECK_SHOOTER_META, VECK_SHOOTER_HTML } from "@/lib/veckShooterGame";
-import { PULSE_JUMP_META, PULSE_JUMP_HTML } from "@/lib/pulseJumpGame";
+import { builtInGameEntities } from "@/lib/builtInGames";
 
 const GENRES = [
   { id: "io", label: ".io", icon: Zap },
@@ -112,7 +110,7 @@ function FeaturedCard({ g, onPlay }) {
   );
 }
 
-function EmptyState({ onCreate, onTryTemplate }) {
+function EmptyState({ onCreate }) {
   return (
     <div className="h-full flex flex-col items-center justify-center text-center">
       <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-fuchsia-500 to-indigo-500 flex items-center justify-center mb-4">
@@ -125,9 +123,6 @@ function EmptyState({ onCreate, onTryTemplate }) {
         className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-br from-fuchsia-500 to-indigo-500 text-white text-sm font-semibold hover:opacity-90 transition-opacity"
       >
         <Plus className="w-4 h-4" /> Create a game
-      </button>
-      <button onClick={onTryTemplate} className="mt-3 text-xs text-slate-500 hover:text-slate-300 transition-colors underline underline-offset-2">
-        or try the built-in Veck template
       </button>
     </div>
   );
@@ -143,10 +138,14 @@ export default function GamesFront() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const load = async () => {
+    const builtIns = builtInGameEntities();
     try {
       const list = await base44.entities.PublishedGame.list("-plays", 500);
-      setGames((list || []).filter((g) => !g.hidden));
+      const real = (list || []).filter((g) => !g.hidden);
+      const realNames = new Set(real.map((g) => g.name));
+      setGames([...builtIns.filter((g) => !realNames.has(g.name)), ...real]);
     } catch {
+      setGames(builtIns);
     } finally {
       setLoading(false);
     }
@@ -173,15 +172,6 @@ export default function GamesFront() {
   const mediumTop = useMemo(() => ranked.filter((g) => g.id !== (featured && featured.id)).slice(0, 5), [ranked, featured]);
   const showTop = cat === "home";
   const play = (name) => navigate(`/chat/game/${name}`);
-  const tryShooterTemplate = () => {
-    loadGameIntoDesigner({ gameName: VECK_SHOOTER_META.name, title: VECK_SHOOTER_META.title, genre: VECK_SHOOTER_META.genre, html: VECK_SHOOTER_HTML });
-    navigate("/chat/game-designer");
-  };
-  const tryPulseTemplate = () => {
-    loadGameIntoDesigner({ gameName: PULSE_JUMP_META.name, title: PULSE_JUMP_META.title, genre: PULSE_JUMP_META.genre, html: PULSE_JUMP_HTML });
-    navigate("/chat/game-designer");
-  };
-
   return (
     <div className="h-screen flex flex-col bg-[#0b0f1a] text-slate-100 overflow-hidden relative">
       <AnimatePresence>
@@ -269,18 +259,6 @@ export default function GamesFront() {
                 >
                   <Plus className="w-4 h-4" /> Create a game
                 </button>
-                <button
-                  onClick={() => { setMenuOpen(false); tryShooterTemplate(); }}
-                  className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-white/10 transition-colors text-sky-300"
-                >
-                  <Zap className="w-4 h-4" /> Try Veck template
-                </button>
-                <button
-                  onClick={() => { setMenuOpen(false); tryPulseTemplate(); }}
-                  className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-white/10 transition-colors text-cyan-300"
-                >
-                  <Gamepad2 className="w-4 h-4" /> Try Pulse Jump template
-                </button>
               </motion.div>
             )}
           </AnimatePresence>
@@ -313,7 +291,7 @@ export default function GamesFront() {
               <Loader2 className="w-6 h-6 animate-spin" />
             </div>
           ) : games.length === 0 ? (
-            <EmptyState onCreate={goGameDesigner} onTryTemplate={tryShooterTemplate} />
+            <EmptyState onCreate={goGameDesigner} />
           ) : (
             <>
               {showTop && games.length > 0 && (
