@@ -11,6 +11,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { loadGameIntoDesigner } from "@/lib/gameDesignerStore";
 import { onGamesChanged } from "@/lib/gameEvents";
 import { VECK_SHOOTER_META, VECK_SHOOTER_HTML } from "@/lib/veckShooterGame";
+import { PULSE_JUMP_META, PULSE_JUMP_HTML } from "@/lib/pulseJumpGame";
 
 const GENRES = [
   { id: "io", label: ".io", icon: Zap },
@@ -176,6 +177,10 @@ export default function GamesFront() {
     loadGameIntoDesigner({ gameName: VECK_SHOOTER_META.name, title: VECK_SHOOTER_META.title, genre: VECK_SHOOTER_META.genre, html: VECK_SHOOTER_HTML });
     navigate("/chat/game-designer");
   };
+  const tryPulseTemplate = () => {
+    loadGameIntoDesigner({ gameName: PULSE_JUMP_META.name, title: PULSE_JUMP_META.title, genre: PULSE_JUMP_META.genre, html: PULSE_JUMP_HTML });
+    navigate("/chat/game-designer");
+  };
 
   return (
     <div className="h-screen flex flex-col bg-[#0b0f1a] text-slate-100 overflow-hidden relative">
@@ -269,6 +274,12 @@ export default function GamesFront() {
                   className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-white/10 transition-colors text-sky-300"
                 >
                   <Zap className="w-4 h-4" /> Try Veck template
+                </button>
+                <button
+                  onClick={() => { setMenuOpen(false); tryPulseTemplate(); }}
+                  className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-white/10 transition-colors text-cyan-300"
+                >
+                  <Gamepad2 className="w-4 h-4" /> Try Pulse Jump template
                 </button>
               </motion.div>
             )}
