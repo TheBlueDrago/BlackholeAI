@@ -107,12 +107,6 @@ export default function DesignerDashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser?.id]);
 
-  // A persistent left rail is the norm for this kind of dashboard — open it by default on desktop.
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.innerWidth >= 640) setSidebarOpen(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const lim = siteLimit(effPlan);
   const atLimit = sites.length >= lim;
 
