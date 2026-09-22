@@ -388,7 +388,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
           return;
         }
       }
-      // The HTML is uploaded as a hosted file, so big websites publish fine.
+      // Handled by the Cloudflare function at functions/api/apps/<appId>/functions/publish-site.js.
       await base44.functions.invoke("publish-site", { name: n, html: previewHtml, ownerName });
       // Mirror any products the page sells so checkout prices are server-side and sales are tracked.
       await syncSiteProducts(n, previewHtml, user).catch(() => {});
