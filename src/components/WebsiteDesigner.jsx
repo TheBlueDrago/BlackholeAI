@@ -14,7 +14,6 @@ import GitHubPush from "@/components/designer/GitHubPush";
 import DownloadZip from "@/components/designer/DownloadZip";
 import SheetSelect from "@/components/SheetSelect";
 import ThemeToggle from "@/components/ThemeToggle";
-import { domainOf } from "@/lib/blackholeDomain";
 import { siteLimit } from "@/lib/publishLimits";
 import { syncSiteProducts } from "@/lib/siteProducts";
 import SaveStatus from "@/components/designer/SaveStatus";
@@ -395,10 +394,10 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
       const list = getTaken().filter((e) => e.name !== n);
       list.push({ name: n, projectId });
       localStorage.setItem(TAKEN_KEY, JSON.stringify(list));
-      setPublishUrl(`/chat/browser?q=${domainOf(n)}`);
+      setPublishUrl(`https://${n}.blackhole-ai-tech.com`);
       setShowPublish(false);
       setPublished(true);
-      setTimeout(() => setPublished(false), 2500);
+      setTimeout(() => setPublished(false), 8000);
     } catch (e) {
       setPublishErr(e?.response?.data?.error || e?.message || "Could not publish.");
     } finally {
@@ -805,7 +804,9 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
           >
             <Rocket className="w-4 h-4" /> {isRepublish ? "Website updated!" : "Website published!"}
             {publishUrl && (
-              <a href={publishUrl} className="underline ml-1">View</a>
+              <a href={publishUrl} target="_blank" rel="noopener noreferrer" className="underline ml-1">
+                View {publishUrl.replace(/^https:\/\//, "")}
+              </a>
             )}
           </motion.div>
         )}
