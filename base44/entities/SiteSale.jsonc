@@ -52,7 +52,12 @@
     "platformFee": {
       "type": "string",
       "default": "",
-      "description": "Platform + tax cut kept by Blackhole."
+      "description": "Kept by Blackhole: 5% of the price plus all tax collected (tax is added once the order is paid)."
+    },
+    "tax": {
+      "type": "string",
+      "default": "",
+      "description": "Tax collected on the order (from the paid Wix order), kept by Blackhole."
     },
     "creatorPayout": {
       "type": "string",

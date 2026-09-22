@@ -125,10 +125,18 @@ async function handleOrderApproved(db: any, eventData: any): Promise<Response> {
   const sale = siteSales?.[0];
   if (sale) {
     if (sale.status !== "paid") {
+      // All tax collected on the order is kept by the platform, on top of its percentage cut;
+      // the creator's payout (price minus the cut) is unchanged.
+      const tax = parseFloat(order?.priceSummary?.tax?.amount ?? order?.taxSummary?.totalTax?.amount ?? "0") || 0;
+      const fee = (parseFloat(sale.platformFee || "0") || 0) + tax;
       await db.entities.SiteSale.update(sale.id, {
         status: "paid",
         buyerEmail: sale.buyerEmail || extractBuyerEmail(order) || "",
         paidAt: new Date().toISOString(),
+        tax: tax.toFixed(2),
+        platformFee: fee.toFixed(2),
+        // What the buyer actually paid (price + tax), so platformFee + creatorPayout = gross.
+        gross: order?.priceSummary?.total?.amount ? (parseFloat(order.priceSummary.total.amount) || 0).toFixed(2) : sale.gross,
       });
       console.log("payments-webhook: site sale paid", { saleId: sale.id, siteName: sale.siteName, orderId });
     }

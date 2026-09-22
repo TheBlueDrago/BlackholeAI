@@ -1,11 +1,13 @@
 // Checkout for products sold on a user-published Blackhole website.
 // Money is charged through Base44 Payments (Wix) into the platform account; every sale records the
-// platform/tax cut and what the site creator is owed, so payouts can be settled from SiteSale.
+// platform cut and what the site creator is owed, so payouts can be settled from SiteSale.
+// The platform keeps PLATFORM_FEE_RATE of the price plus ALL tax collected at checkout; tax is
+// only known once the order is paid, so payments-webhook adds it to platformFee then.
 // PUBLIC on purpose: storefront buyers usually have no Blackhole account. Never 401 here.
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 
 const CONSTRUCT_URL = 'https://www.wixapis.com/payments/platform/v1/checkout-sessions/construct';
-const PLATFORM_FEE_RATE = 0.2; // 20% kept by the platform (covers taxes + processing).
+const PLATFORM_FEE_RATE = 0.05; // 5% of the price kept by the platform (tax is kept on top).
 
 export default async function (req) {
   try {

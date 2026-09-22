@@ -14,6 +14,7 @@ import ThankYou from '@/pages/ThankYou';
 import Plans from '@/pages/Plans';
 import PromoSuccess from '@/pages/PromoSuccess';
 import SiteView from '@/pages/SiteView';
+import Buy from '@/pages/Buy';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
@@ -62,6 +63,7 @@ const AuthenticatedApp = () => {
       <Route path="/ThankYou" element={<ThankYou />} />
       <Route path="/plans" element={<Plans />} />
       <Route path="/site/:name" element={<SiteView />} />
+      <Route path="/buy" element={<Buy />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route path="/chat" element={<Chat />}>
           <Route element={<WorkspaceShell />}>
