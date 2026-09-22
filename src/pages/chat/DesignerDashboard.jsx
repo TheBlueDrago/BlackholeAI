@@ -23,19 +23,80 @@ function initialOf(s) {
   return (s || "?").trim().charAt(0).toUpperCase();
 }
 
+// A thumbnail's HTML is only inline once it's small enough to be worth a live
+// render — a legacy entry that still stores a file URL, or is missing, falls
+// back to the gradient placeholder instead of trying to render a URL string.
+function isInlineHtml(html) {
+  return typeof html === "string" && /^\s*<(!doctype|html)/i.test(html);
+}
+
+const THUMB_SOURCE_WIDTH = 1280;
+const THUMB_SOURCE_HEIGHT = 720;
+
+function SitePreviewThumb({ html }) {
+  const wrapRef = useRef(null);
+  const [scale, setScale] = useState(0);
+
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const update = () => setScale(el.clientWidth / THUMB_SOURCE_WIDTH);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  return (
+    <div ref={wrapRef} className="absolute inset-0 pointer-events-none">
+      {scale > 0 && (
+        <iframe
+          srcDoc={html}
+          title="Website preview"
+          tabIndex={-1}
+          scrolling="no"
+          sandbox=""
+          style={{
+            width: THUMB_SOURCE_WIDTH,
+            height: THUMB_SOURCE_HEIGHT,
+            transform: `scale(${scale})`,
+            transformOrigin: "top left",
+            border: 0,
+            background: "#fff",
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
 function SiteCard({ site, onEdit, onToggleHidden, onDelete }) {
+  const hasPreview = isInlineHtml(site.html);
   return (
     <div className="group relative rounded-2xl bg-slate-900/60 border border-slate-700/50 p-4 hover:border-indigo-500/40 transition-colors">
       <button onClick={() => onEdit(site)} className="w-full text-left">
-        <div className="aspect-video rounded-xl bg-gradient-to-br from-indigo-500/20 to-fuchsia-500/20 border border-slate-700/50 flex items-center justify-center mb-3">
-          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-white font-bold text-lg">
-            {initialOf(site.name)}
-          </div>
+        <div className="relative aspect-video rounded-xl bg-gradient-to-br from-indigo-500/20 to-fuchsia-500/20 border border-slate-700/50 overflow-hidden mb-3">
+          {hasPreview ? (
+            <SitePreviewThumb html={site.html} />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-white font-bold text-lg">
+                {initialOf(site.name)}
+              </div>
+            </div>
+          )}
+          {site.hidden ? (
+            <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-black/60 backdrop-blur text-[10px] font-medium text-slate-300 border border-white/10">
+              Hidden
+            </span>
+          ) : (
+            <span className="absolute top-2 right-2 flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/60 backdrop-blur text-[10px] font-medium text-emerald-300 border border-white/10">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Live
+            </span>
+          )}
         </div>
         <p className="text-sm font-semibold text-slate-100 truncate">{site.name}</p>
-        <p className="text-[11px] text-slate-500 truncate">
-          {site.name}.blackhole{site.hidden ? " · hidden" : ""}
-        </p>
+        <p className="text-[11px] text-slate-500 truncate">{site.name}.blackhole</p>
         <p className="text-[11px] text-slate-600 mt-0.5">
           Updated {site.updated_date ? formatDistanceToNow(new Date(site.updated_date), { addSuffix: true }) : "recently"}
         </p>

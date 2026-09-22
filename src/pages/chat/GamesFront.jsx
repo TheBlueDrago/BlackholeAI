@@ -46,11 +46,35 @@ const THUMB = {
 const thumb = (g) => THUMB[g.genre] || "from-indigo-500 to-fuchsia-500";
 const genreIcon = (g) => (GENRES.find((x) => x.id === g.genre) || {}).icon || Gamepad2;
 
+// Every genre shares one gradient, so a genre row of same-genre games looked
+// like the same tile repeated. Hashing the name into a hue shift gives each
+// game its own tint of that genre's palette without needing real cover art.
+function nameHue(name) {
+  let h = 0;
+  for (let i = 0; i < (name || "").length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+  return h % 360;
+}
+const thumbStyle = (g) => ({ filter: `hue-rotate(${nameHue(g.name) - 180}deg)` });
+
+const isNew = (g) => g.created_date && Date.now() - new Date(g.created_date).getTime() < 7 * 24 * 60 * 60 * 1000;
+
+function NewBadge() {
+  return (
+    <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-emerald-500 text-[9px] font-bold uppercase tracking-wider text-white shadow">
+      New
+    </span>
+  );
+}
+
 function GameCard({ g, onPlay }) {
   const Icon = genreIcon(g);
   return (
     <button onClick={() => onPlay(g.name)} className="group text-left">
-      <div className={`relative aspect-square rounded-xl bg-gradient-to-br ${thumb(g)} overflow-hidden ring-1 ring-white/10`}>
+      <div
+        className={`relative aspect-square rounded-xl bg-gradient-to-br ${thumb(g)} overflow-hidden ring-1 ring-white/10 transition-transform duration-200 group-hover:scale-[1.04] group-hover:ring-white/25`}
+        style={thumbStyle(g)}
+      >
+        {isNew(g) && <NewBadge />}
         <div className="absolute inset-0 flex items-center justify-center">
           <Icon className="w-8 h-8 text-white/70" />
         </div>
@@ -66,32 +90,14 @@ function GameCard({ g, onPlay }) {
   );
 }
 
-function BigCard({ g, idx, onPlay }) {
-  const Icon = genreIcon(g);
-  return (
-    <button onClick={() => onPlay(g.name)} className="group text-left">
-      <div className={`relative aspect-video rounded-xl bg-gradient-to-br ${thumb(g)} overflow-hidden ring-1 ring-white/10`}>
-        <span className="absolute top-2 left-2 text-2xl font-black text-white/80">#{idx + 1}</span>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Icon className="w-10 h-10 text-white/70" />
-        </div>
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
-            <Play className="w-6 h-6 text-slate-900" />
-          </div>
-        </div>
-      </div>
-      <p className="mt-1.5 text-sm font-semibold text-white truncate">{g.title || g.name}</p>
-      <p className="text-[11px] text-slate-400">{g.plays || 0} plays · {GENRE_LABEL[g.genre] || "Game"}</p>
-    </button>
-  );
-}
-
 function FeaturedCard({ g, onPlay }) {
   const Icon = genreIcon(g);
   return (
     <button onClick={() => onPlay(g.name)} className="group text-left w-full">
-      <div className={`relative aspect-video rounded-2xl bg-gradient-to-br ${thumb(g)} overflow-hidden ring-1 ring-white/15`}>
+      <div
+        className={`relative aspect-video rounded-2xl bg-gradient-to-br ${thumb(g)} overflow-hidden ring-1 ring-white/15 transition-transform duration-200 group-hover:scale-[1.02]`}
+        style={thumbStyle(g)}
+      >
         <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wider bg-black/40 px-2 py-1 rounded text-white/90">#1 Featured</span>
         <div className="absolute inset-0 flex items-center justify-center">
           <Icon className="w-16 h-16 text-white/70" />
@@ -231,6 +237,14 @@ export default function GamesFront() {
           </div>
         </div>
         <ThemeToggle light={lightMode} onToggle={toggleLight} />
+        <button
+          onClick={goGameDesigner}
+          title="Create a game"
+          className="shrink-0 inline-flex items-center gap-1.5 pl-2.5 pr-2.5 sm:pr-3 h-9 rounded-full bg-gradient-to-br from-fuchsia-500 to-indigo-500 text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+        >
+          <Plus className="w-4 h-4" />
+          <span className="hidden sm:inline">Create</span>
+        </button>
         <div className="relative shrink-0">
           <button
             onClick={() => setMenuOpen((o) => !o)}
@@ -252,12 +266,6 @@ export default function GamesFront() {
                   className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-white/10 transition-colors"
                 >
                   <Settings className="w-4 h-4" /> Settings
-                </button>
-                <button
-                  onClick={() => { setMenuOpen(false); goGameDesigner(); }}
-                  className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-white/10 transition-colors text-fuchsia-300"
-                >
-                  <Plus className="w-4 h-4" /> Create a game
                 </button>
               </motion.div>
             )}
