@@ -1,55 +1,24 @@
-import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
-import useSiteCheckout from "@/hooks/useSiteCheckout";
+import React, { useEffect } from "react";
+import { useParams } from "react-router-dom";
 
+// Published sites now have their own real subdomain (nova.blackhole-ai-tech.com,
+// served by the blackhole-site-router Cloudflare Worker), so /site/:name just
+// hands off to it instead of iframing the HTML in — the previous sandboxed
+// srcDoc iframe (sandbox="allow-scripts", no allow-same-origin) silently broke
+// anything using localStorage/sessionStorage, since that combination blocks
+// storage access entirely. A real subdomain has its own genuine origin, so the
+// site's own JS works exactly as it does standalone.
 export default function SiteView() {
   const { name } = useParams();
-  const [site, setSite] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
-  useSiteCheckout(site?.name);
 
   useEffect(() => {
     const n = (name || "").toLowerCase();
-    base44.functions
-      .invoke("get-site-html", { name: n })
-      .then((r) => {
-        if (r.data?.html) setSite({ name: n, html: r.data.html });
-        else setNotFound(true);
-      })
-      .catch(() => setNotFound(true))
-      .finally(() => setLoading(false));
+    window.location.replace(`https://${n}.blackhole-ai-tech.com`);
   }, [name]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-400 text-sm">
-        Loading…
-      </div>
-    );
-  }
-
-  if (notFound || !site) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 text-center p-6">
-        <p className="text-slate-200 text-lg font-semibold">Site not found</p>
-        <p className="text-slate-500 text-sm mt-1">
-          No published site named “{name}”.
-        </p>
-        <Link to="/" className="mt-4 text-indigo-400 hover:underline text-sm">
-          Back to Blackhole AI
-        </Link>
-      </div>
-    );
-  }
-
   return (
-    <iframe
-      srcDoc={site.html}
-      title={site.name}
-      sandbox="allow-scripts"
-      className="w-screen h-screen border-0"
-    />
+    <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-400 text-sm">
+      Redirecting…
+    </div>
   );
 }
