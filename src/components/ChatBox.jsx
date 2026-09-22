@@ -10,6 +10,7 @@ import ModeToggle from "@/components/chat/ModeToggle";
 import { base44 } from "@/api/base44Client";
 import { OUT_OF_CREDITS_NOTE } from "@/lib/creditCost";
 import { useEffort, effortFor } from "@/lib/effort";
+import { streamChat } from "@/lib/aiStream";
 import EffortPicker from "@/components/chat/EffortPicker";
 
 const CODE_SYS = "You are Blackhole Code Assistant. Help with programming. Give clear, correct code with brief explanations.";
@@ -25,6 +26,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
   const [files, setFiles] = useState([]);
   const buildMode = useBuildMode(selectedAi);
   const [effort, setEffort] = useEffort();
+  const [live, setLive] = useState("");
   const fileInputRef = useRef(null);
   const scrollRef = useRef(null);
   const reqIdRef = useRef(0);
@@ -47,15 +49,20 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
     addMessage(convId, { role: "user", content: text + (files.length ? ` (attached: ${files.map((f) => f.name).join(", ")})` : "") });
     setInput("");
     setLoading(true);
+    setLive("");
     const myId = ++reqIdRef.current;
     try {
       const eff = effortFor(effort, text, { build: ai !== "ai" && intent.build });
-      const res = await base44.functions.invoke("chatCompletion", { prompt: fullPrompt, model: MODELS[ai] || "automatic", effort: eff });
+      // Streamed so the reply appears as it's written.
+      const res = await streamChat({ prompt: fullPrompt, model: MODELS[ai] || "automatic", effort: eff }, (soFar) => {
+        if (reqIdRef.current === myId) setLive(soFar);
+      });
       if (reqIdRef.current !== myId) return;
+      setLive("");
       // The server charged the credits (cutting the reply off if they ran out); show its new status.
-      spend?.[ai]?.(res.data?.credits);
-      const content = res.data?.content ?? "";
-      addMessage(convId, { role: "ai", content: res.data?.cut ? `${content.trimEnd()}…\n\n${OUT_OF_CREDITS_NOTE}` : content });
+      spend?.[ai]?.(res.credits);
+      const content = res.content ?? "";
+      addMessage(convId, { role: "ai", content: res.cut ? `${content.trimEnd()}…\n\n${OUT_OF_CREDITS_NOTE}` : content });
       if (isFirst) {
         try {
           const titleRes = await base44.functions.invoke("chatCompletion", {
@@ -68,6 +75,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
       }
     } catch (e) {
       if (reqIdRef.current !== myId) return;
+      setLive("");
       const data = e?.response?.data;
       if (data?.credits) spend?.[ai]?.(data.credits);
       // Out-of-credits and "AI is busy" come back with a message worth showing as-is.
@@ -84,7 +92,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [messages, loading, q.queue.length]);
+  }, [messages, loading, live, q.queue.length]);
 
   useEffect(() => {
     convIdRef.current = conversation?.id || null;
@@ -156,7 +164,16 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
             </div>
           ))}
 
-          {loading && (
+          {loading && live && (
+            <div className="flex justify-start">
+              <div className="max-w-[80%] px-4 py-3 rounded-2xl rounded-bl-sm text-sm leading-relaxed whitespace-pre-wrap bg-slate-800 text-slate-100 border border-slate-700/50">
+                {live}
+                <span className="inline-block w-1.5 h-4 ml-0.5 align-middle bg-indigo-400 animate-pulse" />
+              </div>
+            </div>
+          )}
+
+          {loading && !live && (
             <div className="flex justify-start">
               <div className="bg-slate-800 border border-slate-700/50 px-4 py-3 rounded-2xl rounded-bl-sm flex items-center gap-2.5">
                 <BlackholeIcon className="w-5 h-5 animate-spin" />

@@ -18,6 +18,8 @@ import { siteLimit } from "@/lib/publishLimits";
 import { withPreviewShim, PREVIEW_SANDBOX } from "@/lib/previewShim";
 import { OUT_OF_CREDITS_NOTE } from "@/lib/creditCost";
 import { useEffort, effortFor } from "@/lib/effort";
+import { streamChat } from "@/lib/aiStream";
+import LiveReply from "@/components/chat/LiveReply";
 import EffortPicker from "@/components/chat/EffortPicker";
 import { EXPLAIN_NOTE, splitBuildReply, editReplyNote, introBeforeCode } from "@/lib/buildReply";
 import { syncSiteProducts } from "@/lib/siteProducts";
@@ -185,6 +187,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   const [focused, setFocused] = useState(false);
   const buildMode = useBuildMode(selectedAi);
   const [effort, setEffort] = useEffort();
+  const [live, setLive] = useState("");
   const fileInputRef = useRef(null);
   const scrollRef = useRef(null);
   const reqIdRef = useRef(0);
@@ -251,7 +254,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [messages, loading]);
+  }, [messages, loading, live]);
 
   // A published name is claimed forever, unless it's your own site being republished.
   useEffect(() => {
@@ -310,6 +313,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
     pushMsg({ role: "user", content: text + (files.length ? ` (attached: ${files.map((f) => f.name).join(", ")})` : "") });
     setInput("");
     setLoading(true);
+    setLive("");
     const myId = ++reqIdRef.current;
     const spendFor = { ai: onSpendAI, code: onSpendAICode, opus5: onSpendGalaxy5, fable: onSpendSpace5 };
     // Normal Blackhole AI always builds; the code AIs can also just answer a question.
@@ -335,12 +339,16 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
             : "Output your short intro, then the complete updated HTML document in one ```html code block, then the \"What I did:\" summary.");
       const model = MODELS[ai] || "automatic";
       const eff = effortFor(effort, text, { build: !discuss });
-      const res = await base44.functions.invoke("chatCompletion", { prompt, model, effort: eff });
+      // Streamed so the explanation (and build progress) shows while the AI writes.
+      const res = await streamChat({ prompt, model, effort: eff }, (soFar) => {
+        if (reqIdRef.current === myId) setLive(soFar);
+      });
       if (reqIdRef.current !== myId) return;
+      setLive("");
       // The server charged the credits (cutting the reply off if they ran out); show its new status.
-      spendFor[ai]?.(res.data?.credits);
-      const content = res.data?.content ?? "";
-      if (res.data?.cut) {
+      spendFor[ai]?.(res.credits);
+      const content = res.content ?? "";
+      if (res.cut) {
         // A half-written build would break the site, so only the explanation so far is shown.
         const said = discuss ? content.trim() : introBeforeCode(content);
         pushMsg({ role: "ai", text: true, content: [said, OUT_OF_CREDITS_NOTE].filter(Boolean).join("\n\n") });
@@ -362,6 +370,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
       pushMsg(html ? { role: "ai", content: html, note } : { role: "ai", text: true, content: note });
     } catch (e) {
       if (reqIdRef.current !== myId) return;
+      setLive("");
       const data = e?.response?.data;
       if (data?.credits) spendFor[ai]?.(data.credits);
       const why = data?.error || e?.message || "";
@@ -659,7 +668,8 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
               );
             })}
 
-            {loading && (
+            {loading && live && <LiveReply text={live} accent="text-emerald-300" label="Building your website" />}
+            {loading && !live && (
               <div className="flex justify-start">
                 <div className="bg-slate-800 border border-slate-700/50 px-4 py-3 rounded-2xl rounded-bl-sm">
                   <Loader2 className="w-5 h-5 text-sky-400 animate-spin" />

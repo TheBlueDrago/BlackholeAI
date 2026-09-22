@@ -64,7 +64,9 @@ class GeminiError extends Error {
 
 // One streamed Gemini call. Streaming lets us tell "overloaded, never started" (fails
 // fast, fall back) apart from "thinking hard" (headers arrive, then text streams in).
-async function generate(apiKey, model, prompt, generationConfig, timeoutMs) {
+// onDelta receives each new piece of text; once maxChars is reached the call stops
+// there (the user's credits ran out) and returns { text, cut: true }.
+async function generate(apiKey, model, prompt, generationConfig, timeoutMs, { onDelta, maxChars = Infinity } = {}) {
   const ctrl = new AbortController();
   const timer = timeoutMs ? setTimeout(() => ctrl.abort(), timeoutMs) : null;
   let res;
@@ -91,7 +93,18 @@ async function generate(apiKey, model, prompt, generationConfig, timeoutMs) {
   const decoder = new TextDecoder();
   let buf = "";
   let out = "";
+  let cut = false;
   let streamError = null;
+  const add = (text) => {
+    if (cut || !text) return;
+    const room = maxChars - out.length;
+    if (text.length >= room) {
+      text = text.slice(0, Math.max(0, room));
+      cut = true;
+    }
+    out += text;
+    if (text && onDelta) onDelta(text);
+  };
   const handleLine = (line) => {
     if (!line.startsWith("data:")) return;
     let chunk;
@@ -105,37 +118,72 @@ async function generate(apiKey, model, prompt, generationConfig, timeoutMs) {
       return;
     }
     const parts = (chunk.candidates && chunk.candidates[0] && chunk.candidates[0].content && chunk.candidates[0].content.parts) || [];
-    for (const p of parts) if (p.text && !p.thought) out += p.text;
+    for (const p of parts) if (p.text && !p.thought) add(p.text);
   };
-  for (;;) {
+  while (!cut) {
     const { done, value } = await reader.read();
     if (done) break;
     buf += decoder.decode(value, { stream: true });
     let nl;
-    while ((nl = buf.indexOf("\n")) >= 0) {
+    while (!cut && (nl = buf.indexOf("\n")) >= 0) {
       handleLine(buf.slice(0, nl).trim());
       buf = buf.slice(nl + 1);
     }
   }
-  handleLine(buf.trim());
+  if (cut) reader.cancel().catch(() => {});
+  else handleLine(buf.trim());
   if (!out && streamError) {
     const code = Number(streamError.code) || 0;
     throw new GeminiError(streamError.message || "Gemini stream error", { status: code, retryable: RETRYABLE.has(code) });
   }
-  return out;
+  return { text: out, cut };
 }
 
 // Tries the model with the effort's thinking settings; if the model rejects those
 // settings, retries once without them rather than failing the request.
-async function generateWithEffort(apiKey, model, prompt, effort, timeoutMs, maxTokens) {
+async function generateWithEffort(apiKey, model, prompt, effort, timeoutMs, maxTokens, opts) {
   const { thinkingConfig } = EFFORT[effort];
   const maxOutputTokens = maxTokens || EFFORT[effort].maxOutputTokens;
   try {
-    return await generate(apiKey, model, prompt, { maxOutputTokens, thinkingConfig }, timeoutMs);
+    return await generate(apiKey, model, prompt, { maxOutputTokens, thinkingConfig }, timeoutMs, opts);
   } catch (err) {
     if (!(err instanceof GeminiError) || !err.badConfig) throw err;
-    return generate(apiKey, model, prompt, { maxOutputTokens }, timeoutMs);
+    return generate(apiKey, model, prompt, { maxOutputTokens }, timeoutMs, opts);
   }
+}
+
+// Runs the fallback chain. Once any text has been sent to the user we can't switch
+// models, so a failure after that point is reported instead of retried.
+async function runChain(apiKey, chain, prompt, effort, maxTokens, opts) {
+  let lastErr = null;
+  let started = false;
+  const onDelta = opts.onDelta
+    ? (t) => {
+        started = true;
+        opts.onDelta(t);
+      }
+    : undefined;
+  for (let i = 0; i < chain.length; i++) {
+    const isLast = i === chain.length - 1;
+    try {
+      const r = await generateWithEffort(apiKey, chain[i], prompt, effort, isLast ? 0 : HEADERS_TIMEOUT_MS, maxTokens, { ...opts, onDelta });
+      return { ...r, model: chain[i] };
+    } catch (err) {
+      lastErr = err;
+      if (started || !(err instanceof GeminiError) || !err.retryable) break;
+    }
+  }
+  throw lastErr || new GeminiError("No model available");
+}
+
+function failure(err) {
+  const busy = err instanceof GeminiError && err.retryable;
+  return {
+    error: busy
+      ? "The AI is very busy right now (Google's free tier is overloaded). Please try again in a minute."
+      : "The AI couldn't answer that request.",
+    detail: err ? String(err.message).slice(0, 500) : "",
+  };
 }
 
 export async function onRequestPost(context) {
@@ -170,9 +218,10 @@ export async function onRequestPost(context) {
     const effort = internal ? "low" : EFFORT[body.effort] ? body.effort : DEFAULT_EFFORT;
     const mult = EFFORT_MULT[effort];
 
+    let left = Infinity;
     if (!internal) {
       const before = await creditStatus(kv, ent);
-      const left = before.tiers[tier].remaining;
+      left = before.tiers[tier].remaining;
       if (before.tiers[tier].total <= 0) {
         return json({ error: `${TIER_NAMES[tier]} isn't included in your plan. Upgrade to use it.`, outOfCredits: true, credits: before }, 402);
       }
@@ -191,44 +240,49 @@ export async function onRequestPost(context) {
     }
 
     const chain = [requested, ...MODELS_BY_STRENGTH.filter((m) => m !== requested)].slice(0, MAX_ATTEMPTS);
-    let lastErr = null;
-    for (let i = 0; i < chain.length; i++) {
-      const isLast = i === chain.length - 1;
-      try {
-        let content = await generateWithEffort(env.GEMINI_API_KEY, chain[i], prompt, effort, isLast ? 0 : HEADERS_TIMEOUT_MS, internal ? 1024 : 0);
-        if (internal) return json({ content, model: chain[i], effort });
+    // The reply stops at what the user's credits cover: whole credits x effort multiplier.
+    const maxChars = internal ? Infinity : Math.floor(left / mult) * CHARS_PER_CREDIT;
+    const maxTokens = internal ? 1024 : 0;
 
-        // Charge for the reply; if it costs more than is left, cut it off at what the
-        // remaining credits cover and take them all (which pauses the chat).
-        const status = await creditStatus(kv, ent);
-        const left = status.tiers[tier].remaining;
-        let cost = creditsFor(content, effort);
-        let cut = false;
-        if (cost > left) {
-          content = content.slice(0, Math.floor(left / mult) * CHARS_PER_CREDIT);
-          cost = left;
-          cut = true;
-        }
-        await charge(kv, ent, tier, cost);
-        return json({ content, cut, charged: cost, model: chain[i], effort, credits: await creditStatus(kv, ent) });
+    // Charge for what was produced. A cut reply takes every remaining credit, which
+    // pauses the chat until the user has more.
+    const settle = async (text, cut) => {
+      if (internal) return {};
+      const cost = cut ? left : creditsFor(text, effort);
+      await charge(kv, ent, tier, cost);
+      return { cut, charged: cost, credits: await creditStatus(kv, ent) };
+    };
+
+    if (!body.stream) {
+      try {
+        const r = await runChain(env.GEMINI_API_KEY, chain, prompt, effort, maxTokens, { maxChars });
+        return json({ content: r.text, model: r.model, effort, ...(await settle(r.text, r.cut)) });
       } catch (err) {
-        lastErr = err;
-        if (!(err instanceof GeminiError) || !err.retryable) break;
+        // 503 rather than 502: Cloudflare replaces 502 bodies on the custom domain with a
+        // bare "error code: 502", which hid this message from users.
+        return json(failure(err), 503);
       }
     }
 
-    const busy = lastErr instanceof GeminiError && lastErr.retryable;
-    // 503 rather than 502: Cloudflare replaces 502 bodies on the custom domain with a
-    // bare "error code: 502", which hid this message from users.
-    return json(
-      {
-        error: busy
-          ? "The AI is very busy right now (Google's free tier is overloaded). Please try again in a minute."
-          : "The AI couldn't answer that request.",
-        detail: lastErr ? String(lastErr.message).slice(0, 500) : "",
-      },
-      503
+    // Streaming: newline-delimited JSON — {"delta": "..."} pieces as the model writes,
+    // then one {"done": true, ...} (or {"error": ...}) line at the end.
+    const { readable, writable } = new TransformStream();
+    const writer = writable.getWriter();
+    const enc = new TextEncoder();
+    const send = (obj) => writer.write(enc.encode(JSON.stringify(obj) + "\n")).catch(() => {});
+    context.waitUntil(
+      (async () => {
+        try {
+          const r = await runChain(env.GEMINI_API_KEY, chain, prompt, effort, maxTokens, { maxChars, onDelta: (t) => send({ delta: t }) });
+          await send({ done: true, model: r.model, effort, ...(await settle(r.text, r.cut)) });
+        } catch (err) {
+          await send({ ...failure(err), status: 503 });
+        } finally {
+          await writer.close().catch(() => {});
+        }
+      })()
     );
+    return new Response(readable, { headers: { "content-type": "application/x-ndjson", "cache-control": "no-store" } });
   } catch (err) {
     return json({ error: "Unhandled error", detail: String((err && err.stack) || err) }, 500);
   }

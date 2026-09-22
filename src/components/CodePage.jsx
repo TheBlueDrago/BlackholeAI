@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Terminal } from "lucide-react";
-import { base44 } from "@/api/base44Client";
 import { OUT_OF_CREDITS_NOTE } from "@/lib/creditCost";
 import { useEffort, effortFor } from "@/lib/effort";
+import { streamChat } from "@/lib/aiStream";
 import EffortPicker from "@/components/chat/EffortPicker";
 import BlackholeIcon from "@/components/BlackholeIcon";
 import QueueList from "@/components/chat/QueueList";
@@ -14,6 +14,7 @@ import ModeToggle from "@/components/chat/ModeToggle";
 export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICode, userInitial }) {
   const buildMode = useBuildMode("code");
   const [effort, setEffort] = useEffort();
+  const [live, setLive] = useState("");
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -25,19 +26,25 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
     setMessages((m) => [...m, { role: "user", content: text }]);
     setInput("");
     setLoading(true);
+    setLive("");
     const myId = ++reqIdRef.current;
     const intent = resolveIntent(text, buildMode.mode);
     try {
       const modeNote = intent.build ? BUILD_NOTE : ANSWER_NOTE;
       const eff = effortFor(effort, text, { build: intent.build });
-      const res = await base44.functions.invoke("chatCompletion", { prompt: `${modeNote}\n\n${text}`, model: "claude_sonnet_4_6", effort: eff });
+      // Streamed so the reply appears as it's written.
+      const res = await streamChat({ prompt: `${modeNote}\n\n${text}`, model: "claude_sonnet_4_6", effort: eff }, (soFar) => {
+        if (reqIdRef.current === myId) setLive(soFar);
+      });
       if (reqIdRef.current !== myId) return;
+      setLive("");
       // The server charged the credits (cutting the reply off if they ran out); show its new status.
-      onSpendAICode?.(res.data?.credits);
-      const content = res.data?.content ?? "";
-      setMessages((m) => [...m, { role: "ai", content: res.data?.cut ? `${content.trimEnd()}…\n\n${OUT_OF_CREDITS_NOTE}` : content }]);
+      onSpendAICode?.(res.credits);
+      const content = res.content ?? "";
+      setMessages((m) => [...m, { role: "ai", content: res.cut ? `${content.trimEnd()}…\n\n${OUT_OF_CREDITS_NOTE}` : content }]);
     } catch (e) {
       if (reqIdRef.current !== myId) return;
+      setLive("");
       const data = e?.response?.data;
       if (data?.credits) onSpendAICode?.(data.credits);
       setMessages((m) => [...m, { role: "ai", content: data?.error ? `⚠ ${data.error}` : "Sorry, something went wrong. Please try again." }]);
@@ -53,7 +60,7 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [messages, loading, q.queue.length]);
+  }, [messages, loading, live, q.queue.length]);
 
   const stop = () => {
     reqIdRef.current++;
@@ -117,7 +124,16 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
             </div>
           ))}
 
-          {loading && (
+          {loading && live && (
+            <div className="flex justify-start">
+              <div className="max-w-[80%] px-4 py-3 rounded-2xl rounded-bl-sm text-sm leading-relaxed whitespace-pre-wrap bg-slate-800 text-slate-100 border border-emerald-700/40">
+                {live}
+                <span className="inline-block w-1.5 h-4 ml-0.5 align-middle bg-emerald-400 animate-pulse" />
+              </div>
+            </div>
+          )}
+
+          {loading && !live && (
             <div className="flex justify-start">
               <div className="bg-slate-800 border border-emerald-700/40 px-4 py-3 rounded-2xl rounded-bl-sm flex items-center gap-2.5">
                 <BlackholeIcon className="w-5 h-5 animate-spin" />
