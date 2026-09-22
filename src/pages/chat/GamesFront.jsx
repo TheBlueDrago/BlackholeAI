@@ -237,6 +237,14 @@ export default function GamesFront() {
           </div>
         </div>
         <ThemeToggle light={lightMode} onToggle={toggleLight} />
+        <button
+          onClick={goGameDesigner}
+          title="Create a game"
+          className="shrink-0 inline-flex items-center gap-1.5 pl-2.5 pr-2.5 sm:pr-3 h-9 rounded-full bg-gradient-to-br from-fuchsia-500 to-indigo-500 text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+        >
+          <Plus className="w-4 h-4" />
+          <span className="hidden sm:inline">Create</span>
+        </button>
         <div className="relative shrink-0">
           <button
             onClick={() => setMenuOpen((o) => !o)}
@@ -258,12 +266,6 @@ export default function GamesFront() {
                   className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-white/10 transition-colors"
                 >
                   <Settings className="w-4 h-4" /> Settings
-                </button>
-                <button
-                  onClick={() => { setMenuOpen(false); goGameDesigner(); }}
-                  className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-white/10 transition-colors text-fuchsia-300"
-                >
-                  <Plus className="w-4 h-4" /> Create a game
                 </button>
               </motion.div>
             )}
