@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Terminal } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-import { fitToCredits, OUT_OF_CREDITS_NOTE } from "@/lib/creditCost";
+import { OUT_OF_CREDITS_NOTE } from "@/lib/creditCost";
+import { useEffort, effortFor } from "@/lib/effort";
+import EffortPicker from "@/components/chat/EffortPicker";
 import BlackholeIcon from "@/components/BlackholeIcon";
 import QueueList from "@/components/chat/QueueList";
 import SendOrStopButton from "@/components/chat/SendOrStopButton";
@@ -11,6 +13,7 @@ import ModeToggle from "@/components/chat/ModeToggle";
 
 export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICode, userInitial }) {
   const buildMode = useBuildMode("code");
+  const [effort, setEffort] = useEffort();
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -26,15 +29,18 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
     const intent = resolveIntent(text, buildMode.mode);
     try {
       const modeNote = intent.build ? BUILD_NOTE : ANSWER_NOTE;
-      const res = await base44.functions.invoke("chatCompletion", { prompt: `${modeNote}\n\n${text}`, model: "claude_sonnet_4_6" });
+      const eff = effortFor(effort, text, { build: intent.build });
+      const res = await base44.functions.invoke("chatCompletion", { prompt: `${modeNote}\n\n${text}`, model: "claude_sonnet_4_6", effort: eff });
       if (reqIdRef.current !== myId) return;
-      // Charge whole credits for the reply; if it costs more than is left, it's cut off there.
-      const fit = fitToCredits(res.data?.content ?? "", aiCodeRemaining);
-      onSpendAICode?.(fit.cost);
-      setMessages((m) => [...m, { role: "ai", content: fit.cut ? `${fit.content.trimEnd()}…\n\n${OUT_OF_CREDITS_NOTE}` : fit.content }]);
-    } catch {
+      // The server charged the credits (cutting the reply off if they ran out); show its new status.
+      onSpendAICode?.(res.data?.credits);
+      const content = res.data?.content ?? "";
+      setMessages((m) => [...m, { role: "ai", content: res.data?.cut ? `${content.trimEnd()}…\n\n${OUT_OF_CREDITS_NOTE}` : content }]);
+    } catch (e) {
       if (reqIdRef.current !== myId) return;
-      setMessages((m) => [...m, { role: "ai", content: "Sorry, something went wrong. Please try again." }]);
+      const data = e?.response?.data;
+      if (data?.credits) onSpendAICode?.(data.credits);
+      setMessages((m) => [...m, { role: "ai", content: data?.error ? `⚠ ${data.error}` : "Sorry, something went wrong. Please try again." }]);
     } finally {
       if (reqIdRef.current === myId) {
         setLoading(false);
@@ -139,6 +145,7 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
             <SendOrStopButton loading={loading} focused={focused} queued={queued} canSend={canSend} onSend={send} onStop={stop} gradient="from-emerald-500 to-teal-500" />
           </div>
           <div className="flex items-center gap-2 mt-2">
+            <EffortPicker value={effort} onChange={setEffort} />
             <ModeToggle mode={buildMode.mode} onChange={buildMode.setMode} />
             {aiCodeExhausted && <p className="text-xs text-red-400 ml-auto">You're out of AI Code credits.</p>}
           </div>

@@ -13,9 +13,17 @@
 //   claude_sonnet_4_6 (Blackhole Code) -> gemini-3.6-flash (3rd-best coding)
 //   claude_opus_4_8   (Galaxy)         -> gemini-3.7-flash (2nd-best coding)
 //   claude-sonnet-5   (Space)          -> gemini-3.8-flash (best coding)
-// On the free tier the stronger models often answer 503 "experiencing high demand"
-// (or 429 when rate-limited); the request then falls back to gemini-3.5-flash so the
-// user still gets a reply instead of an error.
+// On the free tier any of these can answer 503 "experiencing high demand" (or 429
+// when rate-limited) at any moment; the request then falls back to the next-strongest
+// model so the user still gets a reply instead of an error.
+//
+// Every call must come from a signed-in user and is charged server-side in whole
+// credits (see cloudflare-lib/credits.js): 1 per started 10,000 characters of reply,
+// times the effort level. A reply that costs more than the user has left is cut off
+// at what their credits cover.
+import { json } from "../../../../../cloudflare-lib/published.js";
+import { currentUser, entitlement, creditStatus, charge, creditsFor, CHARS_PER_CREDIT, EFFORT_MULT, TIER_OF_MODEL, TIER_NAMES } from "../../../../../cloudflare-lib/credits.js";
+
 const MODEL_MAP = {
   automatic: "gemini-3.5-flash",
   claude_sonnet_4_6: "gemini-3.6-flash",
@@ -23,7 +31,9 @@ const MODEL_MAP = {
   "claude-sonnet-5": "gemini-3.8-flash",
 };
 const DEFAULT_MODEL = "gemini-3.5-flash";
-const FALLBACK_MODEL = "gemini-3.5-flash";
+// Strongest first; fallbacks are tried in this order after the requested model.
+const MODELS_BY_STRENGTH = ["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash"];
+const MAX_ATTEMPTS = 3;
 
 // Effort levels (the Low…UltraCode bar in the UI): more thinking and a bigger output
 // budget make replies slower but smarter. Gemini's thinkingLevel tops out at "high",
@@ -37,20 +47,10 @@ const EFFORT = {
 };
 const DEFAULT_EFFORT = "medium";
 
-// If the chosen model hasn't even started answering within this long, give up on it
-// and try the fallback (overloaded models take ~20-40s just to return their 503).
-const HEADERS_TIMEOUT_MS = 30000;
+// If a model hasn't even started answering within this long, give up on it and try
+// the next one (overloaded models take ~20-40s just to return their 503).
+const HEADERS_TIMEOUT_MS = 20000;
 const RETRYABLE = new Set([408, 429, 500, 502, 503, 504]);
-
-// Response.json() isn't available under every Pages Functions compatibility
-// date, and a missing static method throws an uncaught exception that surfaces
-// to the client as a raw Cloudflare 502 with no detail — this works everywhere.
-function json(obj, status) {
-  return new Response(JSON.stringify(obj), {
-    status: status || 200,
-    headers: { "content-type": "application/json" },
-  });
-}
 
 class GeminiError extends Error {
   constructor(message, { status = 0, retryable = false, badConfig = false } = {}) {
@@ -126,8 +126,9 @@ async function generate(apiKey, model, prompt, generationConfig, timeoutMs) {
 
 // Tries the model with the effort's thinking settings; if the model rejects those
 // settings, retries once without them rather than failing the request.
-async function generateWithEffort(apiKey, model, prompt, effort, timeoutMs) {
-  const { thinkingConfig, maxOutputTokens } = EFFORT[effort];
+async function generateWithEffort(apiKey, model, prompt, effort, timeoutMs, maxTokens) {
+  const { thinkingConfig } = EFFORT[effort];
+  const maxOutputTokens = maxTokens || EFFORT[effort].maxOutputTokens;
   try {
     return await generate(apiKey, model, prompt, { maxOutputTokens, thinkingConfig }, timeoutMs);
   } catch (err) {
@@ -153,17 +154,62 @@ export async function onRequestPost(context) {
 
     const prompt = (body.prompt || "").toString();
     if (!prompt) return json({ error: "prompt required" }, 400);
-    const requested = MODEL_MAP[body.model] || DEFAULT_MODEL;
-    // Internal calls (e.g. naming a chat) are always quick.
-    const effort = body.internal ? "low" : EFFORT[body.effort] ? body.effort : DEFAULT_EFFORT;
 
-    const chain = requested === FALLBACK_MODEL ? [requested] : [requested, FALLBACK_MODEL];
+    // Only signed-in users with credits left may use the AI (it runs on this app's key).
+    const kv = env.PUBLISHED_HTML;
+    const user = await currentUser(request);
+    if (!user) return json({ error: "Please sign in to use the AI." }, 401);
+    const ent = await entitlement(kv, request, user);
+    if (ent.blocked) return json({ error: "Your account can't use the AI right now." }, 403);
+
+    const requested = MODEL_MAP[body.model] || DEFAULT_MODEL;
+    const tier = TIER_OF_MODEL[body.model] || "ai";
+    // Internal calls (naming a chat) are quick, tiny and free — but still need a signed-in user.
+    const internal = !!body.internal;
+    const effort = internal ? "low" : EFFORT[body.effort] ? body.effort : DEFAULT_EFFORT;
+    const mult = EFFORT_MULT[effort];
+
+    if (!internal) {
+      const before = await creditStatus(kv, ent);
+      const left = before.tiers[tier].remaining;
+      if (before.tiers[tier].total <= 0) {
+        return json({ error: `${TIER_NAMES[tier]} isn't included in your plan. Upgrade to use it.`, outOfCredits: true, credits: before }, 402);
+      }
+      if (left < mult) {
+        return json(
+          {
+            error: left > 0
+              ? `You have ${left} ${TIER_NAMES[tier]} credit${left === 1 ? "" : "s"} left — not enough for ${effort} effort (costs at least ${mult}). Lower the effort level.`
+              : `You've run out of ${TIER_NAMES[tier]} credits.`,
+            outOfCredits: true,
+            credits: before,
+          },
+          402
+        );
+      }
+    }
+
+    const chain = [requested, ...MODELS_BY_STRENGTH.filter((m) => m !== requested)].slice(0, MAX_ATTEMPTS);
     let lastErr = null;
     for (let i = 0; i < chain.length; i++) {
       const isLast = i === chain.length - 1;
       try {
-        const content = await generateWithEffort(env.GEMINI_API_KEY, chain[i], prompt, effort, isLast ? 0 : HEADERS_TIMEOUT_MS);
-        return json({ content, model: chain[i], effort });
+        let content = await generateWithEffort(env.GEMINI_API_KEY, chain[i], prompt, effort, isLast ? 0 : HEADERS_TIMEOUT_MS, internal ? 1024 : 0);
+        if (internal) return json({ content, model: chain[i], effort });
+
+        // Charge for the reply; if it costs more than is left, cut it off at what the
+        // remaining credits cover and take them all (which pauses the chat).
+        const status = await creditStatus(kv, ent);
+        const left = status.tiers[tier].remaining;
+        let cost = creditsFor(content, effort);
+        let cut = false;
+        if (cost > left) {
+          content = content.slice(0, Math.floor(left / mult) * CHARS_PER_CREDIT);
+          cost = left;
+          cut = true;
+        }
+        await charge(kv, ent, tier, cost);
+        return json({ content, cut, charged: cost, model: chain[i], effort, credits: await creditStatus(kv, ent) });
       } catch (err) {
         lastErr = err;
         if (!(err instanceof GeminiError) || !err.retryable) break;

@@ -17,7 +17,9 @@ import { STARTER_GAME_HTML } from "@/lib/gameTemplate";
 import { GAME_TLDS } from "@/lib/blackholeDomain";
 import { gameLimit, inThisMonth } from "@/lib/publishLimits";
 import { withPreviewShim, PREVIEW_SANDBOX } from "@/lib/previewShim";
-import { fitToCredits, OUT_OF_CREDITS_NOTE } from "@/lib/creditCost";
+import { OUT_OF_CREDITS_NOTE } from "@/lib/creditCost";
+import { useEffort, effortFor } from "@/lib/effort";
+import EffortPicker from "@/components/chat/EffortPicker";
 import { EXPLAIN_NOTE, splitBuildReply, introBeforeCode } from "@/lib/buildReply";
 import { GAME_DESIGNER_STORE_KEY } from "@/lib/gameDesignerStore";
 import { notifyGamesChanged } from "@/lib/gameEvents";
@@ -140,6 +142,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
   const fableAllowed = plan === "team" || plan === "secret" || plan === "admin";
   const [selectedAi, setSelectedAi] = useState(fableAllowed ? "fable" : opusAllowed ? "opus5" : "ai");
   const buildMode = useBuildMode(selectedAi);
+  const [effort, setEffort] = useEffort();
   const fileInputRef = useRef(null);
   const scrollRef = useRef(null);
   const reqIdRef = useRef(0);
@@ -278,13 +281,13 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
           ? "Reply in plain text only — do not output HTML."
           : "Output your short intro, then the complete updated HTML game document in one ```html code block, then the \"What I did:\" summary.");
       const model = MODELS[ai] || "automatic";
-      const res = await base44.functions.invoke("chatCompletion", { prompt, model });
+      const eff = effortFor(effort, text, { build: !discuss });
+      const res = await base44.functions.invoke("chatCompletion", { prompt, model, effort: eff });
       if (reqIdRef.current !== myId) return;
-      // Charge whole credits for the reply; if it costs more than is left, it's cut off there.
-      const fit = fitToCredits(res.data?.content ?? "", remaining?.[ai]);
-      spendFor[ai]?.(fit.cost);
-      const content = fit.content;
-      if (fit.cut) {
+      // The server charged the credits (cutting the reply off if they ran out); show its new status.
+      spendFor[ai]?.(res.data?.credits);
+      const content = res.data?.content ?? "";
+      if (res.data?.cut) {
         // A half-written game would be broken, so only the explanation so far is shown.
         const said = discuss ? content.trim() : introBeforeCode(content);
         pushMsg({ role: "ai", text: true, content: [said, OUT_OF_CREDITS_NOTE].filter(Boolean).join("\n\n") });
@@ -298,8 +301,17 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
       pushMsg(html ? { role: "ai", content: html, note } : { role: "ai", text: true, content: note });
     } catch (e) {
       if (reqIdRef.current !== myId) return;
-      const why = e?.response?.data?.error || e?.message || "";
-      pushMsg({ role: "ai", text: true, content: `Sorry, something went wrong generating your game.${why ? ` (${why})` : ""} Please try again.` });
+      const data = e?.response?.data;
+      if (data?.credits) spendFor[ai]?.(data.credits);
+      const why = data?.error || e?.message || "";
+      pushMsg({
+        role: "ai",
+        text: true,
+        content:
+          data?.outOfCredits || e?.response?.status === 503
+            ? `⚠ ${why}`
+            : `Sorry, something went wrong generating your game.${why ? ` (${why})` : ""} Please try again.`,
+      });
     } finally {
       if (reqIdRef.current === myId) {
         setLoading(false);
@@ -543,6 +555,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
                 <Plus className="w-4 h-4" />
               </button>
               <AiChooser value={selectedAi} onChange={setSelectedAi} plan={plan} allowFable={true} />
+              <EffortPicker value={effort} onChange={setEffort} />
               {buildMode.visible && <ModeToggle mode={buildMode.mode} onChange={buildMode.setMode} />}
               {sendExhausted && (
                 <p className="text-xs text-red-400 ml-auto">

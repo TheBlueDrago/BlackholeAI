@@ -1,194 +1,78 @@
 import { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 
-const KEY = "infinity-ai-credits-v3";
-const FREE = { aiTotal: 50, aiCodeTotal: 0, galaxy5Total: 0, space5Total: 0 };
-const PRO = { aiTotal: 100, aiCodeTotal: 50, galaxy5Total: 50, space5Total: 50 };
-const TEAM = { aiTotal: 150, aiCodeTotal: 100, galaxy5Total: 100, space5Total: 100 };
-const SECRET = { aiTotal: 150, aiCodeTotal: 100, galaxy5Total: 100, space5Total: 100 };
-const ADMIN = { aiTotal: 150, aiCodeTotal: 100, galaxy5Total: 100, space5Total: 100 };
-
-function monthKey(d = new Date()) {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-}
-
-function loadUsed() {
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (raw) {
-      const p = JSON.parse(raw);
-      // New calendar month → reset to plan total (unused credits don't stack).
-      if (p.periodKey && p.periodKey !== monthKey()) {
-        return { aiUsed: 0, aiCodeUsed: 0, galaxy5Used: 0, space5Used: 0 };
-      }
-      // Credits used to be charged in 0.3 steps; round any saved fraction up so counts stay whole.
-      const whole = (n) => Math.ceil(Number(n) || 0);
-      return { aiUsed: whole(p.aiUsed), aiCodeUsed: whole(p.aiCodeUsed), galaxy5Used: whole(p.galaxy5Used), space5Used: whole(p.space5Used) };
-    }
-  } catch {}
-  return { aiUsed: 0, aiCodeUsed: 0, galaxy5Used: 0, space5Used: 0 };
-}
-
-// Effective plan: Pro only counts while not expired (promo grants carry planExpiresAt).
-function effectivePlan(user) {
-  if (!user) return "free";
-  if (user.role === "admin") return "admin";
-  if (user.plan === "secret") return "secret";
-  if (user.plan !== "pro") return "free";
-  if (user.planExpiresAt && new Date(user.planExpiresAt) < new Date()) return "free";
-  return "pro";
-}
+// Credits are counted and enforced on the server (the Cloudflare "credits" and
+// "chatCompletion" functions, see cloudflare-lib/credits.js). They used to live in
+// localStorage, where anyone could reset them. This hook only shows the server's
+// status: it loads it on start, and each AI reply hands back the updated status
+// through the spend* callbacks.
+const NONE = { total: 0, used: 0, remaining: 0 };
 
 export function useCredits() {
-  const [used, setUsed] = useState(loadUsed);
-  const [plan, setPlan] = useState("free");
+  const [status, setStatus] = useState(null);
   const [team, setTeam] = useState(null);
-  const [bonus, setBonus] = useState({ ai: 0, aiCode: 0, galaxy5: 0, space5: 0 });
 
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      try {
-        const u = await base44.auth.me();
-        if (!active) return;
-        setPlan(effectivePlan(u));
-        // Bonus balances may hold old 0.3-step fractions; round down so they stay whole.
-        setBonus({
-          ai: Math.floor(Number(u?.bonus?.ai ?? 0)),
-          aiCode: Math.floor(Number(u?.bonus?.aiCode ?? 0)),
-          galaxy5: Math.floor(Number(u?.bonus?.galaxy5 ?? 0)),
-          space5: Math.floor(Number(u?.bonus?.space5 ?? 0)),
-        });
-        const r = await base44.functions.invoke("my-team").catch(() => null);
-        const t = r?.data?.team;
-        if (active && t && t.active) {
-          setTeam(t);
-          if (!t.isAdmin) setPlan(t.ownerPlan === "secret" ? "secret" : "team");
-        } else if (active) {
-          setTeam(null);
-        }
-      } catch {
-        if (active) {
-          setPlan("free");
-          setTeam(null);
-        }
-      }
-    })();
-    return () => {
-      active = false;
-    };
+  const refresh = useCallback(async () => {
+    try {
+      const r = await base44.functions.invoke("credits");
+      if (r?.data?.tiers) setStatus(r.data);
+    } catch {
+      // Signed out or offline: keep what we have; the server still enforces limits.
+    }
   }, []);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(KEY, JSON.stringify({ ...used, periodKey: monthKey() }));
-    } catch {}
-  }, [used]);
+    refresh();
+    base44.functions
+      .invoke("my-team")
+      .then((r) => {
+        const t = r?.data?.team;
+        setTeam(t && t.active ? t : null);
+      })
+      .catch(() => setTeam(null));
+  }, [refresh]);
 
-  const totals = plan === "pro" ? PRO : plan === "team" ? TEAM : plan === "secret" ? SECRET : plan === "admin" ? ADMIN : FREE;
-
-  const aiTotal = totals.aiTotal === Infinity ? Infinity : totals.aiTotal + bonus.ai;
-  const aiCodeTotal = totals.aiCodeTotal === Infinity ? Infinity : totals.aiCodeTotal + bonus.aiCode;
-  const galaxy5Total = totals.galaxy5Total === Infinity ? Infinity : totals.galaxy5Total + bonus.galaxy5;
-  const space5Total = totals.space5Total === Infinity ? Infinity : totals.space5Total + bonus.space5;
-  const aiUsed = used.aiUsed;
-  const aiCodeUsed = plan === "team" || plan === "secret" ? Math.ceil(team?.aiCodeUsed ?? 0) : used.aiCodeUsed;
-  const galaxy5Used = used.galaxy5Used;
-  const space5Used = used.space5Used;
-
-  // Takes whole credits from the bonus balance first and returns what's left to
-  // charge against the monthly allowance.
-  const takeBonus = useCallback(
-    (key, amount) => {
-      const n = Math.max(1, Math.ceil(amount));
-      const fromBonus = Math.min(Math.max(0, bonus[key]), n);
-      if (fromBonus > 0) {
-        const next = { ...bonus, [key]: bonus[key] - fromBonus };
-        setBonus(next);
-        base44.auth.updateMe({ bonus: next }).catch(() => {});
-      }
-      return n - fromBonus;
+  // Called after each AI reply with the status it returned, or with nothing to re-fetch.
+  const sync = useCallback(
+    (next) => {
+      if (next && next.tiers) setStatus(next);
+      else refresh();
     },
-    [bonus]
+    [refresh]
   );
 
-  const spendAI = useCallback(
-    (amount = 1) => {
-      const rest = takeBonus("ai", amount);
-      if (rest > 0) setUsed((u) => ({ ...u, aiUsed: u.aiUsed + rest }));
-    },
-    [takeBonus]
-  );
+  const tier = (k) => status?.tiers?.[k] || NONE;
+  // Until the first load finishes, don't block sending — the server checks anyway.
+  const remainingOf = (k) => (status ? tier(k).remaining : Infinity);
 
-  const spendGalaxy5 = useCallback(
-    (amount = 1) => {
-      const rest = takeBonus("galaxy5", amount);
-      if (rest > 0) setUsed((u) => ({ ...u, galaxy5Used: u.galaxy5Used + rest }));
-    },
-    [takeBonus]
-  );
-
-  const spendSpace5 = useCallback(
-    (amount = 1) => {
-      const rest = takeBonus("space5", amount);
-      if (rest > 0) setUsed((u) => ({ ...u, space5Used: u.space5Used + rest }));
-    },
-    [takeBonus]
-  );
-
-  const spendAICode = useCallback(
-    (amount = 1) => {
-      amount = takeBonus("aiCode", amount);
-      if (amount <= 0) return;
-      if (plan === "team" || plan === "secret") {
-        // Shared pool lives on the server so every member's spend counts.
-        base44.functions
-          .invoke("team-spend", { amount })
-          .then((r) => {
-            const newUsed = r?.data?.aiCodeUsed;
-            if (typeof newUsed === "number") {
-              setTeam((t) => (t ? { ...t, aiCodeUsed: newUsed } : t));
-            }
-          })
-          .catch(() => {});
-        return;
-      }
-      setUsed((u) => ({ ...u, aiCodeUsed: Math.min(u.aiCodeUsed + amount, aiCodeTotal) }));
-    },
-    [plan, takeBonus, aiCodeTotal]
-  );
-
-  const aiRemaining = aiTotal === Infinity ? Infinity : Math.max(0, aiTotal - aiUsed);
-  const aiCodeRemaining = Math.max(0, aiCodeTotal - aiCodeUsed);
-  const galaxy5Remaining = galaxy5Total === Infinity ? Infinity : Math.max(0, galaxy5Total - galaxy5Used);
-  const space5Remaining = space5Total === Infinity ? Infinity : Math.max(0, space5Total - space5Used);
-  const aiExhausted = aiRemaining <= 0;
-  const aiCodeExhausted = aiCodeRemaining <= 0;
-  const galaxy5Exhausted = galaxy5Remaining <= 0;
-  const space5Exhausted = space5Remaining <= 0;
+  const aiRemaining = remainingOf("ai");
+  const aiCodeRemaining = remainingOf("aiCode");
+  const galaxy5Remaining = remainingOf("galaxy5");
+  const space5Remaining = remainingOf("space5");
 
   return {
-    aiTotal,
-    aiUsed,
-    aiCodeTotal,
-    aiCodeUsed,
-    galaxy5Total,
-    galaxy5Used,
-    space5Total,
-    space5Used,
+    aiTotal: tier("ai").total,
+    aiUsed: tier("ai").used,
+    aiCodeTotal: tier("aiCode").total,
+    aiCodeUsed: tier("aiCode").used,
+    galaxy5Total: tier("galaxy5").total,
+    galaxy5Used: tier("galaxy5").used,
+    space5Total: tier("space5").total,
+    space5Used: tier("space5").used,
     aiRemaining,
     aiCodeRemaining,
     galaxy5Remaining,
     space5Remaining,
-    aiExhausted,
-    aiCodeExhausted,
-    galaxy5Exhausted,
-    space5Exhausted,
-    plan,
+    aiExhausted: aiRemaining <= 0,
+    aiCodeExhausted: aiCodeRemaining <= 0,
+    galaxy5Exhausted: galaxy5Remaining <= 0,
+    space5Exhausted: space5Remaining <= 0,
+    plan: status?.plan || "free",
     team,
-    spendAI,
-    spendAICode,
-    spendGalaxy5,
-    spendSpace5,
+    refresh,
+    spendAI: sync,
+    spendAICode: sync,
+    spendGalaxy5: sync,
+    spendSpace5: sync,
   };
 }

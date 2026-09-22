@@ -8,7 +8,9 @@ import useMessageQueue from "@/hooks/useMessageQueue";
 import useBuildMode, { BUILD_NOTE, ANSWER_NOTE, resolveIntent } from "@/hooks/useBuildMode";
 import ModeToggle from "@/components/chat/ModeToggle";
 import { base44 } from "@/api/base44Client";
-import { fitToCredits, OUT_OF_CREDITS_NOTE } from "@/lib/creditCost";
+import { OUT_OF_CREDITS_NOTE } from "@/lib/creditCost";
+import { useEffort, effortFor } from "@/lib/effort";
+import EffortPicker from "@/components/chat/EffortPicker";
 
 const CODE_SYS = "You are Blackhole Code Assistant. Help with programming. Give clear, correct code with brief explanations.";
 const FABLE_SYS = "You are Space, Blackhole AI's premium creative model. Be imaginative and high-quality.";
@@ -22,6 +24,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
   const [selectedAi, setSelectedAi] = useState("ai");
   const [files, setFiles] = useState([]);
   const buildMode = useBuildMode(selectedAi);
+  const [effort, setEffort] = useEffort();
   const fileInputRef = useRef(null);
   const scrollRef = useRef(null);
   const reqIdRef = useRef(0);
@@ -46,12 +49,13 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
     setLoading(true);
     const myId = ++reqIdRef.current;
     try {
-      const res = await base44.functions.invoke("chatCompletion", { prompt: fullPrompt, model: MODELS[ai] || "automatic" });
+      const eff = effortFor(effort, text, { build: ai !== "ai" && intent.build });
+      const res = await base44.functions.invoke("chatCompletion", { prompt: fullPrompt, model: MODELS[ai] || "automatic", effort: eff });
       if (reqIdRef.current !== myId) return;
-      // Charge whole credits for the reply; if it costs more than is left, it's cut off there.
-      const fit = fitToCredits(res.data?.content ?? "", remaining?.[ai]);
-      spend?.[ai]?.(fit.cost);
-      addMessage(convId, { role: "ai", content: fit.cut ? `${fit.content.trimEnd()}…\n\n${OUT_OF_CREDITS_NOTE}` : fit.content });
+      // The server charged the credits (cutting the reply off if they ran out); show its new status.
+      spend?.[ai]?.(res.data?.credits);
+      const content = res.data?.content ?? "";
+      addMessage(convId, { role: "ai", content: res.data?.cut ? `${content.trimEnd()}…\n\n${OUT_OF_CREDITS_NOTE}` : content });
       if (isFirst) {
         try {
           const titleRes = await base44.functions.invoke("chatCompletion", {
@@ -62,9 +66,12 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
           if (title && reqIdRef.current === myId) renameConversation(convId, title);
         } catch {}
       }
-    } catch {
+    } catch (e) {
       if (reqIdRef.current !== myId) return;
-      addMessage(convId, { role: "ai", content: "Sorry, something went wrong. Please try again." });
+      const data = e?.response?.data;
+      if (data?.credits) spend?.[ai]?.(data.credits);
+      // Out-of-credits and "AI is busy" come back with a message worth showing as-is.
+      addMessage(convId, { role: "ai", content: data?.error ? `⚠ ${data.error}` : "Sorry, something went wrong. Please try again." });
     } finally {
       if (reqIdRef.current === myId) {
         setLoading(false);
@@ -199,6 +206,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
               <Plus className="w-4 h-4" />
             </button>
             <AiChooser value={selectedAi} onChange={setSelectedAi} plan={plan} allowFable={true} />
+            <EffortPicker value={effort} onChange={setEffort} />
             {buildMode.visible && <ModeToggle mode={buildMode.mode} onChange={buildMode.setMode} />}
             {isExhausted && (
               <p className="text-xs text-red-400 ml-auto">

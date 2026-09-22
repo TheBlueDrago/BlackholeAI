@@ -30,6 +30,9 @@ export default function Monitor({ onBack }) {
 
   const apply = async (id, patch) => {
     await base44.entities.User.update(id, patch);
+    // The credit system doesn't trust User.plan/banned (users can edit their own row),
+    // so admin grants and bans are also recorded server-side where only admins can write.
+    await base44.functions.invoke("admin-grant", { grants: [{ userId: id, ...patch }] });
     setUsers((us) => us.map((u) => (u.id === id ? { ...u, ...patch } : u)));
   };
 
