@@ -4,6 +4,7 @@ import { ArrowLeft, Loader2, Gamepad2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAppShell } from "@/components/AppShellContext";
 import { findBuiltInGame } from "@/lib/builtInGames";
+import { withPreviewShim, PREVIEW_SANDBOX } from "@/lib/previewShim";
 
 export default function GameView() {
   const { name } = useParams();
@@ -80,7 +81,7 @@ export default function GameView() {
             <p>Game not found.</p>
           </div>
         ) : (
-          <iframe srcDoc={html} title={name} sandbox="allow-scripts" className="w-full h-full" />
+          <iframe srcDoc={withPreviewShim(html)} title={name} sandbox={PREVIEW_SANDBOX} className="w-full h-full" />
         )}
       </div>
     </div>
