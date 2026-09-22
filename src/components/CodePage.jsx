@@ -26,7 +26,7 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
     onSpendAICode?.(intent.cost);
     try {
       const modeNote = intent.build ? BUILD_NOTE : ANSWER_NOTE;
-      const res = await base44.functions.invoke("chatCompletion", { prompt: `${modeNote}\n\n${text}`, model: "claude-sonnet-5" });
+      const res = await base44.functions.invoke("chatCompletion", { prompt: `${modeNote}\n\n${text}`, model: "claude_sonnet_4_6" });
       if (reqIdRef.current !== myId) return;
       setMessages((m) => [...m, { role: "ai", content: res.data?.content ?? "" }]);
     } catch {
