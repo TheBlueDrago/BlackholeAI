@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Terminal } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-import { creditsFor } from "@/lib/creditCost";
+import { fitToCredits, OUT_OF_CREDITS_NOTE } from "@/lib/creditCost";
 import BlackholeIcon from "@/components/BlackholeIcon";
 import QueueList from "@/components/chat/QueueList";
 import SendOrStopButton from "@/components/chat/SendOrStopButton";
@@ -28,9 +28,10 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
       const modeNote = intent.build ? BUILD_NOTE : ANSWER_NOTE;
       const res = await base44.functions.invoke("chatCompletion", { prompt: `${modeNote}\n\n${text}`, model: "claude_sonnet_4_6" });
       if (reqIdRef.current !== myId) return;
-      const content = res.data?.content ?? "";
-      onSpendAICode?.(creditsFor(content));
-      setMessages((m) => [...m, { role: "ai", content }]);
+      // Charge whole credits for the reply; if it costs more than is left, it's cut off there.
+      const fit = fitToCredits(res.data?.content ?? "", aiCodeRemaining);
+      onSpendAICode?.(fit.cost);
+      setMessages((m) => [...m, { role: "ai", content: fit.cut ? `${fit.content.trimEnd()}…\n\n${OUT_OF_CREDITS_NOTE}` : fit.content }]);
     } catch {
       if (reqIdRef.current !== myId) return;
       setMessages((m) => [...m, { role: "ai", content: "Sorry, something went wrong. Please try again." }]);

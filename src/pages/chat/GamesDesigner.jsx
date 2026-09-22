@@ -17,7 +17,8 @@ import { STARTER_GAME_HTML } from "@/lib/gameTemplate";
 import { GAME_TLDS } from "@/lib/blackholeDomain";
 import { gameLimit, inThisMonth } from "@/lib/publishLimits";
 import { withPreviewShim, PREVIEW_SANDBOX } from "@/lib/previewShim";
-import { creditsFor } from "@/lib/creditCost";
+import { fitToCredits, OUT_OF_CREDITS_NOTE } from "@/lib/creditCost";
+import { EXPLAIN_NOTE, splitBuildReply, introBeforeCode } from "@/lib/buildReply";
 import { GAME_DESIGNER_STORE_KEY } from "@/lib/gameDesignerStore";
 import { notifyGamesChanged } from "@/lib/gameEvents";
 
@@ -46,7 +47,8 @@ const GENRES = [
 const SYSTEM = `You are Blackhole AI Games Designer. The user describes a game and you build it as a fully playable HTML5 game.
 ALWAYS respond with a single complete, self-contained HTML document: include <!DOCTYPE html>, <html>, <head> with inline <style> CSS, and <body> with a <canvas> element and inline <script> implementing the entire game.
 The game MUST be genuinely playable with keyboard and/or mouse: include a start screen, a scoring system, increasing difficulty, and a game-over screen with a restart button. Use a smooth requestAnimationFrame loop, a responsive canvas that fills the viewport, and clean neon visuals. No external assets, scripts, or network calls — everything must run offline inside the single document.
-Do NOT wrap the HTML in markdown code fences. Do NOT add any explanation before or after the HTML — output ONLY the raw HTML document.
+Every button and menu (start, pause, restart, settings, mute) must actually work.
+Put the complete HTML document inside ONE \`\`\`html code block, with your explanation outside it (see EXPLAIN YOUR WORK).
 When the user asks for changes, output the FULL updated HTML document every time, not just the diff.`;
 
 function extractHtml(text) {
@@ -55,7 +57,9 @@ function extractHtml(text) {
   return f ? f[1].trim() : text.trim();
 }
 
-const isHtmlMsg = (m) => m.role === "ai" && /<[a-z!][\s\S]*>/i.test(m.content);
+// `text: true` marks plain chat replies (discuss mode, errors, out-of-credits) so a reply
+// that merely mentions a tag like <canvas> is never mistaken for a new version of the game.
+const isHtmlMsg = (m) => m.role === "ai" && !m.text && /<[a-z!][\s\S]*>/i.test(m.content);
 
 function genId() {
   return (crypto.randomUUID && crypto.randomUUID()) || String(Date.now());
@@ -266,21 +270,36 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
       const discuss = !intent.build;
       const prompt =
         `${SYSTEM}\n\n` +
-        (discuss ? `${DISCUSS_NOTE}\n\n` : "") +
+        (discuss ? `${DISCUSS_NOTE}\n\n` : `${EXPLAIN_NOTE}\n\n`) +
         (lastHtml ? `Current game HTML:\n${lastHtml}\n\n` : "") +
         `Requests so far:\n${userTurns.length ? userTurns.map((u, i) => `${i + 1}. ${u}`).join("\n") : "(none)"}\n\n` +
         `Latest request: ${text}${fileNote}\n\n` +
-        (discuss ? "Reply in plain text only — do not output HTML." : "Output the complete updated HTML game document now.");
+        (discuss
+          ? "Reply in plain text only — do not output HTML."
+          : "Output your short intro, then the complete updated HTML game document in one ```html code block, then the \"What I did:\" summary.");
       const model = MODELS[ai] || "automatic";
       const res = await base44.functions.invoke("chatCompletion", { prompt, model });
       if (reqIdRef.current !== myId) return;
-      const content = res.data?.content ?? "";
-      spendFor[ai]?.(creditsFor(content));
-      pushMsg({ role: "ai", content });
+      // Charge whole credits for the reply; if it costs more than is left, it's cut off there.
+      const fit = fitToCredits(res.data?.content ?? "", remaining?.[ai]);
+      spendFor[ai]?.(fit.cost);
+      const content = fit.content;
+      if (fit.cut) {
+        // A half-written game would be broken, so only the explanation so far is shown.
+        const said = discuss ? content.trim() : introBeforeCode(content);
+        pushMsg({ role: "ai", text: true, content: [said, OUT_OF_CREDITS_NOTE].filter(Boolean).join("\n\n") });
+        return;
+      }
+      if (discuss) {
+        pushMsg({ role: "ai", text: true, content });
+        return;
+      }
+      const { html, note } = splitBuildReply(content);
+      pushMsg(html ? { role: "ai", content: html, note } : { role: "ai", text: true, content: note });
     } catch (e) {
       if (reqIdRef.current !== myId) return;
       const why = e?.response?.data?.error || e?.message || "";
-      pushMsg({ role: "ai", content: `Sorry, something went wrong generating your game.${why ? ` (${why})` : ""} Please try again.` });
+      pushMsg({ role: "ai", text: true, content: `Sorry, something went wrong generating your game.${why ? ` (${why})` : ""} Please try again.` });
     } finally {
       if (reqIdRef.current === myId) {
         setLoading(false);
@@ -461,12 +480,15 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
                   </div>
                 );
               }
-              const isHtml = /<[a-z!][\s\S]*>/i.test(m.content);
+              const built = isHtmlMsg(m) || m.built;
               return (
                 <div key={i} className="flex justify-start">
                   <div className="max-w-[85%] px-3.5 py-2.5 rounded-2xl rounded-bl-sm bg-slate-800 text-slate-100 border border-slate-700/50 text-sm">
-                    {isHtml ? (
-                      <span className="text-fuchsia-300 font-medium">✓ Game updated</span>
+                    {built ? (
+                      <div className="space-y-2">
+                        {m.note && <p className="whitespace-pre-wrap">{m.note}</p>}
+                        <span className="block text-fuchsia-300 font-medium">✓ Game updated</span>
+                      </div>
                     ) : (
                       <span className="whitespace-pre-wrap">{m.content}</span>
                     )}

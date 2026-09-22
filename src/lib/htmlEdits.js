@@ -8,7 +8,7 @@ Instead output one or more edit blocks, each replacing an exact snippet of the c
 ===
 (the replacement text)
 >>>
-To add new content, FIND a nearby anchor (e.g. a closing tag) and include it again in the replacement plus the new content. Copy FIND text exactly (whitespace included). Output only edit blocks — no explanation, no markdown fences. Make as many edits as the request needs; large multi-section changes are fine.`;
+To add new content, FIND a nearby anchor (e.g. a closing tag) and include it again in the replacement plus the new content. Copy FIND text exactly (whitespace included). Do not wrap the edit blocks in markdown fences, and keep your explanation outside them (intro before the first block, "What I did:" summary after the last). Make as many edits as the request needs; large multi-section changes are fine.`;
 
 const BLOCK_RE = /<<<FIND\r?\n([\s\S]*?)\r?\n===\r?\n([\s\S]*?)\r?\n>>>/g;
 

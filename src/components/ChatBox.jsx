@@ -8,7 +8,7 @@ import useMessageQueue from "@/hooks/useMessageQueue";
 import useBuildMode, { BUILD_NOTE, ANSWER_NOTE, resolveIntent } from "@/hooks/useBuildMode";
 import ModeToggle from "@/components/chat/ModeToggle";
 import { base44 } from "@/api/base44Client";
-import { creditsFor } from "@/lib/creditCost";
+import { fitToCredits, OUT_OF_CREDITS_NOTE } from "@/lib/creditCost";
 
 const CODE_SYS = "You are Blackhole Code Assistant. Help with programming. Give clear, correct code with brief explanations.";
 const FABLE_SYS = "You are Space, Blackhole AI's premium creative model. Be imaginative and high-quality.";
@@ -48,9 +48,10 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
     try {
       const res = await base44.functions.invoke("chatCompletion", { prompt: fullPrompt, model: MODELS[ai] || "automatic" });
       if (reqIdRef.current !== myId) return;
-      const content = res.data?.content ?? "";
-      spend?.[ai]?.(creditsFor(content));
-      addMessage(convId, { role: "ai", content });
+      // Charge whole credits for the reply; if it costs more than is left, it's cut off there.
+      const fit = fitToCredits(res.data?.content ?? "", remaining?.[ai]);
+      spend?.[ai]?.(fit.cost);
+      addMessage(convId, { role: "ai", content: fit.cut ? `${fit.content.trimEnd()}…\n\n${OUT_OF_CREDITS_NOTE}` : fit.content });
       if (isFirst) {
         try {
           const titleRes = await base44.functions.invoke("chatCompletion", {

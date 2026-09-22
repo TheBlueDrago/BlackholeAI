@@ -16,7 +16,8 @@ import SheetSelect from "@/components/SheetSelect";
 import ThemeToggle from "@/components/ThemeToggle";
 import { siteLimit } from "@/lib/publishLimits";
 import { withPreviewShim, PREVIEW_SANDBOX } from "@/lib/previewShim";
-import { creditsFor } from "@/lib/creditCost";
+import { fitToCredits, OUT_OF_CREDITS_NOTE } from "@/lib/creditCost";
+import { EXPLAIN_NOTE, splitBuildReply, editReplyNote, introBeforeCode } from "@/lib/buildReply";
 import { syncSiteProducts } from "@/lib/siteProducts";
 import SaveStatus from "@/components/designer/SaveStatus";
 import { EDIT_NOTE, hasEditBlocks, applyEdits } from "@/lib/htmlEdits";
@@ -31,9 +32,10 @@ const AI_NAMES = { ai: "Blackhole AI", code: "Blackhole Code", opus5: "Galaxy", 
 const RESERVED = ["home", "www", "admin", "api", "mail", "infinity", "ai", "app", "login", "register", "support", "blog"];
 
 const SYSTEM = `You are Blackhole AI Website Designer. The user describes a website and you build it.
-ALWAYS respond with a single complete, self-contained HTML document: include <!DOCTYPE html>, <html>, <head> with inline <style> CSS, and <body> with inline <script> for any interactivity.
+ALWAYS build a single complete, self-contained HTML document: include <!DOCTYPE html>, <html>, <head> with inline <style> CSS, and <body> with inline <script> for any interactivity.
 Make it modern, responsive, and visually polished — clean typography, good spacing, a tasteful color palette, and smooth interactions. Use placeholder content that fits the site's purpose.
-Do NOT wrap the HTML in markdown code fences. Do NOT add any explanation before or after the HTML — output ONLY the raw HTML document.
+Every button, link, tab, menu and form must actually do something when clicked — scroll to its section, switch views, open/close menus and modals, validate and "submit" forms with a confirmation message. Never leave a button with no behaviour.
+Put the complete HTML document inside ONE \`\`\`html code block, with your explanation outside it (see EXPLAIN YOUR WORK).
 When the user asks for changes to an existing site, follow the EDIT MODE instructions if given; otherwise output the FULL updated HTML document.
 
 PAYMENTS: never add a checkout, billing, payment or "buy" page unless the user explicitly asks for one — a normal site has no products, no prices and no payment buttons. Only when the user asks for a billing, checkout, pricing, payment or "buy" page, use Blackhole's built-in payment system — the same hosted checkout this platform uses. Never use Stripe, PayPal, or your own card form, and never ask the buyer for card numbers.
@@ -50,7 +52,9 @@ function extractHtml(text) {
   return text.trim();
 }
 
-const isHtmlMsg = (m) => m.role === "ai" && /<[a-z!][\s\S]*>/i.test(m.content);
+// `text: true` marks plain chat replies (discuss mode, errors, out-of-credits) so a reply
+// that merely mentions a tag like <nav> is never mistaken for a new version of the site.
+const isHtmlMsg = (m) => m.role === "ai" && !m.text && /<[a-z!][\s\S]*>/i.test(m.content);
 
 function detectPages(html) {
   const paths = new Set(["/home"]);
@@ -63,16 +67,17 @@ function detectPages(html) {
 }
 
 // Only the newest HTML version is worth keeping — older copies are huge and blow the
-// browser storage quota, which is what made saves silently fail.
+// browser storage quota, which is what made saves silently fail. Older builds keep
+// just their explanation so the chat history still reads correctly.
 function trimForStorage(messages) {
   let keptHtml = false;
   return [...messages]
     .reverse()
-    .filter((m) => {
-      if (!isHtmlMsg(m)) return true;
-      if (keptHtml) return false;
+    .map((m) => {
+      if (!isHtmlMsg(m)) return m;
+      if (keptHtml) return { role: "ai", content: "", note: m.note || "", built: true };
       keptHtml = true;
-      return true;
+      return m;
     })
     .reverse();
 }
@@ -180,6 +185,25 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
     base44.auth.me().then(setUser).catch(() => setUser(null));
   }, []);
 
+  // Buy buttons in the page ask the host to start checkout. In the designer that's a
+  // preview, so say where checkout actually happens instead of silently ignoring it.
+  const previewRef = useRef(null);
+  const [previewNotice, setPreviewNotice] = useState("");
+  useEffect(() => {
+    let t;
+    const onMsg = (e) => {
+      if (e.source !== previewRef.current?.contentWindow || e.data?.type !== "blackhole-checkout") return;
+      setPreviewNotice("Buy buttons open secure checkout on your published website.");
+      clearTimeout(t);
+      t = setTimeout(() => setPreviewNotice(""), 4000);
+    };
+    window.addEventListener("message", onMsg);
+    return () => {
+      window.removeEventListener("message", onMsg);
+      clearTimeout(t);
+    };
+  }, []);
+
   // Handoff from the Website Designer dashboard: a prompt typed there gets sent automatically once.
   useEffect(() => {
     const initialPrompt = location.state?.initialPrompt;
@@ -284,30 +308,50 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
       const editMode = !discuss && !!lastHtml;
       const prompt =
         `${SYSTEM}\n\n` +
-        (discuss ? `${DISCUSS_NOTE}\n\n` : "") +
+        (discuss ? `${DISCUSS_NOTE}\n\n` : `${EXPLAIN_NOTE}\n\n`) +
         (editMode ? `${EDIT_NOTE}\n\n` : "") +
         (lastHtml ? `Current website HTML:\n${lastHtml}\n\n` : "") +
         `Recent requests:\n${userTurns.length ? userTurns.map((u, i) => `${i + 1}. ${u}`).join("\n") : "(none)"}\n\n` +
         `Latest request: ${text}${fileNote}\n\n` +
-        (discuss ? "Reply in plain text only — do not output HTML." : editMode ? "Output the edit blocks now." : "Output the complete updated HTML document now.");
+        (discuss
+          ? "Reply in plain text only — do not output HTML."
+          : editMode
+            ? "Output your short intro, then the edit blocks, then the \"What I did:\" summary."
+            : "Output your short intro, then the complete updated HTML document in one ```html code block, then the \"What I did:\" summary.");
       const model = MODELS[ai] || "automatic";
       const res = await base44.functions.invoke("chatCompletion", { prompt, model });
       if (reqIdRef.current !== myId) return;
-      const content = res.data?.content ?? "";
-      spendFor[ai]?.(creditsFor(content));
-      if (editMode && hasEditBlocks(content)) {
-        const { html, failed } = applyEdits(lastHtml, content);
-        if (html !== lastHtml) pushMsg({ role: "ai", content: html });
-        if (failed.length) pushMsg({ role: "ai", content: `${failed.length} of the changes couldn't be placed in the page — ask again for just that part.` });
+      // Charge whole credits for the reply; if it costs more than is left, it's cut off there.
+      const fit = fitToCredits(res.data?.content ?? "", remaining?.[ai]);
+      spendFor[ai]?.(fit.cost);
+      const content = fit.content;
+      if (fit.cut) {
+        // A half-written build would break the site, so only the explanation so far is shown.
+        const said = discuss ? content.trim() : introBeforeCode(content);
+        pushMsg({ role: "ai", text: true, content: [said, OUT_OF_CREDITS_NOTE].filter(Boolean).join("\n\n") });
         return;
       }
-      pushMsg({ role: "ai", content });
+      if (discuss) {
+        pushMsg({ role: "ai", text: true, content });
+        return;
+      }
+      if (editMode && hasEditBlocks(content)) {
+        const { html, failed } = applyEdits(lastHtml, content);
+        const note = editReplyNote(content);
+        if (html !== lastHtml) pushMsg({ role: "ai", content: html, note });
+        else if (note) pushMsg({ role: "ai", text: true, content: note });
+        if (failed.length) pushMsg({ role: "ai", text: true, content: `${failed.length} of the changes couldn't be placed in the page — ask again for just that part.` });
+        return;
+      }
+      const { html, note } = splitBuildReply(content);
+      pushMsg(html ? { role: "ai", content: html, note } : { role: "ai", text: true, content: note });
     } catch (e) {
       if (reqIdRef.current !== myId) return;
       const why = e?.response?.data?.error || e?.message || "";
       const timedOut = /timeout|timed out|504|took too long/i.test(why);
       pushMsg({
         role: "ai",
+        text: true,
         content: timedOut
           ? "That took too long to generate — your website is big, so rewriting the whole page can run past the time limit. Ask for one smaller change at a time (e.g. \"change the pricing section\") and it will go through."
           : `Sorry, something went wrong generating your website.${why ? ` (${why})` : ""} Please try again.`,
@@ -575,12 +619,15 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
                   </div>
                 );
               }
-              const isHtml = /<[a-z!][\s\S]*>/i.test(m.content);
+              const built = isHtmlMsg(m) || m.built;
               return (
                 <div key={i} className="flex justify-start">
                   <div className="max-w-[85%] px-3.5 py-2.5 rounded-2xl rounded-bl-sm bg-slate-800 text-slate-100 border border-slate-700/50 text-sm">
-                    {isHtml ? (
-                      <span className="text-emerald-300 font-medium">✓ Website updated</span>
+                    {built ? (
+                      <div className="space-y-2">
+                        {m.note && <p className="whitespace-pre-wrap">{m.note}</p>}
+                        <span className="block text-emerald-300 font-medium">✓ Website updated</span>
+                      </div>
                     ) : (
                       <span className="whitespace-pre-wrap">{m.content}</span>
                     )}
@@ -709,6 +756,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
             ) : previewHtml ? (
               <iframe
                 key={reloadKey}
+                ref={previewRef}
                 srcDoc={withPreviewShim(previewHtml)}
                 title="Website preview"
                 sandbox={PREVIEW_SANDBOX}
@@ -791,6 +839,20 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
               </div>
               {publishErr && <p className="text-sm text-red-400 mt-3">{publishErr}</p>}
             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Preview notice (e.g. a buy button clicked in the preview) */}
+      <AnimatePresence>
+        {previewNotice && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-slate-800 border border-slate-600 text-slate-100 px-4 py-2.5 rounded-xl shadow-2xl text-sm"
+          >
+            {previewNotice}
           </motion.div>
         )}
       </AnimatePresence>

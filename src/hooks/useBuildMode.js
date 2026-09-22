@@ -31,7 +31,12 @@ export function resolveIntent(text, mode) {
   return { build };
 }
 
-export const BUILD_NOTE = "MODE: BUILD. Produce the complete, working result (code or document) the user asked for.";
+export const BUILD_NOTE =
+  "MODE: BUILD. Produce the complete, working result (code or document) the user asked for. " +
+  "Start with one short friendly sentence confirming what you're building (e.g. \"Sure — here's a Python script that renames your files by date.\"). " +
+  "Then briefly explain the parts it needs and what each one is for (e.g. \"We need this function to read the folder, and this part to parse the dates.\"). " +
+  "Then give the FULL code in fenced code blocks — never partial snippets or placeholders like \"...rest of the code\". " +
+  "Finish with a line or two on how to run or use it.";
 export const ANSWER_NOTE =
   "MODE: ANSWER. The user is asking a question, not requesting a build. Answer it directly and concisely in plain conversational text; short illustrative snippets are fine, but do not produce a full build.";
 export const DISCUSS_NOTE =
