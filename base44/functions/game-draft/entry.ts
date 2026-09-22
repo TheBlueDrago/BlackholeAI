@@ -35,12 +35,12 @@ export default async function(req) {
     }
 
     if (action === 'save') {
+      // Stored inline (not via integrations.Core.UploadFile) so autosaving a draft
+      // doesn't burn Base44's metered integration-credit quota on every edit.
       const html = String(body.html || '');
       let htmlUrl = mine ? (mine.htmlUrl || '') : '';
       if (html) {
-        const file = new File([html], 'draft.html', { type: 'text/html' });
-        const up = await base44.asServiceRole.integrations.Core.UploadFile({ file });
-        htmlUrl = up.file_url;
+        htmlUrl = html;
       }
       const data = {
         gameName: String(body.gameName || 'my-game'),

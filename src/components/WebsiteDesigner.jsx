@@ -749,10 +749,10 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
               <div className="mt-3 flex items-center gap-2 bg-slate-800/70 border border-slate-700/50 rounded-xl px-3 py-2.5">
                 <Globe className="w-4 h-4 text-sky-300 shrink-0" />
                 <span className="text-slate-100 text-sm font-mono truncate">
-                  {sanitizeSite(siteName || "your-site")}<span className="text-sky-300">.blackhole</span>
+                  {sanitizeSite(siteName || "your-site")}<span className="text-sky-300">.blackhole-ai-tech.com</span>
                 </span>
               </div>
-              <p className="text-slate-500 text-xs mt-2">You pick the name — the .blackhole ending always stays.</p>
+              <p className="text-slate-500 text-xs mt-2">You pick the name — the .blackhole-ai-tech.com ending always stays.</p>
 
               {taken && (
                 <div className="mt-3">
