@@ -85,11 +85,18 @@ function SiteCard({ site, onEdit, onToggleHidden, onDelete }) {
               </div>
             </div>
           )}
+          {site.hidden ? (
+            <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-black/60 backdrop-blur text-[10px] font-medium text-slate-300 border border-white/10">
+              Hidden
+            </span>
+          ) : (
+            <span className="absolute top-2 right-2 flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/60 backdrop-blur text-[10px] font-medium text-emerald-300 border border-white/10">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Live
+            </span>
+          )}
         </div>
         <p className="text-sm font-semibold text-slate-100 truncate">{site.name}</p>
-        <p className="text-[11px] text-slate-500 truncate">
-          {site.name}.blackhole{site.hidden ? " · hidden" : ""}
-        </p>
+        <p className="text-[11px] text-slate-500 truncate">{site.name}.blackhole</p>
         <p className="text-[11px] text-slate-600 mt-0.5">
           Updated {site.updated_date ? formatDistanceToNow(new Date(site.updated_date), { addSuffix: true }) : "recently"}
         </p>
