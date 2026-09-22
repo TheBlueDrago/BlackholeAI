@@ -33,7 +33,8 @@ const MODEL_MAP = {
 const DEFAULT_MODEL = "gemini-3.5-flash";
 // Strongest first; fallbacks are tried in this order after the requested model.
 const MODELS_BY_STRENGTH = ["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash"];
-const MAX_ATTEMPTS = 3;
+// All four: on the free tier it's common for three of them to be overloaded at once.
+const MAX_ATTEMPTS = 4;
 
 // Effort levels (the Low…UltraCode bar in the UI): more thinking and a bigger output
 // budget make replies slower but smarter. Gemini's thinkingLevel tops out at "high",

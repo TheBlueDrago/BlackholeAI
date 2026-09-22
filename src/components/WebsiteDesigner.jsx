@@ -58,14 +58,26 @@ function extractHtml(text) {
 // that merely mentions a tag like <nav> is never mistaken for a new version of the site.
 const isHtmlMsg = (m) => m.role === "ai" && !m.text && /<[a-z!][\s\S]*>/i.test(m.content);
 
-function detectPages(html) {
-  const paths = new Set(["/home"]);
+// Sites are single documents, so the "pages" are their sections: ids used as in-page
+// link targets (href="#pricing") or on <section> elements. Picking one jumps the
+// preview there (see "blackhole-goto" in lib/previewShim.js).
+function detectSections(html) {
+  const ids = new Set();
   if (html) {
-    const re = /href=["'](\/[a-z0-9][a-z0-9-]*)["']/gi;
+    const declared = new Set();
     let m;
-    while ((m = re.exec(html))) paths.add(m[1]);
+    const idRe = /\sid=["']([A-Za-z][\w-]*)["']/g;
+    while ((m = idRe.exec(html))) declared.add(m[1]);
+    // In-page links, and view switches wired to a clickable element (onclick="showView('pricing')").
+    const linkRe = /href=["']#([A-Za-z][\w-]*)["']|onclick="[^"]*?showView\(\s*'([A-Za-z][\w-]*)'|onclick='[^']*?showView\(\s*"([A-Za-z][\w-]*)"/g;
+    while ((m = linkRe.exec(html))) {
+      const id = m[1] || m[2] || m[3];
+      if (declared.has(id) || !m[1]) ids.add(id);
+    }
+    const sectionRe = /<section[^>]*\sid=["']([A-Za-z][\w-]*)["']/gi;
+    while ((m = sectionRe.exec(html))) ids.add(m[1]);
   }
-  return Array.from(paths).sort();
+  return ["", ...Array.from(ids)];
 }
 
 // Only the newest HTML version is worth keeping — older copies are huge and blow the
@@ -152,7 +164,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
-  const [pagePath, setPagePath] = useState("/home");
+  const [pagePath, setPagePath] = useState("");
   const [previewMode, setPreviewMode] = useState("preview");
   const [reloadKey, setReloadKey] = useState(0);
   const [showInvite, setShowInvite] = useState(false);
@@ -461,8 +473,12 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   const reload = () => setReloadKey((k) => k + 1);
 
   const taken = nameTaken;
-  const pages = detectPages(previewHtml);
-  const safePagePath = pages.includes(pagePath) ? pagePath : pages[0];
+  const sections = detectSections(previewHtml);
+  const currentSection = sections.includes(pagePath) ? pagePath : "";
+  const goToSection = (id) => {
+    setPagePath(id);
+    previewRef.current?.contentWindow?.postMessage({ type: "blackhole-goto", id }, "*");
+  };
 
   return (
     <div className="h-full flex flex-col bg-gradient-to-br from-slate-950 via-slate-900 to-black overflow-hidden">
@@ -500,9 +516,9 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
           <div className="flex items-center w-full max-w-md bg-slate-800/70 rounded-lg border border-slate-700/50 focus-within:border-indigo-500/50 transition-colors">
             <Search className="w-4 h-4 text-slate-500 ml-2.5 shrink-0" />
             <SheetSelect
-              value={safePagePath}
-              onChange={(v) => { setPagePath(v); reload(); }}
-              options={pages.map((p) => ({ value: p, label: p }))}
+              value={currentSection}
+              onChange={goToSection}
+              options={sections.map((s) => ({ value: s, label: s ? `#${s}` : "Top of page" }))}
               className="flex-1 bg-transparent outline-none text-slate-200 px-2 py-1.5 text-sm min-w-0"
             />
             <button

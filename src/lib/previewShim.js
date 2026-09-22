@@ -28,6 +28,15 @@ const SHIM = `<script>(function(){
     note("Other pages open on your published site.");
   });
   window.addEventListener("submit",function(e){if(e.defaultPrevented)return;e.preventDefault();note("Form submitted (preview).")});
+  // The designer's section picker: click the site's own link to that section if it has one
+  // (so view-switching sites show it), otherwise scroll to it.
+  window.addEventListener("message",function(e){
+    var d=e.data;if(e.source!==window.parent||!d||d.type!=="blackhole-goto")return;
+    var id=String(d.id||"");if(!/^[A-Za-z][\\w-]*$/.test(id)){window.scrollTo({top:0,behavior:"smooth"});return}
+    var link=document.querySelector('a[href="#'+id+'"]')||document.querySelector("[onclick*=\\"'"+id+"'\\"]");
+    if(link){link.click();return}
+    var t=document.getElementById(id);if(t)t.scrollIntoView({behavior:"smooth",block:"start"});
+  });
 })();<\/script>`;
 
 export const PREVIEW_SANDBOX = "allow-scripts allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox";
