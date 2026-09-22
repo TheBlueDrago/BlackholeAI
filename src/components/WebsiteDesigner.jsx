@@ -15,6 +15,7 @@ import DownloadZip from "@/components/designer/DownloadZip";
 import SheetSelect from "@/components/SheetSelect";
 import ThemeToggle from "@/components/ThemeToggle";
 import { siteLimit } from "@/lib/publishLimits";
+import { withPreviewShim, PREVIEW_SANDBOX } from "@/lib/previewShim";
 import { syncSiteProducts } from "@/lib/siteProducts";
 import SaveStatus from "@/components/designer/SaveStatus";
 import { EDIT_NOTE, hasEditBlocks, applyEdits } from "@/lib/htmlEdits";
@@ -707,9 +708,9 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
             ) : previewHtml ? (
               <iframe
                 key={reloadKey}
-                srcDoc={previewHtml}
+                srcDoc={withPreviewShim(previewHtml)}
                 title="Website preview"
-                sandbox="allow-scripts"
+                sandbox={PREVIEW_SANDBOX}
                 className="w-full h-full bg-white"
               />
             ) : (
