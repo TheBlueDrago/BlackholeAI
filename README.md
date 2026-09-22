@@ -4,6 +4,14 @@ Use this repository to run and edit the app locally, then publish changes back t
 
 Any change pushed to the repo will also be reflected in the Base44 Builder.
 
+## How This App Is Hosted
+
+- **Frontend + API overrides: Cloudflare Pages** (project `nebuluxai`, domain `blackhole-ai-tech.com`). Every push to `main` deploys automatically. `functions/` holds Pages Functions: `functions/api/[[path]].js` proxies `/api/*` to Base44, and the files under `functions/api/apps/<appId>/functions/` replace specific Base44 functions (AI chat, credits, admin grants, publishing, game drafts). Shared code is in `cloudflare-lib/`.
+- **Storage: Cloudflare KV** namespace `published-html`, bound as `PUBLISHED_HTML`. Holds published site/game HTML, game drafts, and the server-side credit records (key prefixes `site:`, `game:`, `draft:`, `grant:`, `bonus:`, `usage:`, `teamusage:`). Free tier: 1,000 writes/day.
+- **AI: Google Gemini (free tier)** via the `GEMINI_API_KEY` secret on the Pages project.
+- **Published sites: the `blackhole-site-router` Worker** on `*.blackhole-ai-tech.com/*`. Its code is in `workers/blackhole-site-router/` (deploy with `npx wrangler deploy` from that folder).
+- **Base44:** sign-in, the database (entities), payments (`create-checkout`, `site-checkout`, `payments-webhook`) and a few remaining functions. Changes under `base44/` only take effect after publishing the app from the Base44 dashboard.
+
 ## Prerequisites
 
 1. Clone the repository using the project's Git URL.
