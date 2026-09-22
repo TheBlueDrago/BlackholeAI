@@ -8,17 +8,20 @@
 // GamesDesigner.jsx, CodePage.jsx for callers.
 //
 // Backed by Google's Gemini API (free tier, no billing required) instead of a
-// paid provider. gemini-3.6-flash is the model Google's own API confirmed as
-// available for this account (older tiers like gemini-2.5-flash returned
-// "no longer available to new users"); all four Base44 aliases map to it for
-// now until per-tier variety is worth re-verifying against this account.
+// paid provider. The 2.5-series (flash and pro) returned "no longer available
+// to new users" for this account, so tiers use confirmed-working 3.x models,
+// still ordered by coding strength per the app's renamed tiers:
+//   automatic         (Blackhole AI)   -> gemini-3.5-flash (mid tier, general use)
+//   claude_sonnet_4_6 (Blackhole Code) -> gemini-3.6-flash (3rd-best coding)
+//   claude_opus_4_8   (Galaxy)         -> gemini-3.7-flash (2nd-best coding)
+//   claude-sonnet-5   (Space)          -> gemini-3.8-flash (best coding)
 const MODEL_MAP = {
-  automatic: "gemini-3.6-flash",
+  automatic: "gemini-3.5-flash",
   claude_sonnet_4_6: "gemini-3.6-flash",
-  claude_opus_4_8: "gemini-3.6-flash",
-  "claude-sonnet-5": "gemini-3.6-flash",
+  claude_opus_4_8: "gemini-3.7-flash",
+  "claude-sonnet-5": "gemini-3.8-flash",
 };
-const DEFAULT_MODEL = "gemini-3.6-flash";
+const DEFAULT_MODEL = "gemini-3.5-flash";
 
 export async function onRequestPost(context) {
   const { request, env } = context;
