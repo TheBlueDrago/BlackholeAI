@@ -21,7 +21,9 @@ function loadUsed() {
       if (p.periodKey && p.periodKey !== monthKey()) {
         return { aiUsed: 0, aiCodeUsed: 0, galaxy5Used: 0, space5Used: 0 };
       }
-      return { aiUsed: p.aiUsed ?? 0, aiCodeUsed: p.aiCodeUsed ?? 0, galaxy5Used: p.galaxy5Used ?? 0, space5Used: p.space5Used ?? 0 };
+      // Credits used to be charged in 0.3 steps; round any saved fraction up so counts stay whole.
+      const whole = (n) => Math.ceil(Number(n) || 0);
+      return { aiUsed: whole(p.aiUsed), aiCodeUsed: whole(p.aiCodeUsed), galaxy5Used: whole(p.galaxy5Used), space5Used: whole(p.space5Used) };
     }
   } catch {}
   return { aiUsed: 0, aiCodeUsed: 0, galaxy5Used: 0, space5Used: 0 };
@@ -50,11 +52,12 @@ export function useCredits() {
         const u = await base44.auth.me();
         if (!active) return;
         setPlan(effectivePlan(u));
+        // Bonus balances may hold old 0.3-step fractions; round down so they stay whole.
         setBonus({
-          ai: Number(u?.bonus?.ai ?? 0),
-          aiCode: Number(u?.bonus?.aiCode ?? 0),
-          galaxy5: Number(u?.bonus?.galaxy5 ?? 0),
-          space5: Number(u?.bonus?.space5 ?? 0),
+          ai: Math.floor(Number(u?.bonus?.ai ?? 0)),
+          aiCode: Math.floor(Number(u?.bonus?.aiCode ?? 0)),
+          galaxy5: Math.floor(Number(u?.bonus?.galaxy5 ?? 0)),
+          space5: Math.floor(Number(u?.bonus?.space5 ?? 0)),
         });
         const r = await base44.functions.invoke("my-team").catch(() => null);
         const t = r?.data?.team;
@@ -89,57 +92,54 @@ export function useCredits() {
   const galaxy5Total = totals.galaxy5Total === Infinity ? Infinity : totals.galaxy5Total + bonus.galaxy5;
   const space5Total = totals.space5Total === Infinity ? Infinity : totals.space5Total + bonus.space5;
   const aiUsed = used.aiUsed;
-  const aiCodeUsed = plan === "team" || plan === "secret" ? team?.aiCodeUsed ?? 0 : used.aiCodeUsed;
+  const aiCodeUsed = plan === "team" || plan === "secret" ? Math.ceil(team?.aiCodeUsed ?? 0) : used.aiCodeUsed;
   const galaxy5Used = used.galaxy5Used;
   const space5Used = used.space5Used;
 
-  const spendAI = useCallback(
-    (amount = 1) => {
-      if (bonus.ai > 0) {
-        const next = { ...bonus, ai: bonus.ai - amount };
+  // Takes whole credits from the bonus balance first and returns what's left to
+  // charge against the monthly allowance.
+  const takeBonus = useCallback(
+    (key, amount) => {
+      const n = Math.max(1, Math.ceil(amount));
+      const fromBonus = Math.min(Math.max(0, bonus[key]), n);
+      if (fromBonus > 0) {
+        const next = { ...bonus, [key]: bonus[key] - fromBonus };
         setBonus(next);
         base44.auth.updateMe({ bonus: next }).catch(() => {});
-        return;
       }
-      setUsed((u) => ({ ...u, aiUsed: u.aiUsed + amount }));
+      return n - fromBonus;
     },
-    [plan, bonus]
+    [bonus]
+  );
+
+  const spendAI = useCallback(
+    (amount = 1) => {
+      const rest = takeBonus("ai", amount);
+      if (rest > 0) setUsed((u) => ({ ...u, aiUsed: u.aiUsed + rest }));
+    },
+    [takeBonus]
   );
 
   const spendGalaxy5 = useCallback(
     (amount = 1) => {
-      if (bonus.galaxy5 > 0) {
-        const next = { ...bonus, galaxy5: bonus.galaxy5 - amount };
-        setBonus(next);
-        base44.auth.updateMe({ bonus: next }).catch(() => {});
-        return;
-      }
-      setUsed((u) => ({ ...u, galaxy5Used: u.galaxy5Used + amount }));
+      const rest = takeBonus("galaxy5", amount);
+      if (rest > 0) setUsed((u) => ({ ...u, galaxy5Used: u.galaxy5Used + rest }));
     },
-    [plan, bonus]
+    [takeBonus]
   );
 
   const spendSpace5 = useCallback(
     (amount = 1) => {
-      if (bonus.space5 > 0) {
-        const next = { ...bonus, space5: bonus.space5 - amount };
-        setBonus(next);
-        base44.auth.updateMe({ bonus: next }).catch(() => {});
-        return;
-      }
-      setUsed((u) => ({ ...u, space5Used: u.space5Used + amount }));
+      const rest = takeBonus("space5", amount);
+      if (rest > 0) setUsed((u) => ({ ...u, space5Used: u.space5Used + rest }));
     },
-    [plan, bonus]
+    [takeBonus]
   );
 
   const spendAICode = useCallback(
     (amount = 1) => {
-      if (bonus.aiCode > 0) {
-        const next = { ...bonus, aiCode: bonus.aiCode - amount };
-        setBonus(next);
-        base44.auth.updateMe({ bonus: next }).catch(() => {});
-        return;
-      }
+      amount = takeBonus("aiCode", amount);
+      if (amount <= 0) return;
       if (plan === "team" || plan === "secret") {
         // Shared pool lives on the server so every member's spend counts.
         base44.functions
@@ -155,7 +155,7 @@ export function useCredits() {
       }
       setUsed((u) => ({ ...u, aiCodeUsed: Math.min(u.aiCodeUsed + amount, aiCodeTotal) }));
     },
-    [plan, bonus, team, aiCodeTotal]
+    [plan, takeBonus, aiCodeTotal]
   );
 
   const aiRemaining = aiTotal === Infinity ? Infinity : Math.max(0, aiTotal - aiUsed);

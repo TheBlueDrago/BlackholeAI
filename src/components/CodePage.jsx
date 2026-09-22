@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Terminal } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { creditsFor } from "@/lib/creditCost";
 import BlackholeIcon from "@/components/BlackholeIcon";
 import QueueList from "@/components/chat/QueueList";
 import SendOrStopButton from "@/components/chat/SendOrStopButton";
@@ -23,12 +24,13 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
     setLoading(true);
     const myId = ++reqIdRef.current;
     const intent = resolveIntent(text, buildMode.mode);
-    onSpendAICode?.(intent.cost);
     try {
       const modeNote = intent.build ? BUILD_NOTE : ANSWER_NOTE;
       const res = await base44.functions.invoke("chatCompletion", { prompt: `${modeNote}\n\n${text}`, model: "claude_sonnet_4_6" });
       if (reqIdRef.current !== myId) return;
-      setMessages((m) => [...m, { role: "ai", content: res.data?.content ?? "" }]);
+      const content = res.data?.content ?? "";
+      onSpendAICode?.(creditsFor(content));
+      setMessages((m) => [...m, { role: "ai", content }]);
     } catch {
       if (reqIdRef.current !== myId) return;
       setMessages((m) => [...m, { role: "ai", content: "Sorry, something went wrong. Please try again." }]);

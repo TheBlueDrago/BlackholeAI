@@ -17,6 +17,7 @@ import { STARTER_GAME_HTML } from "@/lib/gameTemplate";
 import { GAME_TLDS } from "@/lib/blackholeDomain";
 import { gameLimit, inThisMonth } from "@/lib/publishLimits";
 import { withPreviewShim, PREVIEW_SANDBOX } from "@/lib/previewShim";
+import { creditsFor } from "@/lib/creditCost";
 import { GAME_DESIGNER_STORE_KEY } from "@/lib/gameDesignerStore";
 import { notifyGamesChanged } from "@/lib/gameEvents";
 
@@ -257,9 +258,8 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
     setLoading(true);
     const myId = ++reqIdRef.current;
     const spendFor = { ai: onSpendAI, code: onSpendAICode, opus5: onSpendGalaxy5, fable: onSpendSpace5 };
-    // Normal Blackhole AI always builds for 1 credit; the code AIs cost 1 to build and 0.3 to answer a question.
-    const intent = ai !== "ai" ? resolveIntent(text, buildMode.mode) : { build: true, cost: 1 };
-    spendFor[ai]?.(intent.cost);
+    // Normal Blackhole AI always builds; the code AIs can also just answer a question.
+    const intent = ai !== "ai" ? resolveIntent(text, buildMode.mode) : { build: true };
     try {
       const lastHtml = prior.filter(isHtmlMsg).pop()?.content || "";
       const userTurns = prior.filter((m) => m.role === "user").map((m) => m.content).slice(-6);
@@ -274,7 +274,9 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
       const model = MODELS[ai] || "automatic";
       const res = await base44.functions.invoke("chatCompletion", { prompt, model });
       if (reqIdRef.current !== myId) return;
-      pushMsg({ role: "ai", content: res.data?.content ?? "" });
+      const content = res.data?.content ?? "";
+      spendFor[ai]?.(creditsFor(content));
+      pushMsg({ role: "ai", content });
     } catch (e) {
       if (reqIdRef.current !== myId) return;
       const why = e?.response?.data?.error || e?.message || "";

@@ -16,6 +16,7 @@ import SheetSelect from "@/components/SheetSelect";
 import ThemeToggle from "@/components/ThemeToggle";
 import { siteLimit } from "@/lib/publishLimits";
 import { withPreviewShim, PREVIEW_SANDBOX } from "@/lib/previewShim";
+import { creditsFor } from "@/lib/creditCost";
 import { syncSiteProducts } from "@/lib/siteProducts";
 import SaveStatus from "@/components/designer/SaveStatus";
 import { EDIT_NOTE, hasEditBlocks, applyEdits } from "@/lib/htmlEdits";
@@ -272,9 +273,8 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
     setLoading(true);
     const myId = ++reqIdRef.current;
     const spendFor = { ai: onSpendAI, code: onSpendAICode, opus5: onSpendGalaxy5, fable: onSpendSpace5 };
-    // Normal Blackhole AI always builds for 1 credit; the code AIs cost 1 to build and 0.3 to answer a question.
-    const intent = ai !== "ai" ? resolveIntent(text, buildMode.mode) : { build: true, cost: 1 };
-    spendFor[ai]?.(intent.cost);
+    // Normal Blackhole AI always builds; the code AIs can also just answer a question.
+    const intent = ai !== "ai" ? resolveIntent(text, buildMode.mode) : { build: true };
     try {
       const lastHtml = prior.filter(isHtmlMsg).pop()?.content || "";
       // Only the last few requests are sent: a long history on top of a big page makes the
@@ -294,6 +294,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
       const res = await base44.functions.invoke("chatCompletion", { prompt, model });
       if (reqIdRef.current !== myId) return;
       const content = res.data?.content ?? "";
+      spendFor[ai]?.(creditsFor(content));
       if (editMode && hasEditBlocks(content)) {
         const { html, failed } = applyEdits(lastHtml, content);
         if (html !== lastHtml) pushMsg({ role: "ai", content: html });

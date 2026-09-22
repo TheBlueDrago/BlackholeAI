@@ -8,6 +8,7 @@ import useMessageQueue from "@/hooks/useMessageQueue";
 import useBuildMode, { BUILD_NOTE, ANSWER_NOTE, resolveIntent } from "@/hooks/useBuildMode";
 import ModeToggle from "@/components/chat/ModeToggle";
 import { base44 } from "@/api/base44Client";
+import { creditsFor } from "@/lib/creditCost";
 
 const CODE_SYS = "You are Blackhole Code Assistant. Help with programming. Give clear, correct code with brief explanations.";
 const FABLE_SYS = "You are Space, Blackhole AI's premium creative model. Be imaginative and high-quality.";
@@ -37,19 +38,19 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
 
     const fileNote = files.length ? `\n[Attached files: ${files.map((f) => f.name).join(", ")}]` : "";
     const sys = ai === "code" ? CODE_SYS : ai === "fable" ? FABLE_SYS : "";
-    // Normal Blackhole AI always costs 1; the code AIs cost 1 to build and 0.3 to answer a question.
-    const intent = ai !== "ai" ? resolveIntent(text, buildMode.mode) : { build: true, cost: 1 };
+    const intent = ai !== "ai" ? resolveIntent(text, buildMode.mode) : { build: true };
     const modeNote = ai !== "ai" ? (intent.build ? BUILD_NOTE : ANSWER_NOTE) + "\n\n" : "";
     const fullPrompt = `${sys ? sys + "\n\n" : ""}${modeNote}${text}${fileNote}`;
     addMessage(convId, { role: "user", content: text + (files.length ? ` (attached: ${files.map((f) => f.name).join(", ")})` : "") });
     setInput("");
     setLoading(true);
     const myId = ++reqIdRef.current;
-    spend?.[ai]?.(intent.cost);
     try {
       const res = await base44.functions.invoke("chatCompletion", { prompt: fullPrompt, model: MODELS[ai] || "automatic" });
       if (reqIdRef.current !== myId) return;
-      addMessage(convId, { role: "ai", content: res.data?.content ?? "" });
+      const content = res.data?.content ?? "";
+      spend?.[ai]?.(creditsFor(content));
+      addMessage(convId, { role: "ai", content });
       if (isFirst) {
         try {
           const titleRes = await base44.functions.invoke("chatCompletion", {
