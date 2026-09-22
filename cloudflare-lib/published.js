@@ -10,7 +10,9 @@
 // every reader (designer, browser, games front, subdomain Worker) keeps working.
 export const BACKEND = "https://blackhole-ai.base44.app";
 export const APP_ID = "6a8b5eb7787b8a4d6a18f662";
-export const PUBLIC_ORIGIN = "https://blackhole-ai-tech.com";
+// The pages.dev origin, not blackhole-ai-tech.com: that zone's bot protection answers
+// Base44's server-side fetch in get-site-html with a "Just a moment..." challenge page.
+export const PUBLIC_ORIGIN = "https://nebuluxai.pages.dev";
 export const MAX_BYTES = 5 * 1024 * 1024;
 
 export const ENTITY = { site: "PublishedSite", game: "PublishedGame" };
