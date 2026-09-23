@@ -19,7 +19,7 @@ const REASONS = [
 // purpose: most visitors of a published site have no Blackhole account.
 export default function Report() {
   const [params] = useSearchParams();
-  const kind = params.get("kind") === "game" ? "game" : "site";
+  const [kind, setKind] = useState(params.get("kind") === "game" ? "game" : "site");
   const [name, setName] = useState((params.get("name") || "").toLowerCase());
   const [reason, setReason] = useState("");
   const [details, setDetails] = useState("");
@@ -31,7 +31,7 @@ export default function Report() {
 
   const submit = async (e) => {
     e.preventDefault();
-    if (!name.trim()) return setError("Which site are you reporting?");
+    if (!name.trim()) return setError(`Which ${kind} are you reporting?`);
     if (!reason) return setError("Pick a reason.");
     setBusy(true);
     setError("");
@@ -67,14 +67,30 @@ export default function Report() {
             {params.get("name") ? (
               <p className="text-sm text-slate-400">You're reporting <span className="text-slate-200 [overflow-wrap:anywhere]">{address}</span>.</p>
             ) : (
+              <>
+              <div className="flex gap-2 text-sm" role="radiogroup" aria-label="Site or game">
+                {["site", "game"].map((k) => (
+                  <button
+                    key={k}
+                    type="button"
+                    role="radio"
+                    aria-checked={kind === k}
+                    onClick={() => setKind(k)}
+                    className={`flex-1 py-1.5 rounded-lg border capitalize ${kind === k ? "border-red-400 text-white bg-red-500/10" : "border-slate-700 text-slate-400"}`}
+                  >
+                    {k}
+                  </button>
+                ))}
+              </div>
               <label className="block text-sm">
-                <span className="text-slate-400">Site name (the part before .blackhole-ai-tech.com)</span>
+                <span className="text-slate-400">{kind === "site" ? "Site name (the part before .blackhole-ai-tech.com)" : "Game name (from its address)"}</span>
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value.toLowerCase())}
                   className="mt-1 w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white outline-none focus:border-indigo-400"
                 />
               </label>
+              </>
             )}
             <fieldset className="space-y-1.5">
               <legend className="text-sm text-slate-400 mb-1">What's wrong with it?</legend>
