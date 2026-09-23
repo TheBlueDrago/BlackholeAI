@@ -23,7 +23,7 @@ const MODELS = { ai: "automatic", code: "claude_sonnet_4_6", opus5: "claude_opus
 // Shown in an empty chat so new people see what they can make right away.
 const STARTERS = [
   { icon: "🌐", label: "Build a website", hint: "Templates or your idea", go: "designer" },
-  { icon: "🎮", label: "Make a game", hint: "Starts out playable", go: "game" },
+  { icon: "🎮", label: "Make a game", hint: "Describe it, then play it", go: "game" },
   { icon: "💡", label: "Explain simply", hint: "Like black holes", prompt: "Explain black holes like I'm 10." },
   { icon: "✍️", label: "Write a story", hint: "A short, fun one", prompt: "Help me write a short, fun story. Ask me a few questions about it first." },
 ];
@@ -178,7 +178,8 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
 
   const startWith = (s) => {
     if (s.go === "designer") return shell?.goDesigner();
-    if (s.go === "game") return shell?.goGameDesigner();
+    // Opens the game maker as it was left (goGameDesigner would start over and clear a draft).
+    if (s.go === "game") return shell?.navigate("/chat/game-designer");
     if (loading || isExhausted) return;
     runPrompt(s.prompt, selectedAi);
   };
