@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Download, Upload, LogOut, Mail, Shield, KeyRound, ArrowLeft, Loader2, Crown, Settings, Users, Lock, ShieldCheck, Ticket, Trash2, Gamepad2, Pencil, Eye, EyeOff, Globe, Gift } from "lucide-react";
+import { LogOut, Mail, Shield, KeyRound, ArrowLeft, Loader2, Crown, Settings, Users, Lock, ShieldCheck, Ticket, Trash2, Gamepad2, Pencil, Eye, EyeOff, Globe, Gift } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import TeamMembership from "@/components/TeamMembership";
 import PublishedSites from "@/components/profile/PublishedSites";
 import ReferFriends from "@/components/profile/ReferFriends";
 import { notifyGamesChanged } from "@/lib/gameEvents";
-import { downloadChats, importChats } from "@/lib/chatBackup";
 
 export default function Profile({ open, onClose, initialView = "main", onMonitor, onPromos }) {
   const [user, setUser] = useState(null);
@@ -28,18 +27,6 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
   const [delAck, setDelAck] = useState(false);
   const [delBusy, setDelBusy] = useState(false);
   const [delError, setDelError] = useState("");
-  const [backupNote, setBackupNote] = useState("");
-
-  // Admins: reported sites and contact messages waiting (badge on the Monitor button).
-  const [openReports, setOpenReports] = useState({ reports: 0, messages: 0 });
-  useEffect(() => {
-    if (!open || user?.role !== "admin") return;
-    Promise.all(
-      ["admin-reports", "contact"].map((fn) =>
-        base44.functions.invoke(fn, { action: "count" }).then((r) => r.data?.open || 0).catch(() => 0)
-      )
-    ).then(([reports, messages]) => setOpenReports({ reports, messages }));
-  }, [open, user?.role]);
 
   useEffect(() => {
     if (open) {
@@ -84,41 +71,13 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
     setDelError("");
     setDelBusy(true);
     try {
-      // Sites, games and drafts first (they live outside the User record); if that
-      // fails, stop so nothing is left behind without an account to manage it.
-      await base44.functions.invoke("delete-my-content");
       await base44.functions.invoke("delete-account");
-      // Chats, designer projects and images are kept in this browser; clear them too.
-      try {
-        localStorage.clear();
-        indexedDB.deleteDatabase("blackhole-designer");
-      } catch {
-        // Storage blocked: nothing saved to clear.
-      }
       base44.auth.logout();
     } catch (e) {
       setDelError(e?.response?.data?.error || e?.message || "Could not delete account");
       setDelBusy(false);
     }
   };
-
-  // Games an admin took down (functions/page-status.js), so owners can tell.
-  const [takenDownGames, setTakenDownGames] = useState(() => new Set());
-  useEffect(() => {
-    if (!games.length) return;
-    let alive = true;
-    Promise.all(
-      games.map((g) =>
-        base44.functions
-          .invoke("page-status", { kind: "game", name: g.name })
-          .then((r) => (r.data?.blocked ? g.name : null))
-          .catch(() => null)
-      )
-    ).then((names) => alive && setTakenDownGames(new Set(names.filter(Boolean))));
-    return () => {
-      alive = false;
-    };
-  }, [games]);
 
   const loadGames = async () => {
     setGamesLoading(true);
@@ -253,7 +212,7 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                   <h3 className="text-lg font-semibold text-white">Delete Account</h3>
                 </div>
                 <p className="text-sm text-slate-300 mb-4 leading-relaxed">
-                  This permanently deletes your account, your published websites and games, your saved game draft, and the chats and projects saved in this browser. This action cannot be undone.
+                  This permanently deletes your account and all associated data. This action cannot be undone.
                 </p>
                 <label className="text-xs text-slate-400">
                   Type <span className="font-semibold text-red-400">DELETE</span> to confirm
@@ -320,9 +279,6 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                       <div key={g.id} className="rounded-xl bg-slate-800 border border-slate-700/50 p-3">
                         <p className="text-sm font-medium text-slate-100 truncate">{g.title || g.name}</p>
                         <p className="text-[11px] text-slate-500 truncate">{g.name} · {g.plays || 0} plays{g.hidden ? " · hidden" : ""}{g.featured ? " · featured" : ""}</p>
-                        {takenDownGames.has(g.name) && (
-                          <p className="text-[11px] text-red-400">Taken down by an admin for breaking the rules — players see a "removed" message.</p>
-                        )}
                         <div className="flex items-center gap-1.5 mt-2">
                           <button onClick={() => editGame(g)} className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg bg-slate-700 text-slate-200 text-xs hover:bg-slate-600 transition-colors">
                             <Pencil className="w-3.5 h-3.5" /> Edit
@@ -384,43 +340,6 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                   </span>
                   <ArrowLeft className="w-4 h-4 rotate-180 text-slate-500" />
                 </button>
-                <div className="mt-4 mb-4 pt-4 border-t border-slate-700/50">
-                  <p className="text-slate-300 text-sm font-medium">Chat backup</p>
-                  <p className="text-[11px] text-slate-500 mt-0.5 mb-2">
-                    Your chats are saved in this browser only. Download them to keep a copy or move them to another device.
-                  </p>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => {
-                        const n = downloadChats();
-                        setBackupNote(n ? `Downloaded ${n} chat${n === 1 ? "" : "s"}.` : "There are no chats to download yet.");
-                      }}
-                      className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 text-slate-200 text-sm hover:bg-slate-700 transition-colors"
-                    >
-                      <Download className="w-4 h-4" /> Download
-                    </button>
-                    <label className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 text-slate-200 text-sm hover:bg-slate-700 transition-colors cursor-pointer">
-                      <Upload className="w-4 h-4" /> Import
-                      <input
-                        type="file"
-                        accept="application/json,.json"
-                        className="hidden"
-                        onChange={async (e) => {
-                          const f = e.target.files?.[0];
-                          e.target.value = "";
-                          if (!f) return;
-                          try {
-                            const n = await importChats(f);
-                            setBackupNote(n ? `Imported ${n} chat${n === 1 ? "" : "s"}.` : "Those chats are already here.");
-                          } catch (err) {
-                            setBackupNote(err.message);
-                          }
-                        }}
-                      />
-                    </label>
-                  </div>
-                  {backupNote && <p className="text-[11px] text-slate-400 mt-2">{backupNote}</p>}
-                </div>
                   <button
                   onClick={() => setView("delete")}
                   className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-red-900/40 text-red-300 hover:bg-red-900/60 transition-colors border border-red-800/50"
@@ -487,14 +406,6 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                     >
                       <ShieldCheck className="w-4 h-4" />
                       Monitor
-                      {openReports.reports + openReports.messages > 0 && (
-                        <span
-                          className="text-[11px] bg-red-500 text-white rounded-full px-1.5 py-0.5 leading-none"
-                          title={`${openReports.reports} reported site(s), ${openReports.messages} message(s) waiting`}
-                        >
-                          {openReports.reports + openReports.messages}
-                        </span>
-                      )}
                     </button>
                   )}
                   {user?.role === "admin" && (
@@ -536,12 +447,6 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                     <LogOut className="w-4 h-4" />
                     Log out
                   </button>
-                  <p className="pt-1 text-center text-[11px] text-slate-500 space-x-3">
-                    <Link to="/showcase" target="_blank" className="hover:text-slate-300">Gallery</Link>
-                    <Link to="/terms" target="_blank" className="hover:text-slate-300">Terms</Link>
-                    <Link to="/privacy" target="_blank" className="hover:text-slate-300">Privacy</Link>
-                    <Link to="/contact" target="_blank" className="hover:text-slate-300">Contact</Link>
-                  </p>
                 </div>
               </>
             )}

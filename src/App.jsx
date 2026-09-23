@@ -1,4 +1,3 @@
-import { lazy, Suspense } from 'react';
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -8,20 +7,14 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
 import Splash from '@/components/Splash';
-import OfflineBanner from '@/components/OfflineBanner';
 import Home from '@/pages/Home';
-const Chat = lazy(() => import('@/pages/Chat'));
-const Billing = lazy(() => import('@/pages/Billing'));
-const ThankYou = lazy(() => import('@/pages/ThankYou'));
-const Plans = lazy(() => import('@/pages/Plans'));
-const PromoSuccess = lazy(() => import('@/pages/PromoSuccess'));
+import Chat from '@/pages/Chat';
+import Billing from '@/pages/Billing';
+import ThankYou from '@/pages/ThankYou';
+import Plans from '@/pages/Plans';
+import PromoSuccess from '@/pages/PromoSuccess';
 import SiteView from '@/pages/SiteView';
-const Buy = lazy(() => import('@/pages/Buy'));
-const Report = lazy(() => import('@/pages/Report'));
-const Terms = lazy(() => import('@/pages/Legal').then((m) => ({ default: m.Terms })));
-const Privacy = lazy(() => import('@/pages/Legal').then((m) => ({ default: m.Privacy })));
-const Showcase = lazy(() => import('@/pages/Showcase'));
-const Contact = lazy(() => import('@/pages/Contact'));
+import Buy from '@/pages/Buy';
 import { captureReferral } from '@/lib/referral';
 
 // Remember an invite code (?ref=) from whatever page the link opened.
@@ -31,25 +24,14 @@ import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import ProtectedRoute from '@/components/ProtectedRoute';
-const WorkspaceShell = lazy(() => import('@/components/WorkspaceShell').then((m) => ({ default: m.WorkspaceShell })));
-const ChatWorkspace = lazy(() => import('@/components/WorkspaceShell').then((m) => ({ default: m.ChatWorkspace })));
-const CodeWorkspace = lazy(() => import('@/components/WorkspaceShell').then((m) => ({ default: m.CodeWorkspace })));
-const DesignerWorkspace = lazy(() => import('@/components/DesignerWorkspace'));
-const DesignerDashboard = lazy(() => import('@/pages/chat/DesignerDashboard'));
-const PlansView = lazy(() => import('@/pages/chat/Views').then((m) => ({ default: m.PlansView })));
-const MonitorView = lazy(() => import('@/pages/chat/Views').then((m) => ({ default: m.MonitorView })));
-const PromosView = lazy(() => import('@/pages/chat/Views').then((m) => ({ default: m.PromosView })));
-const SettingsView = lazy(() => import('@/pages/chat/Views').then((m) => ({ default: m.SettingsView })));
-const GamesFront = lazy(() => import('@/pages/chat/GamesFront'));
-const GamesDesignerWorkspace = lazy(() => import('@/components/GamesDesignerWorkspace'));
-const GameView = lazy(() => import('@/pages/chat/GameView'));
-const BlackholeBrowser = lazy(() => import('@/pages/chat/BlackholeBrowser'));
-
-const PageSpinner = () => (
-  <div className="fixed inset-0 flex items-center justify-center bg-slate-950">
-    <div className="w-8 h-8 border-4 border-slate-700 border-t-sky-400 rounded-full animate-spin"></div>
-  </div>
-);
+import { WorkspaceShell, ChatWorkspace, CodeWorkspace } from '@/components/WorkspaceShell';
+import DesignerWorkspace from '@/components/DesignerWorkspace';
+import DesignerDashboard from '@/pages/chat/DesignerDashboard';
+import { PlansView, MonitorView, PromosView, SettingsView } from '@/pages/chat/Views';
+import GamesFront from '@/pages/chat/GamesFront';
+import GamesDesignerWorkspace from '@/components/GamesDesignerWorkspace';
+import GameView from '@/pages/chat/GameView';
+import BlackholeBrowser from '@/pages/chat/BlackholeBrowser';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -74,10 +56,8 @@ const AuthenticatedApp = () => {
     }
   }
 
-  // Render the main app. Pages load on demand (see the lazy imports above) so the
-  // first visit doesn't download every page at once.
+  // Render the main app
   return (
-    <Suspense fallback={<PageSpinner />}>
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
@@ -88,11 +68,6 @@ const AuthenticatedApp = () => {
       <Route path="/plans" element={<Plans />} />
       <Route path="/site/:name" element={<SiteView />} />
       <Route path="/buy" element={<Buy />} />
-      <Route path="/report" element={<Report />} />
-      <Route path="/terms" element={<Terms />} />
-      <Route path="/privacy" element={<Privacy />} />
-      <Route path="/showcase" element={<Showcase />} />
-      <Route path="/contact" element={<Contact />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route path="/chat" element={<Chat />}>
           <Route element={<WorkspaceShell />}>
@@ -115,7 +90,6 @@ const AuthenticatedApp = () => {
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
-    </Suspense>
   );
 };
 
@@ -128,7 +102,6 @@ function App() {
         <Router>
           <ScrollToTop />
           <Splash />
-          <OfflineBanner />
           <AuthenticatedApp />
         </Router>
         <Toaster />

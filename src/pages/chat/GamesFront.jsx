@@ -85,7 +85,7 @@ function GameCard({ g, onPlay }) {
         </div>
       </div>
       <p className="mt-1.5 text-xs font-medium text-slate-200 truncate">{g.title || g.name}</p>
-      <p className="text-[10px] text-slate-400">{GENRE_LABEL[g.genre] || "Game"} · {g.plays || 0} plays</p>
+      <p className="text-[10px] text-slate-500">{GENRE_LABEL[g.genre] || "Game"} · {g.plays || 0} plays</p>
     </button>
   );
 }
@@ -179,7 +179,7 @@ export default function GamesFront() {
   const showTop = cat === "home";
   const play = (name) => navigate(`/chat/game/${name}`);
   return (
-    <div className="h-screen flex flex-col bg-slate-950 text-slate-100 overflow-hidden relative">
+    <div className="h-screen flex flex-col bg-[#0b0f1a] text-slate-100 overflow-hidden relative">
       <AnimatePresence>
         {sidebarOpen && (
           <>
@@ -215,7 +215,7 @@ export default function GamesFront() {
       </AnimatePresence>
 
       {/* Top bar */}
-      <header className="h-14 shrink-0 flex items-center gap-3 px-4 border-b border-white/10 bg-slate-950/90 backdrop-blur z-30">
+      <header className="h-14 shrink-0 flex items-center gap-3 px-4 border-b border-white/10 bg-[#0b0f1a]/90 backdrop-blur z-30">
         <button onClick={() => setSidebarOpen((o) => !o)} className="p-2 rounded-lg hover:bg-white/10 transition-colors" title="Menu">
           <Menu className="w-5 h-5" />
         </button>
@@ -259,7 +259,7 @@ export default function GamesFront() {
                 initial={{ opacity: 0, y: -6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
-                className="absolute right-0 mt-2 w-48 bg-slate-900 border border-white/10 rounded-xl shadow-2xl py-1 z-50"
+                className="absolute right-0 mt-2 w-48 bg-[#11172a] border border-white/10 rounded-xl shadow-2xl py-1 z-50"
               >
                 <button
                   onClick={() => { setMenuOpen(false); openProfile("main"); }}
@@ -275,7 +275,7 @@ export default function GamesFront() {
 
       <div className="flex-1 flex overflow-hidden">
         {/* Left rail */}
-        <nav className="w-16 sm:w-52 shrink-0 border-r border-white/10 bg-slate-950 overflow-y-auto sidebar-scroll py-2">
+        <nav className="w-16 sm:w-52 shrink-0 border-r border-white/10 bg-[#0b0f1a] overflow-y-auto sidebar-scroll py-2">
           {RAILS.map((r) => {
             const Icon = r.icon;
             const active = cat === r.id;
@@ -283,9 +283,6 @@ export default function GamesFront() {
               <button
                 key={r.id}
                 onClick={() => setCat(r.id)}
-                title={r.label}
-                aria-label={r.label}
-                aria-pressed={active}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm transition-colors ${active ? "bg-white/10 text-white" : "text-slate-400 hover:text-slate-200 hover:bg-white/5"}`}
               >
                 <Icon className="w-5 h-5 shrink-0" />

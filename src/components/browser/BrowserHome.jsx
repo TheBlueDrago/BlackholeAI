@@ -8,7 +8,7 @@ export default function BrowserHome({ value, onChange, onSubmit, onLucky }) {
       <div className="flex items-center gap-3 mb-8 select-none">
         <BlackholeIcon className="w-14 h-14" />
         <h1 className="text-5xl sm:text-6xl font-bold tracking-tight">
-          <span className="bh-wordmark bg-gradient-to-r from-[#ffffff] via-indigo-200 to-fuchsia-200 bg-clip-text text-transparent">Blackhole</span>
+          <span className="bg-gradient-to-r from-[#ffffff] via-indigo-200 to-fuchsia-200 bg-clip-text text-transparent">Blackhole</span>
         </h1>
       </div>
       <form
@@ -32,7 +32,6 @@ export default function BrowserHome({ value, onChange, onSubmit, onLucky }) {
         </div>
       </form>
       <p className="text-slate-500 text-xs mt-10">Websites live at <span className="text-slate-300 font-mono">name.blackhole</span> · games at <span className="text-slate-300 font-mono">name.io</span>, <span className="text-slate-300 font-mono">name.shooter</span>…</p>
-      <a href="/showcase" target="_blank" rel="noopener noreferrer" className="text-indigo-300 hover:underline text-xs mt-3">Browse the gallery of sites people built →</a>
     </div>
   );
 }

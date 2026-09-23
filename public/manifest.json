@@ -1,17 +1,11 @@
 {
   "name": "Blackhole AI",
   "short_name": "Blackhole AI",
-  "description": "Chat with AI, build websites and games, and publish them in minutes.",
-  "id": "/",
-  "start_url": "/chat",
-  "scope": "/",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#05050a",
   "theme_color": "#05050a",
   "icons": [
-    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
     { "src": "/blackhole.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
   ]
 }

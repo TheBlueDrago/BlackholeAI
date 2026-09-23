@@ -1,7 +1,4 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import { findBuiltInGame } from "@/lib/builtInGames";
-import PageSize from "@/components/designer/PageSize";
-import Markdown from "@/components/chat/Markdown";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Gamepad2, RefreshCw, Plus, X, Crown, Rocket, Paperclip } from "lucide-react";
 import BlackholeIcon from "@/components/BlackholeIcon";
@@ -13,7 +10,6 @@ import ModeToggle from "@/components/chat/ModeToggle";
 import { base44 } from "@/api/base44Client";
 import AiChooser from "@/components/AiChooser";
 import GitHubPush from "@/components/designer/GitHubPush";
-import { loadImages, onImagesChange, addImageFile, expandImages, packImages } from "@/lib/siteImages";
 import SheetSelect from "@/components/SheetSelect";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useLocation } from "react-router-dom";
@@ -122,11 +118,7 @@ function sanitize(s) {
 export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrade, aiExhausted, onSpendAI, aiCodeExhausted, onSpendAICode, galaxy5Exhausted, onSpendGalaxy5, space5Exhausted, onSpendSpace5, remaining, plan, lightMode, onToggleLight }) {
   const location = useLocation();
   const startFresh = !!location.state?.fresh;
-  // "Remix" on a built-in game starts a new project from a copy of it.
-  const remix = startFresh && location.state?.remix ? findBuiltInGame(location.state.remix) : null;
-  const initial = remix
-    ? { gameName: `my-${remix.name}`, title: `${remix.title || remix.name} remix`, genre: remix.genre || "io", messages: [{ role: "ai", content: remix.html }], projectId: genId() }
-    : startFresh
+  const initial = startFresh
     ? { gameName: "my-game", title: "", genre: "io", messages: [{ role: "ai", content: STARTER_GAME_HTML }], projectId: genId() }
     : loadState();
   const projectId = initial.projectId;
@@ -157,40 +149,11 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
   const fileInputRef = useRef(null);
   const scrollRef = useRef(null);
   const reqIdRef = useRef(0);
-  const abortRef = useRef(null);
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
 
-  // Attached images: the chat holds bhimg: placeholders; previewHtml (preview, draft,
-  // publish, GitHub) has the real images. See lib/siteImages.js.
-  const [imagesVersion, setImagesVersion] = useState(0);
-  useEffect(() => {
-    const off = onImagesChange(() => setImagesVersion((v) => v + 1));
-    loadImages();
-    return off;
-  }, []);
   const lastAi = [...messages].reverse().find(isHtmlMsg);
-  const previewHtml = useMemo(
-    () => (lastAi ? expandImages(extractHtml(lastAi.content)) : ""),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [lastAi, imagesVersion]
-  );
-
-  // HTML that arrives with images embedded (a published site/game opened for editing,
-  // a saved draft) gets placeholders instead, so they aren't sent to the AI every time.
-  useEffect(() => {
-    const cur = messagesRef.current;
-    if (!cur.some((m) => isHtmlMsg(m) && m.content.includes(";base64,"))) return;
-    let alive = true;
-    Promise.all(cur.map(async (m) => (isHtmlMsg(m) ? { ...m, content: await packImages(m.content) } : m))).then((next) => {
-      if (!alive || messagesRef.current !== cur) return;
-      messagesRef.current = next;
-      setMessages(next);
-    });
-    return () => {
-      alive = false;
-    };
-  }, [messages]);
+  const previewHtml = lastAi ? extractHtml(lastAi.content) : "";
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => setUser(null));
@@ -293,38 +256,18 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
 
   const stop = () => {
     reqIdRef.current++;
-    abortRef.current?.abort();
-    // The server settles the charge for what was written once it notices; re-read credits then.
-    setTimeout(() => ({ ai: onSpendAI, code: onSpendAICode, opus5: onSpendGalaxy5, fable: onSpendSpace5 })[selectedAi]?.(), 2500);
     setLoading(false);
     setInput("");
   };
 
   const runPrompt = async (text, ai) => {
+    const fileNote = files.length ? `\n[Attached files: ${files.map((f) => f.name).join(", ")}]` : "";
     const prior = messagesRef.current;
     pushMsg({ role: "user", content: text + (files.length ? ` (attached: ${files.map((f) => f.name).join(", ")})` : "") });
     setInput("");
     setLoading(true);
     setLive("");
     const myId = ++reqIdRef.current;
-    // Attached images are processed after the busy state is set, so a quick second
-    // tap on Send is queued instead of starting a parallel request.
-    const images = files.filter((f) => /^image\//.test(f.type));
-    const others = files.filter((f) => !/^image\//.test(f.type));
-    const placed = [];
-    for (const f of images) {
-      try {
-        placed.push(`bhimg:${await addImageFile(f)} (${f.name})`);
-      } catch {
-        others.push(f);
-      }
-    }
-    setFiles([]);
-    const fileNote =
-      (placed.length
-        ? `\n[Attached images. Use them in the game with exactly these src values (they are already hosted — never replace them with other URLs, and keep them in any later version): ${placed.join(", ")}]`
-        : "") + (others.length ? `\n[Attached files: ${others.map((f) => f.name).join(", ")}]` : "");
-    if (reqIdRef.current !== myId) return;
     const spendFor = { ai: onSpendAI, code: onSpendAICode, opus5: onSpendGalaxy5, fable: onSpendSpace5 };
     // Normal Blackhole AI always builds; the code AIs can also just answer a question.
     const intent = ai !== "ai" ? resolveIntent(text, buildMode.mode) : { build: true };
@@ -344,13 +287,9 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
       const model = MODELS[ai] || "automatic";
       const eff = effortFor(effort, text, { build: !discuss });
       // Streamed so the explanation (and build progress) shows while the AI writes.
-      // Aborted by Stop, which also ends the reply on the server (see aiStream.js).
-      abortRef.current?.abort();
-      const abort = new AbortController();
-      abortRef.current = abort;
       const res = await streamChat({ prompt, model, effort: eff }, (soFar) => {
         if (reqIdRef.current === myId) setLive(soFar);
-      }, { signal: abort.signal });
+      });
       if (reqIdRef.current !== myId) return;
       setLive("");
       // The server charged the credits (cutting the reply off if they ran out); show its new status.
@@ -566,14 +505,14 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
               const built = isHtmlMsg(m) || m.built;
               return (
                 <div key={i} className="flex justify-start">
-                  <div className="max-w-[85%] min-w-0 px-3.5 py-2.5 rounded-2xl rounded-bl-sm bg-slate-800 text-slate-100 border border-slate-700/50 text-sm">
+                  <div className="max-w-[85%] px-3.5 py-2.5 rounded-2xl rounded-bl-sm bg-slate-800 text-slate-100 border border-slate-700/50 text-sm">
                     {built ? (
                       <div className="space-y-2">
                         {m.note && <p className="whitespace-pre-wrap">{m.note}</p>}
                         <span className="block text-fuchsia-300 font-medium">✓ Game updated</span>
                       </div>
                     ) : (
-                      <Markdown text={m.content} />
+                      <span className="whitespace-pre-wrap">{m.content}</span>
                     )}
                   </div>
                 </div>
@@ -770,7 +709,6 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
                   {publishing ? (isRepublish ? "Re-publishing…" : "Publishing…") : isRepublish ? "Re-publish" : "Publish"}
                 </button>
               </div>
-              <PageSize html={previewHtml} />
               {publishErr && <p className="text-sm text-red-400 mt-3">{publishErr}</p>}
             </motion.div>
           </motion.div>

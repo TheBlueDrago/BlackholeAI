@@ -3,9 +3,7 @@
 // no à la carte top-ups). This exact static path takes routing precedence over the
 // catch-all proxy at functions/api/[[path]].js, so only this one function call is
 // diverted — every other /api/* call (auth, entities, other functions) still goes
-// to Base44 as normal. Contract: { prompt, model, effort?, images? } -> { content, model, effort }.
-// images: up to MAX_IMAGES [{ mimeType, data (base64) }] the user attached, sent to the
-// model with the prompt (the app shrinks them first).
+// to Base44 as normal. Contract: { prompt, model, effort? } -> { content, model, effort }.
 // See ChatBox.jsx, WebsiteDesigner.jsx, GamesDesigner.jsx, CodePage.jsx for callers.
 //
 // Backed by Google's Gemini API on the FREE tier (no billing) instead of a paid
@@ -25,7 +23,6 @@
 // at what their credits cover.
 import { json } from "../../../../../cloudflare-lib/published.js";
 import { currentUser, entitlement, creditStatus, charge, creditsFor, CHARS_PER_CREDIT, EFFORT_MULT, TIER_OF_MODEL, TIER_NAMES } from "../../../../../cloudflare-lib/credits.js";
-import { allow } from "../../../../../cloudflare-lib/ratelimit.js";
 
 const MODEL_MAP = {
   automatic: "gemini-3.5-flash",
@@ -51,26 +48,6 @@ const EFFORT = {
 };
 const DEFAULT_EFFORT = "medium";
 
-const MAX_IMAGES = 3;
-const MAX_IMAGE_B64 = 2_000_000; // ~1.5 MB per image
-const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-
-// The prompt as Gemini "parts": the text, then any attached images. Returns an error
-// message instead when the images aren't acceptable.
-function promptParts(prompt, images) {
-  if (!Array.isArray(images) || !images.length) return prompt;
-  if (images.length > MAX_IMAGES) return { error: `Attach at most ${MAX_IMAGES} images.` };
-  const parts = [{ text: prompt }];
-  for (const img of images) {
-    const mimeType = String((img && img.mimeType) || "");
-    const data = String((img && img.data) || "");
-    if (!IMAGE_TYPES.includes(mimeType) || !/^[A-Za-z0-9+/=]+$/.test(data)) return { error: "That image type isn't supported." };
-    if (data.length > MAX_IMAGE_B64) return { error: "An attached image is too large." };
-    parts.push({ inline_data: { mime_type: mimeType, data } });
-  }
-  return parts;
-}
-
 // If a model hasn't even started answering within this long, give up on it and try
 // the next one (overloaded models take ~20-40s just to return their 503).
 const HEADERS_TIMEOUT_MS = 20000;
@@ -88,10 +65,8 @@ class GeminiError extends Error {
 // One streamed Gemini call. Streaming lets us tell "overloaded, never started" (fails
 // fast, fall back) apart from "thinking hard" (headers arrive, then text streams in).
 // onDelta receives each new piece of text; once maxChars is reached the call stops
-// there (the user's credits ran out) and returns { text, cut: true }. If shouldStop()
-// turns true (the user pressed Stop and the app hung up), it stops there too and
-// returns { text, stopped: true }, so only what was written is charged.
-async function generate(apiKey, model, prompt, generationConfig, timeoutMs, { onDelta, maxChars = Infinity, shouldStop } = {}) {
+// there (the user's credits ran out) and returns { text, cut: true }.
+async function generate(apiKey, model, prompt, generationConfig, timeoutMs, { onDelta, maxChars = Infinity } = {}) {
   const ctrl = new AbortController();
   const timer = timeoutMs ? setTimeout(() => ctrl.abort(), timeoutMs) : null;
   let res;
@@ -99,7 +74,7 @@ async function generate(apiKey, model, prompt, generationConfig, timeoutMs, { on
     res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse`, {
       method: "POST",
       headers: { "content-type": "application/json", "x-goog-api-key": apiKey },
-      body: JSON.stringify({ contents: [{ parts: typeof prompt === "string" ? [{ text: prompt }] : prompt }], generationConfig }),
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig }),
       signal: ctrl.signal,
     });
   } catch (err) {
@@ -145,12 +120,7 @@ async function generate(apiKey, model, prompt, generationConfig, timeoutMs, { on
     const parts = (chunk.candidates && chunk.candidates[0] && chunk.candidates[0].content && chunk.candidates[0].content.parts) || [];
     for (const p of parts) if (p.text && !p.thought) add(p.text);
   };
-  let stopped = false;
   while (!cut) {
-    if (shouldStop && shouldStop()) {
-      stopped = true;
-      break;
-    }
     const { done, value } = await reader.read();
     if (done) break;
     buf += decoder.decode(value, { stream: true });
@@ -160,13 +130,13 @@ async function generate(apiKey, model, prompt, generationConfig, timeoutMs, { on
       buf = buf.slice(nl + 1);
     }
   }
-  if (cut || stopped) reader.cancel().catch(() => {});
+  if (cut) reader.cancel().catch(() => {});
   else handleLine(buf.trim());
   if (!out && streamError) {
     const code = Number(streamError.code) || 0;
     throw new GeminiError(streamError.message || "Gemini stream error", { status: code, retryable: RETRYABLE.has(code) });
   }
-  return { text: out, cut, stopped };
+  return { text: out, cut };
 }
 
 // Tries the model with the effort's thinking settings; if the model rejects those
@@ -241,17 +211,10 @@ export async function onRequestPost(context) {
     const ent = await entitlement(kv, request, user);
     if (ent.blocked) return json({ error: "Your account can't use the AI right now." }, 403);
 
-    // Internal calls (naming a chat) are quick, tiny and free — but still need a signed-in
-    // user. Since they're free, they're held to the basic model, a short prompt and a
-    // per-user rate, so they can't be used as unlimited free AI (the Gemini free-tier
-    // quota is shared by everyone's chats).
-    const internal = !!body.internal;
-    if (internal) {
-      if (prompt.length > 1500) return json({ error: "Internal prompt too long." }, 400);
-      if (!(await allow(`internal:${user.id}`, 30, 3600))) return json({ error: "Too many requests." }, 429);
-    }
-    const requested = internal ? DEFAULT_MODEL : MODEL_MAP[body.model] || DEFAULT_MODEL;
+    const requested = MODEL_MAP[body.model] || DEFAULT_MODEL;
     const tier = TIER_OF_MODEL[body.model] || "ai";
+    // Internal calls (naming a chat) are quick, tiny and free — but still need a signed-in user.
+    const internal = !!body.internal;
     const effort = internal ? "low" : EFFORT[body.effort] ? body.effort : DEFAULT_EFFORT;
     const mult = EFFORT_MULT[effort];
 
@@ -279,20 +242,15 @@ export async function onRequestPost(context) {
       }
     }
 
-    const input = internal ? prompt : promptParts(prompt, body.images);
-    if (input && input.error) return json({ error: input.error }, 400);
-
-    const chain = internal ? [DEFAULT_MODEL] : [requested, ...MODELS_BY_STRENGTH.filter((m) => m !== requested)].slice(0, MAX_ATTEMPTS);
+    const chain = [requested, ...MODELS_BY_STRENGTH.filter((m) => m !== requested)].slice(0, MAX_ATTEMPTS);
     // The reply stops at what the user's credits cover: whole credits x effort multiplier.
     const maxChars = internal ? Infinity : Math.floor(left / mult) * CHARS_PER_CREDIT;
     const maxTokens = internal ? 1024 : 0;
 
     // Charge for what was produced. A cut reply takes every remaining credit, which
     // pauses the chat until the user has more.
-    const settle = async (text, cut, stopped) => {
+    const settle = async (text, cut) => {
       if (internal) return {};
-      // Stopped by the user: what was written so far is charged (nothing if nothing was).
-      if (stopped && !text) return { stopped: true, charged: 0 };
       const cost = cut ? left : creditsFor(text, effort);
       await charge(kv, ent, tier, cost);
       return { cut, charged: cost, credits: await creditStatus(kv, ent) };
@@ -300,7 +258,7 @@ export async function onRequestPost(context) {
 
     if (!body.stream) {
       try {
-        const r = await runChain(env.GEMINI_API_KEY, chain, input, effort, maxTokens, { maxChars });
+        const r = await runChain(env.GEMINI_API_KEY, chain, prompt, effort, maxTokens, { maxChars });
         return json({ content: r.text, model: r.model, effort, ...(await settle(r.text, r.cut)) });
       } catch (err) {
         // 503 rather than 502: Cloudflare replaces 502 bodies on the custom domain with a
@@ -314,20 +272,12 @@ export async function onRequestPost(context) {
     const { readable, writable } = new TransformStream();
     const writer = writable.getWriter();
     const enc = new TextEncoder();
-    // If the app hangs up (the user pressed Stop), writes start failing: stop generating
-    // and charge only for what was written.
-    let gone = false;
-    const hangUp = () => {
-      gone = true;
-    };
-    writer.closed.catch(hangUp);
-    if (request.signal) request.signal.addEventListener("abort", hangUp);
-    const send = (obj) => writer.write(enc.encode(JSON.stringify(obj) + "\n")).catch(hangUp);
+    const send = (obj) => writer.write(enc.encode(JSON.stringify(obj) + "\n")).catch(() => {});
     context.waitUntil(
       (async () => {
         try {
-          const r = await runChain(env.GEMINI_API_KEY, chain, input, effort, maxTokens, { maxChars, onDelta: (t) => send({ delta: t }), shouldStop: () => gone });
-          await send({ done: true, model: r.model, effort, ...(await settle(r.text, r.cut, r.stopped)) });
+          const r = await runChain(env.GEMINI_API_KEY, chain, prompt, effort, maxTokens, { maxChars, onDelta: (t) => send({ delta: t }) });
+          await send({ done: true, model: r.model, effort, ...(await settle(r.text, r.cut)) });
         } catch (err) {
           await send({ ...failure(err), status: 503 });
         } finally {

@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import Markdown, { CopyButton } from "@/components/chat/Markdown";
-import { Plus, X, Paperclip, RotateCcw } from "lucide-react";
+import { Plus, X, Paperclip } from "lucide-react";
 import BlackholeIcon from "@/components/BlackholeIcon";
 import AiChooser from "@/components/AiChooser";
 import QueueList from "@/components/chat/QueueList";
@@ -12,7 +11,6 @@ import { base44 } from "@/api/base44Client";
 import { OUT_OF_CREDITS_NOTE } from "@/lib/creditCost";
 import { useEffort, effortFor } from "@/lib/effort";
 import { streamChat } from "@/lib/aiStream";
-import { shrinkImage } from "@/lib/siteImages";
 import EffortPicker from "@/components/chat/EffortPicker";
 
 const CODE_SYS = "You are Blackhole Code Assistant. Help with programming. Give clear, correct code with brief explanations.";
@@ -32,7 +30,6 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
   const fileInputRef = useRef(null);
   const scrollRef = useRef(null);
   const reqIdRef = useRef(0);
-  const abortRef = useRef(null);
   const convIdRef = useRef(null);
 
   const messages = conversation?.messages || [];
@@ -44,44 +41,22 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
     if (!convId) convId = createConversation();
     convIdRef.current = convId;
 
+    const fileNote = files.length ? `\n[Attached files: ${files.map((f) => f.name).join(", ")}]` : "";
+    const sys = ai === "code" ? CODE_SYS : ai === "fable" ? FABLE_SYS : "";
+    const intent = ai !== "ai" ? resolveIntent(text, buildMode.mode) : { build: true };
+    const modeNote = ai !== "ai" ? (intent.build ? BUILD_NOTE : ANSWER_NOTE) + "\n\n" : "";
+    const fullPrompt = `${sys ? sys + "\n\n" : ""}${modeNote}${text}${fileNote}`;
     addMessage(convId, { role: "user", content: text + (files.length ? ` (attached: ${files.map((f) => f.name).join(", ")})` : "") });
     setInput("");
     setLoading(true);
     setLive("");
     const myId = ++reqIdRef.current;
-    // Attached images are processed after the busy state is set, so a quick second
-    // tap on Send is queued instead of starting a parallel request.
-    // Up to 3 attached images go to the AI itself (shrunk first); other files by name.
-    const imageFiles = files.filter((f) => /^image\//.test(f.type)).slice(0, 3);
-    const otherFiles = files.filter((f) => !imageFiles.includes(f));
-    const images = [];
-    for (const f of imageFiles) {
-      try {
-        const dataUrl = await shrinkImage(f, 1280);
-        const [, mimeType, data] = dataUrl.match(/^data:([^;]+);base64,(.*)$/) || [];
-        if (data) images.push({ mimeType, data });
-        else otherFiles.push(f);
-      } catch {
-        otherFiles.push(f);
-      }
-    }
-    setFiles([]);
-    const fileNote = otherFiles.length ? `\n[Attached files (names only): ${otherFiles.map((f) => f.name).join(", ")}]` : "";
-    const sys = ai === "code" ? CODE_SYS : ai === "fable" ? FABLE_SYS : "";
-    const intent = ai !== "ai" ? resolveIntent(text, buildMode.mode) : { build: true };
-    const modeNote = ai !== "ai" ? (intent.build ? BUILD_NOTE : ANSWER_NOTE) + "\n\n" : "";
-    const fullPrompt = `${sys ? sys + "\n\n" : ""}${modeNote}${text}${fileNote}`;
-    if (reqIdRef.current !== myId) return;
     try {
       const eff = effortFor(effort, text, { build: ai !== "ai" && intent.build });
       // Streamed so the reply appears as it's written.
-      // Aborted by Stop, which also ends the reply on the server (see aiStream.js).
-      abortRef.current?.abort();
-      const abort = new AbortController();
-      abortRef.current = abort;
-      const res = await streamChat({ prompt: fullPrompt, model: MODELS[ai] || "automatic", effort: eff, ...(images.length ? { images } : {}) }, (soFar) => {
+      const res = await streamChat({ prompt: fullPrompt, model: MODELS[ai] || "automatic", effort: eff }, (soFar) => {
         if (reqIdRef.current === myId) setLive(soFar);
-      }, { signal: abort.signal });
+      });
       if (reqIdRef.current !== myId) return;
       setLive("");
       // The server charged the credits (cutting the reply off if they ran out); show its new status.
@@ -91,7 +66,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
       if (isFirst) {
         try {
           const titleRes = await base44.functions.invoke("chatCompletion", {
-            prompt: `Create a very short title (max 4 words, no quotes, no trailing punctuation) summarizing what this chat is about based on the user's first message: "${text.slice(0, 500)}". Respond with only the title.`,
+            prompt: `Create a very short title (max 4 words, no quotes, no trailing punctuation) summarizing what this chat is about based on the user's first message: "${text}". Respond with only the title.`,
             internal: true,
           });
           const title = (titleRes.data?.content ?? "").trim().slice(0, 50);
@@ -125,16 +100,9 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
 
   const stop = () => {
     reqIdRef.current++;
-    abortRef.current?.abort();
-    // The server settles the charge for what was written once it notices; re-read credits then.
-    setTimeout(() => spend?.[selectedAi]?.(), 2500);
     setLoading(false);
     const convId = conversation?.id;
-    // Keep what was already written (it's charged); with nothing written, drop the question.
-    if (convId && live.trim()) {
-      addMessage(convId, { role: "ai", content: `${live.trimEnd()}\n\n_(stopped)_` });
-      setLive("");
-    } else if (convId && messages.length && messages[messages.length - 1].role === "user") {
+    if (convId && messages.length && messages[messages.length - 1].role === "user") {
       removeMessage?.(convId, messages.length - 1);
     }
     setInput("");
@@ -151,20 +119,6 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
     }
     if (isExhausted) return;
     runPrompt(text, selectedAi);
-  };
-
-  // Ask the last question again: drops the last reply (and the question, which
-  // runPrompt adds back) and sends it with the currently selected AI. Attachments
-  // aren't kept in the chat, so they aren't resent.
-  const retryLast = () => {
-    const convId = conversation?.id;
-    const n = messages.length;
-    if (!convId || loading || n < 2 || messages[n - 1].role !== "ai" || messages[n - 2].role !== "user") return;
-    if (isExhausted) return;
-    const question = messages[n - 2].content.replace(/ \(attached: [^)]*\)$/, "");
-    removeMessage?.(convId, n - 1);
-    removeMessage?.(convId, n - 2);
-    runPrompt(question, selectedAi);
   };
 
   const handleKeyDown = (e) => {
@@ -194,33 +148,13 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
           {messages.map((m, i) => (
             <div key={i} className={`flex items-end gap-2 ${m.role === "user" ? "justify-end" : "justify-start"}`}>
               <div
-                className={`max-w-[80%] min-w-0 px-4 py-3 rounded-2xl text-sm leading-relaxed ${
+                className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
                   m.role === "user"
-                    ? "whitespace-pre-wrap bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-br-sm"
+                    ? "bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-br-sm"
                     : "bg-slate-800 text-slate-100 rounded-bl-sm border border-slate-700/50"
                 }`}
               >
-                {m.role === "user" ? (
-                  m.content
-                ) : (
-                  <>
-                    <Markdown text={m.content} />
-                    <div className="flex justify-end gap-1 mt-1 -mb-1">
-                      {i === messages.length - 1 && !loading && !isExhausted && (
-                        <button
-                          type="button"
-                          onClick={retryLast}
-                          title="Try again (uses credits)"
-                          aria-label="Try again"
-                          className="p-1 rounded-md text-slate-500 hover:text-slate-200"
-                        >
-                          <RotateCcw className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                      <CopyButton getText={() => m.content} label="Copy reply" className="p-1 rounded-md text-slate-500 hover:text-slate-200" />
-                    </div>
-                  </>
-                )}
+                {m.content}
               </div>
               {m.role === "user" && (
                 <div className="keep-color w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-xs font-bold text-white shrink-0">
@@ -232,8 +166,8 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
 
           {loading && live && (
             <div className="flex justify-start">
-              <div className="max-w-[80%] min-w-0 px-4 py-3 rounded-2xl rounded-bl-sm text-sm leading-relaxed bg-slate-800 text-slate-100 border border-slate-700/50">
-                <Markdown text={live} />
+              <div className="max-w-[80%] px-4 py-3 rounded-2xl rounded-bl-sm text-sm leading-relaxed whitespace-pre-wrap bg-slate-800 text-slate-100 border border-slate-700/50">
+                {live}
                 <span className="inline-block w-1.5 h-4 ml-0.5 align-middle bg-indigo-400 animate-pulse" />
               </div>
             </div>

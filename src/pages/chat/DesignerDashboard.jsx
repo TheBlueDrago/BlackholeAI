@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 import {
-  Menu, Globe, Plus, Sparkles, Loader2, Pencil, Trash2, Eye, EyeOff, Crown, ExternalLink, Star,
+  Menu, Globe, Plus, Sparkles, Loader2, Pencil, Trash2, Eye, EyeOff, Crown, ExternalLink,
 } from "lucide-react";
 import { useAppShell } from "@/components/AppShellContext";
 import { base44 } from "@/api/base44Client";
@@ -11,7 +11,6 @@ import ThemeToggle from "@/components/ThemeToggle";
 import AiChooser from "@/components/AiChooser";
 import { siteLimit } from "@/lib/publishLimits";
 import { resetDesignerProject, loadDesignerHtmlIntoProject } from "@/lib/designerStore";
-import { SITE_TEMPLATES } from "@/lib/siteTemplates";
 
 const SUGGESTIONS = [
   "A portfolio site for a photographer",
@@ -71,7 +70,7 @@ function SitePreviewThumb({ html }) {
   );
 }
 
-function SiteCard({ site, onEdit, onToggleHidden, onDelete, inGallery, onToggleGallery, takenDown }) {
+function SiteCard({ site, onEdit, onToggleHidden, onDelete }) {
   const hasPreview = isInlineHtml(site.html);
   return (
     <div className="group relative rounded-2xl bg-slate-900/60 border border-slate-700/50 p-4 hover:border-indigo-500/40 transition-colors">
@@ -86,14 +85,7 @@ function SiteCard({ site, onEdit, onToggleHidden, onDelete, inGallery, onToggleG
               </div>
             </div>
           )}
-          {takenDown ? (
-            <span
-              className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-red-600/90 text-[10px] font-medium text-white"
-              title="An admin took this site down for breaking the rules. Visitors see a 'removed' page."
-            >
-              Taken down
-            </span>
-          ) : site.hidden ? (
+          {site.hidden ? (
             <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-black/60 backdrop-blur text-[10px] font-medium text-slate-300 border border-white/10">
               Hidden
             </span>
@@ -126,17 +118,6 @@ function SiteCard({ site, onEdit, onToggleHidden, onDelete, inGallery, onToggleG
           {site.hidden ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
         </button>
         {!site.hidden && (
-          <button
-            onClick={() => onToggleGallery(site)}
-            title={inGallery ? "Remove from the public gallery" : "Show in the public gallery"}
-            className={`flex items-center justify-center px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
-              inGallery ? "bg-amber-500/20 text-amber-300 hover:bg-amber-500/30" : "bg-slate-800 text-slate-200 hover:bg-slate-700"
-            }`}
-          >
-            <Star className={`w-3.5 h-3.5 ${inGallery ? "fill-current" : ""}`} />
-          </button>
-        )}
-        {!site.hidden && (
           <a
             href={`/chat/browser?q=${site.name}.blackhole`}
             title="View live"
@@ -165,9 +146,6 @@ export default function DesignerDashboard() {
   const [prompt, setPrompt] = useState("");
   const [selectedAi, setSelectedAi] = useState("ai");
   const [err, setErr] = useState("");
-  const [gallery, setGallery] = useState(() => new Set());
-  // Sites an admin took down (see functions/page-status.js), so owners can tell.
-  const [takenDown, setTakenDown] = useState(() => new Set());
   const textareaRef = useRef(null);
 
   const opusAllowed = effPlan === "pro" || effPlan === "team" || effPlan === "secret" || effPlan === "admin";
@@ -189,46 +167,6 @@ export default function DesignerDashboard() {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser?.id]);
-
-  // Which sites are in the public gallery (/showcase); see functions/showcase.js.
-  const showGallery = (list) => setGallery(new Set((list || []).map((x) => x.name)));
-  useEffect(() => {
-    base44.functions.invoke("showcase", { action: "list" }).then((r) => showGallery(r.data?.sites)).catch(() => {});
-  }, []);
-
-  const setInGallery = async (s, on, title) => {
-    const r = await base44.functions.invoke("showcase", { action: "set", name: s.name, on, ...(title ? { title } : {}) });
-    if (r.data?.error) throw new Error(r.data.error);
-    showGallery(r.data?.sites);
-  };
-
-  const toggleGallery = async (s) => {
-    setErr("");
-    try {
-      if (gallery.has(s.name)) return await setInGallery(s, false);
-      const title = window.prompt("Show it in the public gallery as (optional title, up to 60 characters):", "");
-      if (title === null) return; // cancelled
-      await setInGallery(s, true, title.trim().slice(0, 60));
-    } catch (e) {
-      setErr(e?.response?.data?.error || e?.message || "Could not update the gallery");
-    }
-  };
-
-  useEffect(() => {
-    if (!sites.length) return;
-    let alive = true;
-    Promise.all(
-      sites.map((s) =>
-        base44.functions
-          .invoke("page-status", { kind: "site", name: s.name })
-          .then((r) => (r.data?.blocked ? s.name : null))
-          .catch(() => null)
-      )
-    ).then((names) => alive && setTakenDown(new Set(names.filter(Boolean))));
-    return () => {
-      alive = false;
-    };
-  }, [sites]);
 
   const lim = siteLimit(effPlan);
   const atLimit = sites.length >= lim;
@@ -255,16 +193,9 @@ export default function DesignerDashboard() {
     navigate("/chat/designer/build");
   };
 
-  // Opens a ready-made page in the builder; no AI call, so it costs no credits.
-  const openTemplate = (t) => {
-    loadDesignerHtmlIntoProject(`my-${t.id}`, t.html);
-    navigate("/chat/designer/build");
-  };
-
   const toggleHidden = async (s) => {
     try {
       await base44.entities.PublishedSite.update(s.id, { hidden: !s.hidden });
-      if (!s.hidden && gallery.has(s.name)) await setInGallery(s, false).catch(() => {});
       load();
     } catch (e) {
       setErr(e?.message);
@@ -274,7 +205,6 @@ export default function DesignerDashboard() {
   const removeSite = async (s) => {
     if (!window.confirm(`Delete "${s.name}"? This cannot be undone.`)) return;
     try {
-      if (gallery.has(s.name)) await setInGallery(s, false).catch(() => {});
       await base44.entities.PublishedSite.delete(s.id);
       load();
     } catch (e) {
@@ -394,27 +324,6 @@ export default function DesignerDashboard() {
             ))}
           </div>
 
-          {/* Starter templates */}
-          <section className="max-w-2xl mx-auto mt-10">
-            <h2 className="text-sm font-semibold text-slate-300 mb-1">Or start from a template</h2>
-            <p className="text-xs text-slate-500 mb-3">Free to open — change anything by chatting with the AI.</p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {SITE_TEMPLATES.map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => openTemplate(t)}
-                  className="text-left rounded-xl bg-slate-900/60 border border-slate-700/50 p-2 hover:border-indigo-500/50 transition-colors"
-                >
-                  <div className="relative aspect-video rounded-lg overflow-hidden bg-slate-800">
-                    <SitePreviewThumb html={t.html} />
-                  </div>
-                  <p className="text-sm text-white font-medium mt-2 px-1">{t.title}</p>
-                  <p className="text-[11px] text-slate-500 px-1 pb-1">{t.blurb}</p>
-                </button>
-              ))}
-            </div>
-          </section>
-
           {/* Usage */}
           <div className="max-w-2xl mx-auto mt-8 flex items-center justify-between gap-3 px-1">
             <p className="text-xs text-slate-500">
@@ -431,13 +340,7 @@ export default function DesignerDashboard() {
           {/* Your websites */}
           <section className="mt-10">
             <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-sm font-semibold text-slate-300">Your websites</h2>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  Tap <Star className="inline w-3 h-3 -mt-0.5" /> to show a site in the{" "}
-                  <a href="/showcase" target="_blank" rel="noopener noreferrer" className="underline hover:text-slate-300">public gallery</a>.
-                </p>
-              </div>
+              <h2 className="text-sm font-semibold text-slate-300">Your websites</h2>
               <button
                 onClick={() => createSite()}
                 className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors"
@@ -458,16 +361,7 @@ export default function DesignerDashboard() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {sites.map((s) => (
-                  <SiteCard
-                    key={s.id}
-                    site={s}
-                    onEdit={editSite}
-                    onToggleHidden={toggleHidden}
-                    onDelete={removeSite}
-                    inGallery={gallery.has(s.name)}
-                    takenDown={takenDown.has(s.name)}
-                    onToggleGallery={toggleGallery}
-                  />
+                  <SiteCard key={s.id} site={s} onEdit={editSite} onToggleHidden={toggleHidden} onDelete={removeSite} />
                 ))}
               </div>
             )}

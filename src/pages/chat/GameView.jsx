@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, Gamepad2, Flag, Wand2 } from "lucide-react";
-import { loadGame } from "@/lib/loadGame";
+import { ArrowLeft, Loader2, Gamepad2 } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 import { useAppShell } from "@/components/AppShellContext";
 import { findBuiltInGame } from "@/lib/builtInGames";
 import { withPreviewShim, PREVIEW_SANDBOX } from "@/lib/previewShim";
@@ -28,9 +28,10 @@ export default function GameView() {
     let done = false;
     (async () => {
       try {
-        const d = await loadGame(name);
-        if (!d || d.removed) {
-          if (!done) { setNotFound(d?.removed || true); setLoading(false); }
+        const res = await base44.functions.invoke("get-game-html", { name });
+        const d = res.data;
+        if (!d || d.error || !d.html) {
+          if (!done) { setNotFound(true); setLoading(false); }
           return;
         }
         setHtml(d.html);
@@ -46,7 +47,7 @@ export default function GameView() {
   }, [name]);
 
   return (
-    <div className="h-screen flex flex-col bg-slate-950">
+    <div className="h-screen flex flex-col bg-[#0b0f1a]">
       <header className="h-12 shrink-0 flex items-center gap-3 px-4 border-b border-white/10">
         <button
           onClick={() => navigate("/chat/games")}
@@ -60,26 +61,6 @@ export default function GameView() {
           {genre && <span className="text-xs text-slate-400 capitalize shrink-0">· {genre}</span>}
         </div>
         <div className="ml-auto flex items-center gap-2">
-          {findBuiltInGame(name) && (
-            <button
-              onClick={() => navigate("/chat/game-designer", { state: { fresh: true, remix: name } })}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-fuchsia-600/80 text-white text-xs font-medium hover:bg-fuchsia-500 transition-colors"
-              title="Open a copy of this game in the Game Designer and change it by chatting"
-            >
-              <Wand2 className="w-3.5 h-3.5" /> Remix
-            </button>
-          )}
-          {!findBuiltInGame(name) && !notFound && (
-            <a
-              href={`/report?${new URLSearchParams({ kind: "game", name: name || "" })}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 rounded-lg hover:bg-white/10 text-slate-400 hover:text-red-300 transition-colors"
-              title="Report this game"
-            >
-              <Flag className="w-4 h-4" />
-            </a>
-          )}
           <button
             onClick={() => openProfile("main")}
             className="keep-color w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-sm font-bold text-white hover:opacity-90 transition-opacity shrink-0"
@@ -97,7 +78,7 @@ export default function GameView() {
         ) : notFound ? (
           <div className="flex flex-col items-center justify-center h-full text-slate-400">
             <Gamepad2 className="w-10 h-10 mb-2" />
-            <p className="px-6 text-center">{typeof notFound === "string" ? notFound : "Game not found."}</p>
+            <p>Game not found.</p>
           </div>
         ) : (
           <iframe srcDoc={withPreviewShim(html)} title={name} sandbox={PREVIEW_SANDBOX} className="w-full h-full" />

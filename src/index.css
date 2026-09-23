@@ -155,10 +155,7 @@
 .light .text-sky-200 { color: #075985; }
 .light .text-sky-300 { color: #0369a1; }
 .light .text-sky-400 { color: #0284c8; }
-.light .text-amber-100 { color: #78350f; }
 .light .text-amber-200 { color: #92400e; }
-.light .text-emerald-400 { color: #059669; }
-.light .text-red-200 { color: #991b1b; }
 .light .text-amber-300 { color: #b45309; }
 .light .text-amber-400 { color: #d97706; }
 .light .text-rose-300 { color: #be123c; }
@@ -187,6 +184,3 @@
   scrollbar-width: thin;
   scrollbar-color: rgba(100, 116, 139, 0.5) transparent;
 }
-/* Headings drawn as a white-to-pastel gradient (Browser wordmark, Subscriptions, Promo
-   Codes) need darker stops on the light theme's pale background to stay readable. */
-.light .bh-wordmark { background-image: linear-gradient(to right, #1e1b4b, #4338ca, #a21caf); }

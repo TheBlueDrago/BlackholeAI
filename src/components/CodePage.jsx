@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import Markdown, { CopyButton } from "@/components/chat/Markdown";
-import { Terminal, RotateCcw } from "lucide-react";
+import { Terminal } from "lucide-react";
 import { OUT_OF_CREDITS_NOTE } from "@/lib/creditCost";
 import { useEffort, effortFor } from "@/lib/effort";
 import { streamChat } from "@/lib/aiStream";
@@ -22,7 +21,6 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
   const [focused, setFocused] = useState(false);
   const scrollRef = useRef(null);
   const reqIdRef = useRef(0);
-  const abortRef = useRef(null);
 
   const runPrompt = async (text) => {
     setMessages((m) => [...m, { role: "user", content: text }]);
@@ -35,13 +33,9 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
       const modeNote = intent.build ? BUILD_NOTE : ANSWER_NOTE;
       const eff = effortFor(effort, text, { build: intent.build });
       // Streamed so the reply appears as it's written.
-      // Aborted by Stop, which also ends the reply on the server (see aiStream.js).
-      abortRef.current?.abort();
-      const abort = new AbortController();
-      abortRef.current = abort;
       const res = await streamChat({ prompt: `${modeNote}\n\n${text}`, model: "claude_sonnet_4_6", effort: eff }, (soFar) => {
         if (reqIdRef.current === myId) setLive(soFar);
-      }, { signal: abort.signal });
+      });
       if (reqIdRef.current !== myId) return;
       setLive("");
       // The server charged the credits (cutting the reply off if they ran out); show its new status.
@@ -70,16 +64,8 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
 
   const stop = () => {
     reqIdRef.current++;
-    abortRef.current?.abort();
-    // The server settles the charge for what was written once it notices; re-read credits then.
-    setTimeout(() => onSpendAICode?.(), 2500);
     setLoading(false);
     setInput("");
-    // Keep what was already written (it's charged).
-    if (live.trim()) {
-      setMessages((m) => [...m, { role: "ai", content: `${live.trimEnd()}\n\n_(stopped)_` }]);
-      setLive("");
-    }
   };
 
   const send = () => {
@@ -93,15 +79,6 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
     }
     if (aiCodeExhausted) return;
     runPrompt(text);
-  };
-
-  // Ask the last question again, replacing the last reply.
-  const retryLast = () => {
-    const n = messages.length;
-    if (loading || aiCodeExhausted || n < 2 || messages[n - 1].role !== "ai" || messages[n - 2].role !== "user") return;
-    const question = messages[n - 2].content;
-    setMessages((m) => m.slice(0, -2));
-    runPrompt(question);
   };
 
   const handleKeyDown = (e) => {
@@ -131,33 +108,13 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
           {messages.map((m, i) => (
             <div key={i} className={`flex items-end gap-2 ${m.role === "user" ? "justify-end" : "justify-start"}`}>
               <div
-                className={`max-w-[80%] min-w-0 px-4 py-3 rounded-2xl text-sm leading-relaxed ${
+                className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
                   m.role === "user"
-                    ? "whitespace-pre-wrap bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-br-sm"
+                    ? "bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-br-sm"
                     : "bg-slate-800 text-slate-100 rounded-bl-sm border border-emerald-700/40"
                 }`}
               >
-                {m.role === "user" ? (
-                  m.content
-                ) : (
-                  <>
-                    <Markdown text={m.content} />
-                    <div className="flex justify-end gap-1 mt-1 -mb-1">
-                      {i === messages.length - 1 && !loading && !aiCodeExhausted && (
-                        <button
-                          type="button"
-                          onClick={retryLast}
-                          title="Try again (uses credits)"
-                          aria-label="Try again"
-                          className="p-1 rounded-md text-slate-500 hover:text-slate-200"
-                        >
-                          <RotateCcw className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                      <CopyButton getText={() => m.content} label="Copy reply" className="p-1 rounded-md text-slate-500 hover:text-slate-200" />
-                    </div>
-                  </>
-                )}
+                {m.content}
               </div>
               {m.role === "user" && (
                 <div className="keep-color w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-xs font-bold text-white shrink-0">
@@ -169,8 +126,8 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
 
           {loading && live && (
             <div className="flex justify-start">
-              <div className="max-w-[80%] min-w-0 px-4 py-3 rounded-2xl rounded-bl-sm text-sm leading-relaxed bg-slate-800 text-slate-100 border border-emerald-700/40">
-                <Markdown text={live} />
+              <div className="max-w-[80%] px-4 py-3 rounded-2xl rounded-bl-sm text-sm leading-relaxed whitespace-pre-wrap bg-slate-800 text-slate-100 border border-emerald-700/40">
+                {live}
                 <span className="inline-block w-1.5 h-4 ml-0.5 align-middle bg-emerald-400 animate-pulse" />
               </div>
             </div>
