@@ -18,18 +18,21 @@ export function withCheckoutBridge(html, name) {
     `location.href="${APP_ORIGIN}/buy?"+new URLSearchParams({site:${site},product:String(d.productId||""),qty:String(d.quantity||1)});});})();</script>`);
 }
 
-// A small "Report" link in the corner, so visitors can flag phishing, scams or abuse
+// A small "Made with Blackhole AI" badge (brings visitors to the builder — the main way
+// new people discover it) and a "Report" link in the corner, so visitors can flag phishing, scams or abuse
 // (it opens the app's /report page). Only when the page is shown on its own — inside
 // the Blackhole Browser or Games front the app shows its own report button. Put in a
 // closed shadow root on its own tag, so the page's CSS can't restyle or hide it.
 export function withReportLink(html, kind, name) {
   const href = JSON.stringify(`${APP_ORIGIN}/report?${new URLSearchParams({ kind, name })}`).replace(/</g, "\\u003c");
+  const badge = JSON.stringify(`${APP_ORIGIN}/?${new URLSearchParams({ from: `${kind}:${name}` })}`).replace(/</g, "\\u003c");
   return beforeBodyEnd(html,
     `<script data-bh>(function(){if(window.top!==window)return;function add(){var h=document.createElement("bh-report");` +
     `h.style.cssText="all:initial;position:fixed;right:8px;bottom:8px;z-index:2147483647";var r=h.attachShadow({mode:"closed"});` +
-    `r.innerHTML='<a target="_blank" rel="noopener" style="font:12px system-ui,sans-serif;color:#cbd5e1;background:rgba(15,23,42,.8);` +
-    `padding:4px 9px;border-radius:999px;text-decoration:none;border:1px solid rgba(148,163,184,.35)">\u2691 Report</a>';` +
-    `r.querySelector("a").href=${href};document.documentElement.appendChild(h);}` +
+    `var st='font:12px system-ui,sans-serif;color:#cbd5e1;background:rgba(15,23,42,.8);padding:4px 9px;border-radius:999px;` +
+    `text-decoration:none;border:1px solid rgba(148,163,184,.35);margin-left:6px';` +
+    `r.innerHTML='<a target="_blank" rel="noopener" style="'+st+'">\u2728 Made with Blackhole AI</a><a target="_blank" rel="noopener" style="'+st+'">\u2691 Report</a>';` +
+    `var a=r.querySelectorAll("a");a[0].href=${badge};a[1].href=${href};document.documentElement.appendChild(h);}` +
     `if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",add);else add();})();</script>`);
 }
 
