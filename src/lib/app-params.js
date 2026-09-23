@@ -34,17 +34,23 @@ const getAppParamValue = (paramName, { defaultValue = undefined, removeFromUrl =
 	return null;
 }
 
+// Which Base44 app and server the site talks to is fixed at build time (Cloudflare env).
+// Links used to be able to change it (?app_id=… or ?app_base_url=… was read from the address
+// and remembered), which could send a visitor's login to another server later.
+const builtIn = (paramName, value) => value || getAppParamValue(paramName);
+
 const getAppParams = () => {
-	if (getAppParamValue("clear_access_token") === 'true') {
+	// Only acts on the page load it's in: remembering it logged the browser out on every visit.
+	if (!isNode && new URLSearchParams(window.location.search).get("clear_access_token") === 'true') {
 		storage.removeItem('base44_access_token');
 		storage.removeItem('token');
 	}
 	return {
-		appId: getAppParamValue("app_id", { defaultValue: import.meta.env.VITE_BASE44_APP_ID }),
+		appId: builtIn("app_id", import.meta.env.VITE_BASE44_APP_ID),
 		token: getAppParamValue("access_token", { removeFromUrl: true }),
 		fromUrl: getAppParamValue("from_url", { defaultValue: window.location.href }),
-		functionsVersion: getAppParamValue("functions_version", { defaultValue: import.meta.env.VITE_BASE44_FUNCTIONS_VERSION }),
-		appBaseUrl: getAppParamValue("app_base_url", { defaultValue: import.meta.env.VITE_BASE44_APP_BASE_URL }),
+		functionsVersion: builtIn("functions_version", import.meta.env.VITE_BASE44_FUNCTIONS_VERSION),
+		appBaseUrl: builtIn("app_base_url", import.meta.env.VITE_BASE44_APP_BASE_URL),
 	}
 }
 
