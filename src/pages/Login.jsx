@@ -149,6 +149,10 @@ export default function Login() {
             Create one
           </Link>
         </p>
+        <p className="text-center text-slate-500 text-xs mt-3">
+          <Link to="/terms" className="hover:underline">Terms</Link> ·{" "}
+          <Link to="/privacy" className="hover:underline">Privacy</Link>
+        </p>
       </div>
     </div>
   );

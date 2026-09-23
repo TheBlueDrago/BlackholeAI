@@ -65,7 +65,7 @@ export default function Report() {
               <h1 className="text-xl font-semibold text-white">Report a {kind}</h1>
             </div>
             {params.get("name") ? (
-              <p className="text-sm text-slate-400">You're reporting <span className="text-slate-200 break-all">{address}</span>.</p>
+              <p className="text-sm text-slate-400">You're reporting <span className="text-slate-200 [overflow-wrap:anywhere]">{address}</span>.</p>
             ) : (
               <label className="block text-sm">
                 <span className="text-slate-400">Site name (the part before .blackhole-ai-tech.com)</span>
@@ -102,7 +102,10 @@ export default function Report() {
             >
               {busy && <Loader2 className="w-4 h-4 animate-spin" />} Send report
             </button>
-            <p className="text-[11px] text-slate-500 text-center">Sites on Blackhole AI are made by its users, not by Blackhole AI.</p>
+            <p className="text-[11px] text-slate-500 text-center">
+              Sites on Blackhole AI are made by its users, not by Blackhole AI. See the{" "}
+              <a href="/terms" className="underline">rules</a>.
+            </p>
           </form>
         )}
       </div>

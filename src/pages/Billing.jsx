@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Loader2, ShieldCheck, Users, Lock } from "lucide-react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 
 export default function Billing() {
@@ -126,7 +126,11 @@ export default function Billing() {
         >
           {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : plan.button}
         </button>
-        <p className="mt-3 text-center text-xs text-slate-500">Secure checkout via Base44 Payments</p>
+        <p className="mt-3 text-center text-xs text-slate-500">
+          Secure checkout via Base44 Payments ·{" "}
+          <Link to="/terms" className="underline hover:text-slate-300">Terms</Link> ·{" "}
+          <Link to="/privacy" className="underline hover:text-slate-300">Privacy</Link>
+        </p>
       </div>
     </motion.div>
   );
