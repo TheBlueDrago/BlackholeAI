@@ -5,6 +5,7 @@ import { base44 } from "@/api/base44Client";
 import UserCard from "@/components/monitor/UserCard";
 import UserDetail from "@/components/monitor/UserDetail";
 import RevenueAnalytics from "@/components/monitor/RevenueAnalytics";
+import ReportedSites from "@/components/monitor/ReportedSites";
 
 export default function Monitor({ onBack }) {
   const [users, setUsers] = useState([]);
@@ -94,6 +95,7 @@ export default function Monitor({ onBack }) {
         </div>
       )}
 
+      {!loading && !q && <ReportedSites />}
       {!loading && !q && <RevenueAnalytics />}
 
       {detailUser && <UserDetail user={detailUser} onClose={() => setDetailUser(null)} />}

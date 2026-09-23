@@ -8,6 +8,8 @@
 // Base44 entity's `html` field holds a short URL to /published/<kind>/<name>.
 // Base44's get-site-html/get-game-html already fetch `html` when it's a URL, so
 // every reader (designer, browser, games front, subdomain Worker) keeps working.
+import { findCredentialForm } from "./phishing.js";
+
 export const BACKEND = "https://blackhole-ai.base44.app";
 export const APP_ID = "6a8b5eb7787b8a4d6a18f662";
 // The pages.dev origin, not blackhole-ai-tech.com: that zone's bot protection answers
@@ -77,6 +79,21 @@ export async function publish(context, kind, { name, html, extra }) {
     if (!name || !html) return json({ error: "name and html required" }, 400);
     if (new TextEncoder().encode(html).length > MAX_BYTES) {
       return json({ error: `${label} is too large (over 5 MB). Make it smaller.` }, 413);
+    }
+
+    const phishing = findCredentialForm(html);
+    if (phishing) {
+      return json(
+        {
+          error: `This ${label.toLowerCase()} has ${phishing}. Pages here can't send passwords or card numbers to other websites — remove that form (use Buy Now buttons for payments).`,
+        },
+        422
+      );
+    }
+
+    // Taken down by an admin (see reports.js): only an admin can put it back.
+    if (user.role !== "admin" && (await env.PUBLISHED_HTML.get(`blocked:${kvKey(kind, name)}`)) != null) {
+      return json({ error: `This ${label.toLowerCase()} was removed for breaking the rules and can't be published again.` }, 403);
     }
 
     const rows = await findByName(request, kind, name);

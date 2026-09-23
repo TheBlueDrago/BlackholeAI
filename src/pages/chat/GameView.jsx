@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, Gamepad2 } from "lucide-react";
+import { ArrowLeft, Loader2, Gamepad2, Flag } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAppShell } from "@/components/AppShellContext";
 import { findBuiltInGame } from "@/lib/builtInGames";
@@ -61,6 +61,17 @@ export default function GameView() {
           {genre && <span className="text-xs text-slate-400 capitalize shrink-0">· {genre}</span>}
         </div>
         <div className="ml-auto flex items-center gap-2">
+          {!findBuiltInGame(name) && !notFound && (
+            <a
+              href={`/report?${new URLSearchParams({ kind: "game", name: name || "" })}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 rounded-lg hover:bg-white/10 text-slate-400 hover:text-red-300 transition-colors"
+              title="Report this game"
+            >
+              <Flag className="w-4 h-4" />
+            </a>
+          )}
           <button
             onClick={() => openProfile("main")}
             className="keep-color w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-sm font-bold text-white hover:opacity-90 transition-opacity shrink-0"

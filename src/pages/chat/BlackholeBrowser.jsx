@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, ArrowLeft, Home, RefreshCw, Lock, Search, Loader2 } from "lucide-react";
+import { Menu, ArrowLeft, Home, RefreshCw, Lock, Search, Loader2, Flag } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { useAppShell } from "@/components/AppShellContext";
 import { base44 } from "@/api/base44Client";
@@ -12,7 +12,7 @@ import BrowserGameFrame from "@/components/browser/BrowserGameFrame";
 import BrowserSiteFrame from "@/components/browser/BrowserSiteFrame";
 import BrowserWebFrame from "@/components/browser/BrowserWebFrame";
 import { domainOf, gameDomainOf, cleanAddress, resolveAddress } from "@/lib/blackholeDomain";
-import { builtInGameEntities } from "@/lib/builtInGames";
+import { builtInGameEntities, findBuiltInGame } from "@/lib/builtInGames";
 import { useWebSearch } from "@/hooks/useWebSearch";
 import useSiteCheckout from "@/hooks/useSiteCheckout";
 
@@ -130,6 +130,17 @@ export default function BlackholeBrowser() {
         <button onClick={goHome} className="hidden sm:inline-flex p-2 rounded-lg hover:bg-white/10 text-slate-300 transition-colors" title="Home">
           <Home className="w-4 h-4" />
         </button>
+        {(mode === "site" || (mode === "game" && !findBuiltInGame(hit.item.name))) && (
+          <a
+            href={`/report?${new URLSearchParams({ kind: mode, name: hit.item.name })}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2 rounded-lg hover:bg-white/10 text-slate-400 hover:text-red-300 transition-colors"
+            title={`Report this ${mode}`}
+          >
+            <Flag className="w-4 h-4" />
+          </a>
+        )}
         {/* min-w-0 lets the address bar shrink on phones instead of pushing the buttons off-screen. */}
         <form onSubmit={(e) => { e.preventDefault(); go(); }} className="flex-1 min-w-0 max-w-2xl mx-auto">
           <div className="flex items-center gap-2 bg-white/5 border border-white/10 focus-within:border-white/30 rounded-full px-3 h-9 transition-colors">
