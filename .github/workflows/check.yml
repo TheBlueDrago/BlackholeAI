@@ -1,0 +1,22 @@
+# Lint, build and the offline server tests on every push and pull request.
+# Cloudflare Pages deploys main on its own; this only reports problems.
+name: Check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx eslint . --quiet
+      - run: npm run build
+      - run: npm test
