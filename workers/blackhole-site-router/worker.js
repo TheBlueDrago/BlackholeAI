@@ -5,9 +5,12 @@
 // versioned and can be restored. Deploy changes with `npx wrangler deploy` from this
 // folder (see wrangler.toml), or paste into the dashboard editor.
 //
-// It asks the app's get-site-html function for the page. For sites published since
-// pages moved to Cloudflare KV, that returns the HTML served by
-// functions/published/[kind]/[name].js (including the Buy Now checkout bridge).
+// It asks the app's get-site-html function for the page. That path on
+// blackhole-ai-tech.com is the Cloudflare Pages function
+// functions/api/apps/<appId>/functions/get-site-html.js (not Base44's), which applies
+// admin take-downs and the phishing-form check to every site and adds the Buy Now
+// checkout bridge, the Report link and link-preview tags. So this Worker doesn't need
+// changing when those rules change.
 
 const APP_ID = "6a8b5eb7787b8a4d6a18f662";
 const ROOT = "blackhole-ai-tech.com";
