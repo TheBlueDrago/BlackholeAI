@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { MessageSquare, Globe, Gamepad2, ArrowRight, Sparkles } from "lucide-react";
+import { MessageSquare, Globe, Gamepad2, ArrowRight, Sparkles, Play } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import BlackholeIcon from "@/components/BlackholeIcon";
 import SiteThumb from "@/components/SiteThumb";
@@ -13,6 +13,13 @@ const FEATURES = [
   { icon: MessageSquare, color: "text-indigo-300", title: "Chat with AI", text: "Ask questions, get homework help, brainstorm ideas or fix your code." },
   { icon: Globe, color: "text-sky-300", title: "Build a website", text: "Describe it in a sentence. Publish it at yourname.blackhole-ai-tech.com." },
   { icon: Gamepad2, color: "text-fuchsia-300", title: "Make a game", text: "Start from a playable game, change it by chatting, and share it with friends." },
+];
+
+// The games shipped with the app (src/lib/builtInGames.js), playable without an account.
+// Listed by name only so their code isn't loaded with this page.
+const GAMES = [
+  { name: "pulse", title: "Pulse Jump", text: "Jump and fly through 7 neon levels.", color: "from-indigo-500 to-fuchsia-500" },
+  { name: "veck", title: "Veck", text: "Fight waves of bots in a zero-gravity arena.", color: "from-fuchsia-500 to-rose-500" },
 ];
 
 const STEPS = [
@@ -106,6 +113,29 @@ export default function Landing() {
               <p className="mt-1 text-sm text-slate-400">{text}</p>
             </div>
           ))}
+        </section>
+
+        <section className="mt-14 sm:mt-20">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white">Play one now</h2>
+          <p className="mt-1 text-slate-400 text-sm">Games made with Blackhole AI. No account needed.</p>
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {GAMES.map((g) => (
+              <Link
+                key={g.name}
+                to={`/play/${g.name}`}
+                className="group flex items-center gap-4 rounded-2xl bg-slate-900/60 border border-slate-700/50 p-4 hover:border-fuchsia-500/50 transition-colors"
+              >
+                <span className={`shrink-0 w-14 h-14 rounded-xl bg-gradient-to-br ${g.color} flex items-center justify-center`}>
+                  <Gamepad2 className="w-7 h-7 text-white" />
+                </span>
+                <span className="flex-1 min-w-0">
+                  <span className="block font-semibold text-white">{g.title}</span>
+                  <span className="block text-sm text-slate-400">{g.text}</span>
+                </span>
+                <Play className="w-5 h-5 text-slate-500 group-hover:text-white shrink-0" />
+              </Link>
+            ))}
+          </div>
         </section>
 
         <section className="mt-14 sm:mt-20">
