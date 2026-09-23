@@ -26,6 +26,7 @@ import EffortPicker from "@/components/chat/EffortPicker";
 import { EXPLAIN_NOTE, splitBuildReply, editReplyNote, introBeforeCode } from "@/lib/buildReply";
 import { syncSiteProducts } from "@/lib/siteProducts";
 import SaveStatus from "@/components/designer/SaveStatus";
+import ShareLink from "@/components/designer/ShareLink";
 import { EDIT_NOTE, hasEditBlocks, applyEdits } from "@/lib/htmlEdits";
 import { DESIGNER_STORE_KEY } from "@/lib/designerStore";
 import { saveBuilds, loadBuilds } from "@/lib/buildHistory";
@@ -1017,6 +1018,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
                 View {publishUrl.replace(/^https:\/\//, "")}
               </a>
             )}
+            {publishUrl && <ShareLink url={publishUrl} title={publishUrl.replace(/^https:\/\//, "")} />}
           </motion.div>
         )}
       </AnimatePresence>

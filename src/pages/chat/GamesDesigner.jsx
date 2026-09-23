@@ -3,6 +3,7 @@ import { saveBuilds, loadBuilds, trimForStorage } from "@/lib/buildHistory";
 import { RotateCcw } from "lucide-react";
 import { findBuiltInGame } from "@/lib/builtInGames";
 import PageSize from "@/components/designer/PageSize";
+import ShareLink from "@/components/designer/ShareLink";
 import Markdown from "@/components/chat/Markdown";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Gamepad2, RefreshCw, Plus, X, Crown, Rocket, Paperclip } from "lucide-react";
@@ -497,7 +498,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
       setShowPublish(false);
       setPublished(true);
       notifyGamesChanged();
-      setTimeout(() => setPublished(false), 2500);
+      setTimeout(() => setPublished(false), 8000);
     } catch (e) {
       setPublishErr(e?.response?.data?.error || e?.message || "Could not publish.");
     } finally {
@@ -833,6 +834,12 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
             className="fixed top-20 right-6 z-50 bg-emerald-500 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 text-sm font-medium"
           >
             <Rocket className="w-4 h-4" /> {isRepublish ? "Game updated!" : "Game published!"}
+            {publishUrl && (
+              <a href={publishUrl} target="_blank" rel="noopener noreferrer" className="underline ml-1">
+                Play
+              </a>
+            )}
+            {publishUrl && <ShareLink url={publishUrl} title={(title || "").trim() || "my game"} />}
           </motion.div>
         )}
       </AnimatePresence>
