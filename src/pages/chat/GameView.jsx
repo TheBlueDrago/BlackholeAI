@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader2, Gamepad2, Flag } from "lucide-react";
-import { base44 } from "@/api/base44Client";
+import { loadGame } from "@/lib/loadGame";
 import { useAppShell } from "@/components/AppShellContext";
 import { findBuiltInGame } from "@/lib/builtInGames";
 import { withPreviewShim, PREVIEW_SANDBOX } from "@/lib/previewShim";
@@ -28,10 +28,9 @@ export default function GameView() {
     let done = false;
     (async () => {
       try {
-        const res = await base44.functions.invoke("get-game-html", { name });
-        const d = res.data;
-        if (!d || d.error || !d.html) {
-          if (!done) { setNotFound(true); setLoading(false); }
+        const d = await loadGame(name);
+        if (!d || d.removed) {
+          if (!done) { setNotFound(d?.removed || true); setLoading(false); }
           return;
         }
         setHtml(d.html);
@@ -89,7 +88,7 @@ export default function GameView() {
         ) : notFound ? (
           <div className="flex flex-col items-center justify-center h-full text-slate-400">
             <Gamepad2 className="w-10 h-10 mb-2" />
-            <p>Game not found.</p>
+            <p className="px-6 text-center">{typeof notFound === "string" ? notFound : "Game not found."}</p>
           </div>
         ) : (
           <iframe srcDoc={withPreviewShim(html)} title={name} sandbox={PREVIEW_SANDBOX} className="w-full h-full" />

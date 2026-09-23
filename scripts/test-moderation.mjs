@@ -226,3 +226,13 @@ assert(tagged.includes('og:title" content="Tom &amp; Co &quot;Bakery&quot;"') &&
 assert(stripInjected(tagged) === ogPage, "added tags are stripped again before saving");
 const own = '<html><head><meta property="og:title" content="Mine"><title>x</title></head></html>';
 assert(withShareTags(own) === own, "pages with their own og:title are left alone");
+
+// ---- page-status ----
+const ps = await import(F + "page-status.js");
+store.set("blocked:game:zap", "x");
+[s, b] = await j(ps.onRequestPost({ request: req({ kind: "game", name: "zap" }), env }));
+assert(b.blocked === true, "page-status: blocked game");
+[s, b] = await j(ps.onRequestPost({ request: req({ kind: "game", name: "fine" }), env }));
+assert(b.blocked === false, "page-status: normal game");
+[s, b] = await j(ps.onRequestPost({ request: req({ kind: "nope", name: "x" }), env }));
+assert(s === 400, "page-status: bad kind");
