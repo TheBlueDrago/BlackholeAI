@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Download, Upload, LogOut, Mail, Shield, KeyRound, ArrowLeft, Loader2, Crown, Settings, Users, Lock, ShieldCheck, Ticket, Trash2, Gamepad2, Pencil, Eye, EyeOff, Globe, Gift } from "lucide-react";
+import { Download, Upload, LogOut, Mail, Shield, KeyRound, ArrowLeft, Loader2, Crown, Settings, Users, Lock, ShieldCheck, Ticket, Trash2, Gamepad2, Pencil, Eye, EyeOff, Globe, Gift, Smartphone } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import TeamMembership from "@/components/TeamMembership";
 import PublishedSites from "@/components/profile/PublishedSites";
 import ReferFriends from "@/components/profile/ReferFriends";
 import { notifyGamesChanged } from "@/lib/gameEvents";
 import { downloadChats, importChats } from "@/lib/chatBackup";
+import { useInstallApp } from "@/lib/installPrompt";
 
 export default function Profile({ open, onClose, initialView = "main", onMonitor, onPromos }) {
   const [user, setUser] = useState(null);
@@ -29,6 +30,8 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
   const [delBusy, setDelBusy] = useState(false);
   const [delError, setDelError] = useState("");
   const [backupNote, setBackupNote] = useState("");
+  const installApp = useInstallApp();
+  const [iosHelp, setIosHelp] = useState(false);
 
   // Admins: reported sites and contact messages waiting (badge on the Monitor button).
   const [openReports, setOpenReports] = useState({ reports: 0, messages: 0 });
@@ -514,6 +517,20 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                     <Gift className="w-4 h-4" />
                     Refer friends · get free credits
                   </button>
+                  {(installApp.canPrompt || installApp.ios) && (
+                    <button
+                      onClick={() => (installApp.canPrompt ? installApp.install() : setIosHelp((v) => !v))}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-800 text-slate-200 font-medium hover:bg-slate-700 transition-colors"
+                    >
+                      <Smartphone className="w-4 h-4" />
+                      Install app
+                    </button>
+                  )}
+                  {iosHelp && installApp.ios && (
+                    <p className="text-xs text-slate-400 text-center px-2">
+                      In Safari, tap the Share button, then <span className="text-slate-200">Add to Home Screen</span>.
+                    </p>
+                  )}
                   <button
                     onClick={startReset}
                     disabled={pwBusy || !user}
