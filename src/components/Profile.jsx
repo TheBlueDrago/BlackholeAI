@@ -102,6 +102,24 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
     }
   };
 
+  // Games an admin took down (functions/page-status.js), so owners can tell.
+  const [takenDownGames, setTakenDownGames] = useState(() => new Set());
+  useEffect(() => {
+    if (!games.length) return;
+    let alive = true;
+    Promise.all(
+      games.map((g) =>
+        base44.functions
+          .invoke("page-status", { kind: "game", name: g.name })
+          .then((r) => (r.data?.blocked ? g.name : null))
+          .catch(() => null)
+      )
+    ).then((names) => alive && setTakenDownGames(new Set(names.filter(Boolean))));
+    return () => {
+      alive = false;
+    };
+  }, [games]);
+
   const loadGames = async () => {
     setGamesLoading(true);
     setGamesErr("");
@@ -302,6 +320,9 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                       <div key={g.id} className="rounded-xl bg-slate-800 border border-slate-700/50 p-3">
                         <p className="text-sm font-medium text-slate-100 truncate">{g.title || g.name}</p>
                         <p className="text-[11px] text-slate-500 truncate">{g.name} · {g.plays || 0} plays{g.hidden ? " · hidden" : ""}{g.featured ? " · featured" : ""}</p>
+                        {takenDownGames.has(g.name) && (
+                          <p className="text-[11px] text-red-400">Taken down by an admin for breaking the rules — players see a "removed" message.</p>
+                        )}
                         <div className="flex items-center gap-1.5 mt-2">
                           <button onClick={() => editGame(g)} className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg bg-slate-700 text-slate-200 text-xs hover:bg-slate-600 transition-colors">
                             <Pencil className="w-3.5 h-3.5" /> Edit
