@@ -42,11 +42,25 @@ export default async function (req) {
       return Response.json({ error: 'Invalid quantity' }, { status: 400 });
     }
 
-    // Price comes from the creator's stored product — never from the buyer's request.
+    // Only the site's owner can sell on it. Product ids are visible in the page and anyone can
+    // save a SiteProduct row, so a row from anyone else for this site name is ignored — otherwise
+    // a stranger could set the price, or have the payout recorded to their own account.
+    const sites = await base44.asServiceRole.entities.PublishedSite.filter({ name: siteName });
+    const site = sites && sites[0];
+    if (!site || site.hidden || !site.created_by_id) {
+      return Response.json({ error: 'This site is not selling anything right now' }, { status: 400 });
+    }
+    // Price comes from the owner's stored product — never from the buyer's request.
     const rows = await base44.asServiceRole.entities.SiteProduct.filter({ siteName, productId });
-    const product = rows && rows[0];
+    const product = (rows || []).find((p) => p.created_by_id === site.created_by_id);
     if (!product) {
       return Response.json({ error: 'Unknown product' }, { status: 400 });
+    }
+    // Payouts go to the owner's account email, not the email typed on the product row.
+    const owner = await base44.asServiceRole.entities.User.get(site.created_by_id).catch(() => null);
+    const creatorEmail = String(owner?.email || '');
+    if (!creatorEmail) {
+      return Response.json({ error: 'This site is not selling anything right now' }, { status: 400 });
     }
     const currency = product.currency || 'USD';
     const total = parseFloat(String(product.price)) * quantity;
@@ -92,8 +106,8 @@ export default async function (req) {
       checkoutSessionId,
       status: 'pending',
       siteName,
-      creatorId: product.created_by_id || '',
-      creatorEmail: product.creatorEmail || '',
+      creatorId: site.created_by_id,
+      creatorEmail,
       productId,
       productName: product.name || productId,
       quantity,

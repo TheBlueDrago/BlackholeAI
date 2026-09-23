@@ -1,0 +1,10 @@
+# Cloudflare Pages response headers for the app's own files (published pages set their own
+# in cloudflare-lib/pageserve.js).
+# - Other websites can't show the app inside a frame (stops click-jacking tricks such as a
+#   hidden "Buy" or "Delete" button under a fake page).
+# - Browsers only ever use HTTPS for the app after the first visit.
+# - No plugins (<object>/<embed>), and no <base> tag pointing links somewhere else.
+/*
+  X-Frame-Options: SAMEORIGIN
+  Strict-Transport-Security: max-age=31536000
+  Content-Security-Policy: frame-ancestors 'self'; object-src 'none'; base-uri 'self'
