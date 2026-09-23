@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import Markdown, { CopyButton } from "@/components/chat/Markdown";
-import { Plus, X, Paperclip } from "lucide-react";
+import { Plus, X, Paperclip, RotateCcw } from "lucide-react";
 import BlackholeIcon from "@/components/BlackholeIcon";
 import AiChooser from "@/components/AiChooser";
 import QueueList from "@/components/chat/QueueList";
@@ -141,6 +141,20 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
     runPrompt(text, selectedAi);
   };
 
+  // Ask the last question again: drops the last reply (and the question, which
+  // runPrompt adds back) and sends it with the currently selected AI. Attachments
+  // aren't kept in the chat, so they aren't resent.
+  const retryLast = () => {
+    const convId = conversation?.id;
+    const n = messages.length;
+    if (!convId || loading || n < 2 || messages[n - 1].role !== "ai" || messages[n - 2].role !== "user") return;
+    if (isExhausted) return;
+    const question = messages[n - 2].content.replace(/ \(attached: [^)]*\)$/, "");
+    removeMessage?.(convId, n - 1);
+    removeMessage?.(convId, n - 2);
+    runPrompt(question, selectedAi);
+  };
+
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -179,7 +193,18 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
                 ) : (
                   <>
                     <Markdown text={m.content} />
-                    <div className="flex justify-end mt-1 -mb-1">
+                    <div className="flex justify-end gap-1 mt-1 -mb-1">
+                      {i === messages.length - 1 && !loading && !isExhausted && (
+                        <button
+                          type="button"
+                          onClick={retryLast}
+                          title="Try again (uses credits)"
+                          aria-label="Try again"
+                          className="p-1 rounded-md text-slate-500 hover:text-slate-200"
+                        >
+                          <RotateCcw className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                       <CopyButton getText={() => m.content} label="Copy reply" className="p-1 rounded-md text-slate-500 hover:text-slate-200" />
                     </div>
                   </>
