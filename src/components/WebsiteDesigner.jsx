@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, Globe, Search, RefreshCw, Plus, X, Crown, Rocket, Paperclip } from "lucide-react";
+import { Loader2, Globe, Search, RefreshCw, Plus, X, Crown, Rocket, Paperclip, RotateCcw } from "lucide-react";
 import BlackholeIcon from "@/components/BlackholeIcon";
 import QueueList from "@/components/chat/QueueList";
 import SendOrStopButton from "@/components/chat/SendOrStopButton";
@@ -26,6 +26,7 @@ import { syncSiteProducts } from "@/lib/siteProducts";
 import SaveStatus from "@/components/designer/SaveStatus";
 import { EDIT_NOTE, hasEditBlocks, applyEdits } from "@/lib/htmlEdits";
 import { DESIGNER_STORE_KEY } from "@/lib/designerStore";
+import { saveBuilds, loadBuilds } from "@/lib/buildHistory";
 
 const STORE_KEY = DESIGNER_STORE_KEY;
 const TAKEN_KEY = "infinity-ai-taken-sites";
@@ -251,6 +252,49 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
       save();
     };
   }, [siteName, messages, members, projectId]);
+
+  // Earlier builds live in IndexedDB (see lib/buildHistory.js). After a reload, put
+  // their HTML back into the chat so each one can be restored; skipped if the stored
+  // history doesn't line up with this chat.
+  const buildsLoadedRef = useRef(false);
+  useEffect(() => {
+    let alive = true;
+    buildsLoadedRef.current = false;
+    loadBuilds(projectId)
+      .catch(() => null)
+      .then((h) => {
+        if (!alive) return;
+        buildsLoadedRef.current = true;
+        if (!h) return;
+        const cur = messagesRef.current;
+        if (cur.filter((m) => isHtmlMsg(m) || m.built).length !== h.total) return;
+        let k = 0;
+        const next = cur.map((m) => {
+          if (!(isHtmlMsg(m) || m.built)) return m;
+          const html = h.get(k++);
+          return m.built && html ? { role: "ai", content: html, note: m.note || "" } : m;
+        });
+        messagesRef.current = next;
+        setMessages(next);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [projectId]);
+
+  useEffect(() => {
+    if (!buildsLoadedRef.current) return;
+    // One entry per build, in order; builds whose HTML is already gone are kept as ""
+    // so the positions still line up with the chat when it's reloaded.
+    const builds = messages.filter((m) => isHtmlMsg(m) || m.built).map((m) => (m.built ? "" : m.content));
+    if (!builds.some(Boolean)) return;
+    const t = setTimeout(() => saveBuilds(projectId, builds).catch(() => {}), 800);
+    return () => clearTimeout(t);
+  }, [messages, projectId]);
+
+  const restoreBuild = (m) => {
+    pushMsg({ role: "ai", content: m.content, note: "Restored an earlier version." });
+  };
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -660,6 +704,15 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
                       <div className="space-y-2">
                         {m.note && <p className="whitespace-pre-wrap">{m.note}</p>}
                         <span className="block text-emerald-300 font-medium">✓ Website updated</span>
+                        {isHtmlMsg(m) && m !== lastAi && !loading && (
+                          <button
+                            onClick={() => restoreBuild(m)}
+                            className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-white"
+                            title="Make this version the current website again"
+                          >
+                            <RotateCcw className="w-3 h-3" /> Restore this version
+                          </button>
+                        )}
                       </div>
                     ) : (
                       <span className="whitespace-pre-wrap">{m.content}</span>
