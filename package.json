@@ -10,7 +10,7 @@
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc -p ./jsconfig.json",
     "preview": "vite preview",
-    "test": "node scripts/test-moderation.mjs && node scripts/test-ai-internal.mjs && node scripts/test-credits.mjs"
+    "test": "node scripts/test-moderation.mjs && node scripts/test-ai-internal.mjs && node scripts/test-credits.mjs && node scripts/test-referrals.mjs"
   },
   "dependencies": {
     "@base44/sdk": "^0.8.48",
