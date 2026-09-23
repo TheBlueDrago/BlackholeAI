@@ -4,7 +4,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -24,6 +24,7 @@ const Terms = lazy(() => import('@/pages/Legal').then((m) => ({ default: m.Terms
 const Privacy = lazy(() => import('@/pages/Legal').then((m) => ({ default: m.Privacy })));
 const Showcase = lazy(() => import('@/pages/Showcase'));
 const Contact = lazy(() => import('@/pages/Contact'));
+const Play = lazy(() => import('@/pages/Play'));
 import { captureReferral } from '@/lib/referral';
 
 // Remember an invite code (?ref=) from whatever page the link opened.
@@ -46,6 +47,12 @@ const GamesFront = lazy(() => import('@/pages/chat/GamesFront'));
 const GamesDesignerWorkspace = lazy(() => import('@/components/GamesDesignerWorkspace'));
 const GameView = lazy(() => import('@/pages/chat/GameView'));
 const BlackholeBrowser = lazy(() => import('@/pages/chat/BlackholeBrowser'));
+
+// Signed out: a shared game link (/chat/game/<name>) opens the public player instead of the login page.
+function SignedOutRedirect() {
+  const game = /^\/chat\/game\/([^/]+)/.exec(useLocation().pathname);
+  return <Navigate to={game ? `/play/${game[1]}` : "/login"} replace />;
+}
 
 const PageSpinner = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-slate-950">
@@ -95,7 +102,8 @@ const AuthenticatedApp = () => {
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/showcase" element={<Showcase />} />
       <Route path="/contact" element={<Contact />} />
-      <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
+      <Route path="/play/:name" element={<Play />} />
+      <Route element={<ProtectedRoute unauthenticatedElement={<SignedOutRedirect />} />}>
         <Route path="/chat" element={<Chat />}>
           <Route element={<WorkspaceShell />}>
             <Route index element={<ChatWorkspace />} />

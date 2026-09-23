@@ -502,7 +502,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
       const list = getTaken().filter((e) => e.name !== n);
       list.push({ name: n, projectId });
       localStorage.setItem(TAKEN_KEY, JSON.stringify(list));
-      setPublishUrl(`${window.location.origin}/chat/game/${n}`);
+      setPublishUrl(`${window.location.origin}/play/${n}`);
       setShowPublish(false);
       setPublished(true);
       notifyGamesChanged();

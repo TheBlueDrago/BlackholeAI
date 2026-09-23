@@ -3,8 +3,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import Intro from "@/components/Intro";
 
 const SEEN_KEY = "bh-splash-seen";
-// Pages people open to get one thing done (often from a published site): no intro there.
-const SKIP = /^\/(buy|report|site\/|terms|privacy|contact|ThankYou|promo-success)/;
+// Pages people open to get one thing done (often from a published site or game): no intro there.
+const SKIP = /^\/(buy|report|site\/|play\/|terms|privacy|contact|ThankYou|promo-success)/;
 
 // The intro plays once per tab, not again on every reload.
 function shouldShow() {
