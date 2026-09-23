@@ -24,6 +24,11 @@ export const REASONS = {
 const REPORTS_KEY = "reports";
 const MAX_PAGES = 200; // reported pages kept (oldest dropped)
 const MAX_PER_PAGE = 20; // individual reports kept per page
+// Reports are anonymous, so cap their KV writes: the 1,000 writes/day free quota is
+// shared with credits, and a flood of reports must not use it up. Past these caps a
+// report is accepted but not stored (the page is flagged well before then).
+const DAILY_WRITES = 100; // all reports together, per UTC day
+const DAILY_PER_REPORTER = 5; // per visitor (IP or account), per UTC day
 export const blockedKey = (kind, name) => `blocked:${kvKey(kind, name)}`;
 
 async function sha(text) {
@@ -31,7 +36,8 @@ async function sha(text) {
   return [...new Uint8Array(buf)].slice(0, 8).map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-export async function readReports(kv) {
+// { "<kind>:<name>": page, ... } plus the "_day" counters used for the daily caps.
+async function readAll(kv) {
   try {
     const v = await kv.get(REPORTS_KEY, "json");
     return v && typeof v === "object" ? v : {};
@@ -40,14 +46,30 @@ export async function readReports(kv) {
   }
 }
 
-// Returns "added" or "duplicate". `who` identifies the reporter (IP, or user id) and is
-// stored only as a short hash, to ignore repeats.
+// Just the reported pages.
+export async function readReports(kv) {
+  const all = await readAll(kv);
+  delete all._day;
+  return all;
+}
+
+// Returns "added", "duplicate" or "limited". `who` identifies the reporter (IP, or
+// user id) and is stored only as a short hash, to ignore repeats.
 export async function addReport(kv, { kind, name, reason, details, who }) {
-  const all = await readReports(kv);
+  const all = await readAll(kv);
   const id = kvKey(kind, name);
   const page = all[id] || { kind, name, reports: [], first: new Date().toISOString() };
   const by = await sha(`${id}|${who || ""}`);
   if (page.reports.some((r) => r.by === by)) return "duplicate";
+
+  const today = new Date().toISOString().slice(0, 10);
+  const day = all._day && all._day.date === today ? all._day : { date: today, n: 0, by: {} };
+  const reporter = await sha(`reporter|${who || ""}`);
+  if (day.n >= DAILY_WRITES || (day.by[reporter] || 0) >= DAILY_PER_REPORTER) return "limited";
+  day.n += 1;
+  day.by[reporter] = (day.by[reporter] || 0) + 1;
+  all._day = day;
+
   page.reports = [
     ...page.reports,
     { by, reason, details: String(details || "").slice(0, 500), at: new Date().toISOString() },
@@ -55,7 +77,7 @@ export async function addReport(kv, { kind, name, reason, details, who }) {
   page.count = (page.count || 0) + 1;
   page.last = new Date().toISOString();
   all[id] = page;
-  const ids = Object.keys(all);
+  const ids = Object.keys(all).filter((k) => k !== "_day");
   if (ids.length > MAX_PAGES) {
     ids.sort((a, b) => String(all[a].last).localeCompare(String(all[b].last)));
     for (const old of ids.slice(0, ids.length - MAX_PAGES)) delete all[old];
@@ -65,7 +87,7 @@ export async function addReport(kv, { kind, name, reason, details, who }) {
 }
 
 export async function dismissReports(kv, kind, name) {
-  const all = await readReports(kv);
+  const all = await readAll(kv);
   if (!all[kvKey(kind, name)]) return;
   delete all[kvKey(kind, name)];
   await kv.put(REPORTS_KEY, JSON.stringify(all));
