@@ -240,3 +240,24 @@ assert(s === 400, "page-status: bad kind");
 // ---- take down by name (Monitor) ----
 [s, b] = await j(admin.onRequestPost({ request: req({ action: "hide", kind: "site", name: "no-such-site" }, "admintok"), env }));
 assert(s === 404 && /No site is called/.test(b.error) && !store.has("blocked:site:no-such-site"), "hiding an unknown name is refused, nothing blocked");
+
+// ---- contact form ----
+const contact = await import(F + "contact.js");
+const send = (body, tok, ip) => j(contact.onRequestPost({ request: req({ action: "send", ...body }, tok, ip), env }));
+[s, b] = await send({ topic: "bug", message: "The designer froze", email: "a@b.co" });
+assert(s === 200 && b.ok, "visitor message accepted");
+[s, b] = await send({ topic: "bug", message: "hi" });
+assert(s === 400, "too-short message refused");
+[s, b] = await send({ topic: "bug", message: "No email here at all" }, null, "8.8.8.8");
+assert(s === 400 && /email/.test(b.error), "visitors must give an email");
+[s, b] = await send({ topic: "billing", message: "Signed-in question" }, "usertok");
+assert(s === 200, "signed-in users don't need to type an email");
+[s, b] = await j(contact.onRequestPost({ request: req({ action: "list" }, "usertok"), env }));
+assert(s === 403, "only admins can read messages");
+[s, b] = await j(contact.onRequestPost({ request: req({ action: "list" }, "admintok"), env }));
+assert(b.messages.length === 2 && b.messages[0].topic === "billing" && b.messages[1].email === "a@b.co", "admin sees messages, newest first");
+[s, b] = await j(contact.onRequestPost({ request: req({ action: "done", id: b.messages[0].id }, "admintok"), env }));
+assert(b.messages.length === 1, "Done removes a message");
+for (let i = 0; i < 5; i++) await send({ message: "spam spam " + i, email: "s@p.am" }, null, "6.6.6.6");
+const stored = JSON.parse(store.get("contact")).messages.filter((m) => m.email === "s@p.am").length;
+assert(stored === 3, "at most 3 stored messages per sender per day (" + stored + ")");

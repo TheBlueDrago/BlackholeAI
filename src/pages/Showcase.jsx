@@ -107,6 +107,7 @@ export default function Showcase() {
         <Link to="/terms" className="hover:underline">Terms</Link>
         <Link to="/privacy" className="hover:underline">Privacy</Link>
         <Link to="/report" className="hover:underline">Report a site</Link>
+        <Link to="/contact" className="hover:underline">Contact</Link>
       </footer>
     </div>
   );

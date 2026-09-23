@@ -6,6 +6,7 @@ import UserCard from "@/components/monitor/UserCard";
 import UserDetail from "@/components/monitor/UserDetail";
 import RevenueAnalytics from "@/components/monitor/RevenueAnalytics";
 import ReportedSites from "@/components/monitor/ReportedSites";
+import Messages from "@/components/monitor/Messages";
 
 export default function Monitor({ onBack }) {
   const [users, setUsers] = useState([]);
@@ -133,6 +134,7 @@ export default function Monitor({ onBack }) {
       )}
 
       {!loading && !q && <ReportedSites />}
+      {!loading && !q && <Messages />}
       {!loading && !q && <RevenueAnalytics />}
 
       {detailUser && <UserDetail user={detailUser} onClose={() => setDetailUser(null)} />}

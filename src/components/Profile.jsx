@@ -515,6 +515,7 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                     <Link to="/showcase" target="_blank" className="hover:text-slate-300">Gallery</Link>
                     <Link to="/terms" target="_blank" className="hover:text-slate-300">Terms</Link>
                     <Link to="/privacy" target="_blank" className="hover:text-slate-300">Privacy</Link>
+                    <Link to="/contact" target="_blank" className="hover:text-slate-300">Contact</Link>
                   </p>
                 </div>
               </>

@@ -5,15 +5,14 @@ import { ArrowLeft } from "lucide-react";
 // Public /terms and /privacy pages, linked from sign-up, log-in, billing and the
 // report page. Plain language on purpose; keep them in step with what the app does.
 const UPDATED = "September 23, 2026";
-// Set this to the support address people should write to; until then the pages
-// point to the report form.
+// Optional: a support address to show instead of the contact form (/contact).
 const CONTACT_EMAIL = "";
 
 function Contact() {
   return CONTACT_EMAIL ? (
     <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
   ) : (
-    <Link to="/report">the report form</Link>
+    <Link to="/contact">our contact form</Link>
   );
 }
 
@@ -123,6 +122,7 @@ export function Privacy() {
         <li><strong>Prompts:</strong> what you send the AI, including any images you attach in the chat, passes through our servers to Google to get an answer. We count the credits it uses but don't keep the text or images.</li>
         <li><strong>Usage:</strong> how many credits you use on each AI, your plan, promo codes you redeem, and who invited you or whom you invited. When you join through an invite link we keep a scrambled (hashed) form of your IP address with it, to spot one person creating many accounts.</li>
         <li><strong>Payments:</strong> what you bought and when. Card details go straight to the payment provider; we never see your full card number.</li>
+        <li><strong>Messages:</strong> what you send through the contact form, with your email address so we can reply.</li>
         <li><strong>Reports:</strong> when you report a site we keep your reason and note, plus a scrambled (hashed) form of your IP address so the same person can't report one page many times.</li>
         <li><strong>Technical data:</strong> like any website, our hosting provider handles IP addresses and basic request logs to deliver pages and block attacks.</li>
       </ul>
