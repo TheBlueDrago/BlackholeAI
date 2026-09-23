@@ -12,12 +12,17 @@ export default function Monitor({ onBack }) {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [detailUser, setDetailUser] = useState(null);
+  // The first page (newest 200) loads right away; searching loads everyone else, 500 at a
+  // time, so older accounts can be found too.
+  const [allLoaded, setAllLoaded] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const load = async () => {
     setLoading(true);
     try {
       const list = await base44.entities.User.list("-created_date", 200);
       setUsers(list ?? []);
+      setAllLoaded((list ?? []).length < 200);
     } catch (e) {
       console.error("Monitor load failed", e);
     } finally {
@@ -38,6 +43,35 @@ export default function Monitor({ onBack }) {
   };
 
   const q = query.trim().toLowerCase();
+
+  const searching = q.length > 0;
+  useEffect(() => {
+    if (!searching || allLoaded || loading) return;
+    let alive = true;
+    (async () => {
+      setLoadingMore(true);
+      try {
+        let all = users;
+        for (;;) {
+          const page = (await base44.entities.User.list("-created_date", 500, all.length)) ?? [];
+          const seen = new Set(all.map((u) => u.id));
+          all = [...all, ...page.filter((u) => !seen.has(u.id))];
+          if (!alive) return;
+          setUsers(all);
+          if (page.length < 500 || all.length >= 20000) break;
+        }
+        if (alive) setAllLoaded(true);
+      } catch (e) {
+        console.error("Monitor: loading more users failed", e);
+      } finally {
+        setLoadingMore(false);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searching, allLoaded, loading]);
   const filtered = q
     ? users.filter(
         (u) =>
@@ -80,7 +114,10 @@ export default function Monitor({ onBack }) {
         </div>
       ) : q ? (
         <div className="w-full max-w-3xl mt-6 space-y-3">
-          <p className="text-slate-400 text-sm">{filtered.length} result(s)</p>
+          <p className="text-slate-400 text-sm inline-flex items-center gap-2">
+            {filtered.length} result(s) · searched {users.length} users
+            {loadingMore && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+          </p>
           {filtered.map((u) => (
             <UserCard key={u.id} user={u} onApply={apply} onOpenDetail={setDetailUser} />
           ))}
