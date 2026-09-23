@@ -167,3 +167,9 @@ assert(store.has("site:nova") && store.has("game:other") && store.has("site:old"
 assert(!b.sites.some((x) => x.name === "cafe"), "removed from the gallery");
 [s, b] = await j(del.onRequestPost({ request: req({}), env }));
 assert(s === 401, "delete-my-content needs sign-in");
+
+// ---- report count for the Monitor badge ----
+[s, b] = await j(admin.onRequestPost({ request: req({ action: "count" }, "admintok"), env }));
+assert(s === 200 && typeof b.open === "number" && b.open === Object.keys(await rep.readReports(kv)).length, "count action: " + b.open);
+[s, b] = await j(admin.onRequestPost({ request: req({ action: "count" }, "usertok"), env }));
+assert(s === 403, "count is admin-only");

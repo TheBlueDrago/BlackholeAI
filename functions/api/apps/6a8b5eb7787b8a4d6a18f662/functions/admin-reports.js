@@ -1,6 +1,7 @@
 // Admin-only moderation for the Monitor page (see cloudflare-lib/reports.js).
 // Body: { action, kind, name }
 //   "list"    -> { reports: [...], hidden: [...] }   (the default)
+//   "count"   -> { open }   number of reported pages
 //   "hide"    -> take the page offline (it shows "removed") and hide it from listings
 //   "unhide"  -> put it back
 //   "dismiss" -> clear its reports without hiding it
@@ -17,6 +18,9 @@ export async function onRequestPost(context) {
     if (admin.role !== "admin") return json({ error: "Admins only." }, 403);
 
     const body = await request.json().catch(() => ({}));
+    // Just the number of reported pages (for the badge on the Monitor button): one KV
+    // read, and no list operation (those are limited to 1,000/day on the free plan).
+    if (body.action === "count") return json({ open: Object.keys(await readReports(kv)).length });
     const kind = String(body.kind || "");
     const name = String(body.name || "").toLowerCase();
     if (body.action && body.action !== "list") {

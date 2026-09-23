@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { LogOut, Mail, Shield, KeyRound, ArrowLeft, Loader2, Crown, Settings, Users, Lock, ShieldCheck, Ticket, Trash2, Gamepad2, Pencil, Eye, EyeOff, Globe, Gift } from "lucide-react";
 import { base44 } from "@/api/base44Client";
@@ -27,6 +27,16 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
   const [delAck, setDelAck] = useState(false);
   const [delBusy, setDelBusy] = useState(false);
   const [delError, setDelError] = useState("");
+
+  // Admins: how many reported sites are waiting (badge on the Monitor button).
+  const [openReports, setOpenReports] = useState(0);
+  useEffect(() => {
+    if (!open || user?.role !== "admin") return;
+    base44.functions
+      .invoke("admin-reports", { action: "count" })
+      .then((r) => setOpenReports(r.data?.open || 0))
+      .catch(() => {});
+  }, [open, user?.role]);
 
   useEffect(() => {
     if (open) {
@@ -416,6 +426,11 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                     >
                       <ShieldCheck className="w-4 h-4" />
                       Monitor
+                      {openReports > 0 && (
+                        <span className="text-[11px] bg-red-500 text-white rounded-full px-1.5 py-0.5 leading-none" title="Reported sites waiting for review">
+                          {openReports}
+                        </span>
+                      )}
                     </button>
                   )}
                   {user?.role === "admin" && (
@@ -457,6 +472,11 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                     <LogOut className="w-4 h-4" />
                     Log out
                   </button>
+                  <p className="pt-1 text-center text-[11px] text-slate-500 space-x-3">
+                    <Link to="/showcase" target="_blank" className="hover:text-slate-300">Gallery</Link>
+                    <Link to="/terms" target="_blank" className="hover:text-slate-300">Terms</Link>
+                    <Link to="/privacy" target="_blank" className="hover:text-slate-300">Privacy</Link>
+                  </p>
                 </div>
               </>
             )}
