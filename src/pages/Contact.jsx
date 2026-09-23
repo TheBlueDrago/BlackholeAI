@@ -9,6 +9,8 @@ const TOPICS = [
   ["billing", "Plans, credits or payments"],
   ["bug", "Something isn't working"],
   ["idea", "Idea or feedback"],
+  ["business", "Using Blackhole AI for my business"],
+  ["partnership", "Partnership, investment or acquisition"],
   ["other", "Something else"],
 ];
 
@@ -16,7 +18,11 @@ const TOPICS = [
 // Messages (functions/contact.js). Signed-in users are replied to at their account email.
 export default function Contact() {
   const [signedInEmail, setSignedInEmail] = useState("");
-  const [topic, setTopic] = useState("other");
+  // Links can pick the topic (/contact?topic=business from the For business page).
+  const [topic, setTopic] = useState(() => {
+    const t = new URLSearchParams(window.location.search).get("topic");
+    return TOPICS.some(([k]) => k === t) ? t : "other";
+  });
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);

@@ -3,9 +3,10 @@ import React, { useEffect, useRef, useState } from "react";
 const SRC_W = 1280;
 const SRC_H = 800;
 
-// A scaled-down live render of the site, loaded straight from KV (/published/site/…)
-// with scripts off (empty sandbox), so thumbnails are cheap and can't run code.
-export default function SiteThumb({ name }) {
+// A scaled-down live render of a site with scripts off (empty sandbox), so thumbnails are
+// cheap and can't run code: a published site by `name` (loaded straight from KV at
+// /published/site/…), or a page's `html` (templates).
+export default function SiteThumb({ name, html }) {
   const ref = useRef(null);
   const [scale, setScale] = useState(0);
   useEffect(() => {
@@ -21,8 +22,8 @@ export default function SiteThumb({ name }) {
     <div ref={ref} className="absolute inset-0 pointer-events-none">
       {scale > 0 && (
         <iframe
-          src={`/published/site/${encodeURIComponent(name)}`}
-          title={name}
+          {...(html != null ? { srcDoc: html } : { src: `/published/site/${encodeURIComponent(name)}` })}
+          title={name || "Preview"}
           loading="lazy"
           tabIndex={-1}
           scrolling="no"

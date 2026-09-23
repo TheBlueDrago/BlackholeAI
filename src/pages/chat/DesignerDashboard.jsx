@@ -261,6 +261,16 @@ export default function DesignerDashboard() {
     navigate("/chat/designer/build");
   };
 
+  // Arriving from the public Templates page (after signing up) with ?template=<id>: open it
+  // once, replacing this entry so Back doesn't open it again over their edits.
+  useEffect(() => {
+    const t = SITE_TEMPLATES.find((x) => x.id === new URLSearchParams(window.location.search).get("template"));
+    if (!t) return;
+    loadDesignerHtmlIntoProject(`my-${t.id}`, t.html);
+    navigate("/chat/designer/build", { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const toggleHidden = async (s) => {
     try {
       await base44.entities.PublishedSite.update(s.id, { hidden: !s.hidden });
