@@ -10,7 +10,7 @@ Any change pushed to the repo will also be reflected in the Base44 Builder.
 - **Storage: Cloudflare KV** namespace `published-html`, bound as `PUBLISHED_HTML`. Holds published site/game HTML, game drafts, and the server-side credit records (key prefixes `site:`, `game:`, `draft:`, `grant:`, `bonus:`, `usage:`, `teamusage:`). Free tier: 1,000 writes/day.
 - **AI: Google Gemini (free tier)** via the `GEMINI_API_KEY` secret on the Pages project.
 - **Published sites: the `blackhole-site-router` Worker** on `*.blackhole-ai-tech.com/*`. Its code is in `workers/blackhole-site-router/` (deploy with `npx wrangler deploy` from that folder).
-- **Base44:** sign-in, the database (entities), payments (`create-checkout`, `site-checkout`, `payments-webhook`) and a few remaining functions. Changes under `base44/` only take effect after publishing the app from the Base44 dashboard.
+- **Base44:** sign-in, the database (entities), payments (`create-checkout`, `site-checkout`, `payments-webhook`) and a few remaining functions. Base44 is **not** connected to this repo or the domain (keep it that way: its GitHub sync moves `functions/` and breaks Cloudflare). To ship a payment change, deploy just that function with the Base44 CLI: `npx base44 login`, then `npx base44 --app-id 6a8b5eb7787b8a4d6a18f662 functions deploy <name>`. The deployed functions use `main.ts` as the entry file (payments-webhook is deployed flat, importing `./adminNotify.ts`), so stage a copy in that layout first (`functions pull <name>` shows it).
 
 ## Prerequisites
 

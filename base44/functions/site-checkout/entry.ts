@@ -20,11 +20,8 @@ export default async function (req) {
       console.error('site-checkout: Wix payment config not set');
       return Response.json({ error: 'Payments not configured' }, { status: 500 });
     }
-    const appUrl = req.headers.get('x-base44-app-url') || Deno.env.get('WIX_CHECKOUT_APP_URL') || '';
-    if (!appUrl) {
-      console.error('site-checkout: no app URL available');
-      return Response.json({ error: 'Payments not configured' }, { status: 500 });
-    }
+    // Buyers return to the live site on Cloudflare (a fixed constant, never caller-controlled).
+    const appUrl = 'https://blackhole-ai-tech.com';
 
     const base44 = createClientFromRequest(req);
     let buyer = null;
@@ -66,12 +63,12 @@ export default async function (req) {
       },
       body: JSON.stringify({
         cart: {
-          items: [{ name: `${product.name || productId} — ${siteName}.blackhole`, quantity, price: String(product.price) }],
+          items: [{ name: `${product.name || productId} — ${siteName}.blackhole-ai-tech.com`, quantity, price: String(product.price) }],
           ...(buyer?.email ? { customerInfo: { email: buyer.email } } : {}),
         },
         callbackUrls: {
           thankYouPageUrl: `${appUrl}/ThankYou`,
-          postFlowUrl: `${appUrl}/site/${siteName}`,
+          postFlowUrl: `https://${siteName}.blackhole-ai-tech.com`,
         },
       }),
     });

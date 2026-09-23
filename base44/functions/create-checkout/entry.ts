@@ -23,12 +23,11 @@ const CONSTRUCT_URL = "https://www.wixapis.com/payments/platform/v1/checkout-ses
 // server-owned `WIX_CHECKOUT_APP_URL` secret. We do NOT fall back to the request `Origin`: it's
 // caller-controlled, so a spoofed Origin would make Wix send the paid buyer to an attacker page
 // (open redirect). Both sources above are always present for a connected payments app.
-function resolveAppUrl(req: Request): string {
-  return (
-    req.headers.get("x-base44-app-url") ||
-    Deno.env.get("WIX_CHECKOUT_APP_URL") ||
-    ""
-  );
+// The live site is served from Cloudflare at blackhole-ai-tech.com, not from the Base44
+// host, so buyers are always sent back there. A fixed constant — never caller-controlled.
+const PUBLIC_APP_URL = "https://blackhole-ai-tech.com";
+function resolveAppUrl(_req: Request): string {
+  return PUBLIC_APP_URL;
 }
 
 Deno.serve(async (req: Request) => {
@@ -100,7 +99,7 @@ Deno.serve(async (req: Request) => {
       },
       team: {
         name: "Team Plan",
-        price: "10.00",
+        price: "5.00",
         currency: "USD",
         subscriptionInfo: {
           subscriptionSettings: { frequency: "MONTH" },
@@ -110,7 +109,7 @@ Deno.serve(async (req: Request) => {
       },
       secret: {
         name: "Secret Plan",
-        price: "0.50",
+        price: "10.00",
         currency: "USD",
         subscriptionInfo: {
           subscriptionSettings: { frequency: "MONTH" },
@@ -146,7 +145,7 @@ Deno.serve(async (req: Request) => {
       },
       callbackUrls: {
         thankYouPageUrl: `${appUrl}${thankYouPath}`,
-        postFlowUrl: `https://infinity-ai-site.base44.app${postFlowPath}`,
+        postFlowUrl: `${appUrl}${postFlowPath}`,
       },
     };
 

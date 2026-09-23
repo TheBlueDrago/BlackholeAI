@@ -15,20 +15,21 @@ export default function Billing() {
   const PLANS = {
     secret: {
       name: "Secret Plan",
-      price: "$0.50 / month",
+      price: "$10 / month",
       gradient: "from-slate-800 to-black",
       glow: "bg-fuchsia-600/10",
-      features: ["4 AI's (incl. Galaxy and Space in Website Designer)", "5 people total — invite up to 4", "50 Blackhole AI credits", "25 Blackhole Code credits", "40 Galaxy credits", "25 Space credits"],
-      button: "Subscribe — $0.50/mo",
+      // Must match PLAN_TOTALS in cloudflare-lib/credits.js (what the server actually gives).
+      features: ["4 AI's (incl. Galaxy and Space)", "5 people total — invite up to 4", "150 Blackhole AI credits / month", "100 Blackhole Code credits / month", "100 Galaxy credits / month", "100 Space credits / month"],
+      button: "Subscribe — $10/mo",
       icon: Lock,
     },
     team: {
       name: "Team Plan",
-      price: "$10 / month",
+      price: "$5 / month",
       gradient: "from-sky-500 to-indigo-500",
       glow: "bg-sky-600/15",
-      features: ["4 AI's (incl. Galaxy and Space in Website Designer)", "25 Blackhole Code credits", "50 Blackhole AI credits", "40 Galaxy credits", "25 Space credits", "Add up to 2 people — shared credits"],
-      button: "Subscribe — $10/mo",
+      features: ["4 AI's (incl. Galaxy and Space)", "150 Blackhole AI credits / month", "100 Blackhole Code credits / month (shared)", "100 Galaxy credits / month", "100 Space credits / month", "Add up to 2 people — shared credits"],
+      button: "Subscribe — $5/mo",
       icon: Users,
     },
     pro: {
@@ -36,7 +37,7 @@ export default function Billing() {
       price: "$1 / month",
       gradient: "from-emerald-500 to-teal-500",
       glow: "bg-emerald-600/15",
-      features: ["3 AI's (incl. Galaxy in Website Designer)", "15 Blackhole Code credits", "25 Blackhole AI credits", "25 Galaxy credits"],
+      features: ["4 AI's (incl. Galaxy and Space)", "100 Blackhole AI credits / month", "50 Blackhole Code credits / month", "50 Galaxy credits / month", "50 Space credits / month"],
       button: "Subscribe — $1/mo",
       icon: ShieldCheck,
     },

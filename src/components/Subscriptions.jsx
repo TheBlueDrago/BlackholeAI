@@ -90,7 +90,7 @@ function TeamCard({ onTeam }) {
       <div className="flex items-center justify-between">
         <h3 className="text-xl font-bold text-white">Team</h3>
         <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/40">
-          $10/mo
+          $5/mo
         </span>
       </div>
       <div className="h-px bg-slate-700/60 my-4" />
