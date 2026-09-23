@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { Copy, Check } from "lucide-react";
 
 // Copies text and briefly shows a tick.
@@ -41,6 +42,13 @@ const components = {
   pre: CodeBlock,
   code: ({ className, children }) =>
     className ? <code className={className}>{children}</code> : <code className="px-1 py-0.5 rounded bg-black/30 text-[0.92em]">{children}</code>,
+  table: ({ children }) => (
+    <div className="my-2 overflow-x-auto">
+      <table className="text-[12.5px] border-collapse [&_th]:border [&_td]:border [&_th]:border-slate-600 [&_td]:border-slate-700 [&_th]:px-2 [&_td]:px-2 [&_th]:py-1 [&_td]:py-1 [&_th]:bg-slate-700/40 [&_th]:text-left">
+        {children}
+      </table>
+    </div>
+  ),
   a: ({ href, children }) => (
     <a href={href} target="_blank" rel="noopener noreferrer" className="underline text-sky-300 hover:text-sky-200">
       {children}
@@ -53,7 +61,7 @@ const components = {
 export default function Markdown({ text }) {
   return (
     <div className="break-words [&_p]:my-1.5 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5 [&_ul]:my-1.5 [&_ol]:my-1.5 [&_li]:my-0.5 [&_h1]:text-lg [&_h2]:text-base [&_h3]:text-sm [&_h1]:font-semibold [&_h2]:font-semibold [&_h3]:font-semibold [&_h1]:mt-3 [&_h2]:mt-3 [&_h3]:mt-2 [&_h1]:mb-1 [&_h2]:mb-1 [&_blockquote]:border-l-2 [&_blockquote]:border-slate-600 [&_blockquote]:pl-3 [&_blockquote]:text-slate-300 [&_hr]:my-3 [&_hr]:border-slate-700">
-      <ReactMarkdown components={components}>{text || ""}</ReactMarkdown>
+      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>{text || ""}</ReactMarkdown>
     </div>
   );
 }
