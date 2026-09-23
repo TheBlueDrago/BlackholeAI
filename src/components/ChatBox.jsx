@@ -14,11 +14,19 @@ import { useEffort, effortFor } from "@/lib/effort";
 import { streamChat } from "@/lib/aiStream";
 import { shrinkImage } from "@/lib/siteImages";
 import EffortPicker from "@/components/chat/EffortPicker";
+import { useAppShell } from "@/components/AppShellContext";
 
 const CODE_SYS = "You are Blackhole Code Assistant. Help with programming. Give clear, correct code with brief explanations.";
 const FABLE_SYS = "You are Space, Blackhole AI's premium creative model. Be imaginative and high-quality.";
 const AI_NAMES = { ai: "Blackhole AI", code: "Blackhole Code", opus5: "Galaxy", fable: "Space" };
 const MODELS = { ai: "automatic", code: "claude_sonnet_4_6", opus5: "claude_opus_4_8", fable: "claude-sonnet-5" };
+// Shown in an empty chat so new people see what they can make right away.
+const STARTERS = [
+  { icon: "🌐", label: "Build a website", hint: "Templates or your idea", go: "designer" },
+  { icon: "🎮", label: "Make a game", hint: "Starts out playable", go: "game" },
+  { icon: "💡", label: "Explain simply", hint: "Like black holes", prompt: "Explain black holes like I'm 10." },
+  { icon: "✍️", label: "Write a story", hint: "A short, fun one", prompt: "Help me write a short, fun story. Ask me a few questions about it first." },
+];
 
 export default function ChatBox({ conversation, createConversation, addMessage, removeMessage, renameConversation, plan, exhausted, remaining, spend, userInitial }) {
   const [input, setInput] = useState("");
@@ -34,6 +42,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
   const reqIdRef = useRef(0);
   const abortRef = useRef(null);
   const convIdRef = useRef(null);
+  const shell = useAppShell();
 
   const messages = conversation?.messages || [];
   const isExhausted = !!exhausted?.[selectedAi];
@@ -167,6 +176,13 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
     runPrompt(question, selectedAi);
   };
 
+  const startWith = (s) => {
+    if (s.go === "designer") return shell?.goDesigner();
+    if (s.go === "game") return shell?.goGameDesigner();
+    if (loading || isExhausted) return;
+    runPrompt(s.prompt, selectedAi);
+  };
+
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -187,7 +203,21 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
                 <BlackholeIcon className="w-7 h-7" />
               </div>
               <p className="text-slate-300 font-medium">Ask me anything</p>
-              <p className="text-slate-500 text-sm mt-1">Blackhole AI is ready to help</p>
+              <p className="text-slate-500 text-sm mt-1">or try one of these</p>
+              <div className="mt-4 grid grid-cols-2 gap-2 w-full max-w-md">
+                {STARTERS.map((s) => (
+                  <button
+                    key={s.label}
+                    onClick={() => startWith(s)}
+                    className="text-left px-3 py-2.5 rounded-xl bg-slate-800/70 border border-slate-700/50 hover:bg-slate-700/70 hover:border-indigo-500/50 transition-colors"
+                  >
+                    <span className="block text-sm text-slate-200 font-medium">
+                      <span aria-hidden="true">{s.icon}</span> {s.label}
+                    </span>
+                    <span className="block text-[11px] text-slate-500 mt-0.5">{s.hint}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
