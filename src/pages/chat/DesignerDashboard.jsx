@@ -71,7 +71,7 @@ function SitePreviewThumb({ html }) {
   );
 }
 
-function SiteCard({ site, onEdit, onToggleHidden, onDelete, inGallery, onToggleGallery }) {
+function SiteCard({ site, onEdit, onToggleHidden, onDelete, inGallery, onToggleGallery, takenDown }) {
   const hasPreview = isInlineHtml(site.html);
   return (
     <div className="group relative rounded-2xl bg-slate-900/60 border border-slate-700/50 p-4 hover:border-indigo-500/40 transition-colors">
@@ -86,7 +86,14 @@ function SiteCard({ site, onEdit, onToggleHidden, onDelete, inGallery, onToggleG
               </div>
             </div>
           )}
-          {site.hidden ? (
+          {takenDown ? (
+            <span
+              className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-red-600/90 text-[10px] font-medium text-white"
+              title="An admin took this site down for breaking the rules. Visitors see a 'removed' page."
+            >
+              Taken down
+            </span>
+          ) : site.hidden ? (
             <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-black/60 backdrop-blur text-[10px] font-medium text-slate-300 border border-white/10">
               Hidden
             </span>
@@ -159,6 +166,8 @@ export default function DesignerDashboard() {
   const [selectedAi, setSelectedAi] = useState("ai");
   const [err, setErr] = useState("");
   const [gallery, setGallery] = useState(() => new Set());
+  // Sites an admin took down (see functions/page-status.js), so owners can tell.
+  const [takenDown, setTakenDown] = useState(() => new Set());
   const textareaRef = useRef(null);
 
   const opusAllowed = effPlan === "pro" || effPlan === "team" || effPlan === "secret" || effPlan === "admin";
@@ -201,6 +210,22 @@ export default function DesignerDashboard() {
       setErr(e?.response?.data?.error || e?.message || "Could not update the gallery");
     }
   };
+
+  useEffect(() => {
+    if (!sites.length) return;
+    let alive = true;
+    Promise.all(
+      sites.map((s) =>
+        base44.functions
+          .invoke("page-status", { kind: "site", name: s.name })
+          .then((r) => (r.data?.blocked ? s.name : null))
+          .catch(() => null)
+      )
+    ).then((names) => alive && setTakenDown(new Set(names.filter(Boolean))));
+    return () => {
+      alive = false;
+    };
+  }, [sites]);
 
   const lim = siteLimit(effPlan);
   const atLimit = sites.length >= lim;
@@ -437,6 +462,7 @@ export default function DesignerDashboard() {
                     onToggleHidden={toggleHidden}
                     onDelete={removeSite}
                     inGallery={gallery.has(s.name)}
+                    takenDown={takenDown.has(s.name)}
                     onToggleGallery={toggleGallery}
                   />
                 ))}
