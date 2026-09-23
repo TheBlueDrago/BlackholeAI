@@ -28,6 +28,8 @@ const Play = lazy(() => import('@/pages/Play'));
 const Arcade = lazy(() => import('@/pages/Arcade'));
 const Templates = lazy(() => import('@/pages/Templates'));
 const Business = lazy(() => import('@/pages/Business'));
+const Pricing = lazy(() => import('@/pages/Pricing'));
+const About = lazy(() => import('@/pages/About'));
 import { captureReferral } from '@/lib/referral';
 
 // Remember an invite code (?ref=) from whatever page the link opened.
@@ -109,6 +111,8 @@ const AuthenticatedApp = () => {
       <Route path="/arcade" element={<Arcade />} />
       <Route path="/templates" element={<Templates />} />
       <Route path="/business" element={<Business />} />
+      <Route path="/pricing" element={<Pricing />} />
+      <Route path="/about" element={<About />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<SignedOutRedirect />} />}>
         <Route path="/chat" element={<Chat />}>
           <Route element={<WorkspaceShell />}>

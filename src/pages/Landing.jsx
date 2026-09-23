@@ -1,28 +1,83 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { MessageSquare, Globe, Gamepad2, ArrowRight, Sparkles, Play } from "lucide-react";
+import { ArrowRight, Sparkles, Smartphone, Globe, ShieldCheck, Gamepad2, Play, Check, ChevronDown, Mail, Phone } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import SiteThumb from "@/components/SiteThumb";
-import PublicLayout, { START_FREE as START } from "@/components/PublicLayout";
+import PublicLayout, { START_FREE } from "@/components/PublicLayout";
+import PricingCards from "@/components/landing/PricingCards";
+import { HeroCollage, ChatShot, SiteShot, GameShot, ShopShot, TeamShot, SafetyShot } from "@/components/landing/ProductShots";
+import { CONTACT_EMAIL, CONTACT_PHONE, CONTACT_PHONE_LINK } from "@/lib/company";
 
-const FEATURES = [
-  { icon: MessageSquare, color: "text-indigo-300", title: "Chat with AI", text: "Ask questions, get homework help, brainstorm ideas or fix your code." },
-  { icon: Globe, color: "text-sky-300", title: "Build a website", text: "Describe it in a sentence. Publish it at yourname.blackhole-ai-tech.com." },
-  { icon: Gamepad2, color: "text-fuchsia-300", title: "Make a game", text: "Start from a playable game, change it by chatting, and share it with friends." },
+const FACTS = [
+  { icon: Sparkles, title: "No coding", text: "Just describe it" },
+  { icon: Smartphone, title: "Phone or computer", text: "Works everywhere" },
+  { icon: Globe, title: "Free web address", text: "Your own link to share" },
+  { icon: ShieldCheck, title: "Safety checked", text: "Before anything goes live" },
 ];
 
-// The games shipped with the app (src/lib/builtInGames.js), playable without an account.
-// Listed by name only so their code isn't loaded with this page.
+const FEATURES = [
+  {
+    eyebrow: "Chat",
+    title: "Ask anything. Get real help.",
+    text: "Homework, ideas, writing or code: ask in your own words and get a clear answer in seconds.",
+    bullets: ["Explains things simply", "Writes, summarizes and makes quizzes", "Send a picture and ask about it"],
+    cta: { to: START_FREE, label: "Start chatting" },
+    Picture: ChatShot,
+  },
+  {
+    eyebrow: "Websites",
+    title: "Describe your website. It's live in minutes.",
+    text: "Say what your site is for. The AI writes the pages and the design, and changes anything you ask. Publish it free at yourname.blackhole-ai-tech.com.",
+    bullets: ["Free templates to start from", "Edit by chatting or by hand", "Keep your code: ZIP download or GitHub on Pro"],
+    cta: { to: "/templates", label: "Browse templates" },
+    Picture: SiteShot,
+  },
+  {
+    eyebrow: "Games",
+    title: "Make a game. Send it to your friends.",
+    text: "Describe a game and play it right away. Change the levels, speed or look by chatting, then share the link. Friends play on any phone or computer, no account needed.",
+    bullets: ["Touch controls on phones", "Links open straight into the game", "Remix the built-in games"],
+    cta: { to: "/arcade", label: "Play in the Arcade" },
+    Picture: GameShot,
+  },
+  {
+    eyebrow: "Sell",
+    title: "Sell from your own site.",
+    text: "Add Buy buttons for your products and get paid, minus a small 5% fee. Payments are being upgraded right now; ask us for early access.",
+    bullets: ["Buyers pay on a secure checkout page", "Buyers can't change your prices", "You see every order"],
+    cta: { to: "/contact?topic=business", label: "Ask about selling" },
+    Picture: ShopShot,
+  },
+  {
+    eyebrow: "Teams",
+    title: "Build it together.",
+    text: "The Team plan puts up to 3 people on one plan, sharing one pool of AI credits.",
+    bullets: ["Invite by email", "Everyone builds with the same credits", "$5 a month for the whole team"],
+    cta: { to: "/pricing", label: "See pricing" },
+    Picture: TeamShot,
+  },
+];
+
+const STEPS = [
+  ["Describe it", "Type what you want in your own words, or pick a template."],
+  ["Change anything", "Ask for new colors, pages, levels or features until it's right."],
+  ["Publish and share", "Get a link anyone can open on a phone or computer."],
+];
+
+// Built-in games (src/lib/builtInGames.js), listed by name so their code isn't loaded here.
 const GAMES = [
   { name: "pulse", title: "Pulse Jump", text: "Jump and fly through 7 neon levels.", color: "from-indigo-500 to-fuchsia-500" },
   { name: "veck", title: "Veck", text: "Fight waves of bots in a zero-gravity arena.", color: "from-fuchsia-500 to-rose-500" },
 ];
 
-const STEPS = [
-  ["Describe it", "Say what you want in your own words."],
-  ["Change anything", "Ask for new colors, pages, levels or features."],
-  ["Publish and share", "Get a link anyone can open."],
+const FAQ = [
+  ["Is Blackhole AI free?", "Yes. The Free plan gives you 50 AI credits every month and lets you publish a website and a game. Pro is $1 a month and Team is $5 a month when you want more."],
+  ["Do I need to know how to code?", "No. You describe what you want in your own words. If you do know code, you can edit it by hand, and on Pro you can download it or push it to GitHub."],
+  ["Does it work on my phone?", "Yes. Everything works on phones, tablets and computers, and you can install it like an app from your profile."],
+  ["What are credits?", "Credits are what the AI uses up when it works for you. Bigger jobs use more. Your plan gives you a fresh allowance every month."],
+  ["Is it safe for kids?", "Every site and game is checked before it's published: adult content, scams, fake login forms and harmful code are blocked. Anyone can report a page, and makers' emails are never shown."],
+  ["Can I take my site down?", "Yes. You can unpublish or delete your websites and games at any time from your profile."],
 ];
 
 // "Made with Blackhole AI" badges link here with ?from=site:<name> or game:<name>.
@@ -31,7 +86,60 @@ function cameFrom() {
   return m ? { kind: m[1], name: m[2] } : null;
 }
 
-// What signed-out visitors see first: what Blackhole AI does, real examples, and a way in.
+// Fades a section in as it scrolls into view.
+function Reveal({ children, className = "" }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function Question({ q, children }) {
+  return (
+    <details className="group py-4">
+      <summary className="flex items-center justify-between gap-4 cursor-pointer list-none text-lg font-medium text-white">
+        {q}
+        <ChevronDown className="w-5 h-5 text-slate-400 shrink-0 transition-transform group-open:rotate-180" />
+      </summary>
+      <div className="mt-3 text-slate-400">{children}</div>
+    </details>
+  );
+}
+
+function FeatureRow({ eyebrow, title, text, bullets, cta, Picture, flip }) {
+  return (
+    <Reveal className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
+      <div className={flip ? "md:order-2" : ""}>
+        <p className="text-sm font-semibold uppercase tracking-wider text-indigo-300">{eyebrow}</p>
+        <h3 className="mt-2 text-2xl sm:text-4xl font-bold text-white leading-tight">{title}</h3>
+        <p className="mt-4 text-slate-400 text-base sm:text-lg">{text}</p>
+        <ul className="mt-5 space-y-2">
+          {bullets.map((b) => (
+            <li key={b} className="flex items-start gap-2 text-slate-200">
+              <Check className="w-5 h-5 text-emerald-400 shrink-0" /> {b}
+            </li>
+          ))}
+        </ul>
+        <Link to={cta.to} className="mt-6 inline-flex items-center gap-2 text-indigo-300 font-semibold hover:text-indigo-200">
+          {cta.label} <ArrowRight className="w-4 h-4" />
+        </Link>
+      </div>
+      <div className={`px-2 ${flip ? "md:order-1" : ""}`}>
+        <Picture />
+      </div>
+    </Reveal>
+  );
+}
+
+// What visitors see first: a long page explaining what Blackhole AI does, with pictures,
+// prices, answers and "Get started for free" all the way down.
 export default function Landing() {
   const [from] = useState(cameFrom);
   const [sites, setSites] = useState([]);
@@ -45,59 +153,101 @@ export default function Landing() {
 
   return (
     <PublicLayout>
-      <motion.section
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="text-center pt-10 pb-14 sm:pt-16 sm:pb-20"
-      >
-        {from && (
-          <p className="inline-flex items-center gap-1.5 mb-6 px-3 py-1.5 rounded-full bg-slate-800/70 border border-slate-700/60 text-xs text-slate-300">
-            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-            {from.kind === "game" ? "The game" : "The site"} &ldquo;{from.name}&rdquo; was made with Blackhole AI
+      {/* Hero */}
+      <section className="grid lg:grid-cols-2 gap-12 items-center pt-10 sm:pt-16 pb-12">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="text-center lg:text-left"
+        >
+          {from && (
+            <p className="inline-flex items-center gap-1.5 mb-6 px-3 py-1.5 rounded-full bg-slate-800/70 border border-slate-700/60 text-xs text-slate-300">
+              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+              {from.kind === "game" ? "The game" : "The site"} &ldquo;{from.name}&rdquo; was made with Blackhole AI
+            </p>
+          )}
+          <h1 className="text-4xl sm:text-6xl font-bold tracking-tight leading-[1.05]">
+            <span className="bg-gradient-to-r from-[#ffffff] via-indigo-200 to-fuchsia-200 bg-clip-text text-transparent">
+              Make websites and games just by describing them
+            </span>
+          </h1>
+          <p className="mt-5 text-slate-400 text-lg max-w-xl mx-auto lg:mx-0">
+            Blackhole AI is an AI helper that chats, builds websites and makes games for you. Share what you make with a link. Free to start.
           </p>
-        )}
-        <h1 className="text-4xl sm:text-6xl font-bold tracking-tight leading-tight">
-          <span className="bg-gradient-to-r from-[#ffffff] via-indigo-200 to-fuchsia-200 bg-clip-text text-transparent">
-            Make websites and games
-            <br className="hidden sm:block" /> just by describing them
-          </span>
-        </h1>
-        <p className="mt-5 text-slate-400 text-base sm:text-lg max-w-xl mx-auto">
-          Chat with AI, build a website or make a game, then share it with a link. Free to start.
-        </p>
-        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-          <Link
-            to={START}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-white font-semibold shadow-lg shadow-indigo-500/25 hover:opacity-90"
-          >
-            {from ? "Make your own" : "Start free"} <ArrowRight className="w-4 h-4" />
-          </Link>
-          <Link
-            to="/showcase"
-            className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-xl bg-slate-800/70 border border-slate-700/60 text-slate-200 font-medium hover:bg-slate-700/70"
-          >
-            See what people built
-          </Link>
-        </div>
-      </motion.section>
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3">
+            <Link
+              to={START_FREE}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-white text-lg font-semibold shadow-lg shadow-indigo-500/25 hover:opacity-90"
+            >
+              {from ? "Make your own for free" : "Get started for free"} <ArrowRight className="w-5 h-5" />
+            </Link>
+            <a
+              href="#how"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-1 px-6 py-3.5 rounded-full border border-slate-600 text-slate-200 font-medium hover:bg-white/5"
+            >
+              See how it works <ChevronDown className="w-4 h-4" />
+            </a>
+          </div>
+          <p className="mt-4 text-xs text-slate-500">No credit card needed · Works on phones and computers</p>
+        </motion.div>
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }}>
+          <HeroCollage />
+        </motion.div>
+      </section>
 
-      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {FEATURES.map(({ icon: Icon, color, title, text }) => (
-          <div key={title} className="rounded-2xl bg-slate-900/60 border border-slate-700/50 p-5">
-            <Icon className={`w-6 h-6 ${color}`} />
-            <h2 className="mt-3 font-semibold text-white">{title}</h2>
-            <p className="mt-1 text-sm text-slate-400">{text}</p>
+      {/* Quick facts */}
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {FACTS.map(({ icon: Icon, title, text }) => (
+          <div key={title} className="rounded-2xl bg-slate-900/50 border border-slate-800 p-4 flex items-center gap-3">
+            <Icon className="w-6 h-6 text-indigo-300 shrink-0" />
+            <span className="min-w-0">
+              <span className="block text-sm font-semibold text-white">{title}</span>
+              <span className="block text-xs text-slate-400 break-words">{text}</span>
+            </span>
           </div>
         ))}
       </section>
 
-      <section className="mt-14 sm:mt-20">
+      {/* What it can do */}
+      <section className="mt-24 sm:mt-32">
+        <Reveal className="text-center max-w-2xl mx-auto">
+          <h2 className="text-3xl sm:text-5xl font-bold text-white">One place to make anything</h2>
+          <p className="mt-4 text-slate-400 text-lg">Chat, websites, games, shops and teams, all with the same AI helper.</p>
+        </Reveal>
+        <div className="mt-16 space-y-24 sm:space-y-32">
+          {FEATURES.map((f, i) => (
+            <FeatureRow key={f.eyebrow} {...f} flip={i % 2 === 1} />
+          ))}
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section id="how" className="mt-28 sm:mt-36 scroll-mt-24">
+        <Reveal className="text-center">
+          <h2 className="text-3xl sm:text-5xl font-bold text-white">How it works</h2>
+          <p className="mt-4 text-slate-400 text-lg">Three steps, no experience needed.</p>
+        </Reveal>
+        <ol className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-5">
+          {STEPS.map(([title, text], i) => (
+            <li key={title} className="rounded-3xl bg-slate-900/50 border border-slate-800 p-6">
+              <span className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-white font-bold flex items-center justify-center">{i + 1}</span>
+              <p className="mt-4 text-lg font-semibold text-white">{title}</p>
+              <p className="mt-1 text-slate-400">{text}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      {/* Play now */}
+      <section className="mt-28 sm:mt-36">
         <div className="flex items-end justify-between gap-3">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white">Play one now</h2>
+          <div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white">Play one now</h2>
+            <p className="mt-2 text-slate-400">Games made with Blackhole AI. No account needed.</p>
+          </div>
           <Link to="/arcade" className="shrink-0 text-sm text-indigo-300 hover:text-indigo-200">All games</Link>
         </div>
-        <p className="mt-1 text-slate-400 text-sm">Games made with Blackhole AI. No account needed.</p>
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
           {GAMES.map((g) => (
             <Link
@@ -118,27 +268,10 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="mt-14 sm:mt-20">
-        <h2 className="text-center text-2xl sm:text-3xl font-bold text-white">How it works</h2>
-        <ol className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {STEPS.map(([title, text], i) => (
-            <li key={title} className="flex gap-3 rounded-2xl bg-slate-900/40 border border-slate-800 p-5">
-              <span className="shrink-0 w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-400/40 text-indigo-200 text-sm font-semibold flex items-center justify-center">
-                {i + 1}
-              </span>
-              <span>
-                <span className="block font-semibold text-white">{title}</span>
-                <span className="block text-sm text-slate-400 mt-0.5">{text}</span>
-              </span>
-            </li>
-          ))}
-        </ol>
-      </section>
-
       {sites.length > 0 && (
-        <section className="mt-14 sm:mt-20">
+        <section className="mt-20">
           <div className="flex items-end justify-between gap-3">
-            <h2 className="text-2xl sm:text-3xl font-bold text-white">Made by people like you</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white">Made by people like you</h2>
             <Link to="/showcase" className="shrink-0 text-sm text-indigo-300 hover:text-indigo-200">See all</Link>
           </div>
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -160,15 +293,60 @@ export default function Landing() {
         </section>
       )}
 
-      <section className="mt-14 sm:mt-20 text-center rounded-3xl bg-gradient-to-br from-indigo-500/15 to-fuchsia-500/15 border border-indigo-400/20 px-6 py-10">
-        <h2 className="text-2xl sm:text-3xl font-bold text-white">Your first site takes a few minutes</h2>
-        <p className="mt-2 text-slate-400">Free to start. Pro is $1 a month if you want more.</p>
-        <Link
-          to={START}
-          className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-slate-900 font-semibold hover:bg-slate-200"
-        >
-          Start free <ArrowRight className="w-4 h-4" />
-        </Link>
+      {/* Safety */}
+      <section className="mt-28 sm:mt-36">
+        <FeatureRow
+          eyebrow="Safety"
+          title="Safe for everyone, including kids."
+          text="Blackhole AI is used by young people, so every website and game is checked before it goes live, and anyone can report a page for us to review."
+          bullets={["Adult content, scams and harmful code are blocked", "Fake login and card forms aren't allowed", "Makers' email addresses are never shown"]}
+          cta={{ to: "/about", label: "About us" }}
+          Picture={SafetyShot}
+          flip
+        />
+      </section>
+
+      {/* Pricing */}
+      <section className="mt-28 sm:mt-36">
+        <Reveal className="text-center mb-10">
+          <h2 className="text-3xl sm:text-5xl font-bold text-white">Simple prices</h2>
+          <p className="mt-4 text-slate-400 text-lg">Start free. Upgrade only if you want more.</p>
+        </Reveal>
+        <PricingCards />
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="mt-28 sm:mt-36 max-w-3xl mx-auto scroll-mt-24">
+        <h2 className="text-center text-3xl sm:text-4xl font-bold text-white">Questions</h2>
+        <div className="mt-8 divide-y divide-slate-800 border-y border-slate-800">
+          {FAQ.map(([q, a]) => (
+            <Question key={q} q={q}>
+              <p>{a}</p>
+            </Question>
+          ))}
+          <Question q="How do I contact you?">
+            <div className="space-y-2">
+              <a href={`mailto:${CONTACT_EMAIL}`} className="flex items-center gap-2 hover:text-white break-all">
+                <Mail className="w-4 h-4 shrink-0" /> {CONTACT_EMAIL}
+              </a>
+              <a href={CONTACT_PHONE_LINK} className="flex items-center gap-2 hover:text-white">
+                <Phone className="w-4 h-4 shrink-0" /> {CONTACT_PHONE}
+              </a>
+              <Link to="/contact" className="inline-block text-indigo-300 hover:text-indigo-200">Or send us a message →</Link>
+            </div>
+          </Question>
+        </div>
+      </section>
+
+      {/* Final call to action */}
+      <section className="mt-28 sm:mt-36">
+        <Reveal className="text-center rounded-[2rem] bg-gradient-to-br from-indigo-600/30 via-fuchsia-600/20 to-transparent border border-indigo-400/20 px-6 py-14 sm:py-20">
+          <h2 className="text-3xl sm:text-5xl font-bold text-white">Make your first thing today</h2>
+          <p className="mt-4 text-slate-300 text-lg max-w-xl mx-auto">A website, a game or just a question. It's free to start and takes a minute to sign up.</p>
+          <Link to={START_FREE} className="mt-8 inline-flex items-center gap-2 px-8 py-4 rounded-full bg-white text-slate-900 text-lg font-semibold hover:bg-slate-200">
+            Get started for free <ArrowRight className="w-5 h-5" />
+          </Link>
+        </Reveal>
       </section>
     </PublicLayout>
   );

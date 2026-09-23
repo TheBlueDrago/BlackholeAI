@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Store, Wand2, Globe, Users, Download, ShieldCheck, ArrowRight, Handshake } from "lucide-react";
 import PublicLayout, { START_FREE } from "@/components/PublicLayout";
+import PricingCards from "@/components/landing/PricingCards";
 
 const POINTS = [
   { icon: Wand2, title: "Describe it, get a website", text: "Say what your business does. The AI writes the pages, the words and the design, and changes anything you ask." },
@@ -10,12 +11,6 @@ const POINTS = [
   { icon: Users, title: "Work as a team", text: "The Team plan lets up to 3 people build together and share one pool of AI credits." },
   { icon: Download, title: "Your code is yours", text: "On Pro and Team, download your site as a ZIP or push it to GitHub whenever you like." },
   { icon: ShieldCheck, title: "Safe by design", text: "Every published page is checked for scams and harmful content, and visitors can report a page." },
-];
-
-const PLANS = [
-  { name: "Free", price: "$0", text: "1 website, AI credits to build it" },
-  { name: "Pro", price: "$1/mo", text: "3 websites, 4 AI models, ZIP download and GitHub" },
-  { name: "Team", price: "$5/mo", text: "Up to 3 people sharing credits" },
 ];
 
 // For shops, clubs and small businesses, plus a door for partners, investors and buyers.
@@ -49,14 +44,8 @@ export default function Business() {
 
       <section className="mt-14">
         <h2 className="text-center text-2xl sm:text-3xl font-bold text-white">Simple prices</h2>
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {PLANS.map((p) => (
-            <div key={p.name} className="rounded-2xl bg-slate-900/60 border border-slate-700/50 p-5 text-center">
-              <p className="text-slate-300 font-medium">{p.name}</p>
-              <p className="mt-1 text-3xl font-bold text-white">{p.price}</p>
-              <p className="mt-2 text-sm text-slate-400">{p.text}</p>
-            </div>
-          ))}
+        <div className="mt-8">
+          <PricingCards />
         </div>
         <p className="text-center mt-4">
           <Link to="/templates" className="text-sm text-indigo-300 hover:text-indigo-200">Start from a free template →</Link>

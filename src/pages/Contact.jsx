@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Mail, Loader2, CheckCircle2, ArrowLeft } from "lucide-react";
+import { Mail, Phone, Loader2, CheckCircle2, Briefcase, Handshake } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import PublicLayout from "@/components/PublicLayout";
+import { CONTACT_EMAIL, CONTACT_PHONE, CONTACT_PHONE_LINK } from "@/lib/company";
 
 // Keys must match TOPICS in cloudflare-lib/contact.js.
 const TOPICS = [
@@ -51,24 +53,52 @@ export default function Contact() {
   const field = "mt-1 w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white outline-none focus:border-indigo-400";
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-200 flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-md">
-        <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-white mb-4">
-          <ArrowLeft className="w-4 h-4" /> Blackhole AI
-        </Link>
-        <div className="bg-slate-900/80 border border-slate-700/60 rounded-2xl p-6">
+    <PublicLayout title="Contact us">
+      <section className="text-center pt-10 pb-10">
+        <h1 className="text-4xl sm:text-5xl font-bold text-white">Contact us</h1>
+        <p className="mt-3 text-slate-400 text-lg max-w-xl mx-auto">Questions, ideas, help with your account, or business: we'd love to hear from you.</p>
+      </section>
+      <div className="grid lg:grid-cols-5 gap-6 items-start">
+        <div className="lg:col-span-2 space-y-4">
+          <a href={`mailto:${CONTACT_EMAIL}`} className="flex items-center gap-4 rounded-2xl bg-slate-900/60 border border-slate-700/50 p-5 hover:border-indigo-500/50">
+            <span className="w-12 h-12 shrink-0 rounded-xl bg-indigo-500/15 border border-indigo-400/30 flex items-center justify-center"><Mail className="w-6 h-6 text-indigo-300" /></span>
+            <span className="min-w-0">
+              <span className="block text-sm text-slate-400">Email us</span>
+              <span className="block text-white text-sm sm:text-base font-medium break-all">{CONTACT_EMAIL}</span>
+            </span>
+          </a>
+          <a href={CONTACT_PHONE_LINK} className="flex items-center gap-4 rounded-2xl bg-slate-900/60 border border-slate-700/50 p-5 hover:border-indigo-500/50">
+            <span className="w-12 h-12 shrink-0 rounded-xl bg-indigo-500/15 border border-indigo-400/30 flex items-center justify-center"><Phone className="w-6 h-6 text-indigo-300" /></span>
+            <span>
+              <span className="block text-sm text-slate-400">Call or text</span>
+              <span className="block text-white font-medium">{CONTACT_PHONE}</span>
+            </span>
+          </a>
+          <button type="button" onClick={() => setTopic("business")} className="w-full text-left flex items-center gap-4 rounded-2xl bg-slate-900/60 border border-slate-700/50 p-5 hover:border-indigo-500/50">
+            <span className="w-12 h-12 shrink-0 rounded-xl bg-sky-500/15 border border-sky-400/30 flex items-center justify-center"><Briefcase className="w-6 h-6 text-sky-300" /></span>
+            <span>
+              <span className="block text-white font-medium">For your business</span>
+              <span className="block text-sm text-slate-400">Websites, selling online, teams</span>
+            </span>
+          </button>
+          <button type="button" onClick={() => setTopic("partnership")} className="w-full text-left flex items-center gap-4 rounded-2xl bg-slate-900/60 border border-slate-700/50 p-5 hover:border-indigo-500/50">
+            <span className="w-12 h-12 shrink-0 rounded-xl bg-fuchsia-500/15 border border-fuchsia-400/30 flex items-center justify-center"><Handshake className="w-6 h-6 text-fuchsia-300" /></span>
+            <span>
+              <span className="block text-white font-medium">Partners, investors and acquirers</span>
+              <span className="block text-sm text-slate-400">Let's talk</span>
+            </span>
+          </button>
+        </div>
+        <div className="lg:col-span-3 bg-slate-900/80 border border-slate-700/60 rounded-3xl p-6 sm:p-8">
           {sent ? (
             <div className="text-center space-y-3">
               <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto" />
-              <h1 className="text-xl font-semibold text-white">Message sent</h1>
+              <h2 className="text-xl font-semibold text-white">Message sent</h2>
               <p className="text-sm text-slate-400">Thanks — we'll reply to {signedInEmail || email}.</p>
             </div>
           ) : (
             <form onSubmit={submit} className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Mail className="w-5 h-5 text-indigo-300" />
-                <h1 className="text-xl font-semibold text-white">Contact us</h1>
-              </div>
+              <h2 className="text-xl font-semibold text-white">Send us a message</h2>
               <label className="block text-sm">
                 <span className="text-slate-400">What's it about?</span>
                 <select value={topic} onChange={(e) => setTopic(e.target.value)} className={field}>
@@ -104,6 +134,6 @@ export default function Contact() {
           )}
         </div>
       </div>
-    </div>
+    </PublicLayout>
   );
 }
