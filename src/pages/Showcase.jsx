@@ -1,41 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Loader2, Sparkles, ExternalLink } from "lucide-react";
 import { base44 } from "@/api/base44Client";
-
-const SRC_W = 1280;
-const SRC_H = 800;
-
-// A scaled-down live render of the site, loaded straight from KV (/published/site/…)
-// with scripts off (empty sandbox), so thumbnails are cheap and can't run code.
-function Thumb({ name }) {
-  const ref = useRef(null);
-  const [scale, setScale] = useState(0);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const update = () => setScale(el.clientWidth / SRC_W);
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-  return (
-    <div ref={ref} className="absolute inset-0 pointer-events-none">
-      {scale > 0 && (
-        <iframe
-          src={`/published/site/${encodeURIComponent(name)}`}
-          title={name}
-          loading="lazy"
-          tabIndex={-1}
-          scrolling="no"
-          sandbox=""
-          style={{ width: SRC_W, height: SRC_H, transform: `scale(${scale})`, transformOrigin: "top left", border: 0, background: "#fff" }}
-        />
-      )}
-    </div>
-  );
-}
+import SiteThumb from "@/components/SiteThumb";
 
 // Public gallery of sites people built with Blackhole AI (owners opt in from the
 // Website Designer). Doubles as a landing page for visitors who aren't signed up.
@@ -88,7 +55,7 @@ export default function Showcase() {
                 className="group rounded-2xl bg-slate-900/60 border border-slate-700/50 p-3 hover:border-indigo-500/50 transition-colors"
               >
                 <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-slate-800">
-                  <Thumb name={s.name} />
+                  <SiteThumb name={s.name} />
                 </div>
                 <div className="flex items-center gap-2 mt-3 px-1">
                   <div className="min-w-0 flex-1">
