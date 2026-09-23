@@ -23,6 +23,7 @@
 // at what their credits cover.
 import { json } from "../../../../../cloudflare-lib/published.js";
 import { currentUser, entitlement, creditStatus, charge, creditsFor, CHARS_PER_CREDIT, EFFORT_MULT, TIER_OF_MODEL, TIER_NAMES } from "../../../../../cloudflare-lib/credits.js";
+import { allow } from "../../../../../cloudflare-lib/ratelimit.js";
 
 const MODEL_MAP = {
   automatic: "gemini-3.5-flash",
@@ -211,10 +212,17 @@ export async function onRequestPost(context) {
     const ent = await entitlement(kv, request, user);
     if (ent.blocked) return json({ error: "Your account can't use the AI right now." }, 403);
 
-    const requested = MODEL_MAP[body.model] || DEFAULT_MODEL;
-    const tier = TIER_OF_MODEL[body.model] || "ai";
-    // Internal calls (naming a chat) are quick, tiny and free — but still need a signed-in user.
+    // Internal calls (naming a chat) are quick, tiny and free — but still need a signed-in
+    // user. Since they're free, they're held to the basic model, a short prompt and a
+    // per-user rate, so they can't be used as unlimited free AI (the Gemini free-tier
+    // quota is shared by everyone's chats).
     const internal = !!body.internal;
+    if (internal) {
+      if (prompt.length > 1500) return json({ error: "Internal prompt too long." }, 400);
+      if (!(await allow(`internal:${user.id}`, 30, 3600))) return json({ error: "Too many requests." }, 429);
+    }
+    const requested = internal ? DEFAULT_MODEL : MODEL_MAP[body.model] || DEFAULT_MODEL;
+    const tier = TIER_OF_MODEL[body.model] || "ai";
     const effort = internal ? "low" : EFFORT[body.effort] ? body.effort : DEFAULT_EFFORT;
     const mult = EFFORT_MULT[effort];
 
@@ -242,7 +250,7 @@ export async function onRequestPost(context) {
       }
     }
 
-    const chain = [requested, ...MODELS_BY_STRENGTH.filter((m) => m !== requested)].slice(0, MAX_ATTEMPTS);
+    const chain = internal ? [DEFAULT_MODEL] : [requested, ...MODELS_BY_STRENGTH.filter((m) => m !== requested)].slice(0, MAX_ATTEMPTS);
     // The reply stops at what the user's credits cover: whole credits x effort multiplier.
     const maxChars = internal ? Infinity : Math.floor(left / mult) * CHARS_PER_CREDIT;
     const maxTokens = internal ? 1024 : 0;
