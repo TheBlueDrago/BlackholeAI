@@ -34,7 +34,7 @@ async function ask(apiKey, model, prompt) {
     });
     if (res.ok || res.status !== 400) break;
   }
-  if (!res.ok) throw new Error(`Gemini ${res.status}`);
+  if (!res.ok) throw new Error(`Gemini ${res.status}: ${(await res.text().catch(() => "")).slice(0, 200)}`);
   const data = await res.json();
   const parts = (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) || [];
   return parts.map((p) => (p.thought ? "" : p.text || "")).join("");
@@ -61,15 +61,19 @@ export async function onRequestPost(context) {
     ].join("\n");
 
     let data = null;
+    let lastErr = "";
     for (const model of MODELS) {
       try {
-        data = extractJson(await ask(env.GEMINI_API_KEY, model, prompt));
+        const text = await ask(env.GEMINI_API_KEY, model, prompt);
+        data = extractJson(text);
         if (data) break;
-      } catch {
+        lastErr = `no JSON in reply: ${text.slice(0, 120)}`;
+      } catch (err) {
         // Busy or unavailable: try the next model.
+        lastErr = String((err && err.message) || err);
       }
     }
-    if (!data) return json({ error: "Search is busy right now. Please try again in a minute." }, 503);
+    if (!data) return json({ error: "Search is busy right now. Please try again in a minute.", detail: lastErr }, 503);
     const results = Array.isArray(data.results)
       ? data.results.filter((r) => r && typeof r.url === "string" && /^https:\/\//.test(r.url) && r.title).slice(0, 10)
       : [];
