@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import Markdown, { CopyButton } from "@/components/chat/Markdown";
-import { Terminal } from "lucide-react";
+import { Terminal, RotateCcw } from "lucide-react";
 import { OUT_OF_CREDITS_NOTE } from "@/lib/creditCost";
 import { useEffort, effortFor } from "@/lib/effort";
 import { streamChat } from "@/lib/aiStream";
@@ -82,6 +82,15 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
     runPrompt(text);
   };
 
+  // Ask the last question again, replacing the last reply.
+  const retryLast = () => {
+    const n = messages.length;
+    if (loading || aiCodeExhausted || n < 2 || messages[n - 1].role !== "ai" || messages[n - 2].role !== "user") return;
+    const question = messages[n - 2].content;
+    setMessages((m) => m.slice(0, -2));
+    runPrompt(question);
+  };
+
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -120,7 +129,18 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
                 ) : (
                   <>
                     <Markdown text={m.content} />
-                    <div className="flex justify-end mt-1 -mb-1">
+                    <div className="flex justify-end gap-1 mt-1 -mb-1">
+                      {i === messages.length - 1 && !loading && !aiCodeExhausted && (
+                        <button
+                          type="button"
+                          onClick={retryLast}
+                          title="Try again (uses credits)"
+                          aria-label="Try again"
+                          className="p-1 rounded-md text-slate-500 hover:text-slate-200"
+                        >
+                          <RotateCcw className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                       <CopyButton getText={() => m.content} label="Copy reply" className="p-1 rounded-md text-slate-500 hover:text-slate-200" />
                     </div>
                   </>
