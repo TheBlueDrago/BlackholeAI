@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import Markdown, { CopyButton } from "@/components/chat/Markdown";
 import { Plus, X, Paperclip } from "lucide-react";
 import BlackholeIcon from "@/components/BlackholeIcon";
 import AiChooser from "@/components/AiChooser";
@@ -148,13 +149,22 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
           {messages.map((m, i) => (
             <div key={i} className={`flex items-end gap-2 ${m.role === "user" ? "justify-end" : "justify-start"}`}>
               <div
-                className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
+                className={`max-w-[80%] min-w-0 px-4 py-3 rounded-2xl text-sm leading-relaxed ${
                   m.role === "user"
-                    ? "bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-br-sm"
+                    ? "whitespace-pre-wrap bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-br-sm"
                     : "bg-slate-800 text-slate-100 rounded-bl-sm border border-slate-700/50"
                 }`}
               >
-                {m.content}
+                {m.role === "user" ? (
+                  m.content
+                ) : (
+                  <>
+                    <Markdown text={m.content} />
+                    <div className="flex justify-end mt-1 -mb-1">
+                      <CopyButton getText={() => m.content} label="Copy reply" className="p-1 rounded-md text-slate-500 hover:text-slate-200" />
+                    </div>
+                  </>
+                )}
               </div>
               {m.role === "user" && (
                 <div className="keep-color w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-xs font-bold text-white shrink-0">
@@ -166,8 +176,8 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
 
           {loading && live && (
             <div className="flex justify-start">
-              <div className="max-w-[80%] px-4 py-3 rounded-2xl rounded-bl-sm text-sm leading-relaxed whitespace-pre-wrap bg-slate-800 text-slate-100 border border-slate-700/50">
-                {live}
+              <div className="max-w-[80%] min-w-0 px-4 py-3 rounded-2xl rounded-bl-sm text-sm leading-relaxed bg-slate-800 text-slate-100 border border-slate-700/50">
+                <Markdown text={live} />
                 <span className="inline-block w-1.5 h-4 ml-0.5 align-middle bg-indigo-400 animate-pulse" />
               </div>
             </div>
