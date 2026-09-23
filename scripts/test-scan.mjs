@@ -52,3 +52,15 @@ r = scanPage(
 assert(r.flag === "red" && r.malware >= 50, "many malware signs add up to 50%+ (red)");
 
 assert(flagRank("red") < flagRank("yellow") && flagRank("yellow") < flagRank("green"), "red sorts before yellow before green");
+
+// Publish-time blocking (published.js refuses pages whose scan has a `block` list).
+r = scanPage(page("<h1>Netflix</h1><p>Netflix movies. Netflix shows. Sign in to Netflix. Netflix originals. Netflix kids.</p>"));
+assert(r.block.length === 0, "a brand-heavy fan page is flagged red but not blocked at publish");
+r = scanPage(page(j("<p>x", "xx po", "rn ns", "fw</p>")));
+assert(r.block.some((x) => /adult/.test(x)), "adult content is blocked at publish");
+r = scanPage(page(`${S} src="https://${j("coin", "hive")}.invalid/m.js">${SE}`));
+assert(r.block.some((x) => /mining/.test(x)), "a crypto miner is blocked at publish");
+r = scanPage(page(`<input id="n">${S}>function calc(){return ${EV}n.value)}${SE}`));
+assert(r.block.length === 0, "a calculator using eval is not blocked");
+r = scanPage(page(`<h1>My Bakery</h1><p>Fresh bread every day.</p>`));
+assert(r.block.length === 0, "a normal page is not blocked");

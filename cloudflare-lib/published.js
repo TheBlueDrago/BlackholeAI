@@ -9,6 +9,7 @@
 // Base44's get-site-html/get-game-html already fetch `html` when it's a URL, so
 // every reader (designer, browser, games front, subdomain Worker) keeps working.
 import { findCredentialForm } from "./phishing.js";
+import { scanPage } from "./scan.js";
 import { stripInjected } from "./injected.js";
 import { allow, TOO_MANY } from "./ratelimit.js";
 
@@ -90,6 +91,18 @@ export async function publish(context, kind, { name, html: rawHtml, extra }) {
       return json(
         {
           error: `This ${label.toLowerCase()} has ${phishing}. Pages here can't send passwords or card numbers to other websites — remove that form (use Buy Now buttons for payments).`,
+        },
+        422
+      );
+    }
+
+    // Kid-safety check: refuse the worst pages up front instead of waiting for a report.
+    // Admins can still publish (e.g. to restore a false positive).
+    const scan = scanPage(html);
+    if (scan.block.length && user.role !== "admin") {
+      return json(
+        {
+          error: `This ${label.toLowerCase()} can't be published because it has ${scan.block.join(", ")}. Blackhole AI is used by kids, so pages must be safe for everyone — ask the AI to remove that part and try again.`,
         },
         422
       );

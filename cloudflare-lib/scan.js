@@ -62,6 +62,9 @@ export function scanPage(html) {
   let malware = 0; // 0-100
   let red = false;
   let yellow = false;
+  // Red reasons serious enough to refuse publishing outright (a brand name alone isn't:
+  // kids make fan pages all the time, so that stays a Monitor flag for a human to judge).
+  const block = [];
 
   const phish = findCredentialForm(src);
   if (phish) {
@@ -73,6 +76,7 @@ export function scanPage(html) {
     red = true;
     malware += 70;
     reasons.push("Contains a crypto-mining script");
+    block.push("a crypto-mining script");
   }
 
   const evalUse = count(/\beval\s*\(|new\s+Function\s*\(|setTimeout\s*\(\s*["'`]/g, src);
@@ -128,6 +132,7 @@ export function scanPage(html) {
   if (adult >= 2 || adultHits >= 3) {
     red = true;
     reasons.push("Adult content (not appropriate for kids)");
+    block.push("adult content");
   } else if (adultHits) {
     yellow = true;
     reasons.push("Mentions adult topics");
@@ -136,6 +141,7 @@ export function scanPage(html) {
   if (swears >= 5) {
     red = true;
     reasons.push("Lots of swearing");
+    block.push("lots of swearing");
   } else if (swears) {
     yellow = true;
     reasons.push("Some swearing");
@@ -170,7 +176,10 @@ export function scanPage(html) {
     red = true;
     reasons.push(`Malware score ${malware}%`);
   }
-  return { flag: red ? "red" : yellow ? "yellow" : "green", malware, reasons };
+  // Blocking needs a higher bar than the red flag: a calculator using eval plus a
+  // game decoding a few strings can reach 50 without being harmful.
+  if (malware >= 70) block.push("code that looks harmful (hidden scripts, downloads or redirects)");
+  return { flag: red ? "red" : yellow ? "yellow" : "green", malware, reasons, block };
 }
 
 // "AI check": Gemini reads the page and judges it. Returns { flag, reasons } or throws.
