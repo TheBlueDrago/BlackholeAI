@@ -1,8 +1,8 @@
 // Refer-a-friend. Every user gets a short code (link: /register?ref=CODE). When a brand
-// new account signs up through it, the referrer gets one reward of their choice for that
-// referral — 25 Blackhole AI, 15 Blackhole Code, 10 Galaxy or 5 Space credits — added
-// to their server-side bonus balance (see credits.js). Admins can take a referral back,
-// which removes its credits again.
+// new account signs up through it, BOTH people get one reward of their choice — 25
+// Blackhole AI, 15 Blackhole Code, 10 Galaxy or 5 Space credits — added to their
+// server-side bonus balance (see credits.js). Admins can take a referral back, which
+// removes both rewards again.
 //
 // KV keys (PUBLISHED_HTML namespace):
 //   refcode:<code>        -> referrer's user id
@@ -10,6 +10,7 @@
 //   referrals:<userId>    -> [{ id, name, at, reward: {tier, amount} | null, revoked }]
 //   referredby:<userId>   -> the referrer's user id (one referrer per account)
 //   referredemail:<email> -> 1 (an email can only ever be referred once)
+//   welcome:<userId>      -> the new user's own bonus { from, at, reward, revoked }
 import { adjustBonus } from "./credits.js";
 
 export const REWARDS = { ai: 25, aiCode: 15, galaxy5: 10, space5: 5 };
@@ -83,7 +84,26 @@ export async function joinWithCode(kv, user, rawCode) {
   }
   await kv.put(`referredby:${user.id}`, referrerId);
   if (email) await kv.put(`referredemail:${email}`, "1");
+  // The new user gets to pick a welcome bonus too — a win for both of them.
+  await kv.put(`welcome:${user.id}`, JSON.stringify({ from: referrerId, at: new Date().toISOString(), reward: null, revoked: false }));
   return { ok: true };
+}
+
+// The referred (new) user's welcome bonus: null if they weren't referred.
+export async function getWelcome(kv, userId) {
+  return getJSON(kv, `welcome:${userId}`, null);
+}
+
+export async function claimWelcome(kv, request, user, tier) {
+  if (!(tier in REWARDS)) throw new Error("Pick one of the rewards.");
+  const w = await getWelcome(kv, user.id);
+  if (!w) throw new Error("You don't have a welcome bonus.");
+  if (w.revoked) throw new Error("This bonus was removed.");
+  if (w.reward) throw new Error("You already claimed your welcome bonus.");
+  w.reward = { tier, amount: REWARDS[tier], at: new Date().toISOString() };
+  await kv.put(`welcome:${user.id}`, JSON.stringify(w));
+  await adjustBonus(kv, request, user, tier, REWARDS[tier]);
+  return w;
 }
 
 // The referrer picks which AI's credits a referral gives them.
@@ -100,7 +120,8 @@ export async function claimReward(kv, request, referrer, referredId, tier) {
   return list;
 }
 
-// Admin: take a referral back and remove whatever of its credits are still unspent.
+// Admin: take a referral back and remove whatever is still unspent of BOTH rewards —
+// the referrer's and the new user's welcome bonus.
 export async function revokeReferral(kv, request, referrer, referredId) {
   const list = await listReferrals(kv, referrer.id);
   const r = list.find((x) => x.id === referredId);
@@ -110,5 +131,11 @@ export async function revokeReferral(kv, request, referrer, referredId) {
   r.revokedAt = new Date().toISOString();
   await kv.put(`referrals:${referrer.id}`, JSON.stringify(list));
   if (r.reward) await adjustBonus(kv, request, referrer, r.reward.tier, -r.reward.amount);
+  const w = await getWelcome(kv, referredId);
+  if (w && !w.revoked) {
+    w.revoked = true;
+    await kv.put(`welcome:${referredId}`, JSON.stringify(w));
+    if (w.reward) await adjustBonus(kv, request, { id: referredId }, w.reward.tier, -w.reward.amount);
+  }
   return list;
 }

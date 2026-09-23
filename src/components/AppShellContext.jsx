@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useConversations } from "@/hooks/useConversations";
 import { useCredits } from "@/hooks/useCredits";
-import { claimPendingReferral } from "@/lib/referral";
+import { claimPendingReferral, hasWelcomePending } from "@/lib/referral";
+import WelcomeReward from "@/components/WelcomeReward";
 import { applyThemeClass, readUserTheme, writeUserTheme, prefersLight } from "@/lib/theme";
 
 const AppShellContext = createContext(null);
@@ -23,9 +24,14 @@ export function AppShellProvider({ children }) {
     base44.auth.me().then(setCurrentUser).catch(() => setCurrentUser(null));
   }, []);
 
-  // A new user who arrived through a friend's invite link: count the referral once.
+  // A new user who arrived through a friend's invite link: count the referral once,
+  // then let them pick their own welcome bonus (until they do, it's offered on each visit).
+  const [welcomeOpen, setWelcomeOpen] = useState(false);
   useEffect(() => {
-    if (currentUser?.id) claimPendingReferral();
+    if (!currentUser?.id) return;
+    claimPendingReferral().then(() => {
+      if (hasWelcomePending()) setWelcomeOpen(true);
+    });
   }, [currentUser?.id]);
 
   // Initial theme from OS preference, then refined per-user once we know who's logged in.
@@ -81,5 +87,10 @@ export function AppShellProvider({ children }) {
     navigate, goHome, goCode, goDesigner, goBrowser, goGames, goGameDesigner, goPlans, goMonitor, goPromos, newChat, goBilling, openProfile,
   };
 
-  return <AppShellContext.Provider value={value}>{children}</AppShellContext.Provider>;
+  return (
+    <AppShellContext.Provider value={value}>
+      {children}
+      <WelcomeReward open={welcomeOpen} onClose={() => setWelcomeOpen(false)} onClaimed={credits.sync} />
+    </AppShellContext.Provider>
+  );
 }

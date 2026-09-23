@@ -32,7 +32,7 @@ export default function CreditControls({ userId }) {
 
   const adjust = (tier, sign) => call({ action: "adjust", tier, delta: sign * (Number(amounts[tier]) || 0) }, `${tier}${sign}`);
   const revoke = (referredId) => {
-    if (window.confirm("Take this referral back? Its reward credits will be removed.")) call({ action: "revoke", referredId }, referredId);
+    if (window.confirm("Take this referral back? Both rewards — this user's and their friend's welcome bonus — will be removed.")) call({ action: "revoke", referredId }, referredId);
   };
 
   if (!data) {

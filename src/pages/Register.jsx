@@ -141,7 +141,7 @@ export default function Register() {
     <AuthLayout
       icon={UserPlus}
       title="Create your account"
-      subtitle={invited ? "🎁 A friend invited you to Blackhole AI — sign up to join them" : "Sign up to get started"}
+      subtitle={invited ? "🎁 A friend invited you — sign up and you both get free credits" : "Sign up to get started"}
       footer={
         <>
           Already have an account?{" "}

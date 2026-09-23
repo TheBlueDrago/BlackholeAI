@@ -1,15 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { ArrowLeft, Gift, Copy, Check, Share2, Loader2, Sparkles, Code, Gem, Star } from "lucide-react";
+import { ArrowLeft, Gift, Copy, Check, Share2, Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useAppShell } from "@/components/AppShellContext";
-
-const REWARD_INFO = [
-  { tier: "ai", label: "Blackhole AI", icon: Sparkles, color: "text-indigo-300" },
-  { tier: "aiCode", label: "Blackhole Code", icon: Code, color: "text-emerald-300" },
-  { tier: "galaxy5", label: "Galaxy", icon: Gem, color: "text-sky-300" },
-  { tier: "space5", label: "Space", icon: Star, color: "text-fuchsia-300" },
-];
-const LABEL = Object.fromEntries(REWARD_INFO.map((r) => [r.tier, r.label]));
+import RewardPicker, { REWARD_INFO, REWARD_LABEL as LABEL } from "@/components/profile/RewardPicker";
+import { clearWelcomePending } from "@/lib/referral";
 
 // Account → Refer friends: the user's invite link, and one reward to pick for every
 // friend who signs up with it (credits for any AI — no plan needed to use them).
@@ -53,7 +47,23 @@ export default function ReferFriends({ onBack }) {
     }
   };
 
+  const claimWelcome = async (tier) => {
+    setBusy("welcome");
+    setError("");
+    try {
+      const r = await base44.functions.invoke("referrals", { action: "claim-welcome", tier });
+      clearWelcomePending();
+      setData((d) => ({ ...d, welcome: r.data.welcome }));
+      shell?.credits?.sync?.(r.data.credits);
+    } catch (e) {
+      setError(e?.response?.data?.error || "Could not claim your welcome bonus.");
+    } finally {
+      setBusy("");
+    }
+  };
+
   const active = (data?.referrals || []).filter((r) => !r.revoked);
+  const welcome = data?.welcome;
 
   return (
     <div className="p-6">
@@ -65,8 +75,20 @@ export default function ReferFriends({ onBack }) {
         <h3 className="text-lg font-semibold text-white">Refer friends</h3>
       </div>
       <p className="text-sm text-slate-400 mb-4">
-        Share your link. For every friend who signs up with it, pick a reward — you can use those credits even without a plan.
+        Share your link — <span className="text-amber-200">you both get free credits.</span> Every friend who signs up with it picks a welcome bonus, and you pick a reward for each one. Credits work even without a plan.
       </p>
+
+      {welcome && !welcome.reward && !welcome.revoked && (
+        <div className="rounded-xl bg-amber-500/10 border border-amber-400/40 p-3 mb-4">
+          <p className="text-sm text-amber-100 mb-2">🎁 A friend invited you — pick your welcome bonus:</p>
+          <RewardPicker rewards={data.rewards} onPick={claimWelcome} disabled={busy === "welcome"} />
+        </div>
+      )}
+      {welcome?.reward && (
+        <p className="text-xs text-emerald-300 mb-4">
+          ✓ Welcome bonus claimed: {welcome.reward.amount} {LABEL[welcome.reward.tier]} credits
+        </p>
+      )}
 
       {!data && !error && (
         <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-slate-400" /></div>
@@ -87,7 +109,7 @@ export default function ReferFriends({ onBack }) {
             )}
           </div>
 
-          <p className="text-xs text-slate-500 mt-4 mb-2">Each friend = one reward of your choice:</p>
+          <p className="text-xs text-slate-500 mt-4 mb-2">Each friend = one reward of your choice (and they pick one too):</p>
           <div className="grid grid-cols-2 gap-2">
             {REWARD_INFO.map((r) => (
               <div key={r.tier} className="flex items-center gap-2 bg-slate-800/60 border border-slate-700/50 rounded-xl px-3 py-2">
@@ -119,18 +141,7 @@ export default function ReferFriends({ onBack }) {
                   ) : (
                     <div className="mt-2">
                       <p className="text-xs text-amber-200 mb-1.5">Pick your reward:</p>
-                      <div className="grid grid-cols-2 gap-1.5">
-                        {REWARD_INFO.map((o) => (
-                          <button
-                            key={o.tier}
-                            disabled={busy === r.id}
-                            onClick={() => claim(r.id, o.tier)}
-                            className="flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg bg-slate-700 text-slate-100 text-xs hover:bg-slate-600 disabled:opacity-50"
-                          >
-                            <o.icon className={`w-3.5 h-3.5 ${o.color}`} />+{data.rewards?.[o.tier]} {o.label}
-                          </button>
-                        ))}
-                      </div>
+                      <RewardPicker rewards={data.rewards} onPick={(tier) => claim(r.id, tier)} disabled={busy === r.id} />
                     </div>
                   )}
                 </div>

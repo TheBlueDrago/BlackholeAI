@@ -20,18 +20,39 @@ export function hasPendingReferral() {
   }
 }
 
+// Set once a new user's referral counted, until they pick their own welcome bonus.
+export const WELCOME_KEY = "blackhole-welcome-pending";
+
 export async function claimPendingReferral() {
   let code = null;
   try {
     code = localStorage.getItem(KEY);
   } catch {}
-  if (!code) return;
+  if (!code) return false;
+  let joined = false;
   try {
-    await base44.functions.invoke("referrals", { action: "join", code });
+    const r = await base44.functions.invoke("referrals", { action: "join", code });
+    joined = !!r?.data?.ok;
   } catch {
     // Not eligible (existing account, own link, already referred) — nothing to retry.
   }
   try {
     localStorage.removeItem(KEY);
+    if (joined) localStorage.setItem(WELCOME_KEY, "1");
+  } catch {}
+  return joined;
+}
+
+export function hasWelcomePending() {
+  try {
+    return !!localStorage.getItem(WELCOME_KEY);
+  } catch {
+    return false;
+  }
+}
+
+export function clearWelcomePending() {
+  try {
+    localStorage.removeItem(WELCOME_KEY);
   } catch {}
 }
