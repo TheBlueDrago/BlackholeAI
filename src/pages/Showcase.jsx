@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Loader2, ExternalLink } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import SiteThumb from "@/components/SiteThumb";
-import PublicLayout from "@/components/PublicLayout";
+import { Link } from "react-router-dom";
+import PublicLayout, { START_FREE } from "@/components/PublicLayout";
+import { SITE_TEMPLATES } from "@/lib/siteTemplates";
 
 // Public gallery of sites people built with Blackhole AI (owners opt in from the
 // Website Designer). Doubles as a landing page for visitors who aren't signed up.
@@ -32,7 +34,23 @@ export default function Showcase() {
       ) : !sites ? (
         <div className="flex justify-center py-16 text-slate-500"><Loader2 className="w-6 h-6 animate-spin" /></div>
       ) : sites.length === 0 ? (
-        <p className="text-center text-slate-500 text-sm py-16">No sites in the gallery yet — be the first.</p>
+        <div className="text-center py-10">
+          <p className="text-lg text-white font-semibold">The gallery is brand new: your site could be the first one here.</p>
+          <p className="mt-2 text-slate-400">Build a site, publish it, then tap the star on it in the Website Designer to add it to the gallery.</p>
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-5 text-left">
+            {SITE_TEMPLATES.slice(0, 4).map((t) => (
+              <Link key={t.id} to="/templates" className="rounded-2xl bg-slate-900/60 border border-slate-700/50 p-3 hover:border-indigo-500/50 transition-colors">
+                <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-slate-800">
+                  <SiteThumb html={t.html} />
+                </div>
+                <p className="mt-3 px-1 text-sm font-medium text-white">{t.title} template</p>
+              </Link>
+            ))}
+          </div>
+          <Link to={START_FREE} className="mt-8 inline-flex items-center px-6 py-3 rounded-full bg-white text-slate-900 font-semibold hover:bg-slate-200">
+            Get started for free
+          </Link>
+        </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {sites.map((s) => (

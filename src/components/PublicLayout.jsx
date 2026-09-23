@@ -56,6 +56,18 @@ export default function PublicLayout({ title, children }) {
 
   useEffect(() => setMenuOpen(false), [pathname]);
 
+  // The public pages are always dark. The app's light mode puts a "light" class on <html>
+  // that flips the whole palette; it can still be there after leaving the app for a page
+  // like About us, so set it aside while one of these pages is showing.
+  useEffect(() => {
+    const el = document.documentElement;
+    const wasLight = el.classList.contains("light");
+    el.classList.remove("light");
+    return () => {
+      if (wasLight) el.classList.add("light");
+    };
+  }, []);
+
   useEffect(() => {
     if (!title) return;
     document.title = `${title} · Blackhole AI`;
