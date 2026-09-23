@@ -117,6 +117,14 @@ function suggestNames(n, projectId) {
   return out;
 }
 
+// Tap-to-fill ideas for an empty game chat.
+const GAME_IDEAS = [
+  "A space shooter with power-ups",
+  "A platformer where a cat collects fish",
+  "A maze escape against the clock",
+  "A two-player air hockey game",
+];
+
 function sanitize(s) {
   // Letters, hyphens and dots (so a name like "shooter.io" is allowed); no leading/trailing separators.
   return s.toLowerCase().replace(/[^a-z.-]+/g, "-").replace(/\.{2,}/g, ".").replace(/^[-.]+|[-.]+$/g, "");
@@ -589,6 +597,17 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
                 </div>
                 <p className="text-slate-300 font-medium">Describe your game</p>
                 <p className="text-slate-500 text-sm mt-1">Blackhole AI will build it live</p>
+                <div className="flex flex-wrap justify-center gap-2 mt-4">
+                  {GAME_IDEAS.map((idea) => (
+                    <button
+                      key={idea}
+                      onClick={() => setInput(idea)}
+                      className="px-3 py-1.5 rounded-full bg-slate-800/70 border border-slate-700/50 text-slate-300 text-xs hover:bg-slate-700/70 hover:text-white transition-colors"
+                    >
+                      {idea}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 
