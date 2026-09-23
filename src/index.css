@@ -187,3 +187,6 @@
   scrollbar-width: thin;
   scrollbar-color: rgba(100, 116, 139, 0.5) transparent;
 }
+/* The Blackhole Browser wordmark is a white-to-pastel gradient; on the light theme's
+   pale background it needs darker stops to stay readable. */
+.light .bh-wordmark { background-image: linear-gradient(to right, #1e1b4b, #4338ca, #a21caf); }

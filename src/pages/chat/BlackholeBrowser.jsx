@@ -87,7 +87,7 @@ export default function BlackholeBrowser() {
   const web = useWebSearch(q.trim(), mode === "results");
 
   return (
-    <div className="h-screen flex flex-col bg-[#0b0f1a] text-slate-100 overflow-hidden relative">
+    <div className="h-screen flex flex-col bg-slate-950 text-slate-100 overflow-hidden relative">
       <AnimatePresence>
         {sidebarOpen && (
           <>
@@ -117,7 +117,7 @@ export default function BlackholeBrowser() {
       </AnimatePresence>
 
       {/* Browser chrome */}
-      <header className="h-14 shrink-0 flex items-center gap-2 px-3 border-b border-white/10 bg-[#0b0f1a]/90 backdrop-blur z-30">
+      <header className="h-14 shrink-0 flex items-center gap-2 px-3 border-b border-white/10 bg-slate-950/90 backdrop-blur z-30">
         <button onClick={() => setSidebarOpen((o) => !o)} className="p-2 rounded-lg hover:bg-white/10 transition-colors" title="Menu">
           <Menu className="w-5 h-5" />
         </button>

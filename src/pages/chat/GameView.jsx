@@ -46,7 +46,7 @@ export default function GameView() {
   }, [name]);
 
   return (
-    <div className="h-screen flex flex-col bg-[#0b0f1a]">
+    <div className="h-screen flex flex-col bg-slate-950">
       <header className="h-12 shrink-0 flex items-center gap-3 px-4 border-b border-white/10">
         <button
           onClick={() => navigate("/chat/games")}

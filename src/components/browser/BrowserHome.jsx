@@ -8,7 +8,7 @@ export default function BrowserHome({ value, onChange, onSubmit, onLucky }) {
       <div className="flex items-center gap-3 mb-8 select-none">
         <BlackholeIcon className="w-14 h-14" />
         <h1 className="text-5xl sm:text-6xl font-bold tracking-tight">
-          <span className="bg-gradient-to-r from-[#ffffff] via-indigo-200 to-fuchsia-200 bg-clip-text text-transparent">Blackhole</span>
+          <span className="bh-wordmark bg-gradient-to-r from-[#ffffff] via-indigo-200 to-fuchsia-200 bg-clip-text text-transparent">Blackhole</span>
         </h1>
       </div>
       <form
