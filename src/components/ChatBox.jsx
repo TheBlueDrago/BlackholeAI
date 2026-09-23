@@ -126,6 +126,8 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
   const stop = () => {
     reqIdRef.current++;
     abortRef.current?.abort();
+    // The server settles the charge for what was written once it notices; re-read credits then.
+    setTimeout(() => spend?.[selectedAi]?.(), 2500);
     setLoading(false);
     const convId = conversation?.id;
     // Keep what was already written (it's charged); with nothing written, drop the question.

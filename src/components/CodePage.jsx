@@ -71,6 +71,8 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
   const stop = () => {
     reqIdRef.current++;
     abortRef.current?.abort();
+    // The server settles the charge for what was written once it notices; re-read credits then.
+    setTimeout(() => onSpendAICode?.(), 2500);
     setLoading(false);
     setInput("");
     // Keep what was already written (it's charged).

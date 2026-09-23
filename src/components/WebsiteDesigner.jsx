@@ -380,6 +380,8 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   const stop = () => {
     reqIdRef.current++;
     abortRef.current?.abort();
+    // The server settles the charge for what was written once it notices; re-read credits then.
+    setTimeout(() => ({ ai: onSpendAI, code: onSpendAICode, opus5: onSpendGalaxy5, fable: onSpendSpace5 })[selectedAi]?.(), 2500);
     setLoading(false);
     setInput("");
   };
