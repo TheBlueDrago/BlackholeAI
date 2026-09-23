@@ -367,7 +367,7 @@ export default function DesignerDashboard() {
           </div>
 
           {/* Starter templates */}
-          <section className="max-w-3xl mx-auto mt-10">
+          <section className="max-w-2xl mx-auto mt-10">
             <h2 className="text-sm font-semibold text-slate-300 mb-1">Or start from a template</h2>
             <p className="text-xs text-slate-500 mb-3">Free to open — change anything by chatting with the AI.</p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
