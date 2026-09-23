@@ -283,6 +283,9 @@ export default function GamesFront() {
               <button
                 key={r.id}
                 onClick={() => setCat(r.id)}
+                title={r.label}
+                aria-label={r.label}
+                aria-pressed={active}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm transition-colors ${active ? "bg-white/10 text-white" : "text-slate-400 hover:text-slate-200 hover:bg-white/5"}`}
               >
                 <Icon className="w-5 h-5 shrink-0" />
