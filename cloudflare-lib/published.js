@@ -9,6 +9,7 @@
 // Base44's get-site-html/get-game-html already fetch `html` when it's a URL, so
 // every reader (designer, browser, games front, subdomain Worker) keeps working.
 import { findCredentialForm } from "./phishing.js";
+import { stripInjected } from "./injected.js";
 
 export const BACKEND = "https://blackhole-ai.base44.app";
 export const APP_ID = "6a8b5eb7787b8a4d6a18f662";
@@ -62,8 +63,9 @@ export async function findByName(request, kind, name) {
 }
 
 // The whole publish flow for both kinds; `extra` holds the kind-specific entity fields.
-export async function publish(context, kind, { name, html, extra }) {
+export async function publish(context, kind, { name, html: rawHtml, extra }) {
   const { request, env } = context;
+  const html = stripInjected(rawHtml);
   const label = kind === "site" ? "Website" : "Game";
   try {
     if (!env.PUBLISHED_HTML) {

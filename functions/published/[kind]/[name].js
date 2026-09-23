@@ -3,6 +3,7 @@
 // cloudflare-lib/published.js), and Base44's get-site-html/get-game-html fetch it.
 import { ENTITY, findByName, kvKey } from "../../../cloudflare-lib/published.js";
 import { isBlocked } from "../../../cloudflare-lib/reports.js";
+import { stripInjected } from "../../../cloudflare-lib/injected.js";
 
 const APP_ORIGIN = "https://blackhole-ai-tech.com";
 
@@ -14,7 +15,7 @@ const APP_ORIGIN = "https://blackhole-ai-tech.com";
 function withCheckoutBridge(html, name) {
   const site = JSON.stringify(name).replace(/</g, "\\u003c");
   return beforeBodyEnd(html,
-    `<script>(function(){if(window.top!==window)return;window.addEventListener("message",function(e){var d=e.data;` +
+    `<script data-bh>(function(){if(window.top!==window)return;window.addEventListener("message",function(e){var d=e.data;` +
     `if(e.source!==window||!d||d.type!=="blackhole-checkout")return;` +
     `location.href="${APP_ORIGIN}/buy?"+new URLSearchParams({site:${site},product:String(d.productId||""),qty:String(d.quantity||1)});});})();</script>`);
 }
@@ -26,7 +27,7 @@ function withCheckoutBridge(html, name) {
 function withReportLink(html, kind, name) {
   const href = JSON.stringify(`${APP_ORIGIN}/report?${new URLSearchParams({ kind, name })}`).replace(/</g, "\\u003c");
   return beforeBodyEnd(html,
-    `<script>(function(){if(window.top!==window)return;function add(){var h=document.createElement("bh-report");` +
+    `<script data-bh>(function(){if(window.top!==window)return;function add(){var h=document.createElement("bh-report");` +
     `h.style.cssText="all:initial;position:fixed;right:8px;bottom:8px;z-index:2147483647";var r=h.attachShadow({mode:"closed"});` +
     `r.innerHTML='<a target="_blank" rel="noopener" style="font:12px system-ui,sans-serif;color:#cbd5e1;background:rgba(15,23,42,.8);` +
     `padding:4px 9px;border-radius:999px;text-decoration:none;border:1px solid rgba(148,163,184,.35)">\u2691 Report</a>';` +
@@ -74,6 +75,7 @@ export async function onRequestGet(context) {
 
   let html = await env.PUBLISHED_HTML.get(kvKey(kind, name));
   if (html == null) return new Response("Not found", { status: 404 });
+  html = stripInjected(html); // pages republished before the scripts were marked
   if (kind === "site") html = withCheckoutBridge(html, name);
   html = withReportLink(html, kind, name);
   return new Response(html, {
