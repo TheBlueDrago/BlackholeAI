@@ -32,7 +32,8 @@ async function ask(apiKey, model, prompt) {
       headers: { "content-type": "application/json", "x-goog-api-key": apiKey },
       body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], ...extra, generationConfig: { maxOutputTokens: 4096 } }),
     });
-    if (res.ok || res.status !== 400) break;
+    // 400: this model can't search; 429: the free search quota is used up. Either way, answer without it.
+    if (res.ok || ![400, 429].includes(res.status)) break;
   }
   if (!res.ok) throw new Error(`Gemini ${res.status}: ${(await res.text().catch(() => "")).slice(0, 200)}`);
   const data = await res.json();
