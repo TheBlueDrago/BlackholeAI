@@ -486,7 +486,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
           return;
         }
       }
-      const ownerName = user?.email || user?.full_name || "";
+      const ownerName = user?.full_name || "";
       const dispTitle = title.trim() || n;
       const res = await base44.functions.invoke("publish-game", {
         name: n,

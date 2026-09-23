@@ -552,7 +552,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
         setPublishErr("That name is taken. Try another.");
         return;
       }
-      const ownerName = user?.email || user?.full_name || "";
+      const ownerName = user?.full_name || "";
       if (!mine) {
         // Websites are a lifetime allowance per plan; deleting one frees a slot.
         const lim = siteLimit(plan);

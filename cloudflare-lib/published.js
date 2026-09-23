@@ -31,6 +31,13 @@ export function json(obj, status) {
 
 export const kvKey = (kind, name) => `${kind}:${name}`;
 
+// The maker's name as anyone can read it on a published page's record: a first name
+// only, never an email address (the records are public and many users are kids).
+export function publicName(user) {
+  const first = String((user && user.full_name) || "").trim().split(/\s+/)[0] || "";
+  return first.includes("@") ? "" : first.slice(0, 40);
+}
+
 export const publishedUrl = (kind, name) => `${PUBLIC_ORIGIN}/published/${kind}/${encodeURIComponent(name)}?v=${Date.now()}`;
 
 // Calls Base44's REST API, as the user who made `request` when it carries a token.
@@ -123,7 +130,7 @@ export async function publish(context, kind, { name, html: rawHtml, extra }) {
       metadata: { owner: user.id, updated: new Date().toISOString() },
     });
 
-    const data = { ...extra, html: publishedUrl(kind, name), hidden: false };
+    const data = { ...extra, ownerName: publicName(user), html: publishedUrl(kind, name), hidden: false };
     const target = mine || rows[0];
     const rec = target
       ? await base44(request, "PUT", `entities/${ENTITY[kind]}/${target.id}`, data)

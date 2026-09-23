@@ -62,6 +62,21 @@ export default function PublishedContent() {
     }
   };
 
+  // Pages published before names were limited to first names show the maker's email to anyone.
+  const emailsShown = (items || []).filter((it) => it.emailShown).length;
+  const hideEmails = async () => {
+    setBusy("emails");
+    setError("");
+    try {
+      await base44.functions.invoke("admin-content", { action: "hide-emails" });
+      await load();
+    } catch (e) {
+      setError(e?.response?.data?.error || "Could not hide the emails.");
+    } finally {
+      setBusy("");
+    }
+  };
+
   const counts = { red: 0, yellow: 0, green: 0 };
   for (const it of items || []) counts[it.flag] += 1;
   const shown = (items || []).filter((it) => showGreen || it.flag !== "green");
@@ -88,6 +103,20 @@ export default function PublishedContent() {
             🔴 inappropriate for kids, copyright copy, phishing or 50%+ malware · 🟡 might be harmful · 🟢 looks safe.
             Automatic check — use "AI check" for a closer look.
           </p>
+          {emailsShown > 0 && (
+            <div className="mb-3 rounded-xl border border-amber-400/40 bg-amber-950/20 p-3 flex flex-wrap items-center gap-2">
+              <p className="flex-1 min-w-[12rem] text-xs text-amber-100">
+                {emailsShown} published page{emailsShown === 1 ? " shows its maker's" : "s show their makers'"} email address to anyone who looks.
+              </p>
+              <button
+                onClick={hideEmails}
+                disabled={busy === "emails"}
+                className="px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 text-xs font-semibold hover:bg-amber-400 disabled:opacity-60"
+              >
+                {busy === "emails" ? "Hiding…" : "Hide emails"}
+              </button>
+            </div>
+          )}
           {!items && (
             <div className="flex justify-center py-6 text-slate-500"><Loader2 className="w-5 h-5 animate-spin" /></div>
           )}

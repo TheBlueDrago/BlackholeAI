@@ -3,7 +3,9 @@
 // green. { action: "list" } -> { items }
 // { action: "ai-check", kind, name } -> { item } (Gemini reads the page; the verdict is
 // saved in KV as review:<kind>:<name> and shown until the page changes).
-import { json, base44, kvKey, ENTITY, MAX_BYTES } from "../../../../../cloudflare-lib/published.js";
+// { action: "hide-emails" } -> { fixed } (pages published before publicName() showed the
+// maker's email address to anyone; replaces it with their first name).
+import { json, base44, kvKey, ENTITY, MAX_BYTES, publicName } from "../../../../../cloudflare-lib/published.js";
 import { currentUser } from "../../../../../cloudflare-lib/credits.js";
 import { isBlocked } from "../../../../../cloudflare-lib/reports.js";
 import { scanPage, reviewPage, flagRank } from "../../../../../cloudflare-lib/scan.js";
@@ -45,6 +47,7 @@ async function describe(kv, kind, rec, owners) {
     title: rec.title || name,
     ownerEmail: owner.email || rec.ownerName || "",
     ownerName: owner.full_name || "",
+    emailShown: String(rec.ownerName || "").includes("@"),
     created: rec.created_date,
     hidden: !!rec.hidden,
     takenDown: await isBlocked(kv, kind, name.toLowerCase()),
@@ -79,6 +82,19 @@ export async function onRequestPost(context) {
       const verdict = await reviewPage(env.GEMINI_API_KEY, html, kind === "game" ? "game" : "website");
       await kv.put(`review:${kind}:${rec.name}`, JSON.stringify({ ...verdict, fp: fingerprint(html), at: new Date().toISOString() }));
       return json({ item: await describe(kv, kind, rec, owners) });
+    }
+
+    if (body.action === "hide-emails") {
+      let fixed = 0;
+      for (const kind of ["site", "game"]) {
+        const rows = (await base44(request, "GET", `entities/${ENTITY[kind]}?limit=500`)) || [];
+        for (const rec of rows) {
+          if (!String(rec.ownerName || "").includes("@")) continue;
+          await base44(request, "PUT", `entities/${ENTITY[kind]}/${rec.id}`, { ownerName: publicName(owners.get(rec.created_by_id)) });
+          fixed += 1;
+        }
+      }
+      return json({ fixed });
     }
 
     const items = [];
