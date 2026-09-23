@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
+import Markdown from "@/components/chat/Markdown";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Gamepad2, RefreshCw, Plus, X, Crown, Rocket, Paperclip } from "lucide-react";
 import BlackholeIcon from "@/components/BlackholeIcon";
@@ -548,14 +549,14 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
               const built = isHtmlMsg(m) || m.built;
               return (
                 <div key={i} className="flex justify-start">
-                  <div className="max-w-[85%] px-3.5 py-2.5 rounded-2xl rounded-bl-sm bg-slate-800 text-slate-100 border border-slate-700/50 text-sm">
+                  <div className="max-w-[85%] min-w-0 px-3.5 py-2.5 rounded-2xl rounded-bl-sm bg-slate-800 text-slate-100 border border-slate-700/50 text-sm">
                     {built ? (
                       <div className="space-y-2">
                         {m.note && <p className="whitespace-pre-wrap">{m.note}</p>}
                         <span className="block text-fuchsia-300 font-medium">✓ Game updated</span>
                       </div>
                     ) : (
-                      <span className="whitespace-pre-wrap">{m.content}</span>
+                      <Markdown text={m.content} />
                     )}
                   </div>
                 </div>
