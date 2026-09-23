@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
+import PageSize from "@/components/designer/PageSize";
 import Markdown from "@/components/chat/Markdown";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -972,6 +973,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
                   {publishing ? (isRepublish ? "Re-publishing…" : "Publishing…") : isRepublish ? "Re-publish" : "Publish"}
                 </button>
               </div>
+              <PageSize html={previewHtml} />
               {publishErr && <p className="text-sm text-red-400 mt-3">{publishErr}</p>}
             </motion.div>
           </motion.div>

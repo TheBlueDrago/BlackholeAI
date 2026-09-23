@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
+import PageSize from "@/components/designer/PageSize";
 import Markdown from "@/components/chat/Markdown";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Gamepad2, RefreshCw, Plus, X, Crown, Rocket, Paperclip } from "lucide-react";
@@ -756,6 +757,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
                   {publishing ? (isRepublish ? "Re-publishing…" : "Publishing…") : isRepublish ? "Re-publish" : "Publish"}
                 </button>
               </div>
+              <PageSize html={previewHtml} />
               {publishErr && <p className="text-sm text-red-400 mt-3">{publishErr}</p>}
             </motion.div>
           </motion.div>
