@@ -13,6 +13,7 @@ export default function ReportedSites() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState("");
   const [open, setOpen] = useState(null);
+  const [manual, setManual] = useState({ kind: "site", name: "" });
 
   const call = async (body, key) => {
     setBusy(key || "load");
@@ -51,6 +52,34 @@ export default function ReportedSites() {
           <span className="text-[11px] bg-red-500/20 text-red-300 rounded-full px-2 py-0.5">{data.reports.length}</span>
         )}
       </p>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          const name = manual.name.trim().toLowerCase().replace(/\.blackhole-ai-tech\.com.*$/, "").replace(/^https?:\/\//, "");
+          if (name) act("hide", { kind: manual.kind, name });
+        }}
+        className="flex flex-wrap items-center gap-2 mb-3"
+      >
+        <select
+          value={manual.kind}
+          onChange={(e) => setManual((m) => ({ ...m, kind: e.target.value }))}
+          aria-label="Site or game"
+          className="bg-slate-800/70 border border-slate-700/50 rounded-lg px-2 py-1.5 text-xs text-slate-200"
+        >
+          <option value="site">Site</option>
+          <option value="game">Game</option>
+        </select>
+        <input
+          value={manual.name}
+          onChange={(e) => setManual((m) => ({ ...m, name: e.target.value }))}
+          placeholder="Name to take down (e.g. nova)"
+          aria-label="Name to take down"
+          className="flex-1 min-w-[140px] bg-slate-800/70 border border-slate-700/50 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder:text-slate-500 outline-none"
+        />
+        <button type="submit" disabled={!!busy || !manual.name.trim()} className={`${btn} border-red-500/50 text-red-300`}>
+          <EyeOff className="w-3 h-3" /> Take down
+        </button>
+      </form>
       {!data ? (
         error ? <p className="text-red-400 text-sm">{error}</p> : <Loader2 className="w-5 h-5 animate-spin text-slate-500" />
       ) : (

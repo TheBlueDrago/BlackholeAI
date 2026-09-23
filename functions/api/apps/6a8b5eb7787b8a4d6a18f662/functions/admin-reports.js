@@ -5,7 +5,7 @@
 //   "hide"    -> take the page offline (it shows "removed") and hide it from listings
 //   "unhide"  -> put it back
 //   "dismiss" -> clear its reports without hiding it
-import { json } from "../../../../../cloudflare-lib/published.js";
+import { json, findByName } from "../../../../../cloudflare-lib/published.js";
 import { currentUser } from "../../../../../cloudflare-lib/credits.js";
 import { KINDS, REASONS, readReports, dismissReports, setBlocked } from "../../../../../cloudflare-lib/reports.js";
 
@@ -26,6 +26,8 @@ export async function onRequestPost(context) {
     if (body.action && body.action !== "list") {
       if (!KINDS.includes(kind) || !name) return json({ error: "kind and name required" }, 400);
       if (body.action === "hide") {
+        // Catch typos from Monitor's "take down by name" box.
+        if (!(await findByName(request, kind, name)).length) return json({ error: `No ${kind} is called "${name}".` }, 404);
         await setBlocked(kv, request, kind, name, true);
         await dismissReports(kv, kind, name);
       } else if (body.action === "unhide") {

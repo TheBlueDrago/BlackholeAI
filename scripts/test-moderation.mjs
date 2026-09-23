@@ -236,3 +236,7 @@ assert(b.blocked === true, "page-status: blocked game");
 assert(b.blocked === false, "page-status: normal game");
 [s, b] = await j(ps.onRequestPost({ request: req({ kind: "nope", name: "x" }), env }));
 assert(s === 400, "page-status: bad kind");
+
+// ---- take down by name (Monitor) ----
+[s, b] = await j(admin.onRequestPost({ request: req({ action: "hide", kind: "site", name: "no-such-site" }, "admintok"), env }));
+assert(s === 404 && /No site is called/.test(b.error) && !store.has("blocked:site:no-such-site"), "hiding an unknown name is refused, nothing blocked");
