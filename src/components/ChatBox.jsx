@@ -43,6 +43,13 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
     if (!convId) convId = createConversation();
     convIdRef.current = convId;
 
+    addMessage(convId, { role: "user", content: text + (files.length ? ` (attached: ${files.map((f) => f.name).join(", ")})` : "") });
+    setInput("");
+    setLoading(true);
+    setLive("");
+    const myId = ++reqIdRef.current;
+    // Attached images are processed after the busy state is set, so a quick second
+    // tap on Send is queued instead of starting a parallel request.
     // Up to 3 attached images go to the AI itself (shrunk first); other files by name.
     const imageFiles = files.filter((f) => /^image\//.test(f.type)).slice(0, 3);
     const otherFiles = files.filter((f) => !imageFiles.includes(f));
@@ -57,18 +64,13 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
         otherFiles.push(f);
       }
     }
-    const attachedNames = files.map((f) => f.name).join(", ");
     setFiles([]);
     const fileNote = otherFiles.length ? `\n[Attached files (names only): ${otherFiles.map((f) => f.name).join(", ")}]` : "";
     const sys = ai === "code" ? CODE_SYS : ai === "fable" ? FABLE_SYS : "";
     const intent = ai !== "ai" ? resolveIntent(text, buildMode.mode) : { build: true };
     const modeNote = ai !== "ai" ? (intent.build ? BUILD_NOTE : ANSWER_NOTE) + "\n\n" : "";
     const fullPrompt = `${sys ? sys + "\n\n" : ""}${modeNote}${text}${fileNote}`;
-    addMessage(convId, { role: "user", content: text + (attachedNames ? ` (attached: ${attachedNames})` : "") });
-    setInput("");
-    setLoading(true);
-    setLive("");
-    const myId = ++reqIdRef.current;
+    if (reqIdRef.current !== myId) return;
     try {
       const eff = effortFor(effort, text, { build: ai !== "ai" && intent.build });
       // Streamed so the reply appears as it's written.

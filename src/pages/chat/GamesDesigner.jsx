@@ -291,6 +291,14 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
   };
 
   const runPrompt = async (text, ai) => {
+    const prior = messagesRef.current;
+    pushMsg({ role: "user", content: text + (files.length ? ` (attached: ${files.map((f) => f.name).join(", ")})` : "") });
+    setInput("");
+    setLoading(true);
+    setLive("");
+    const myId = ++reqIdRef.current;
+    // Attached images are processed after the busy state is set, so a quick second
+    // tap on Send is queued instead of starting a parallel request.
     const images = files.filter((f) => /^image\//.test(f.type));
     const others = files.filter((f) => !/^image\//.test(f.type));
     const placed = [];
@@ -306,12 +314,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
       (placed.length
         ? `\n[Attached images. Use them in the game with exactly these src values (they are already hosted — never replace them with other URLs, and keep them in any later version): ${placed.join(", ")}]`
         : "") + (others.length ? `\n[Attached files: ${others.map((f) => f.name).join(", ")}]` : "");
-    const prior = messagesRef.current;
-    pushMsg({ role: "user", content: text + (files.length ? ` (attached: ${files.map((f) => f.name).join(", ")})` : "") });
-    setInput("");
-    setLoading(true);
-    setLive("");
-    const myId = ++reqIdRef.current;
+    if (reqIdRef.current !== myId) return;
     const spendFor = { ai: onSpendAI, code: onSpendAICode, opus5: onSpendGalaxy5, fable: onSpendSpace5 };
     // Normal Blackhole AI always builds; the code AIs can also just answer a question.
     const intent = ai !== "ai" ? resolveIntent(text, buildMode.mode) : { build: true };
