@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Pen, Plus, Code, Sparkles, Gem, Star, Check, X, CreditCard, Globe, Gamepad2, Compass } from "lucide-react";
+import { Pen, Plus, Code, Sparkles, Gem, Star, Check, X, CreditCard, Globe, Gamepad2, Compass, Search } from "lucide-react";
 import BlackholeIcon from "@/components/BlackholeIcon";
 import PullToRefresh from "@/components/PullToRefresh";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -34,6 +34,16 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
   const [editValue, setEditValue] = useState("");
   const [confirmId, setConfirmId] = useState(null);
   const [neverShow, setNeverShow] = useState(false);
+  // Filters the chat list by title or by what was said in the chat.
+  const [search, setSearch] = useState("");
+  const needle = search.trim().toLowerCase();
+  const shown = needle
+    ? conversations.filter(
+        (c) =>
+          String(c.title || "").toLowerCase().includes(needle) ||
+          (c.messages || []).some((m) => String(m.content || "").toLowerCase().includes(needle))
+      )
+    : conversations;
   const isMobile = useIsMobile();
   const targetWidth = isMobile ? Math.min((typeof window !== "undefined" ? window.innerWidth : 400) * 0.86, 320) : 220;
 
@@ -190,6 +200,19 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
             <div className="px-2 py-1 text-slate-500 text-[11px] font-medium cursor-default select-none">
               Previous Chats
             </div>
+            {conversations.length > 3 && (
+              <div className="relative mt-1">
+                <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500" />
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  onClick={(e) => e.stopPropagation()}
+                  placeholder="Search chats"
+                  aria-label="Search chats"
+                  className="w-full bg-slate-800/70 border border-slate-700/50 focus:border-indigo-500/50 rounded-lg pl-6 pr-2 py-1 text-[12px] text-slate-200 placeholder:text-slate-500 outline-none"
+                />
+              </div>
+            )}
           </div>
 
           <div className="mx-3 h-px bg-slate-700/50" />
@@ -199,7 +222,10 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
             {conversations.length === 0 && (
               <p className="text-center text-slate-600 text-xs py-6">No chats yet</p>
             )}
-            {conversations.map((conv) => (
+            {needle && shown.length === 0 && (
+              <p className="text-center text-slate-600 text-xs py-6">No chats match</p>
+            )}
+            {shown.map((conv) => (
               <div
                 key={conv.id}
                 onClick={() => editingId !== conv.id && onSelect(conv.id)}
