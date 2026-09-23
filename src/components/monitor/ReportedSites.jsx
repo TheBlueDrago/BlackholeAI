@@ -19,9 +19,10 @@ export default function ReportedSites() {
     setError("");
     try {
       const r = await base44.functions.invoke("admin-reports", body);
-      setData(r.data);
+      if (r.data?.error) throw new Error(r.data.error);
+      setData({ reports: r.data?.reports || [], hidden: r.data?.hidden || [] });
     } catch (e) {
-      setError(e?.response?.data?.error || "Could not load reports.");
+      setError(e?.response?.data?.error || e?.message || "Could not load reports.");
     } finally {
       setBusy("");
     }
