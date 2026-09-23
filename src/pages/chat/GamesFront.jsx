@@ -85,7 +85,7 @@ function GameCard({ g, onPlay }) {
         </div>
       </div>
       <p className="mt-1.5 text-xs font-medium text-slate-200 truncate">{g.title || g.name}</p>
-      <p className="text-[10px] text-slate-500">{GENRE_LABEL[g.genre] || "Game"} · {g.plays || 0} plays</p>
+      <p className="text-[10px] text-slate-400">{GENRE_LABEL[g.genre] || "Game"} · {g.plays || 0} plays</p>
     </button>
   );
 }
