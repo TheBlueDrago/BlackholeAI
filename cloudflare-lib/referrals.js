@@ -62,8 +62,19 @@ export async function listReferrals(kv, userId) {
   return getJSON(kv, `referrals:${userId}`, []);
 }
 
-// Called by the new user after signing up through someone's link.
-export async function joinWithCode(kv, user, rawCode) {
+// A short one-way fingerprint of the network a sign-up came from (its IP address),
+// so admins can spot one person signing up many "friends". Only admins see it.
+export async function networkId(ip) {
+  if (!ip) return "";
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`bh-net|${ip}`));
+  return [...new Uint8Array(buf)].slice(0, 5).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+// What the referrer themselves may see of their referrals (no network fingerprints).
+export const publicReferrals = (list) => list.map(({ net, ...r }) => r); // eslint-disable-line no-unused-vars
+
+// Called by the new user after signing up through someone's link. `net` is networkId().
+export async function joinWithCode(kv, user, rawCode, net = "") {
   const code = String(rawCode || "").trim().toLowerCase();
   if (!/^[a-z0-9]{4,16}$/.test(code)) return { ok: false, reason: "Invalid referral code." };
   const referrerId = await kv.get(`refcode:${code}`);
@@ -79,7 +90,7 @@ export async function joinWithCode(kv, user, rawCode) {
 
   const list = await listReferrals(kv, referrerId);
   if (!list.some((r) => r.id === user.id)) {
-    list.push({ id: user.id, name: displayName(user), at: new Date().toISOString(), reward: null, revoked: false });
+    list.push({ id: user.id, name: displayName(user), at: new Date().toISOString(), reward: null, revoked: false, ...(net ? { net } : {}) });
     await kv.put(`referrals:${referrerId}`, JSON.stringify(list));
   }
   await kv.put(`referredby:${user.id}`, referrerId);

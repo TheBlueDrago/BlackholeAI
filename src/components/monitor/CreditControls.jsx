@@ -44,6 +44,11 @@ export default function CreditControls({ userId }) {
   }
 
   const fmt = (n) => (n > 1e9 ? "∞" : n);
+  // Referrals that signed up from the same network (IP) as another of this user's
+  // referrals — a sign of one person making several "friends".
+  const netCount = {};
+  for (const r of data.referrals) if (r.net) netCount[r.net] = (netCount[r.net] || 0) + 1;
+  const suspicious = data.referrals.filter((r) => r.net && netCount[r.net] > 1).length;
 
   return (
     <>
@@ -94,12 +99,20 @@ export default function CreditControls({ userId }) {
       <p className="text-slate-300 text-sm font-medium mt-5 mb-2">
         Referrals {data.referrals.length ? `(${data.referrals.filter((r) => !r.revoked).length})` : ""}
       </p>
+      {suspicious > 0 && (
+        <p className="text-[11px] text-amber-300 mb-2">
+          {suspicious} of these signed up from a network shared with another referral. That can mean one person made several accounts — check before leaving the rewards.
+        </p>
+      )}
       {data.referrals.length ? (
         <div className="space-y-2">
           {data.referrals.map((r) => (
             <div key={r.id} className="flex items-center justify-between gap-2 bg-slate-800/60 border border-slate-700/50 rounded-xl px-3 py-2">
               <div className="min-w-0">
                 <p className="text-slate-100 text-sm truncate">{r.name}</p>
+                {r.net && netCount[r.net] > 1 && (
+                  <p className="text-[11px] text-amber-300">Same network as {netCount[r.net] - 1} other referral{netCount[r.net] > 2 ? "s" : ""}</p>
+                )}
                 <p className="text-[11px] text-slate-500">
                   {new Date(r.at).toLocaleDateString()} ·{" "}
                   {r.revoked ? "taken back" : r.reward ? `+${r.reward.amount} ${LABELS[r.reward.tier]}` : "reward not claimed yet"}

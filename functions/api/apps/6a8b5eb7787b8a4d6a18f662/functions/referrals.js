@@ -5,7 +5,7 @@
 // { action: "claim-welcome", tier }    -> the new user takes their own welcome bonus
 import { json } from "../../../../../cloudflare-lib/published.js";
 import { currentUser, entitlement, creditStatus } from "../../../../../cloudflare-lib/credits.js";
-import { REWARDS, referralCode, referralLink, listReferrals, joinWithCode, claimReward, getWelcome, claimWelcome } from "../../../../../cloudflare-lib/referrals.js";
+import { REWARDS, referralCode, referralLink, listReferrals, joinWithCode, claimReward, getWelcome, claimWelcome, networkId, publicReferrals } from "../../../../../cloudflare-lib/referrals.js";
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -17,13 +17,13 @@ export async function onRequestPost(context) {
     const credits = async () => creditStatus(kv, await entitlement(kv, request, user));
 
     if (body.action === "join") {
-      const r = await joinWithCode(kv, user, body.code);
+      const r = await joinWithCode(kv, user, body.code, await networkId(request.headers.get("cf-connecting-ip")));
       return json(r, r.ok ? 200 : 400);
     }
 
     if (body.action === "claim") {
       const referrals = await claimReward(kv, request, user, String(body.referredId || ""), String(body.tier || ""));
-      return json({ referrals, credits: await credits() });
+      return json({ referrals: publicReferrals(referrals), credits: await credits() });
     }
 
     if (body.action === "claim-welcome") {
@@ -36,7 +36,7 @@ export async function onRequestPost(context) {
       code,
       link: referralLink(code),
       rewards: REWARDS,
-      referrals: await listReferrals(kv, user.id),
+      referrals: publicReferrals(await listReferrals(kv, user.id)),
       welcome: await getWelcome(kv, user.id),
     });
   } catch (err) {
