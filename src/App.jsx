@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
 import Splash from '@/components/Splash';
+import OfflineBanner from '@/components/OfflineBanner';
 import Home from '@/pages/Home';
 const Chat = lazy(() => import('@/pages/Chat'));
 const Billing = lazy(() => import('@/pages/Billing'));
@@ -125,6 +126,7 @@ function App() {
         <Router>
           <ScrollToTop />
           <Splash />
+          <OfflineBanner />
           <AuthenticatedApp />
         </Router>
         <Toaster />
