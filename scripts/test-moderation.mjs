@@ -136,3 +136,34 @@ const legacyBridge = '<script>(function(){if(window.top!==window)return;window.a
 store.set("site:cafe", "<html><body><h1>Cafe</h1>" + legacyBridge + legacyBridge + "</body></html>");
 served = await serveCafe();
 assert(count(served, "blackhole-checkout") === 1 && served.includes("<h1>Cafe</h1>"), "old unmarked bridges cleaned on serve");
+
+// ---- delete-my-content ----
+const del = await import(F + "delete-my-content.js");
+// u1 owns nova (taken down earlier, then restored), cafe and s1-style rows; give u1 a game and a draft too.
+entities.PublishedGame = [{ id: "g1", name: "zap", created_by_id: "u1" }, { id: "g2", name: "other", created_by_id: "u2" }];
+store.set("game:zap", "<html>game</html>"); store.set("game:other", "<html>theirs</html>");
+store.set("draft:u1", "{}");
+await sc.onRequest({ request: req({ action: "set", name: "cafe", on: true }, "usertok"), env });
+store.set("blocked:site:nova", "x"); // pretend nova is taken down again
+const deletes = [];
+const realFetch = globalThis.fetch;
+globalThis.fetch = async (url, opts = {}) => {
+  const u = new URL(url);
+  if (opts.method === "DELETE") { deletes.push(u.pathname.split("/entities/")[1]); return new Response("{}", { status: 200 }); }
+  if (u.pathname.includes("/entities/Published") && u.searchParams.get("q")?.includes("created_by_id")) {
+    const ent = u.pathname.split("/entities/")[1];
+    const q = JSON.parse(u.searchParams.get("q"));
+    return new Response(JSON.stringify(entities[ent].filter((x) => x.created_by_id === q.created_by_id)));
+  }
+  return realFetch(url, opts);
+};
+[s, b] = await j(del.onRequestPost({ request: req({}, "usertok"), env }));
+globalThis.fetch = realFetch;
+assert(s === 200 && b.sites === 2 && b.games === 1, "deleted 2 sites + 1 game: " + JSON.stringify(b));
+assert(deletes.sort().join(",") === "PublishedGame/g1,PublishedSite/s1,PublishedSite/s3", "only the user's own records deleted: " + deletes);
+assert(!store.has("site:cafe") && !store.has("game:zap") && !store.has("draft:u1"), "their HTML and draft removed");
+assert(store.has("site:nova") && store.has("game:other") && store.has("site:old"), "taken-down page kept as a record; others' pages kept");
+[s, b] = await call({ action: "list" });
+assert(!b.sites.some((x) => x.name === "cafe"), "removed from the gallery");
+[s, b] = await j(del.onRequestPost({ request: req({}), env }));
+assert(s === 401, "delete-my-content needs sign-in");

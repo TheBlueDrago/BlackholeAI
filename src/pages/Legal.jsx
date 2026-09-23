@@ -119,7 +119,8 @@ export function Privacy() {
       <h2>What we collect</h2>
       <ul>
         <li><strong>Account:</strong> your email address, and your name and picture if you sign in with Google.</li>
-        <li><strong>What you make:</strong> your chats, prompts, code, website and game designs, drafts and anything you publish.</li>
+        <li><strong>What you make:</strong> the sites and games you publish, and your game draft. Your chats and website projects are saved in your own browser, not on our servers.</li>
+        <li><strong>Prompts:</strong> what you send the AI passes through our servers to Google to get an answer. We count the credits it uses but don't keep the text.</li>
         <li><strong>Usage:</strong> how many credits you use on each AI, your plan, promo codes you redeem, and who invited you or whom you invited.</li>
         <li><strong>Payments:</strong> what you bought and when. Card details go straight to the payment provider; we never see your full card number.</li>
         <li><strong>Reports:</strong> when you report a site we keep your reason and note, plus a scrambled (hashed) form of your IP address so the same person can't report one page many times.</li>
@@ -148,21 +149,22 @@ export function Privacy() {
 
       <h2>What's public</h2>
       <p>
-        Sites and games you publish, and the name shown with them, are public. Your chats and unpublished drafts are
-        not shared with other users.
+        Sites and games you publish are public, and so is anything you add to the gallery. Your chats and unpublished
+        drafts are not shared with other users.
       </p>
 
       <h2>Stored on your device</h2>
       <p>
-        We use your browser's storage for sign-in and settings such as your theme and welcome messages. We don't use
-        advertising or tracking cookies.
+        We use your browser's storage for sign-in, settings such as your theme, and your chats, website projects and
+        attached images. We don't use advertising or tracking cookies.
       </p>
 
       <h2>Keeping and deleting</h2>
       <p>
-        We keep your data while your account is open. You can delete your account at any time from your profile.
-        Delete your published sites, games and chats first if you want them gone too, or ask us to remove anything
-        left over. We may keep records we need for payments, fraud prevention or the law.
+        We keep your data while your account is open. You can delete your account at any time from your profile;
+        that also deletes your published sites and games, your game draft, and the chats and projects saved in that
+        browser. We keep records we need for payments, fraud prevention (such as who invited whom) or the law, and a
+        copy of any page we took down for breaking the rules.
       </p>
 
       <h2>Children</h2>

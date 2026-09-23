@@ -71,7 +71,17 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
     setDelError("");
     setDelBusy(true);
     try {
+      // Sites, games and drafts first (they live outside the User record); if that
+      // fails, stop so nothing is left behind without an account to manage it.
+      await base44.functions.invoke("delete-my-content");
       await base44.functions.invoke("delete-account");
+      // Chats, designer projects and images are kept in this browser; clear them too.
+      try {
+        localStorage.clear();
+        indexedDB.deleteDatabase("blackhole-designer");
+      } catch {
+        // Storage blocked: nothing saved to clear.
+      }
       base44.auth.logout();
     } catch (e) {
       setDelError(e?.response?.data?.error || e?.message || "Could not delete account");
@@ -212,7 +222,7 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                   <h3 className="text-lg font-semibold text-white">Delete Account</h3>
                 </div>
                 <p className="text-sm text-slate-300 mb-4 leading-relaxed">
-                  This permanently deletes your account and all associated data. This action cannot be undone.
+                  This permanently deletes your account, your published websites and games, your saved game draft, and the chats and projects saved in this browser. This action cannot be undone.
                 </p>
                 <label className="text-xs text-slate-400">
                   Type <span className="font-semibold text-red-400">DELETE</span> to confirm
