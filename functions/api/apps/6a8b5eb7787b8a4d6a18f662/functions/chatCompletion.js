@@ -223,14 +223,17 @@ export async function onRequestPost(context) {
       const before = await creditStatus(kv, ent);
       left = before.tiers[tier].remaining;
       if (before.tiers[tier].total <= 0) {
-        return json({ error: `${TIER_NAMES[tier]} isn't included in your plan. Upgrade to use it.`, outOfCredits: true, credits: before }, 402);
+        return json(
+          { error: `You don't have any ${TIER_NAMES[tier]} credits. Refer friends (Account → Refer friends) or upgrade to get some.`, outOfCredits: true, credits: before },
+          402
+        );
       }
       if (left < mult) {
         return json(
           {
             error: left > 0
               ? `You have ${left} ${TIER_NAMES[tier]} credit${left === 1 ? "" : "s"} left — not enough for ${effort} effort (costs at least ${mult}). Lower the effort level.`
-              : `You've run out of ${TIER_NAMES[tier]} credits.`,
+              : `You've run out of ${TIER_NAMES[tier]} credits. Refer friends (Account → Refer friends) to earn more.`,
             outOfCredits: true,
             credits: before,
           },

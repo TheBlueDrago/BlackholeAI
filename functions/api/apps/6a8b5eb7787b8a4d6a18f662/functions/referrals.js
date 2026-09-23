@@ -1,0 +1,33 @@
+// Refer-a-friend for the signed-in user (see cloudflare-lib/referrals.js).
+// { action: "get" }                    -> { code, link, rewards, referrals }
+// { action: "join", code }             -> count this (brand-new) account as referred
+// { action: "claim", referredId, tier } -> take a referral's reward as that AI's credits
+import { json } from "../../../../../cloudflare-lib/published.js";
+import { currentUser, entitlement, creditStatus } from "../../../../../cloudflare-lib/credits.js";
+import { REWARDS, referralCode, referralLink, listReferrals, joinWithCode, claimReward } from "../../../../../cloudflare-lib/referrals.js";
+
+export async function onRequestPost(context) {
+  const { request, env } = context;
+  const kv = env.PUBLISHED_HTML;
+  try {
+    const user = await currentUser(request);
+    if (!user) return json({ error: "Please sign in." }, 401);
+    const body = await request.json().catch(() => ({}));
+
+    if (body.action === "join") {
+      const r = await joinWithCode(kv, user, body.code);
+      return json(r, r.ok ? 200 : 400);
+    }
+
+    if (body.action === "claim") {
+      const referrals = await claimReward(kv, request, user, String(body.referredId || ""), String(body.tier || ""));
+      const credits = await creditStatus(kv, await entitlement(kv, request, user));
+      return json({ referrals, credits });
+    }
+
+    const code = await referralCode(kv, user.id);
+    return json({ code, link: referralLink(code), rewards: REWARDS, referrals: await listReferrals(kv, user.id) });
+  } catch (err) {
+    return json({ error: (err && err.message) || "Referral error" }, 400);
+  }
+}

@@ -70,6 +70,7 @@ export function useCredits() {
     plan: status?.plan || "free",
     team,
     refresh,
+    sync,
     spendAI: sync,
     spendAICode: sync,
     spendGalaxy5: sync,

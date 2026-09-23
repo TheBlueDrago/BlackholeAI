@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { LogOut, Mail, Shield, KeyRound, ArrowLeft, Loader2, Crown, Settings, Users, Lock, ShieldCheck, Ticket, Trash2, Gamepad2, Pencil, Eye, EyeOff, Globe } from "lucide-react";
+import { LogOut, Mail, Shield, KeyRound, ArrowLeft, Loader2, Crown, Settings, Users, Lock, ShieldCheck, Ticket, Trash2, Gamepad2, Pencil, Eye, EyeOff, Globe, Gift } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import TeamMembership from "@/components/TeamMembership";
 import PublishedSites from "@/components/profile/PublishedSites";
+import ReferFriends from "@/components/profile/ReferFriends";
 import { notifyGamesChanged } from "@/lib/gameEvents";
 
 export default function Profile({ open, onClose, initialView = "main", onMonitor, onPromos }) {
@@ -241,6 +242,8 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                   Delete account
                 </button>
               </div>
+            ) : view === "refer" ? (
+              <ReferFriends onBack={() => setView("main")} />
             ) : view === "sites" ? (
               <PublishedSites user={user} plan={effPlan} onBack={() => setView("settings")} />
             ) : view === "games" ? (
@@ -414,6 +417,14 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                       Promo Code
                     </button>
                   )}
+                  <button
+                    onClick={() => setView("refer")}
+                    disabled={!user}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-amber-500/25 to-fuchsia-500/25 border border-amber-400/40 text-amber-100 font-medium hover:from-amber-500/35 hover:to-fuchsia-500/35 transition-colors disabled:opacity-60"
+                  >
+                    <Gift className="w-4 h-4" />
+                    Refer friends · get free credits
+                  </button>
                   <button
                     onClick={startReset}
                     disabled={pwBusy || !user}

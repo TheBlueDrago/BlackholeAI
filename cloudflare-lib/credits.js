@@ -4,6 +4,9 @@
 // Now every AI call is authenticated and charged here, and the UI just displays
 // the status this returns.
 //
+// Access follows credits, not plans: any AI can be used while the user has credits
+// for it (from a plan, a referral reward, a promo code or an admin), and not without.
+//
 // Where each fact comes from (nothing a user can edit about themselves):
 // - role "admin": Base44 enforces role itself (all entity RLS depends on it).
 // - Paid plans: Base44Purchase rows with status "paid" (admin/service-only writes).
@@ -82,6 +85,20 @@ async function paidPlan(request, user) {
   }
 }
 
+// An admin looking at someone else: my-team only answers for the caller, so read the
+// (admin-readable) Team rows directly.
+async function teamInfoFor(request, user) {
+  try {
+    const owned = await base44(request, "GET", `entities/Team?q=${q({ ownerId: user.id })}`);
+    let t = (owned || [])[0];
+    if (!t && user.email) t = ((await base44(request, "GET", `entities/Team?q=${q({ memberEmails: String(user.email).toLowerCase() })}`)) || [])[0];
+    if (t && t.status === "active") return { plan: "team", teamId: t.id };
+  } catch {
+    // No team.
+  }
+  return null;
+}
+
 async function teamInfo(request) {
   try {
     const r = await base44(request, "POST", "functions/my-team", {});
@@ -124,9 +141,14 @@ async function syncBonus(kv, request, user, grant) {
   return b;
 }
 
-export async function entitlement(kv, request, user) {
+// `other: true` when an admin is computing this for another user (not the caller).
+export async function entitlement(kv, request, user, { other = false } = {}) {
   const grant = await getJSON(kv, `grant:${user.id}`, null);
-  const [paid, team, bonus] = await Promise.all([paidPlan(request, user), teamInfo(request), syncBonus(kv, request, user, grant)]);
+  const [paid, team, bonus] = await Promise.all([
+    paidPlan(request, user),
+    other ? teamInfoFor(request, user) : teamInfo(request),
+    syncBonus(kv, request, user, grant),
+  ]);
   let plan = "free";
   const consider = (p) => {
     if (p && RANK[p] > RANK[plan]) plan = p;
@@ -185,6 +207,17 @@ export async function charge(kv, ent, tier, amount) {
   const usage = await getJSON(kv, key, {});
   usage[tier] = (Number(usage[tier]) || 0) + left;
   await putJSON(kv, key, usage);
+}
+
+// Adds (or with a negative delta, removes) bonus credits for one AI. Balances never go
+// below zero. Used by referral rewards and by admins in the Monitor page.
+export async function adjustBonus(kv, request, user, tier, delta) {
+  if (!TIERS.includes(tier)) throw new Error("Unknown AI");
+  const grant = await getJSON(kv, `grant:${user.id}`, null);
+  const b = await syncBonus(kv, request, user, grant);
+  b[tier] = Math.max(0, (Number(b[tier]) || 0) + Math.trunc(Number(delta) || 0));
+  await putJSON(kv, `bonus:${user.id}`, b);
+  return b;
 }
 
 // Admin-only: record plan grants, bans/blocks and (for the one-time snapshot) bonus balances.

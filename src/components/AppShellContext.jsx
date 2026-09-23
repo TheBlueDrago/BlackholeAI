@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useConversations } from "@/hooks/useConversations";
 import { useCredits } from "@/hooks/useCredits";
+import { claimPendingReferral } from "@/lib/referral";
 import { applyThemeClass, readUserTheme, writeUserTheme, prefersLight } from "@/lib/theme";
 
 const AppShellContext = createContext(null);
@@ -21,6 +22,11 @@ export function AppShellProvider({ children }) {
     base44.functions.invoke("record-email").catch(() => {});
     base44.auth.me().then(setCurrentUser).catch(() => setCurrentUser(null));
   }, []);
+
+  // A new user who arrived through a friend's invite link: count the referral once.
+  useEffect(() => {
+    if (currentUser?.id) claimPendingReferral();
+  }, [currentUser?.id]);
 
   // Initial theme from OS preference, then refined per-user once we know who's logged in.
   useEffect(() => {
@@ -53,9 +59,10 @@ export function AppShellProvider({ children }) {
 
   const goHome = useCallback(() => { navigate("/chat"); setSidebarOpen(false); }, [navigate]);
   const goCode = useCallback(() => {
-    if (effPlan === "free") { navigate("/chat/plans"); } else { navigate("/chat/code"); }
+    // Access follows credits: anyone with Blackhole Code credits (plan, referrals, admin) can use it.
+    if (credits.aiCodeRemaining > 0) { navigate("/chat/code"); } else { navigate("/chat/plans"); }
     setSidebarOpen(false);
-  }, [navigate, effPlan]);
+  }, [navigate, credits.aiCodeRemaining]);
   const goDesigner = useCallback(() => { navigate("/chat/designer"); setSidebarOpen(false); }, [navigate]);
   const goBrowser = useCallback(() => { navigate("/chat/browser"); setSidebarOpen(false); }, [navigate]);
   const goGames = useCallback(() => { navigate("/chat/games"); setSidebarOpen(false); }, [navigate]);

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Code, Gem, Star, ChevronDown, Lock } from "lucide-react";
+import { useAppShell } from "@/components/AppShellContext";
 
 const OPTIONS = [
   { id: "ai", label: "AI", icon: Sparkles, color: "text-indigo-400" },
@@ -21,11 +22,17 @@ export default function AiChooser({ value, onChange, plan, allowFable }) {
     return () => document.removeEventListener("mousedown", h);
   }, []);
 
+  // Access follows credits, not plans: an AI is unlocked while you have credits for it
+  // (from a plan, referrals, promo codes or an admin). Before credits load, allow the
+  // basics and fall back to the plan for the others.
+  const credits = useAppShell()?.credits;
+  const REMAINING = { ai: "aiRemaining", code: "aiCodeRemaining", opus5: "galaxy5Remaining", fable: "space5Remaining" };
   const canUse = (id) => {
+    if ((id === "opus5" || id === "fable") && !allowFable) return false;
+    const left = credits?.[REMAINING[id]];
+    if (typeof left === "number" && Number.isFinite(left)) return left > 0;
     if (id === "ai" || id === "code") return true;
-    if (id === "opus5") return allowFable && (plan === "pro" || plan === "team" || plan === "secret" || plan === "admin");
-    if (id === "fable") return allowFable && (plan === "pro" || plan === "team" || plan === "secret" || plan === "admin");
-    return false;
+    return plan === "pro" || plan === "team" || plan === "secret" || plan === "admin";
   };
 
   const current = OPTIONS.find((o) => o.id === value) || OPTIONS[0];
@@ -81,11 +88,8 @@ export default function AiChooser({ value, onChange, plan, allowFable }) {
             {!allowFable && (
               <p className="px-2.5 py-1 text-[10px] text-slate-500">Galaxy & Space: Website Designer only</p>
             )}
-            {allowFable && plan === "free" && (
-              <p className="px-2.5 py-1 text-[10px] text-slate-500">Galaxy: Pro+ · Space: Team+</p>
-            )}
-            {allowFable && plan === "free" && (
-              <p className="px-2.5 py-1 text-[10px] text-slate-500">Galaxy & Space: Pro+ plans</p>
+            {OPTIONS.some((o) => !canUse(o.id)) && (
+              <p className="px-2.5 py-1 text-[10px] text-slate-500">🔒 = no credits. Refer friends (Account) or upgrade to unlock.</p>
             )}
           </motion.div>
         )}

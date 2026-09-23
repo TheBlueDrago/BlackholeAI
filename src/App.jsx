@@ -15,6 +15,10 @@ import Plans from '@/pages/Plans';
 import PromoSuccess from '@/pages/PromoSuccess';
 import SiteView from '@/pages/SiteView';
 import Buy from '@/pages/Buy';
+import { captureReferral } from '@/lib/referral';
+
+// Remember an invite code (?ref=) from whatever page the link opened.
+captureReferral();
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';

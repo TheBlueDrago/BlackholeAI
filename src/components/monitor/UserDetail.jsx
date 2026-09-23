@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { X, Loader2, Clock, MessageSquare } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import CreditControls from "./CreditControls";
 
 const LABELS = { ai: "Blackhole AI", aiCode: "Blackhole Code", galaxy5: "Galaxy", space5: "Space" };
 
@@ -41,6 +42,8 @@ export default function UserDetail({ user, onClose }) {
           </button>
         </div>
 
+        <CreditControls userId={user.id} />
+
         {error && <p className="text-red-400 text-sm mt-6">{error}</p>}
         {!data && !error && (
           <div className="flex items-center justify-center py-10 text-slate-500"><Loader2 className="w-5 h-5 animate-spin" /></div>
@@ -48,27 +51,6 @@ export default function UserDetail({ user, onClose }) {
 
         {data && (
           <>
-            <p className="text-slate-500 text-xs mt-1 capitalize">{data.plan} plan</p>
-
-            <p className="text-slate-300 text-sm font-medium mt-5 mb-2">Credits left this month</p>
-            <div className="grid grid-cols-2 gap-2">
-              {Object.keys(LABELS).map((k) => {
-                const c = data.credits?.[k] || { total: 0, used: 0, remaining: 0 };
-                return (
-                  <div key={k} className="bg-slate-800/60 border border-slate-700/50 rounded-xl px-3 py-2">
-                    <p className="text-[11px] text-slate-400">{LABELS[k]}</p>
-                    {c.total === 0 ? (
-                      <p className="text-slate-500 text-sm font-medium">Not in their plan</p>
-                    ) : (
-                      <>
-                        <p className="text-white text-sm font-semibold">{c.remaining} left</p>
-                        <p className="text-[11px] text-slate-500">{c.used} used of {c.total}</p>
-                      </>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
 
             <div className="grid grid-cols-2 gap-2 mt-3">
               <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl px-3 py-2">
