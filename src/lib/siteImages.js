@@ -49,8 +49,9 @@ export function onImagesChange(fn) {
   };
 }
 
-// Shrinks an image file (longest side MAX_SIDE) and returns its placeholder id.
-export async function addImageFile(file) {
+// Shrinks an image file so its longest side is at most maxSide and returns a data: URL.
+// PNG/GIF/WebP (maybe transparent, e.g. logos) become WebP; photos become JPEG.
+export async function shrinkImage(file, maxSide = MAX_SIDE) {
   const url = URL.createObjectURL(file);
   try {
     const img = await new Promise((resolve, reject) => {
@@ -59,21 +60,25 @@ export async function addImageFile(file) {
       el.onerror = () => reject(new Error(`${file.name} isn't an image this browser can open.`));
       el.src = url;
     });
-    const scale = Math.min(1, MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
+    const scale = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
     const canvas = document.createElement("canvas");
     canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
     canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
     canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
-    // PNGs may be transparent (logos); photos compress far better as JPEG.
-    const dataUrl = file.type === "image/png" || file.type === "image/gif" || file.type === "image/webp"
+    return file.type === "image/png" || file.type === "image/gif" || file.type === "image/webp"
       ? canvas.toDataURL("image/webp", 0.85)
       : canvas.toDataURL("image/jpeg", 0.82);
-    const id = await idFor(dataUrl);
-    remember(id, dataUrl);
-    return id;
   } finally {
     URL.revokeObjectURL(url);
   }
+}
+
+// Shrinks an attached image, keeps it, and returns its placeholder id.
+export async function addImageFile(file) {
+  const dataUrl = await shrinkImage(file);
+  const id = await idFor(dataUrl);
+  remember(id, dataUrl);
+  return id;
 }
 
 // Real images in place of placeholders. Unknown placeholders are left as they are.

@@ -3,7 +3,9 @@
 // no à la carte top-ups). This exact static path takes routing precedence over the
 // catch-all proxy at functions/api/[[path]].js, so only this one function call is
 // diverted — every other /api/* call (auth, entities, other functions) still goes
-// to Base44 as normal. Contract: { prompt, model, effort? } -> { content, model, effort }.
+// to Base44 as normal. Contract: { prompt, model, effort?, images? } -> { content, model, effort }.
+// images: up to MAX_IMAGES [{ mimeType, data (base64) }] the user attached, sent to the
+// model with the prompt (the app shrinks them first).
 // See ChatBox.jsx, WebsiteDesigner.jsx, GamesDesigner.jsx, CodePage.jsx for callers.
 //
 // Backed by Google's Gemini API on the FREE tier (no billing) instead of a paid
@@ -49,6 +51,26 @@ const EFFORT = {
 };
 const DEFAULT_EFFORT = "medium";
 
+const MAX_IMAGES = 3;
+const MAX_IMAGE_B64 = 2_000_000; // ~1.5 MB per image
+const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+
+// The prompt as Gemini "parts": the text, then any attached images. Returns an error
+// message instead when the images aren't acceptable.
+function promptParts(prompt, images) {
+  if (!Array.isArray(images) || !images.length) return prompt;
+  if (images.length > MAX_IMAGES) return { error: `Attach at most ${MAX_IMAGES} images.` };
+  const parts = [{ text: prompt }];
+  for (const img of images) {
+    const mimeType = String((img && img.mimeType) || "");
+    const data = String((img && img.data) || "");
+    if (!IMAGE_TYPES.includes(mimeType) || !/^[A-Za-z0-9+/=]+$/.test(data)) return { error: "That image type isn't supported." };
+    if (data.length > MAX_IMAGE_B64) return { error: "An attached image is too large." };
+    parts.push({ inline_data: { mime_type: mimeType, data } });
+  }
+  return parts;
+}
+
 // If a model hasn't even started answering within this long, give up on it and try
 // the next one (overloaded models take ~20-40s just to return their 503).
 const HEADERS_TIMEOUT_MS = 20000;
@@ -75,7 +97,7 @@ async function generate(apiKey, model, prompt, generationConfig, timeoutMs, { on
     res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse`, {
       method: "POST",
       headers: { "content-type": "application/json", "x-goog-api-key": apiKey },
-      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig }),
+      body: JSON.stringify({ contents: [{ parts: typeof prompt === "string" ? [{ text: prompt }] : prompt }], generationConfig }),
       signal: ctrl.signal,
     });
   } catch (err) {
@@ -250,6 +272,9 @@ export async function onRequestPost(context) {
       }
     }
 
+    const input = internal ? prompt : promptParts(prompt, body.images);
+    if (input && input.error) return json({ error: input.error }, 400);
+
     const chain = internal ? [DEFAULT_MODEL] : [requested, ...MODELS_BY_STRENGTH.filter((m) => m !== requested)].slice(0, MAX_ATTEMPTS);
     // The reply stops at what the user's credits cover: whole credits x effort multiplier.
     const maxChars = internal ? Infinity : Math.floor(left / mult) * CHARS_PER_CREDIT;
@@ -266,7 +291,7 @@ export async function onRequestPost(context) {
 
     if (!body.stream) {
       try {
-        const r = await runChain(env.GEMINI_API_KEY, chain, prompt, effort, maxTokens, { maxChars });
+        const r = await runChain(env.GEMINI_API_KEY, chain, input, effort, maxTokens, { maxChars });
         return json({ content: r.text, model: r.model, effort, ...(await settle(r.text, r.cut)) });
       } catch (err) {
         // 503 rather than 502: Cloudflare replaces 502 bodies on the custom domain with a
@@ -284,7 +309,7 @@ export async function onRequestPost(context) {
     context.waitUntil(
       (async () => {
         try {
-          const r = await runChain(env.GEMINI_API_KEY, chain, prompt, effort, maxTokens, { maxChars, onDelta: (t) => send({ delta: t }) });
+          const r = await runChain(env.GEMINI_API_KEY, chain, input, effort, maxTokens, { maxChars, onDelta: (t) => send({ delta: t }) });
           await send({ done: true, model: r.model, effort, ...(await settle(r.text, r.cut)) });
         } catch (err) {
           await send({ ...failure(err), status: 503 });

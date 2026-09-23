@@ -1,11 +1,13 @@
-// Offline test: free "internal" AI calls (chat titles) are held to the basic model, a
+// Offline test: attached images reach Gemini (with limits); free "internal" AI calls (chat titles) are held to the basic model, a
 // short prompt and a per-user rate; normal calls are still charged. Run: node scripts/test-ai-internal.mjs
 const F = new URL("../functions/api/apps/6a8b5eb7787b8a4d6a18f662/functions/", import.meta.url).pathname;
 const models = [];
+const bodies = [];
 globalThis.fetch = async (url, opts = {}) => {
   const u = String(url);
   if (u.includes("generativelanguage")) {
     models.push(u.split("/models/")[1].split(":")[0]);
+    bodies.push(JSON.parse(opts.body));
     const sse = 'data: {"candidates":[{"content":{"parts":[{"text":"My Title"}]}}]}\n\n';
     return new Response(sse, { status: 200, headers: { "content-type": "text/event-stream" } });
   }
@@ -32,3 +34,18 @@ console.log("after 31 internal calls:", last);
 models.length = 0;
 [s, b] = await call({ prompt: "hello", model: "automatic" });
 console.log("normal call:", s, b.content, "charged:", b.charged, "model:", models.join(","), "usage keys:", [...store.keys()].filter((k) => k.startsWith("usage:")).length);
+
+// ---- images ----
+bodies.length = 0;
+const png = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+[s, b] = await call({ prompt: "what is this?", images: [{ mimeType: "image/png", data: png }] });
+const parts = bodies[0].contents[0].parts;
+console.log("image call:", s, "parts:", parts.length, parts[1].inline_data.mime_type, parts[1].inline_data.data === png);
+[s, b] = await call({ prompt: "x", images: [{ mimeType: "text/html", data: "PGh0bWw+" }] });
+console.log("bad image type:", s, b.error);
+[s, b] = await call({ prompt: "x", images: [1, 2, 3, 4].map(() => ({ mimeType: "image/png", data: png })) });
+console.log("too many images:", s, b.error);
+bodies.length = 0;
+cache.clear();
+[s, b] = await call({ prompt: "Name it", internal: true, images: [{ mimeType: "image/png", data: png }] });
+console.log("internal ignores images:", s, bodies[0] ? bodies[0].contents[0].parts.length : "throttled");

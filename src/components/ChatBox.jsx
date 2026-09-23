@@ -12,6 +12,7 @@ import { base44 } from "@/api/base44Client";
 import { OUT_OF_CREDITS_NOTE } from "@/lib/creditCost";
 import { useEffort, effortFor } from "@/lib/effort";
 import { streamChat } from "@/lib/aiStream";
+import { shrinkImage } from "@/lib/siteImages";
 import EffortPicker from "@/components/chat/EffortPicker";
 
 const CODE_SYS = "You are Blackhole Code Assistant. Help with programming. Give clear, correct code with brief explanations.";
@@ -42,12 +43,28 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
     if (!convId) convId = createConversation();
     convIdRef.current = convId;
 
-    const fileNote = files.length ? `\n[Attached files: ${files.map((f) => f.name).join(", ")}]` : "";
+    // Up to 3 attached images go to the AI itself (shrunk first); other files by name.
+    const imageFiles = files.filter((f) => /^image\//.test(f.type)).slice(0, 3);
+    const otherFiles = files.filter((f) => !imageFiles.includes(f));
+    const images = [];
+    for (const f of imageFiles) {
+      try {
+        const dataUrl = await shrinkImage(f, 1280);
+        const [, mimeType, data] = dataUrl.match(/^data:([^;]+);base64,(.*)$/) || [];
+        if (data) images.push({ mimeType, data });
+        else otherFiles.push(f);
+      } catch {
+        otherFiles.push(f);
+      }
+    }
+    const attachedNames = files.map((f) => f.name).join(", ");
+    setFiles([]);
+    const fileNote = otherFiles.length ? `\n[Attached files (names only): ${otherFiles.map((f) => f.name).join(", ")}]` : "";
     const sys = ai === "code" ? CODE_SYS : ai === "fable" ? FABLE_SYS : "";
     const intent = ai !== "ai" ? resolveIntent(text, buildMode.mode) : { build: true };
     const modeNote = ai !== "ai" ? (intent.build ? BUILD_NOTE : ANSWER_NOTE) + "\n\n" : "";
     const fullPrompt = `${sys ? sys + "\n\n" : ""}${modeNote}${text}${fileNote}`;
-    addMessage(convId, { role: "user", content: text + (files.length ? ` (attached: ${files.map((f) => f.name).join(", ")})` : "") });
+    addMessage(convId, { role: "user", content: text + (attachedNames ? ` (attached: ${attachedNames})` : "") });
     setInput("");
     setLoading(true);
     setLive("");
@@ -55,7 +72,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
     try {
       const eff = effortFor(effort, text, { build: ai !== "ai" && intent.build });
       // Streamed so the reply appears as it's written.
-      const res = await streamChat({ prompt: fullPrompt, model: MODELS[ai] || "automatic", effort: eff }, (soFar) => {
+      const res = await streamChat({ prompt: fullPrompt, model: MODELS[ai] || "automatic", effort: eff, ...(images.length ? { images } : {}) }, (soFar) => {
         if (reqIdRef.current === myId) setLive(soFar);
       });
       if (reqIdRef.current !== myId) return;
