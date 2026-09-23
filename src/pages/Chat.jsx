@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { AppShellProvider, useAppShell } from "@/components/AppShellContext";
 import Profile from "@/components/Profile";
@@ -7,14 +7,21 @@ import TeamWelcomePopup from "@/components/TeamWelcomePopup";
 import BanScreen from "@/components/BanScreen";
 import MobileTabBar from "@/components/MobileTabBar";
 
+const PageSpinner = () => (
+  <div className="relative z-10 min-h-screen flex items-center justify-center">
+    <div className="w-8 h-8 border-4 border-slate-700 border-t-sky-400 rounded-full animate-spin"></div>
+  </div>
+);
+
 function ChatLayout() {
   const shell = useAppShell();
-  const { isBanned, isBlocked, blockedUntil, openProfile } = shell;
+  const { isBanned, isBlocked, blockedUntil, openProfile, closeProfile } = shell;
   const loc = useLocation();
   const navigate = useNavigate();
 
-  const profileOpen = loc.pathname.startsWith("/chat/settings");
-  const profileInitialView = loc.state?.initialView || "main";
+  // The profile opens over whatever page is showing (see openProfile), so that page stays put behind it.
+  const profileView = loc.state?.profile;
+  const profileOpen = !!profileView;
   const showTabbar = ["/chat", "/chat/code", "/chat/designer", "/chat/designer/build"].includes(loc.pathname) && !isBanned && !isBlocked;
 
   return (
@@ -22,12 +29,20 @@ function ChatLayout() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute top-1/3 left-1/3 w-[400px] h-[400px] bg-fuchsia-600/10 rounded-full blur-[100px] pointer-events-none" />
 
-      {isBanned || isBlocked ? <BanScreen banned={isBanned} until={blockedUntil} /> : <Outlet />}
+      {/* Pages load on demand. Waiting for one here, instead of at the app's top level, keeps the
+          profile popup below mounted, so it can close when a button in it opens a page. */}
+      {isBanned || isBlocked ? (
+        <BanScreen banned={isBanned} until={blockedUntil} />
+      ) : (
+        <Suspense fallback={<PageSpinner />}>
+          <Outlet />
+        </Suspense>
+      )}
 
       <Profile
         open={profileOpen}
-        initialView={profileInitialView}
-        onClose={() => navigate(-1)}
+        initialView={profileView || "main"}
+        onClose={closeProfile}
         onMonitor={() => navigate("/chat/monitor", { replace: true })}
         onPromos={() => navigate("/chat/promos", { replace: true })}
       />

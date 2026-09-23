@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useConversations } from "@/hooks/useConversations";
 import { useCredits } from "@/hooks/useCredits";
@@ -13,6 +13,7 @@ export const useAppShell = () => useContext(AppShellContext);
 
 export function AppShellProvider({ children }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const conv = useConversations();
   const credits = useCredits();
   const [currentUser, setCurrentUser] = useState(null);
@@ -78,13 +79,30 @@ export function AppShellProvider({ children }) {
   const goPromos = useCallback(() => { navigate("/chat/promos"); setSidebarOpen(false); }, [navigate]);
   const newChat = useCallback(() => { conv.createConversation("New Chat"); navigate("/chat"); setSidebarOpen(false); }, [navigate, conv]);
   const goBilling = useCallback((productId = "pro") => navigate("/billing", { state: { productId } }), [navigate]);
-  const openProfile = useCallback((initialView = "main") => navigate("/chat/settings", { state: { initialView } }), [navigate]);
+  // Back within the app, or to the chat when there is nothing to go back to (a page opened from a link).
+  const goBack = useCallback(() => (window.history.state?.idx > 0 ? navigate(-1) : navigate("/chat", { replace: true })), [navigate]);
+  // The profile opens over the current page as a history entry of its own, so the page stays
+  // behind it and the phone's back button (or a tap outside) closes it.
+  const openProfile = useCallback((initialView = "main") => {
+    const state = location.state || {};
+    const alreadyOpen = !!state.profile;
+    navigate(location.pathname + location.search, {
+      replace: alreadyOpen,
+      state: { ...state, profile: initialView, profileEntry: alreadyOpen ? !!state.profileEntry : true },
+    });
+  }, [navigate, location]);
+  const closeProfile = useCallback(() => {
+    const { profile, profileEntry, ...rest } = location.state || {};
+    if (!profile) return;
+    if (profileEntry && window.history.state?.idx > 0) navigate(-1);
+    else navigate(location.pathname + location.search, { replace: true, state: rest });
+  }, [navigate, location]);
 
   const value = {
     currentUser, conv, credits, lightMode, toggleLight,
     isAdmin, isBanned, isBlocked, blockedUntil, effPlan, avatarInitial,
     sidebarOpen, setSidebarOpen,
-    navigate, goHome, goCode, goDesigner, goBrowser, goGames, goGameDesigner, goPlans, goMonitor, goPromos, newChat, goBilling, openProfile,
+    navigate, goHome, goCode, goDesigner, goBrowser, goGames, goGameDesigner, goPlans, goMonitor, goPromos, newChat, goBilling, openProfile, closeProfile, goBack,
   };
 
   return (

@@ -1,4 +1,5 @@
 import React from "react";
+import { Navigate } from "react-router-dom";
 import { useAppShell } from "@/components/AppShellContext";
 import Subscriptions from "@/components/Subscriptions";
 import Monitor from "@/pages/Monitor";
@@ -9,7 +10,7 @@ export function PlansView() {
   const shell = useAppShell();
   return (
     <Subscriptions
-      onFree={() => shell.navigate(-1)}
+      onFree={shell.goBack}
       onPro={() => shell.goBilling("pro")}
       onTeam={() => shell.goBilling("team")}
       onSecret={() => shell.goBilling("secret")}
@@ -19,15 +20,15 @@ export function PlansView() {
 
 export function MonitorView() {
   const shell = useAppShell();
-  return <Monitor onBack={() => shell.navigate(-1)} />;
+  return <Monitor onBack={shell.goBack} />;
 }
 
 export function PromosView() {
   const shell = useAppShell();
-  return <PromoManager onBack={() => shell.navigate(-1)} />;
+  return <PromoManager onBack={shell.goBack} />;
 }
 
-// The Settings route just signals the Profile modal (rendered by the ChatLayout) to open.
+// Old /chat/settings links: open the profile over the chat.
 export function SettingsView() {
-  return null;
+  return <Navigate to="/chat" replace state={{ profile: "main" }} />;
 }
