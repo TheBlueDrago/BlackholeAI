@@ -3,6 +3,9 @@
 // green. { action: "list" } -> { items }
 // { action: "ai-check", kind, name } -> { item } (Gemini reads the page; the verdict is
 // saved in KV as review:<kind>:<name> and shown until the page changes).
+// { action: "set-flag", kind, name, flag: "green"|"yellow"|"red"|null } -> { item } (an admin's
+// own verdict, saved in KV as flag:<kind>:<name>; like the AI's, it only lasts until the page
+// changes, and null goes back to the automatic check).
 // { action: "hide-emails" } -> { fixed } (pages published before publicName() showed the
 // maker's email address to anyone; replaces it with their first name).
 import { json, base44, kvKey, ENTITY, MAX_BYTES, publicName } from "../../../../../cloudflare-lib/published.js";
@@ -25,7 +28,9 @@ async function sourceHtml(kv, kind, rec) {
   }
 }
 
-// Short fingerprint so a saved AI verdict is dropped when the page changes.
+const FLAGS = ["green", "yellow", "red"];
+
+// Short fingerprint so a saved AI or admin verdict is dropped when the page changes.
 function fingerprint(html) {
   let h = 0;
   for (let i = 0; i < html.length; i += Math.max(1, Math.floor(html.length / 4000))) h = (h * 31 + html.charCodeAt(i)) | 0;
@@ -36,10 +41,15 @@ async function describe(kv, kind, rec, owners) {
   const html = await sourceHtml(kv, kind, rec);
   const scan = scanPage(html);
   const name = String(rec.name || "");
-  const review = await kv.get(`review:${kind}:${name}`, "json").catch(() => null);
-  const ai = review && review.fp === fingerprint(html) ? review : null;
-  // The AI's verdict wins when it's stricter than the pattern check.
-  const flag = ai && flagRank(ai.flag) < flagRank(scan.flag) ? ai.flag : scan.flag;
+  const fp = fingerprint(html);
+  const [review, set] = await Promise.all([
+    kv.get(`review:${kind}:${name}`, "json").catch(() => null),
+    kv.get(`flag:${kind}:${name}`, "json").catch(() => null),
+  ]);
+  const ai = review && review.fp === fp ? review : null;
+  const own = set && set.fp === fp && FLAGS.includes(set.flag) ? set : null;
+  // An admin's own verdict wins; otherwise the AI's, when it's stricter than the pattern check.
+  const flag = own ? own.flag : ai && flagRank(ai.flag) < flagRank(scan.flag) ? ai.flag : scan.flag;
   const owner = owners.get(rec.created_by_id) || {};
   return {
     kind,
@@ -56,6 +66,8 @@ async function describe(kv, kind, rec, owners) {
     malware: scan.malware,
     reasons: scan.reasons,
     ai: ai ? { flag: ai.flag, reasons: ai.reasons, at: ai.at } : null,
+    autoFlag: ai && flagRank(ai.flag) < flagRank(scan.flag) ? ai.flag : scan.flag,
+    setByAdmin: own ? { flag: own.flag, at: own.at } : null,
   };
 }
 
@@ -81,6 +93,20 @@ export async function onRequestPost(context) {
       if (!html) return json({ error: "That page has no content to check." }, 404);
       const verdict = await reviewPage(env.GEMINI_API_KEY, html, kind === "game" ? "game" : "website");
       await kv.put(`review:${kind}:${rec.name}`, JSON.stringify({ ...verdict, fp: fingerprint(html), at: new Date().toISOString() }));
+      return json({ item: await describe(kv, kind, rec, owners) });
+    }
+
+    if (body.action === "set-flag") {
+      const kind = String(body.kind || "");
+      if (!ENTITY[kind]) return json({ error: "kind required" }, 400);
+      const flag = body.flag == null ? null : String(body.flag);
+      if (flag !== null && !FLAGS.includes(flag)) return json({ error: "flag must be green, yellow or red" }, 400);
+      const q = encodeURIComponent(JSON.stringify({ name: String(body.name || "") }));
+      const rec = ((await base44(request, "GET", `entities/${ENTITY[kind]}?q=${q}`)) || [])[0];
+      if (!rec) return json({ error: "Not found." }, 404);
+      const key = `flag:${kind}:${rec.name}`;
+      if (flag === null) await kv.delete(key);
+      else await kv.put(key, JSON.stringify({ flag, fp: fingerprint(await sourceHtml(kv, kind, rec)), at: new Date().toISOString(), by: admin.id }));
       return json({ item: await describe(kv, kind, rec, owners) });
     }
 
