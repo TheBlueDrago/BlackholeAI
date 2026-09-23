@@ -173,3 +173,23 @@ assert(s === 401, "delete-my-content needs sign-in");
 assert(s === 200 && typeof b.open === "number" && b.open === Object.keys(await rep.readReports(kv)).length, "count action: " + b.open);
 [s, b] = await j(admin.onRequestPost({ request: req({ action: "count" }, "usertok"), env }));
 assert(s === 403, "count is admin-only");
+
+// ---- rate limits (with a fake edge cache) ----
+const cacheStore = new Map();
+globalThis.caches = { default: {
+  async match(r) { const v = cacheStore.get(r.url); return v == null ? undefined : new Response(v); },
+  async put(r, res) { cacheStore.set(r.url, await res.text()); },
+} };
+const { allow } = await import(R + "cloudflare-lib/ratelimit.js");
+const got = [];
+for (let i = 0; i < 4; i++) got.push(await allow("t:x", 3, 3600));
+assert(got.join() === "true,true,true,false" && (await allow("t:y", 3, 3600)), "3 per window, per key");
+let lastStatus = 0;
+for (let i = 0; i < 31; i++) lastStatus = (await pub.onRequestPost({ request: req({ name: "cafe", html: "<p>v" + i + "</p>" }, "usertok"), env })).status;
+assert(lastStatus === 429, "31st publish in an hour is refused");
+[s, b] = await j(pub.onRequestPost({ request: req({ name: "cafe", html: "<p>admin</p>" }, "admintok"), env }));
+assert(s === 200, "admins aren't throttled");
+for (let i = 0; i < 10; i++) await report.onRequestPost({ request: req({ name: "nova", reason: "scam" }, null, "7.7.7.7"), env });
+[s, b] = await j(report.onRequestPost({ request: req({ name: "nova", reason: "scam" }, null, "7.7.7.7"), env }));
+assert(s === 429, "11th report from one visitor in an hour is refused");
+delete globalThis.caches;

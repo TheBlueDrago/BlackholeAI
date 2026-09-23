@@ -5,6 +5,7 @@ import { json, findByName } from "../../../../../cloudflare-lib/published.js";
 import { currentUser } from "../../../../../cloudflare-lib/credits.js";
 import { isBlocked } from "../../../../../cloudflare-lib/reports.js";
 import { readShowcase, setShowcase, MAX_SHOWCASE } from "../../../../../cloudflare-lib/showcase.js";
+import { allow, TOO_MANY } from "../../../../../cloudflare-lib/ratelimit.js";
 
 const list = async (kv) =>
   Object.entries(await readShowcase(kv))
@@ -21,6 +22,7 @@ export async function onRequest(context) {
 
     const user = await currentUser(request);
     if (!user) return json({ error: "Please sign in." }, 401);
+    if (!(await allow(`showcase:${user.id}`, 30, 3600))) return json({ error: TOO_MANY }, 429);
     const name = String(body.name || "").toLowerCase();
     const rows = await findByName(request, "site", name);
     const site = rows[0];

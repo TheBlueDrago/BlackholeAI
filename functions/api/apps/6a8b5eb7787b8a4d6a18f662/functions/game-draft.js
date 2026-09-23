@@ -6,6 +6,7 @@
 // Same contract as before: { action: "load" | "save" | "clear", ... }.
 import { json, base44 } from "../../../../../cloudflare-lib/published.js";
 import { currentUser } from "../../../../../cloudflare-lib/credits.js";
+import { allow, TOO_MANY } from "../../../../../cloudflare-lib/ratelimit.js";
 
 const MAX_BYTES = 5 * 1024 * 1024;
 
@@ -52,6 +53,7 @@ export async function onRequestPost(context) {
       // Skip identical saves: KV's free tier allows 1,000 writes a day.
       const serialized = JSON.stringify(draft);
       if ((await kv.get(key)) === serialized) return json({ ok: true, unchanged: true });
+      if (!(await allow(`draft:${user.id}`, 120, 3600))) return json({ error: TOO_MANY }, 429);
       await kv.put(key, serialized);
       return json({ ok: true });
     }

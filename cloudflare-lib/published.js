@@ -10,6 +10,7 @@
 // every reader (designer, browser, games front, subdomain Worker) keeps working.
 import { findCredentialForm } from "./phishing.js";
 import { stripInjected } from "./injected.js";
+import { allow, TOO_MANY } from "./ratelimit.js";
 
 export const BACKEND = "https://blackhole-ai.base44.app";
 export const APP_ID = "6a8b5eb7787b8a4d6a18f662";
@@ -78,6 +79,7 @@ export async function publish(context, kind, { name, html: rawHtml, extra }) {
       user = null;
     }
     if (!user || !user.id) return json({ error: "Please sign in to publish." }, 401);
+    if (user.role !== "admin" && !(await allow(`publish:${user.id}`, 30, 3600))) return json({ error: TOO_MANY }, 429);
     if (!name || !html) return json({ error: "name and html required" }, 400);
     if (new TextEncoder().encode(html).length > MAX_BYTES) {
       return json({ error: `${label} is too large (over 5 MB). Make it smaller.` }, 413);

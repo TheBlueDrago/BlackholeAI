@@ -4,6 +4,7 @@
 import { json, findByName } from "../../../../../cloudflare-lib/published.js";
 import { REASONS, addReport } from "../../../../../cloudflare-lib/reports.js";
 import { currentUser } from "../../../../../cloudflare-lib/credits.js";
+import { allow, TOO_MANY } from "../../../../../cloudflare-lib/ratelimit.js";
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -20,6 +21,7 @@ export async function onRequestPost(context) {
 
     const user = request.headers.get("authorization") ? await currentUser(request).catch(() => null) : null;
     const who = (user && user.id) || request.headers.get("cf-connecting-ip") || "";
+    if (!(await allow(`report:${who}`, 10, 3600))) return json({ error: TOO_MANY }, 429);
     const result = await addReport(env.PUBLISHED_HTML, { kind, name, reason, details: body.details, who });
     return json({ ok: true, duplicate: result === "duplicate" });
   } catch (err) {
