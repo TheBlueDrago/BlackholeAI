@@ -150,6 +150,7 @@ export default function Login() {
           </Link>
         </p>
         <p className="text-center text-slate-500 text-xs mt-3">
+          <Link to="/showcase" className="hover:underline">See what people built</Link> ·{" "}
           <Link to="/terms" className="hover:underline">Terms</Link> ·{" "}
           <Link to="/privacy" className="hover:underline">Privacy</Link>
         </p>

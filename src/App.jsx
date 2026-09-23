@@ -17,6 +17,7 @@ import SiteView from '@/pages/SiteView';
 import Buy from '@/pages/Buy';
 import Report from '@/pages/Report';
 import { Terms, Privacy } from '@/pages/Legal';
+import Showcase from '@/pages/Showcase';
 import { captureReferral } from '@/lib/referral';
 
 // Remember an invite code (?ref=) from whatever page the link opened.
@@ -73,6 +74,7 @@ const AuthenticatedApp = () => {
       <Route path="/report" element={<Report />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />
+      <Route path="/showcase" element={<Showcase />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route path="/chat" element={<Chat />}>
           <Route element={<WorkspaceShell />}>

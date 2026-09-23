@@ -32,6 +32,7 @@ export default function BrowserHome({ value, onChange, onSubmit, onLucky }) {
         </div>
       </form>
       <p className="text-slate-500 text-xs mt-10">Websites live at <span className="text-slate-300 font-mono">name.blackhole</span> · games at <span className="text-slate-300 font-mono">name.io</span>, <span className="text-slate-300 font-mono">name.shooter</span>…</p>
+      <a href="/showcase" target="_blank" rel="noopener noreferrer" className="text-indigo-300 hover:underline text-xs mt-3">Browse the gallery of sites people built →</a>
     </div>
   );
 }

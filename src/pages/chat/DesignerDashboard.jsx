@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 import {
-  Menu, Globe, Plus, Sparkles, Loader2, Pencil, Trash2, Eye, EyeOff, Crown, ExternalLink,
+  Menu, Globe, Plus, Sparkles, Loader2, Pencil, Trash2, Eye, EyeOff, Crown, ExternalLink, Star,
 } from "lucide-react";
 import { useAppShell } from "@/components/AppShellContext";
 import { base44 } from "@/api/base44Client";
@@ -71,7 +71,7 @@ function SitePreviewThumb({ html }) {
   );
 }
 
-function SiteCard({ site, onEdit, onToggleHidden, onDelete }) {
+function SiteCard({ site, onEdit, onToggleHidden, onDelete, inGallery, onToggleGallery }) {
   const hasPreview = isInlineHtml(site.html);
   return (
     <div className="group relative rounded-2xl bg-slate-900/60 border border-slate-700/50 p-4 hover:border-indigo-500/40 transition-colors">
@@ -119,6 +119,17 @@ function SiteCard({ site, onEdit, onToggleHidden, onDelete }) {
           {site.hidden ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
         </button>
         {!site.hidden && (
+          <button
+            onClick={() => onToggleGallery(site)}
+            title={inGallery ? "Remove from the public gallery" : "Show in the public gallery"}
+            className={`flex items-center justify-center px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
+              inGallery ? "bg-amber-500/20 text-amber-300 hover:bg-amber-500/30" : "bg-slate-800 text-slate-200 hover:bg-slate-700"
+            }`}
+          >
+            <Star className={`w-3.5 h-3.5 ${inGallery ? "fill-current" : ""}`} />
+          </button>
+        )}
+        {!site.hidden && (
           <a
             href={`/chat/browser?q=${site.name}.blackhole`}
             title="View live"
@@ -147,6 +158,7 @@ export default function DesignerDashboard() {
   const [prompt, setPrompt] = useState("");
   const [selectedAi, setSelectedAi] = useState("ai");
   const [err, setErr] = useState("");
+  const [gallery, setGallery] = useState(() => new Set());
   const textareaRef = useRef(null);
 
   const opusAllowed = effPlan === "pro" || effPlan === "team" || effPlan === "secret" || effPlan === "admin";
@@ -168,6 +180,27 @@ export default function DesignerDashboard() {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser?.id]);
+
+  // Which sites are in the public gallery (/showcase); see functions/showcase.js.
+  const showGallery = (list) => setGallery(new Set((list || []).map((x) => x.name)));
+  useEffect(() => {
+    base44.functions.invoke("showcase", { action: "list" }).then((r) => showGallery(r.data?.sites)).catch(() => {});
+  }, []);
+
+  const setInGallery = async (s, on) => {
+    const r = await base44.functions.invoke("showcase", { action: "set", name: s.name, on });
+    if (r.data?.error) throw new Error(r.data.error);
+    showGallery(r.data?.sites);
+  };
+
+  const toggleGallery = async (s) => {
+    setErr("");
+    try {
+      await setInGallery(s, !gallery.has(s.name));
+    } catch (e) {
+      setErr(e?.response?.data?.error || e?.message || "Could not update the gallery");
+    }
+  };
 
   const lim = siteLimit(effPlan);
   const atLimit = sites.length >= lim;
@@ -203,6 +236,7 @@ export default function DesignerDashboard() {
   const toggleHidden = async (s) => {
     try {
       await base44.entities.PublishedSite.update(s.id, { hidden: !s.hidden });
+      if (!s.hidden && gallery.has(s.name)) await setInGallery(s, false).catch(() => {});
       load();
     } catch (e) {
       setErr(e?.message);
@@ -212,6 +246,7 @@ export default function DesignerDashboard() {
   const removeSite = async (s) => {
     if (!window.confirm(`Delete "${s.name}"? This cannot be undone.`)) return;
     try {
+      if (gallery.has(s.name)) await setInGallery(s, false).catch(() => {});
       await base44.entities.PublishedSite.delete(s.id);
       load();
     } catch (e) {
@@ -368,7 +403,13 @@ export default function DesignerDashboard() {
           {/* Your websites */}
           <section className="mt-10">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-semibold text-slate-300">Your websites</h2>
+              <div>
+                <h2 className="text-sm font-semibold text-slate-300">Your websites</h2>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  Tap <Star className="inline w-3 h-3 -mt-0.5" /> to show a site in the{" "}
+                  <a href="/showcase" target="_blank" rel="noopener noreferrer" className="underline hover:text-slate-300">public gallery</a>.
+                </p>
+              </div>
               <button
                 onClick={() => createSite()}
                 className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors"
@@ -389,7 +430,15 @@ export default function DesignerDashboard() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {sites.map((s) => (
-                  <SiteCard key={s.id} site={s} onEdit={editSite} onToggleHidden={toggleHidden} onDelete={removeSite} />
+                  <SiteCard
+                    key={s.id}
+                    site={s}
+                    onEdit={editSite}
+                    onToggleHidden={toggleHidden}
+                    onDelete={removeSite}
+                    inGallery={gallery.has(s.name)}
+                    onToggleGallery={toggleGallery}
+                  />
                 ))}
               </div>
             )}

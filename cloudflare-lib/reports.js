@@ -10,6 +10,7 @@
 //   hidden so it drops out of the Blackhole Browser / Games front.
 // - Pages with phishing forms are refused at publish time (see phishing.js).
 import { ENTITY, kvKey, base44, findByName, publishedUrl } from "./published.js";
+import { setShowcase } from "./showcase.js";
 
 export const REASONS = {
   phishing: "Phishing or stealing passwords",
@@ -98,6 +99,7 @@ export async function setBlocked(kv, request, kind, name, blocked) {
       }
     }
     await kv.put(blockedKey(kind, name), new Date().toISOString());
+    if (kind === "site") await setShowcase(kv, name, null);
   } else {
     await kv.delete(blockedKey(kind, name));
   }
