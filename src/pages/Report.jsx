@@ -98,11 +98,11 @@ export default function Report() {
             <button
               type="submit"
               disabled={busy}
-              className="w-full inline-flex items-center justify-center gap-2 bg-red-500/90 hover:bg-red-500 disabled:opacity-60 text-white font-medium rounded-lg py-2.5"
+              className="w-full inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-500 disabled:opacity-60 text-white font-medium rounded-lg py-2.5"
             >
               {busy && <Loader2 className="w-4 h-4 animate-spin" />} Send report
             </button>
-            <p className="text-[11px] text-slate-500 text-center">
+            <p className="text-[11px] text-slate-400 text-center">
               Sites on Blackhole AI are made by its users, not by Blackhole AI. See the{" "}
               <a href="/terms" className="underline">rules</a>.
             </p>

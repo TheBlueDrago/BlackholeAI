@@ -25,9 +25,9 @@ function LegalPage({ title, other, children }) {
           <ArrowLeft className="w-4 h-4" /> Blackhole AI
         </Link>
         <h1 className="text-3xl font-bold text-white mt-6">{title}</h1>
-        <p className="text-slate-500 mt-1 mb-6">Last updated {UPDATED}</p>
+        <p className="text-slate-400 mt-1 mb-6">Last updated {UPDATED}</p>
         {children}
-        <p className="mt-10 pt-4 border-t border-slate-800 text-slate-500">
+        <p className="mt-10 pt-4 border-t border-slate-800 text-slate-400">
           See also: <Link to={other.to}>{other.label}</Link>
         </p>
       </article>
