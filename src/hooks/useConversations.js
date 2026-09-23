@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { CHATS_CHANGED } from "@/lib/chatBackup";
 
 const STORAGE_KEY = "infinity-ai-conversations";
 
@@ -58,6 +59,12 @@ export function useConversations() {
   }, []);
 
   const reload = useCallback(() => setConversations(load), []);
+
+  // Chats imported from a backup file (Settings) show up right away.
+  useEffect(() => {
+    window.addEventListener(CHATS_CHANGED, reload);
+    return () => window.removeEventListener(CHATS_CHANGED, reload);
+  }, [reload]);
 
   const activeConversation = conversations.find((c) => c.id === activeId) || null;
 

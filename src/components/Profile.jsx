@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { LogOut, Mail, Shield, KeyRound, ArrowLeft, Loader2, Crown, Settings, Users, Lock, ShieldCheck, Ticket, Trash2, Gamepad2, Pencil, Eye, EyeOff, Globe, Gift } from "lucide-react";
+import { Download, Upload, LogOut, Mail, Shield, KeyRound, ArrowLeft, Loader2, Crown, Settings, Users, Lock, ShieldCheck, Ticket, Trash2, Gamepad2, Pencil, Eye, EyeOff, Globe, Gift } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import TeamMembership from "@/components/TeamMembership";
 import PublishedSites from "@/components/profile/PublishedSites";
 import ReferFriends from "@/components/profile/ReferFriends";
 import { notifyGamesChanged } from "@/lib/gameEvents";
+import { downloadChats, importChats } from "@/lib/chatBackup";
 
 export default function Profile({ open, onClose, initialView = "main", onMonitor, onPromos }) {
   const [user, setUser] = useState(null);
@@ -27,6 +28,7 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
   const [delAck, setDelAck] = useState(false);
   const [delBusy, setDelBusy] = useState(false);
   const [delError, setDelError] = useState("");
+  const [backupNote, setBackupNote] = useState("");
 
   // Admins: how many reported sites are waiting (badge on the Monitor button).
   const [openReports, setOpenReports] = useState(0);
@@ -360,6 +362,43 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                   </span>
                   <ArrowLeft className="w-4 h-4 rotate-180 text-slate-500" />
                 </button>
+                <div className="mt-4 mb-4 pt-4 border-t border-slate-700/50">
+                  <p className="text-slate-300 text-sm font-medium">Chat backup</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5 mb-2">
+                    Your chats are saved in this browser only. Download them to keep a copy or move them to another device.
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        const n = downloadChats();
+                        setBackupNote(n ? `Downloaded ${n} chat${n === 1 ? "" : "s"}.` : "There are no chats to download yet.");
+                      }}
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 text-slate-200 text-sm hover:bg-slate-700 transition-colors"
+                    >
+                      <Download className="w-4 h-4" /> Download
+                    </button>
+                    <label className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 text-slate-200 text-sm hover:bg-slate-700 transition-colors cursor-pointer">
+                      <Upload className="w-4 h-4" /> Import
+                      <input
+                        type="file"
+                        accept="application/json,.json"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const f = e.target.files?.[0];
+                          e.target.value = "";
+                          if (!f) return;
+                          try {
+                            const n = await importChats(f);
+                            setBackupNote(n ? `Imported ${n} chat${n === 1 ? "" : "s"}.` : "Those chats are already here.");
+                          } catch (err) {
+                            setBackupNote(err.message);
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+                  {backupNote && <p className="text-[11px] text-slate-400 mt-2">{backupNote}</p>}
+                </div>
                   <button
                   onClick={() => setView("delete")}
                   className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-red-900/40 text-red-300 hover:bg-red-900/60 transition-colors border border-red-800/50"
