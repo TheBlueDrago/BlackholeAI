@@ -7,6 +7,7 @@ import UserDetail from "@/components/monitor/UserDetail";
 import RevenueAnalytics from "@/components/monitor/RevenueAnalytics";
 import ReportedSites from "@/components/monitor/ReportedSites";
 import Messages from "@/components/monitor/Messages";
+import PublishedContent from "@/components/monitor/PublishedContent";
 
 export default function Monitor({ onBack }) {
   const [users, setUsers] = useState([]);
@@ -98,6 +99,9 @@ export default function Monitor({ onBack }) {
         </h1>
         <div className="w-16" />
       </div>
+
+      {/* Published sites & games with safety flags, red first. */}
+      <PublishedContent />
 
       <div className="w-full max-w-3xl mt-6 relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />

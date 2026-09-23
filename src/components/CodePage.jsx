@@ -39,7 +39,7 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
       abortRef.current?.abort();
       const abort = new AbortController();
       abortRef.current = abort;
-      const res = await streamChat({ prompt: `${modeNote}\n\n${text}`, model: "claude_sonnet_4_6", effort: eff }, (soFar) => {
+      const res = await streamChat({ prompt: `${modeNote}\n\n${text}`, question: text, model: "claude_sonnet_4_6", effort: eff }, (soFar) => {
         if (reqIdRef.current === myId) setLive(soFar);
       }, { signal: abort.signal });
       if (reqIdRef.current !== myId) return;

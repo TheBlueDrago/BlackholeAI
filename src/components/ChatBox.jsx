@@ -79,7 +79,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
       abortRef.current?.abort();
       const abort = new AbortController();
       abortRef.current = abort;
-      const res = await streamChat({ prompt: fullPrompt, model: MODELS[ai] || "automatic", effort: eff, ...(images.length ? { images } : {}) }, (soFar) => {
+      const res = await streamChat({ prompt: fullPrompt, question: text, model: MODELS[ai] || "automatic", effort: eff, ...(images.length ? { images } : {}) }, (soFar) => {
         if (reqIdRef.current === myId) setLive(soFar);
       }, { signal: abort.signal });
       if (reqIdRef.current !== myId) return;

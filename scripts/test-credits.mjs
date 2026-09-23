@@ -88,14 +88,36 @@ s = await status({ id: "u4" });
 const again = await status({ id: "u4" });
 assert(s.tiers.aiCode.total === 20 && again.tiers.aiCode.total === 20, "a promo redemption adds its credits exactly once");
 
-// Team: Blackhole Code uses the team's shared pool
+// Team (kept in KV, cloudflare-lib/teams.js): Blackhole Code uses the owner's shared pool
 fresh();
-db.team = { id: "t1", active: true, isAdmin: false, ownerPlan: "team" };
-ent = await C.entitlement(kv, req, { id: "u5" });
+const T = await import(R + "cloudflare-lib/teams.js");
+const owner = { id: "own", email: "owner@x.com" };
+const member = { id: "mem", email: "member@x.com" };
+await C.applyGrant(kv, "own", { plan: "team" });
+await T.invite(kv, owner, "team", ["Member@x.com", "a@x.com", "b@x.com"]);
+const team = await T.readTeam(kv, "own");
+assert(team.memberEmails.length === 2 && team.memberEmails[0] === "member@x.com", "team invite: emails cleaned, capped at 2 for Team");
+ent = await C.entitlement(kv, req, member);
 await C.charge(kv, ent, "aiCode", 3);
-const ent6 = await C.entitlement(kv, req, { id: "u6" });
-s = await C.creditStatus(kv, ent6);
-assert(ent.plan === "team" && s.tiers.aiCode.used === 3 && store.get("teamusage:t1:" + s.month) === "3", "team members share the Blackhole Code pool");
+s = await C.creditStatus(kv, await C.entitlement(kv, req, owner));
+assert(ent.plan === "team" && s.tiers.aiCode.used === 3 && store.get("teamusage:own:" + s.month) === "3", "team members share the owner's Blackhole Code pool");
+const mt = await T.myTeam(kv, member, "free", 3);
+assert(mt && mt.active && !mt.isOwner && mt.ownerPlan === "team", "my-team shape for a member");
+await T.leave(kv, member);
+assert((await C.entitlement(kv, req, member)).plan === "free", "a member who leaves is back on free");
+await T.invite(kv, owner, "team", ["member@x.com"]);
+const stale = await T.readTeam(kv, "own");
+stale.ownerPlan = "free";
+await T.saveTeam(kv, stale);
+assert((await C.entitlement(kv, req, member)).plan === "free", "no team access once the owner's plan is gone");
+
+// Activity for Monitor rides along in the usage record
+fresh();
+ent = await C.entitlement(kv, req, { id: "u7" });
+await C.charge(kv, ent, "ai", 1, "build me a bakery site");
+await C.charge(kv, ent, "ai", 1, "make it blue");
+const act = await C.activityOf(kv, "u7");
+assert(act.prompts === 2 && act.sessions === 1 && act.recent[0].prompt === "make it blue", "activity: prompts, sessions and latest question recorded");
 
 // Credit cost
 assert(C.creditsFor("x".repeat(10000), "low") === 1 && C.creditsFor("x".repeat(10001), "low") === 2 && C.creditsFor("hi", "ultracode") === 4, "cost: 1 per started 10,000 chars, times effort");

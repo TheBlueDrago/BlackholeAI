@@ -1,4 +1,6 @@
-import { lazy, Suspense } from 'react';
+import { Suspense } from 'react';
+import { lazyRetry as lazy } from '@/lib/lazyRetry';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -129,7 +131,9 @@ function App() {
           <ScrollToTop />
           <Splash />
           <OfflineBanner />
-          <AuthenticatedApp />
+          <ErrorBoundary>
+            <AuthenticatedApp />
+          </ErrorBoundary>
         </Router>
         <Toaster />
       </QueryClientProvider>

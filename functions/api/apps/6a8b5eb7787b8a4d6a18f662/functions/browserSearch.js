@@ -1,0 +1,80 @@
+// Replaces Base44's browserSearch (Blackhole Browser's search results), which used
+// Base44's metered InvokeLLM and so the Base44 integration allowance. This asks Gemini
+// (the app's free-tier key) with Google Search grounding for the same shape:
+// { query } -> { answer, answerLabel, results: [{ title, url, site, description }] }.
+// Free for the user, so it's rate-limited per account.
+import { json } from "../../../../../cloudflare-lib/published.js";
+import { currentUser } from "../../../../../cloudflare-lib/credits.js";
+import { allow, TOO_MANY } from "../../../../../cloudflare-lib/ratelimit.js";
+
+const MODELS = ["gemini-3.5-flash", "gemini-3.6-flash", "gemini-3.7-flash"];
+
+function extractJson(text) {
+  const t = String(text || "");
+  const fence = t.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  const body = fence ? fence[1] : t.slice(t.indexOf("{"), t.lastIndexOf("}") + 1);
+  try {
+    return JSON.parse(body);
+  } catch {
+    return null;
+  }
+}
+
+async function ask(apiKey, model, prompt) {
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-goog-api-key": apiKey },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      tools: [{ google_search: {} }],
+      generationConfig: { maxOutputTokens: 4096, thinkingConfig: { thinkingLevel: "low" } },
+    }),
+  });
+  if (!res.ok) throw new Error(`Gemini ${res.status}`);
+  const data = await res.json();
+  const parts = (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) || [];
+  return parts.map((p) => (p.thought ? "" : p.text || "")).join("");
+}
+
+export async function onRequestPost(context) {
+  const { request, env } = context;
+  try {
+    const user = await currentUser(request);
+    if (!user) return json({ error: "Unauthorized" }, 401);
+    if (!(await allow(`search:${user.id}`, 60, 3600))) return json({ error: TOO_MANY }, 429);
+    const body = await request.json().catch(() => ({}));
+    const query = typeof body.query === "string" ? body.query.trim().slice(0, 300) : "";
+    if (!query) return json({ error: "Query is required" }, 400);
+
+    const prompt = [
+      'You are the search engine behind "Blackhole Browser". Search the web, then answer like a search results page.',
+      `Query: ${query}`,
+      "",
+      "Reply with ONLY a JSON object: {\"answer\": string, \"answerLabel\": string, \"results\": [{\"title\", \"url\", \"site\", \"description\"}]}",
+      "- answer: a direct, correct, concise answer (1-3 sentences). Compute math; answer definitions, conversions and how-tos directly. Never refuse.",
+      "- answerLabel: 2-4 words, e.g. \"Calculator\", \"Quick answer\", \"Definition\".",
+      "- results: 6 to 10 real pages from your search. url must be a real https URL; site is the display domain; description is a 1-2 sentence snippet. Never invent domains.",
+    ].join("\n");
+
+    let data = null;
+    for (const model of MODELS) {
+      try {
+        data = extractJson(await ask(env.GEMINI_API_KEY, model, prompt));
+        if (data) break;
+      } catch {
+        // Busy or unavailable: try the next model.
+      }
+    }
+    if (!data) return json({ error: "Search is busy right now. Please try again in a minute." }, 503);
+    const results = Array.isArray(data.results)
+      ? data.results.filter((r) => r && typeof r.url === "string" && /^https:\/\//.test(r.url) && r.title).slice(0, 10)
+      : [];
+    return json({
+      answer: typeof data.answer === "string" ? data.answer : "",
+      answerLabel: typeof data.answerLabel === "string" ? data.answerLabel : "Quick answer",
+      results,
+    });
+  } catch (err) {
+    return json({ error: (err && err.message) || "Search failed." }, 500);
+  }
+}

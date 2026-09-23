@@ -31,8 +31,9 @@ export default function Register() {
     }
     setLoading(true);
     try {
-      const check = await base44.functions.invoke("check-email", { email });
-      const status = check.data?.status;
+      // A failed check must never block sign-up (Base44's register refuses existing accounts anyway).
+      const check = await base44.functions.invoke("check-email", { email }).catch(() => null);
+      const status = check?.data?.status;
       if (status === "deleted") {
         setError("This AI email account has been deleted.");
         return;

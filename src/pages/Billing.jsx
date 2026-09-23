@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Loader2, ShieldCheck, Users, Lock } from "lucide-react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { paymentError } from "@/lib/paymentError";
 
 export default function Billing() {
   const navigate = useNavigate();
@@ -53,7 +54,7 @@ export default function Billing() {
       if (!redirectUrl) throw new Error("No checkout URL");
       window.location.href = redirectUrl;
     } catch (e) {
-      setError(e?.response?.data?.error || e?.message || "Could not start checkout");
+      setError(paymentError(e));
       setLoading(false);
     }
   };

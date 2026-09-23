@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { paymentError } from "@/lib/paymentError";
 
 // Published sites live on their own subdomain (nova.blackhole-ai-tech.com), where a buy
 // button's parent.postMessage has no host page to answer it. The bridge added by
@@ -26,7 +27,7 @@ export default function Buy() {
         if (res.data?.redirectUrl) window.location.replace(res.data.redirectUrl);
         else setError(res.data?.error || "Checkout is unavailable right now.");
       })
-      .catch((err) => setError(err?.response?.data?.error || "Checkout is unavailable right now."));
+      .catch((err) => setError(paymentError(err, "Checkout is unavailable right now.")));
   }, [params, siteName]);
 
   return (

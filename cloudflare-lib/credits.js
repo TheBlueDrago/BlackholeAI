@@ -20,6 +20,7 @@
 // Stored in the PUBLISHED_HTML KV namespace (already bound to this Pages project)
 // under their own key prefixes.
 import { base44 } from "./published.js";
+import { teamFor } from "./teams.js";
 
 export const TIERS = ["ai", "aiCode", "galaxy5", "space5"];
 export const TIER_OF_MODEL = { automatic: "ai", claude_sonnet_4_6: "aiCode", claude_opus_4_8: "galaxy5", "claude-sonnet-5": "space5" };
@@ -87,28 +88,6 @@ async function paidPlan(request, user) {
 
 // An admin looking at someone else: my-team only answers for the caller, so read the
 // (admin-readable) Team rows directly.
-async function teamInfoFor(request, user) {
-  try {
-    const owned = await base44(request, "GET", `entities/Team?q=${q({ ownerId: user.id })}`);
-    let t = (owned || [])[0];
-    if (!t && user.email) t = ((await base44(request, "GET", `entities/Team?q=${q({ memberEmails: String(user.email).toLowerCase() })}`)) || [])[0];
-    if (t && t.status === "active") return { plan: "team", teamId: t.id };
-  } catch {
-    // No team.
-  }
-  return null;
-}
-
-async function teamInfo(request) {
-  try {
-    const r = await base44(request, "POST", "functions/my-team", {});
-    const t = r && r.team;
-    if (t && t.active && !t.isAdmin && t.id) return { plan: t.ownerPlan === "secret" ? "secret" : "team", teamId: t.id };
-  } catch {
-    // Not on a team, or my-team unavailable.
-  }
-  return null;
-}
 
 // Server-owned bonus balance: seeded from the admin snapshot, plus each promo redemption once.
 async function syncBonus(kv, request, user, grant) {
@@ -141,22 +120,29 @@ async function syncBonus(kv, request, user, grant) {
   return b;
 }
 
-// `other: true` when an admin is computing this for another user (not the caller).
-export async function entitlement(kv, request, user, { other = false } = {}) {
-  const grant = await getJSON(kv, `grant:${user.id}`, null);
-  const [paid, team, bonus] = await Promise.all([
-    paidPlan(request, user),
-    other ? teamInfoFor(request, user) : teamInfo(request),
-    syncBonus(kv, request, user, grant),
-  ]);
+// The user's own plan, before team membership: admin role, an admin grant, or a payment.
+export async function basePlanOf(kv, request, user, grant) {
+  if (grant === undefined) grant = await getJSON(kv, `grant:${user.id}`, null);
   let plan = "free";
   const consider = (p) => {
     if (p && RANK[p] > RANK[plan]) plan = p;
   };
   if (user.role === "admin") consider("admin");
   if (grant && grant.plan && !(grant.planExpiresAt && new Date(grant.planExpiresAt) < new Date())) consider(grant.plan);
-  consider(paid);
-  if (team) consider(team.plan);
+  consider(await paidPlan(request, user));
+  return plan;
+}
+
+// Teams live in KV (cloudflare-lib/teams.js), not Base44's my-team function: every
+// Base44 function call used up the Base44 integration allowance, and once that ran out
+// they all failed. `other` is kept for callers that compute this for another user.
+// eslint-disable-next-line no-unused-vars
+export async function entitlement(kv, request, user, { other = false } = {}) {
+  const grant = await getJSON(kv, `grant:${user.id}`, null);
+  const [base, bonus] = await Promise.all([basePlanOf(kv, request, user, grant), syncBonus(kv, request, user, grant)]);
+  const team = await teamFor(kv, user, base);
+  let plan = base;
+  if (team && RANK[team.plan] > RANK[plan]) plan = team.plan;
   const now = new Date();
   const blocked =
     user.banned === true ||
@@ -182,9 +168,26 @@ export async function creditStatus(kv, ent) {
 
 // Takes whole credits from the bonus balance first, then the monthly allowance
 // (or the team's shared pool for Blackhole Code on a team plan).
-export async function charge(kv, ent, tier, amount) {
+// Monitor's per-user activity (questions asked, time on the AI, latest questions) rides
+// along in the same monthly usage record, so logging it costs no extra KV write when
+// the charge already writes that record. (Base44's AiActivity table was written by a
+// Base44 function, which used up the Base44 integration allowance.)
+const SESSION_GAP_MS = 30 * 60 * 1000;
+function noteActivity(usage, tier, prompt) {
+  const a = usage.activity || { prompts: 0, sessions: 0, minutes: 0, first: null, last: null, recent: [] };
+  const now = Date.now();
+  const last = a.last ? new Date(a.last).getTime() : 0;
+  if (last && now - last <= SESSION_GAP_MS) a.minutes += (now - last) / 60000;
+  else a.sessions += 1;
+  a.prompts += 1;
+  a.first = a.first || new Date(now).toISOString();
+  a.last = new Date(now).toISOString();
+  a.recent = [{ prompt: String(prompt || "").slice(0, 300), bucket: tier, at: a.last }, ...(a.recent || [])].slice(0, 5);
+  usage.activity = a;
+}
+
+export async function charge(kv, ent, tier, amount, prompt) {
   let left = Math.max(0, Math.ceil(amount));
-  if (!left) return;
   const month = monthKey();
   const fromBonus = Math.min(Math.max(0, Number(ent.bonus[tier]) || 0), left);
   if (fromBonus > 0) {
@@ -192,8 +195,7 @@ export async function charge(kv, ent, tier, amount) {
     left -= fromBonus;
     await putJSON(kv, `bonus:${ent.user.id}`, ent.bonus);
   }
-  if (left <= 0) return;
-  if (tier === "aiCode" && ent.teamId) {
+  if (left > 0 && tier === "aiCode" && ent.teamId) {
     const key = `teamusage:${ent.teamId}:${month}`;
     const cur = Number(await kv.get(key).catch(() => 0)) || 0;
     try {
@@ -201,12 +203,20 @@ export async function charge(kv, ent, tier, amount) {
     } catch (err) {
       console.error("credits: KV write failed", key, String(err));
     }
-    return;
+    left = 0;
   }
+  if (left <= 0 && prompt === undefined) return;
   const key = `usage:${ent.user.id}:${month}`;
   const usage = await getJSON(kv, key, {});
-  usage[tier] = (Number(usage[tier]) || 0) + left;
+  if (left > 0) usage[tier] = (Number(usage[tier]) || 0) + left;
+  if (prompt !== undefined) noteActivity(usage, tier, prompt);
   await putJSON(kv, key, usage);
+}
+
+// This month's activity for one user (Monitor), from the usage record above.
+export async function activityOf(kv, userId) {
+  const usage = await getJSON(kv, `usage:${userId}:${monthKey()}`, {});
+  return usage.activity || null;
 }
 
 // Adds (or with a negative delta, removes) bonus credits for one AI. Balances never go

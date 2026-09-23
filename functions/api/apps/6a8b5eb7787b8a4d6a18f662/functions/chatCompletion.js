@@ -294,7 +294,8 @@ export async function onRequestPost(context) {
       // Stopped by the user: what was written so far is charged (nothing if nothing was).
       if (stopped && !text) return { stopped: true, charged: 0 };
       const cost = cut ? left : creditsFor(text, effort);
-      await charge(kv, ent, tier, cost);
+      // `question` is the user's own words (the prompt adds instructions), for Monitor's activity view.
+      await charge(kv, ent, tier, cost, String(body.question || prompt).slice(0, 300));
       return { cut, charged: cost, credits: await creditStatus(kv, ent) };
     };
 

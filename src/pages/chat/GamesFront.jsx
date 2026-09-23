@@ -146,8 +146,12 @@ export default function GamesFront() {
   const load = async () => {
     const builtIns = builtInGameEntities();
     try {
-      const list = await base44.entities.PublishedGame.list("-plays", 500);
-      const real = (list || []).filter((g) => !g.hidden);
+      const [list, extra] = await Promise.all([
+        base44.entities.PublishedGame.list("-plays", 500),
+        // Plays counted since counting moved to Cloudflare (functions/game-plays.js).
+        base44.functions.invoke("game-plays").then((r) => r.data?.plays || {}).catch(() => ({})),
+      ]);
+      const real = (list || []).filter((g) => !g.hidden).map((g) => ({ ...g, plays: (g.plays || 0) + (extra[g.name] || 0) }));
       const realNames = new Set(real.map((g) => g.name));
       setGames([...builtIns.filter((g) => !realNames.has(g.name)), ...real]);
     } catch {

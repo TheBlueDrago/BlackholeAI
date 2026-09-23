@@ -386,7 +386,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
       abortRef.current?.abort();
       const abort = new AbortController();
       abortRef.current = abort;
-      const res = await streamChat({ prompt, model, effort: eff }, (soFar) => {
+      const res = await streamChat({ prompt, question: text, model, effort: eff }, (soFar) => {
         if (reqIdRef.current === myId) setLive(soFar);
       }, { signal: abort.signal });
       if (reqIdRef.current !== myId) return;
