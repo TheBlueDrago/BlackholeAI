@@ -494,7 +494,8 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
       <div className="pointer-events-none absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-indigo-600/15 rounded-full blur-[120px]" />
 
       {/* Top bar */}
-      <header className="relative z-20 flex items-center gap-2 sm:gap-3 h-[calc(3.5rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] px-3 sm:px-4 border-b border-slate-700/50 bg-slate-900/70 backdrop-blur-xl">
+      {/* On phones the bar wraps to a second row so Publish/Download stay on screen. */}
+      <header className="relative z-20 flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 sm:h-[calc(3.5rem+env(safe-area-inset-top))] pt-[calc(0.5rem+env(safe-area-inset-top))] pb-2 sm:pt-[env(safe-area-inset-top)] sm:pb-0 px-3 sm:px-4 border-b border-slate-700/50 bg-slate-900/70 backdrop-blur-xl">
         <button onClick={onToggleSidebar} title="Menu" className="p-1.5 rounded-lg hover:bg-slate-800 transition-colors shrink-0">
           <div className="keep-color w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center">
             <BlackholeIcon className="w-5 h-5" />
@@ -521,7 +522,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
         <SaveStatus state={saveState} />
 
         {/* Page path / search bar */}
-        <div className="flex-1 flex justify-center px-2 min-w-0">
+        <div className="hidden sm:flex flex-1 justify-center px-2 min-w-0">
           <div className="flex items-center w-full max-w-md bg-slate-800/70 rounded-lg border border-slate-700/50 focus-within:border-indigo-500/50 transition-colors">
             <Search className="w-4 h-4 text-slate-500 ml-2.5 shrink-0" />
             <SheetSelect
@@ -541,8 +542,8 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
         </div>
 
         {/* Right cluster */}
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          <div className="flex items-center -space-x-2">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-auto">
+          <div className="hidden sm:flex items-center -space-x-2">
             <div
               className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-xs font-bold text-white ring-2 ring-slate-900"
               title="You"

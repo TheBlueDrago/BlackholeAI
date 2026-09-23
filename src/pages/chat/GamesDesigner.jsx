@@ -415,7 +415,8 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
       <div className="pointer-events-none absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-fuchsia-600/15 rounded-full blur-[120px]" />
 
       {/* Top bar */}
-      <header className="relative z-20 flex items-center gap-2 sm:gap-3 h-[calc(3.5rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] px-3 sm:px-4 border-b border-slate-700/50 bg-slate-900/70 backdrop-blur-xl">
+      {/* On phones the bar wraps (genre gets its own row) so Publish stays on screen. */}
+      <header className="relative z-20 flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 sm:h-[calc(3.5rem+env(safe-area-inset-top))] pt-[calc(0.5rem+env(safe-area-inset-top))] pb-2 sm:pt-[env(safe-area-inset-top)] sm:pb-0 px-3 sm:px-4 border-b border-slate-700/50 bg-slate-900/70 backdrop-blur-xl">
         <button onClick={onToggleSidebar} title="Menu" className="p-1.5 rounded-lg hover:bg-slate-800 transition-colors shrink-0">
           <div className="keep-color w-7 h-7 rounded-lg bg-gradient-to-br from-fuchsia-500 to-indigo-500 flex items-center justify-center">
             <BlackholeIcon className="w-5 h-5" />
@@ -440,7 +441,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
         />
 
         {/* Genre selector */}
-        <div className="flex-1 flex justify-center px-2 min-w-0">
+        <div className="order-last basis-full sm:order-none sm:basis-auto flex-1 flex justify-center sm:px-2 min-w-0">
           <div className="flex items-center w-full max-w-md bg-slate-800/70 rounded-lg border border-slate-700/50 focus-within:border-fuchsia-500/50 transition-colors">
             <Gamepad2 className="w-4 h-4 text-fuchsia-400 ml-2.5 shrink-0" />
             <SheetSelect
@@ -459,7 +460,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
           </div>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-auto">
           <button
             onClick={onUpgrade}
             className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 text-white text-sm font-medium hover:opacity-90 transition-opacity"

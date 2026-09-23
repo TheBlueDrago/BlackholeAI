@@ -12,6 +12,14 @@ export function captureReferral() {
   } catch {}
 }
 
+export function hasPendingReferral() {
+  try {
+    return !!localStorage.getItem(KEY);
+  } catch {
+    return false;
+  }
+}
+
 export async function claimPendingReferral() {
   let code = null;
   try {

@@ -10,6 +10,7 @@ import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
 import { toast } from "@/components/ui/use-toast";
 import { safeReturnTo } from "@/lib/authReturnTo";
+import { hasPendingReferral } from "@/lib/referral";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -19,6 +20,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
   const [otpCode, setOtpCode] = useState("");
+  const [invited] = useState(() => hasPendingReferral());
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -139,7 +141,7 @@ export default function Register() {
     <AuthLayout
       icon={UserPlus}
       title="Create your account"
-      subtitle="Sign up to get started"
+      subtitle={invited ? "🎁 A friend invited you to Blackhole AI — sign up to join them" : "Sign up to get started"}
       footer={
         <>
           Already have an account?{" "}
