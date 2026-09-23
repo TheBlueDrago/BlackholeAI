@@ -6,7 +6,9 @@ import { appParams } from "@/lib/app-params";
 // or {"error": "..."}. onDelta(textSoFar) is called as text arrives. Resolves with
 // { content, cut, charged, credits, model, effort }. Errors mimic axios' shape
 // (err.response.status / err.response.data) so existing catch blocks keep working.
-export async function streamChat(body, onDelta) {
+// Pass { signal } and abort it when the user presses Stop: the connection closes, the
+// server stops generating and charges only for what was written.
+export async function streamChat(body, onDelta, { signal } = {}) {
   const appId = appParams.appId;
   const token = localStorage.getItem("base44_access_token") || appParams.token;
   const res = await fetch(`/api/apps/${appId}/functions/chatCompletion`, {
@@ -17,6 +19,7 @@ export async function streamChat(body, onDelta) {
       ...(token ? { authorization: `Bearer ${token}` } : {}),
     },
     body: JSON.stringify({ ...body, stream: true }),
+    signal,
   });
 
   const fail = (status, data) => {

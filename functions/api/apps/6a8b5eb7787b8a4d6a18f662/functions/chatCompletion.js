@@ -88,8 +88,10 @@ class GeminiError extends Error {
 // One streamed Gemini call. Streaming lets us tell "overloaded, never started" (fails
 // fast, fall back) apart from "thinking hard" (headers arrive, then text streams in).
 // onDelta receives each new piece of text; once maxChars is reached the call stops
-// there (the user's credits ran out) and returns { text, cut: true }.
-async function generate(apiKey, model, prompt, generationConfig, timeoutMs, { onDelta, maxChars = Infinity } = {}) {
+// there (the user's credits ran out) and returns { text, cut: true }. If shouldStop()
+// turns true (the user pressed Stop and the app hung up), it stops there too and
+// returns { text, stopped: true }, so only what was written is charged.
+async function generate(apiKey, model, prompt, generationConfig, timeoutMs, { onDelta, maxChars = Infinity, shouldStop } = {}) {
   const ctrl = new AbortController();
   const timer = timeoutMs ? setTimeout(() => ctrl.abort(), timeoutMs) : null;
   let res;
@@ -143,7 +145,12 @@ async function generate(apiKey, model, prompt, generationConfig, timeoutMs, { on
     const parts = (chunk.candidates && chunk.candidates[0] && chunk.candidates[0].content && chunk.candidates[0].content.parts) || [];
     for (const p of parts) if (p.text && !p.thought) add(p.text);
   };
+  let stopped = false;
   while (!cut) {
+    if (shouldStop && shouldStop()) {
+      stopped = true;
+      break;
+    }
     const { done, value } = await reader.read();
     if (done) break;
     buf += decoder.decode(value, { stream: true });
@@ -153,13 +160,13 @@ async function generate(apiKey, model, prompt, generationConfig, timeoutMs, { on
       buf = buf.slice(nl + 1);
     }
   }
-  if (cut) reader.cancel().catch(() => {});
+  if (cut || stopped) reader.cancel().catch(() => {});
   else handleLine(buf.trim());
   if (!out && streamError) {
     const code = Number(streamError.code) || 0;
     throw new GeminiError(streamError.message || "Gemini stream error", { status: code, retryable: RETRYABLE.has(code) });
   }
-  return { text: out, cut };
+  return { text: out, cut, stopped };
 }
 
 // Tries the model with the effort's thinking settings; if the model rejects those
@@ -282,8 +289,10 @@ export async function onRequestPost(context) {
 
     // Charge for what was produced. A cut reply takes every remaining credit, which
     // pauses the chat until the user has more.
-    const settle = async (text, cut) => {
+    const settle = async (text, cut, stopped) => {
       if (internal) return {};
+      // Stopped by the user: what was written so far is charged (nothing if nothing was).
+      if (stopped && !text) return { stopped: true, charged: 0 };
       const cost = cut ? left : creditsFor(text, effort);
       await charge(kv, ent, tier, cost);
       return { cut, charged: cost, credits: await creditStatus(kv, ent) };
@@ -305,12 +314,20 @@ export async function onRequestPost(context) {
     const { readable, writable } = new TransformStream();
     const writer = writable.getWriter();
     const enc = new TextEncoder();
-    const send = (obj) => writer.write(enc.encode(JSON.stringify(obj) + "\n")).catch(() => {});
+    // If the app hangs up (the user pressed Stop), writes start failing: stop generating
+    // and charge only for what was written.
+    let gone = false;
+    const hangUp = () => {
+      gone = true;
+    };
+    writer.closed.catch(hangUp);
+    if (request.signal) request.signal.addEventListener("abort", hangUp);
+    const send = (obj) => writer.write(enc.encode(JSON.stringify(obj) + "\n")).catch(hangUp);
     context.waitUntil(
       (async () => {
         try {
-          const r = await runChain(env.GEMINI_API_KEY, chain, input, effort, maxTokens, { maxChars, onDelta: (t) => send({ delta: t }) });
-          await send({ done: true, model: r.model, effort, ...(await settle(r.text, r.cut)) });
+          const r = await runChain(env.GEMINI_API_KEY, chain, input, effort, maxTokens, { maxChars, onDelta: (t) => send({ delta: t }), shouldStop: () => gone });
+          await send({ done: true, model: r.model, effort, ...(await settle(r.text, r.cut, r.stopped)) });
         } catch (err) {
           await send({ ...failure(err), status: 503 });
         } finally {

@@ -32,6 +32,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
   const fileInputRef = useRef(null);
   const scrollRef = useRef(null);
   const reqIdRef = useRef(0);
+  const abortRef = useRef(null);
   const convIdRef = useRef(null);
 
   const messages = conversation?.messages || [];
@@ -74,9 +75,13 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
     try {
       const eff = effortFor(effort, text, { build: ai !== "ai" && intent.build });
       // Streamed so the reply appears as it's written.
+      // Aborted by Stop, which also ends the reply on the server (see aiStream.js).
+      abortRef.current?.abort();
+      const abort = new AbortController();
+      abortRef.current = abort;
       const res = await streamChat({ prompt: fullPrompt, model: MODELS[ai] || "automatic", effort: eff, ...(images.length ? { images } : {}) }, (soFar) => {
         if (reqIdRef.current === myId) setLive(soFar);
-      });
+      }, { signal: abort.signal });
       if (reqIdRef.current !== myId) return;
       setLive("");
       // The server charged the credits (cutting the reply off if they ran out); show its new status.
@@ -120,6 +125,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
 
   const stop = () => {
     reqIdRef.current++;
+    abortRef.current?.abort();
     setLoading(false);
     const convId = conversation?.id;
     if (convId && messages.length && messages[messages.length - 1].role === "user") {

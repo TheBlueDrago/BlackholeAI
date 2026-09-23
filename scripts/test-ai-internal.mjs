@@ -50,3 +50,48 @@ bodies.length = 0;
 cache.clear();
 [s, b] = await call({ prompt: "Name it", internal: true, images: [{ mimeType: "image/png", data: png }] });
 assert(s === 200 && bodies[0].contents[0].parts.length === 1, "internal calls ignore images");
+
+// ---- Stop: the app hangs up mid-reply ----
+// A fake Gemini stream that sends 50 chunks of 1,000 characters, slowly.
+let chunksSent = 0;
+const realFetch2 = globalThis.fetch;
+globalThis.fetch = async (url, opts = {}) => {
+  if (!String(url).includes("generativelanguage")) return realFetch2(url, opts);
+  const enc = new TextEncoder();
+  const body = new ReadableStream({
+    async pull(ctrl) {
+      if (chunksSent >= 50) return ctrl.close();
+      await new Promise((r) => setTimeout(r, 5));
+      chunksSent++;
+      ctrl.enqueue(enc.encode(`data: {"candidates":[{"content":{"parts":[{"text":"${"x".repeat(1000)}"}]}}]}\n\n`));
+    },
+  });
+  return new Response(body, { status: 200 });
+};
+const usageBefore = () => { const k = [...store.keys()].find((x) => x.startsWith("usage:")); return k ? JSON.parse(store.get(k)).ai || 0 : 0; };
+const streamCall = async (stopAfterDeltas) => {
+  let work;
+  const r = await onRequestPost({
+    request: new Request("https://x/", { method: "POST", headers: { authorization: "Bearer t" }, body: JSON.stringify({ prompt: "write a lot", model: "automatic", stream: true, effort: "low" }) }),
+    env: { PUBLISHED_HTML: kv, GEMINI_API_KEY: "k" },
+    waitUntil: (p) => { work = p; },
+  });
+  const reader = r.body.getReader();
+  let deltas = 0;
+  if (stopAfterDeltas === Infinity) { for (;;) { const { done } = await reader.read(); if (done) break; } }
+  else {
+    while (deltas < stopAfterDeltas) { const { value } = await reader.read(); deltas += new TextDecoder().decode(value).split("\n").filter((l) => l.includes('"delta"')).length; }
+    await reader.cancel();
+  }
+  await work;
+};
+chunksSent = 0;
+let u0 = usageBefore();
+await streamCall(Infinity);
+const fullCost = usageBefore() - u0;
+assert(chunksSent === 50 && fullCost === 5, "a full 50,000-character reply costs 5 credits (" + fullCost + ")");
+chunksSent = 0;
+u0 = usageBefore();
+await streamCall(3);
+const stoppedCost = usageBefore() - u0;
+assert(chunksSent < 20 && stoppedCost >= 1 && stoppedCost < 5, `pressing Stop ends generation early (${chunksSent}/50 chunks) and charges only what was written (${stoppedCost} credit)`);

@@ -195,6 +195,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   const fileInputRef = useRef(null);
   const scrollRef = useRef(null);
   const reqIdRef = useRef(0);
+  const abortRef = useRef(null);
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
   const location = useLocation();
@@ -378,6 +379,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
 
   const stop = () => {
     reqIdRef.current++;
+    abortRef.current?.abort();
     setLoading(false);
     setInput("");
   };
@@ -432,9 +434,13 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
       const model = MODELS[ai] || "automatic";
       const eff = effortFor(effort, text, { build: !discuss });
       // Streamed so the explanation (and build progress) shows while the AI writes.
+      // Aborted by Stop, which also ends the reply on the server (see aiStream.js).
+      abortRef.current?.abort();
+      const abort = new AbortController();
+      abortRef.current = abort;
       const res = await streamChat({ prompt, model, effort: eff }, (soFar) => {
         if (reqIdRef.current === myId) setLive(soFar);
-      });
+      }, { signal: abort.signal });
       if (reqIdRef.current !== myId) return;
       setLive("");
       // The server charged the credits (cutting the reply off if they ran out); show its new status.

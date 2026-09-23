@@ -22,6 +22,7 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
   const [focused, setFocused] = useState(false);
   const scrollRef = useRef(null);
   const reqIdRef = useRef(0);
+  const abortRef = useRef(null);
 
   const runPrompt = async (text) => {
     setMessages((m) => [...m, { role: "user", content: text }]);
@@ -34,9 +35,13 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
       const modeNote = intent.build ? BUILD_NOTE : ANSWER_NOTE;
       const eff = effortFor(effort, text, { build: intent.build });
       // Streamed so the reply appears as it's written.
+      // Aborted by Stop, which also ends the reply on the server (see aiStream.js).
+      abortRef.current?.abort();
+      const abort = new AbortController();
+      abortRef.current = abort;
       const res = await streamChat({ prompt: `${modeNote}\n\n${text}`, model: "claude_sonnet_4_6", effort: eff }, (soFar) => {
         if (reqIdRef.current === myId) setLive(soFar);
-      });
+      }, { signal: abort.signal });
       if (reqIdRef.current !== myId) return;
       setLive("");
       // The server charged the credits (cutting the reply off if they ran out); show its new status.
@@ -65,6 +70,7 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
 
   const stop = () => {
     reqIdRef.current++;
+    abortRef.current?.abort();
     setLoading(false);
     setInput("");
   };
