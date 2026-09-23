@@ -209,7 +209,7 @@ export default function PromoManager({ onBack }) {
       </button>
 
       <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-center">
-        <span className="bg-gradient-to-r from-white via-emerald-200 to-sky-200 bg-clip-text text-transparent">Promo Codes</span>
+        <span className="bh-wordmark bg-gradient-to-r from-white via-emerald-200 to-sky-200 bg-clip-text text-transparent">Promo Codes</span>
       </h1>
       <p className="text-slate-400 mt-2 text-center text-sm">Create single-use codes that grant extra credits</p>
 

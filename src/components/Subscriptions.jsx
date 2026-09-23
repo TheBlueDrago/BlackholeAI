@@ -156,7 +156,7 @@ export default function Subscriptions({ onFree, onPro, onTeam, onSecret }) {
         <button
           type="button"
           onClick={onSecret}
-          className="bg-gradient-to-r from-white via-indigo-200 to-fuchsia-200 bg-clip-text text-transparent cursor-pointer select-none"
+          className="bh-wordmark bg-gradient-to-r from-white via-indigo-200 to-fuchsia-200 bg-clip-text text-transparent cursor-pointer select-none"
         >
           Subscriptions
         </button>
