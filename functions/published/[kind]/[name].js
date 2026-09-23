@@ -51,6 +51,19 @@ function removedPage(kind) {
   );
 }
 
+// This path is on the app's own origin (blackhole-ai-tech.com / nebuluxai.pages.dev),
+// where the signed-in user's token lives in localStorage. A published page opened
+// here directly must not run as that origin, or its scripts could read the token.
+// The CSP sandbox gives it an opaque origin instead (scripts, forms and popups still
+// work). Real visitors see sites on their own subdomain, which the router Worker
+// serves with its own headers, so this doesn't affect them.
+const HEADERS = {
+  "content-type": "text/html; charset=utf-8",
+  "cache-control": "no-store",
+  "content-security-policy": "sandbox allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals",
+  "x-content-type-options": "nosniff",
+};
+
 export async function onRequestGet(context) {
   const { params, env } = context;
   const kind = String(params.kind || "");
@@ -68,9 +81,7 @@ export async function onRequestGet(context) {
   if (await isBlocked(env.PUBLISHED_HTML, kind, name)) {
     // Status 200 on purpose: Base44's get-site-html passes the body on to the subdomain
     // Worker whatever the status, and the visitor should see why the page is gone.
-    return new Response(removedPage(kind), {
-      headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" },
-    });
+    return new Response(removedPage(kind), { headers: HEADERS });
   }
 
   let html = await env.PUBLISHED_HTML.get(kvKey(kind, name));
@@ -78,10 +89,5 @@ export async function onRequestGet(context) {
   html = stripInjected(html); // pages republished before the scripts were marked
   if (kind === "site") html = withCheckoutBridge(html, name);
   html = withReportLink(html, kind, name);
-  return new Response(html, {
-    headers: {
-      "content-type": "text/html; charset=utf-8",
-      "cache-control": "no-store",
-    },
-  });
+  return new Response(html, { headers: HEADERS });
 }
