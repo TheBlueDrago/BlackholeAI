@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
+import { findBuiltInGame } from "@/lib/builtInGames";
 import PageSize from "@/components/designer/PageSize";
 import Markdown from "@/components/chat/Markdown";
 import { motion, AnimatePresence } from "framer-motion";
@@ -121,7 +122,11 @@ function sanitize(s) {
 export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrade, aiExhausted, onSpendAI, aiCodeExhausted, onSpendAICode, galaxy5Exhausted, onSpendGalaxy5, space5Exhausted, onSpendSpace5, remaining, plan, lightMode, onToggleLight }) {
   const location = useLocation();
   const startFresh = !!location.state?.fresh;
-  const initial = startFresh
+  // "Remix" on a built-in game starts a new project from a copy of it.
+  const remix = startFresh && location.state?.remix ? findBuiltInGame(location.state.remix) : null;
+  const initial = remix
+    ? { gameName: `my-${remix.name}`, title: `${remix.title || remix.name} remix`, genre: remix.genre || "io", messages: [{ role: "ai", content: remix.html }], projectId: genId() }
+    : startFresh
     ? { gameName: "my-game", title: "", genre: "io", messages: [{ role: "ai", content: STARTER_GAME_HTML }], projectId: genId() }
     : loadState();
   const projectId = initial.projectId;

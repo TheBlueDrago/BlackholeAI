@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, Gamepad2, Flag } from "lucide-react";
+import { ArrowLeft, Loader2, Gamepad2, Flag, Wand2 } from "lucide-react";
 import { loadGame } from "@/lib/loadGame";
 import { useAppShell } from "@/components/AppShellContext";
 import { findBuiltInGame } from "@/lib/builtInGames";
@@ -60,6 +60,15 @@ export default function GameView() {
           {genre && <span className="text-xs text-slate-400 capitalize shrink-0">· {genre}</span>}
         </div>
         <div className="ml-auto flex items-center gap-2">
+          {findBuiltInGame(name) && (
+            <button
+              onClick={() => navigate("/chat/game-designer", { state: { fresh: true, remix: name } })}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-fuchsia-600/80 text-white text-xs font-medium hover:bg-fuchsia-500 transition-colors"
+              title="Open a copy of this game in the Game Designer and change it by chatting"
+            >
+              <Wand2 className="w-3.5 h-3.5" /> Remix
+            </button>
+          )}
           {!findBuiltInGame(name) && !notFound && (
             <a
               href={`/report?${new URLSearchParams({ kind: "game", name: name || "" })}`}
