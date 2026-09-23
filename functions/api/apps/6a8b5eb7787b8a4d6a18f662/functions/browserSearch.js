@@ -20,16 +20,20 @@ function extractJson(text) {
   }
 }
 
+// Tried in order: Google Search grounding first; if a model refuses that (not every
+// model/tier supports it), a plain answer from the model's own knowledge.
+const VARIANTS = [{ tools: [{ google_search: {} }] }, {}];
+
 async function ask(apiKey, model, prompt) {
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-    method: "POST",
-    headers: { "content-type": "application/json", "x-goog-api-key": apiKey },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      tools: [{ google_search: {} }],
-      generationConfig: { maxOutputTokens: 4096, thinkingConfig: { thinkingLevel: "low" } },
-    }),
-  });
+  let res;
+  for (const extra of VARIANTS) {
+    res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-goog-api-key": apiKey },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], ...extra, generationConfig: { maxOutputTokens: 4096 } }),
+    });
+    if (res.ok || res.status !== 400) break;
+  }
   if (!res.ok) throw new Error(`Gemini ${res.status}`);
   const data = await res.json();
   const parts = (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) || [];
