@@ -196,8 +196,8 @@ export default function DesignerDashboard() {
     base44.functions.invoke("showcase", { action: "list" }).then((r) => showGallery(r.data?.sites)).catch(() => {});
   }, []);
 
-  const setInGallery = async (s, on) => {
-    const r = await base44.functions.invoke("showcase", { action: "set", name: s.name, on });
+  const setInGallery = async (s, on, title) => {
+    const r = await base44.functions.invoke("showcase", { action: "set", name: s.name, on, ...(title ? { title } : {}) });
     if (r.data?.error) throw new Error(r.data.error);
     showGallery(r.data?.sites);
   };
@@ -205,7 +205,10 @@ export default function DesignerDashboard() {
   const toggleGallery = async (s) => {
     setErr("");
     try {
-      await setInGallery(s, !gallery.has(s.name));
+      if (gallery.has(s.name)) return await setInGallery(s, false);
+      const title = window.prompt("Show it in the public gallery as (optional title, up to 60 characters):", "");
+      if (title === null) return; // cancelled
+      await setInGallery(s, true, title.trim().slice(0, 60));
     } catch (e) {
       setErr(e?.response?.data?.error || e?.message || "Could not update the gallery");
     }
