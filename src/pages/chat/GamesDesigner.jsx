@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
+import { saveBuilds, loadBuilds, trimForStorage } from "@/lib/buildHistory";
+import { RotateCcw } from "lucide-react";
 import { findBuiltInGame } from "@/lib/builtInGames";
 import PageSize from "@/components/designer/PageSize";
 import Markdown from "@/components/chat/Markdown";
@@ -198,7 +200,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
 
   useEffect(() => {
     try {
-      localStorage.setItem(STORE_KEY, JSON.stringify({ gameName, title, genre, messages, projectId }));
+      localStorage.setItem(STORE_KEY, JSON.stringify({ gameName, title, genre, messages: trimForStorage(messages, isHtmlMsg), projectId }));
     } catch {}
   }, [gameName, title, genre, messages]);
 
@@ -285,6 +287,42 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
   const isGalaxy = selectedAi === "opus5";
   const isSpace = selectedAi === "fable";
   const sendExhausted = isCodeAi ? aiCodeExhausted : isGalaxy ? galaxy5Exhausted : isSpace ? space5Exhausted : aiExhausted;
+
+  // Earlier builds are kept in IndexedDB (lib/buildHistory.js, "game" slot) so they can
+  // be restored after a reload; the chat gets their HTML back when it lines up.
+  const buildsLoadedRef = useRef(false);
+  useEffect(() => {
+    let alive = true;
+    buildsLoadedRef.current = false;
+    loadBuilds(projectId, "game")
+      .catch(() => null)
+      .then((h) => {
+        if (!alive) return;
+        buildsLoadedRef.current = true;
+        if (!h) return;
+        const cur = messagesRef.current;
+        if (cur.filter((m) => isHtmlMsg(m) || m.built).length !== h.total) return;
+        let k = 0;
+        const next = cur.map((m) => {
+          if (!(isHtmlMsg(m) || m.built)) return m;
+          const html = h.get(k++);
+          return m.built && html ? { role: "ai", content: html, note: m.note || "" } : m;
+        });
+        messagesRef.current = next;
+        setMessages(next);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [projectId]);
+
+  useEffect(() => {
+    if (!buildsLoadedRef.current) return;
+    const builds = messages.filter((m) => isHtmlMsg(m) || m.built).map((m) => (m.built ? "" : m.content));
+    if (!builds.some(Boolean)) return;
+    const t = setTimeout(() => saveBuilds(projectId, builds, "game").catch(() => {}), 800);
+    return () => clearTimeout(t);
+  }, [messages, projectId]);
 
   const pushMsg = (m) => {
     messagesRef.current = [...messagesRef.current, m];
@@ -571,6 +609,15 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
                       <div className="space-y-2">
                         {m.note && <p className="whitespace-pre-wrap">{m.note}</p>}
                         <span className="block text-fuchsia-300 font-medium">✓ Game updated</span>
+                        {isHtmlMsg(m) && m !== lastAi && !loading && (
+                          <button
+                            onClick={() => pushMsg({ role: "ai", content: m.content, note: "Restored an earlier version." })}
+                            className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-white"
+                            title="Make this version the current game again"
+                          >
+                            <RotateCcw className="w-3 h-3" /> Restore this version
+                          </button>
+                        )}
                       </div>
                     ) : (
                       <Markdown text={m.content} />
