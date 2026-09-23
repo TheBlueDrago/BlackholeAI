@@ -261,3 +261,5 @@ assert(b.messages.length === 1, "Done removes a message");
 for (let i = 0; i < 5; i++) await send({ message: "spam spam " + i, email: "s@p.am" }, null, "6.6.6.6");
 const stored = JSON.parse(store.get("contact")).messages.filter((m) => m.email === "s@p.am").length;
 assert(stored === 3, "at most 3 stored messages per sender per day (" + stored + ")");
+[s, b] = await j(contact.onRequestPost({ request: req({ action: "count" }, "admintok"), env }));
+assert(s === 200 && b.open === JSON.parse(store.get("contact")).messages.length, "message count for the Monitor badge");

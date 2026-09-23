@@ -1,6 +1,7 @@
 // The /contact page (see cloudflare-lib/contact.js).
 // Anyone:  { action: "send", topic, message, email? } -> { ok }
-// Admins:  { action: "list" } -> { messages }, { action: "done", id } -> { messages }
+// Admins:  { action: "list" } -> { messages }, { action: "done", id } -> { messages },
+//          { action: "count" } -> { open }  (for the badge on the Monitor button)
 import { json } from "../../../../../cloudflare-lib/published.js";
 import { currentUser } from "../../../../../cloudflare-lib/credits.js";
 import { allow, TOO_MANY } from "../../../../../cloudflare-lib/ratelimit.js";
@@ -14,8 +15,9 @@ export async function onRequestPost(context) {
     const body = await request.json().catch(() => ({}));
     const user = request.headers.get("authorization") ? await currentUser(request) : null;
 
-    if (body.action === "list" || body.action === "done") {
+    if (body.action === "list" || body.action === "done" || body.action === "count") {
       if (!user || user.role !== "admin") return json({ error: "Admins only." }, 403);
+      if (body.action === "count") return json({ open: (await listMessages(kv)).length });
       if (body.action === "done") await removeMessage(kv, String(body.id || ""));
       return json({ messages: await listMessages(kv) });
     }

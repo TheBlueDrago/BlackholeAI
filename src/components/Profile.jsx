@@ -30,14 +30,15 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
   const [delError, setDelError] = useState("");
   const [backupNote, setBackupNote] = useState("");
 
-  // Admins: how many reported sites are waiting (badge on the Monitor button).
-  const [openReports, setOpenReports] = useState(0);
+  // Admins: reported sites and contact messages waiting (badge on the Monitor button).
+  const [openReports, setOpenReports] = useState({ reports: 0, messages: 0 });
   useEffect(() => {
     if (!open || user?.role !== "admin") return;
-    base44.functions
-      .invoke("admin-reports", { action: "count" })
-      .then((r) => setOpenReports(r.data?.open || 0))
-      .catch(() => {});
+    Promise.all(
+      ["admin-reports", "contact"].map((fn) =>
+        base44.functions.invoke(fn, { action: "count" }).then((r) => r.data?.open || 0).catch(() => 0)
+      )
+    ).then(([reports, messages]) => setOpenReports({ reports, messages }));
   }, [open, user?.role]);
 
   useEffect(() => {
@@ -465,9 +466,12 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                     >
                       <ShieldCheck className="w-4 h-4" />
                       Monitor
-                      {openReports > 0 && (
-                        <span className="text-[11px] bg-red-500 text-white rounded-full px-1.5 py-0.5 leading-none" title="Reported sites waiting for review">
-                          {openReports}
+                      {openReports.reports + openReports.messages > 0 && (
+                        <span
+                          className="text-[11px] bg-red-500 text-white rounded-full px-1.5 py-0.5 leading-none"
+                          title={`${openReports.reports} reported site(s), ${openReports.messages} message(s) waiting`}
+                        >
+                          {openReports.reports + openReports.messages}
                         </span>
                       )}
                     </button>
