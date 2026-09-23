@@ -128,7 +128,11 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
     abortRef.current?.abort();
     setLoading(false);
     const convId = conversation?.id;
-    if (convId && messages.length && messages[messages.length - 1].role === "user") {
+    // Keep what was already written (it's charged); with nothing written, drop the question.
+    if (convId && live.trim()) {
+      addMessage(convId, { role: "ai", content: `${live.trimEnd()}\n\n_(stopped)_` });
+      setLive("");
+    } else if (convId && messages.length && messages[messages.length - 1].role === "user") {
       removeMessage?.(convId, messages.length - 1);
     }
     setInput("");

@@ -73,6 +73,11 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
     abortRef.current?.abort();
     setLoading(false);
     setInput("");
+    // Keep what was already written (it's charged).
+    if (live.trim()) {
+      setMessages((m) => [...m, { role: "ai", content: `${live.trimEnd()}\n\n_(stopped)_` }]);
+      setLive("");
+    }
   };
 
   const send = () => {
