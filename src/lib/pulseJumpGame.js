@@ -70,7 +70,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#05060f;font-family:
 (function(){
 "use strict";
 var c = document.getElementById('c'), x = c.getContext('2d');
-function resize(){ c.width = innerWidth; c.height = innerHeight; }
+// Short screens (a phone on its side, the game maker's preview) are zoomed out so the ship's
+// ceiling stays on screen: VW x VH is the visible area in game units.
+var VIEW_S = 1, VW = innerWidth, VH = innerHeight;
+function resize(){
+  c.width = innerWidth; c.height = innerHeight;
+  VIEW_S = Math.min(1, innerHeight/667); VW = innerWidth/VIEW_S; VH = innerHeight/VIEW_S;
+}
 resize(); addEventListener('resize', resize);
 
 var GRAV = 2600;
@@ -81,6 +87,14 @@ var SHIP_ACCEL = 2200;
 var SHIP_GRAV = 1900;
 var SHIP_MAX_V = 620;
 var CEIL_OFFSET = 430;
+// Hitboxes follow what's drawn: spikes use their triangle shape (shrunk a little, so a
+// graze is forgiven), the ship is +-0.42 of its size tall, and the cube stands while any
+// part of it is over the floor.
+var HIT_HALF = PLAYER_SIZE*0.32;
+var FOOT_HALF = PLAYER_SIZE*0.45;
+var SHIP_HALF_H = PLAYER_SIZE*0.42;
+var SPIKE_GRACE = 0.85;
+var SHIP_TOP_Y = CEIL_OFFSET - PLAYER_SIZE/2 - SHIP_HALF_H;
 
 function mulberry32(seed){
   return function(){
@@ -148,7 +162,8 @@ function buildLevel(lv){
     var rnd2 = mulberry32(lv.seed + 777);
     lv.shipWindows.forEach(function(w){
       var xs = lv.length*w.start, xe = lv.length*w.end;
-      cubeObstacles = cubeObstacles.filter(function(o){ return o.x < xs-150 || o.x > xe+150; });
+      // Clear floor after the exit portal too: the cube drops from the ship's height back to the floor there.
+      cubeObstacles = cubeObstacles.filter(function(o){ return o.x < xs-150 || o.x > xe+520; });
       portals.push({ x:xs, toMode:'ship', crossed:false });
       portals.push({ x:xe, toMode:'cube', crossed:false });
       shipObstacles = shipObstacles.concat(generateShipSegment(rnd2, xs, xe, lv.speed));
@@ -235,12 +250,12 @@ function win(){
   document.getElementById('won').classList.remove('hidden');
 }
 
-function playerScreenX(){ return Math.min(innerWidth*0.22, 150); }
-function groundYScreen(){ return innerHeight*0.72; }
+function playerScreenX(){ return Math.min(VW*0.22, 150); }
+function groundYScreen(){ return VH*0.72; }
 
 function obstaclesNear(){
   var lv = LEVELS[curLevel];
-  return lv.obstacles.filter(function(o){ return o.x > scrollX-100 && o.x < scrollX+innerWidth+100; });
+  return lv.obstacles.filter(function(o){ return o.x > scrollX-100 && o.x < scrollX+VW+100; });
 }
 
 function groundSolidAt(wx){
@@ -259,17 +274,32 @@ function padAt(wx){
   }
   return false;
 }
+// Tallest point of a triangle (centre cx, half-width hw, height top) over world x a..b.
+function triHeight(cx, hw, top, a, b){
+  var lo = Math.max(a, cx-hw), hi = Math.min(b, cx+hw);
+  if (lo > hi) return 0;
+  var nearest = Math.max(lo, Math.min(hi, cx));
+  return top*(1 - Math.abs(nearest-cx)/hw);
+}
+function spikeHeight(o, a, b){
+  if (o.h) return triHeight(o.x+o.w/2, o.w*0.48, o.h, a, b);
+  var n = o.n||1, seg = o.w/n, best = 0;
+  for (var k=0;k<n;k++) best = Math.max(best, triHeight(o.x+seg*k+seg/2, seg*0.48, seg*1.5, a, b));
+  return best;
+}
 function hazardHit(wx){
   var lv = LEVELS[curLevel];
-  var half = PLAYER_SIZE*0.32;
+  var a = wx-HIT_HALF, b = wx+HIT_HALF;
+  var ship = player.mode==='ship';
+  var bottom = ship ? player.y+PLAYER_SIZE/2-SHIP_HALF_H : player.y;
+  var top = ship ? player.y+PLAYER_SIZE/2+SHIP_HALF_H : player.y+PLAYER_SIZE;
   for (var i=0;i<lv.obstacles.length;i++){
     var o = lv.obstacles[i];
-    if (wx+half <= o.x || wx-half >= o.x+o.w) continue;
+    if (b <= o.x || a >= o.x+o.w) continue;
     if (o.type==='spike'){
-      if (player.mode==='cube'){ if (player.y < 6) return true; }
-      else if (player.y < (o.h||0)) return true;
+      if (bottom < spikeHeight(o, a, b)*SPIKE_GRACE) return true;
     } else if (o.type==='spikeTop'){
-      if (player.mode==='ship' && player.y > CEIL_OFFSET-(o.h||0)) return true;
+      if (top > CEIL_OFFSET - triHeight(o.x+o.w/2, o.w*0.48, o.h, a, b)*SPIKE_GRACE) return true;
     }
   }
   return false;
@@ -299,7 +329,29 @@ addEventListener('mouseup', pressEnd);
 c.addEventListener('touchstart', function(e){ e.preventDefault(); pressStart(); }, {passive:false});
 addEventListener('touchend', pressEnd, {passive:true});
 
+function land(wx){
+  player.y = 0; player.vy = 0;
+  if (player.airborne){ player.rot = Math.round(player.rot/90)*90; }
+  player.airborne = false;
+  player.falling = false;
+  if (padAt(wx)){ player.vy = PAD_V; player.airborne = true; }
+}
+
 function update(dt){
+  // Small physics steps, so a slow frame (common on phones) can't carry the player
+  // past a spike or into the floor between two checks.
+  var n = Math.max(1, Math.ceil(dt*240));
+  for (var i=0;i<n;i++){
+    step(dt/n);
+    if (state !== 'play') return;
+  }
+  var lv = LEVELS[curLevel];
+  document.getElementById('pbarFill').style.width = Math.min(100, scrollX/lv.length*100) + '%';
+  particles.forEach(function(p){ p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=GRAV*dt*0.3; p.life-=dt; });
+  particles = particles.filter(function(p){ return p.life>0; });
+}
+
+function step(dt){
   var lv = LEVELS[curLevel];
   scrollX += lv.speed*dt;
   var worldX = scrollX + PLAYER_SIZE*0.5;
@@ -310,7 +362,8 @@ function update(dt){
       player.mode = p.toMode;
       document.getElementById('modeTag').textContent = p.toMode === 'ship' ? 'SHIP' : 'CUBE';
       if (p.toMode === 'ship'){ player.y = CEIL_OFFSET*0.5; player.vy = 0; player.airborne = true; player.falling = false; }
-      else { player.y = 0; player.vy = 0; player.airborne = false; player.falling = false; }
+      // Back to cube: drop to the floor from where the ship was, instead of snapping down.
+      else { player.vy = Math.min(0, player.vy); player.airborne = true; player.falling = false; }
     }
   });
 
@@ -319,15 +372,14 @@ function update(dt){
     player.y += player.vy*dt;
     if (player.falling){
       if (player.y < -160){ crash(); return; }
-    } else if (player.y <= 0){
-      if (groundSolidAt(worldX)){
-        player.y = 0; player.vy = 0;
-        if (player.airborne){ player.rot = Math.round(player.rot/90)*90; }
-        player.airborne = false;
-        if (padAt(worldX)){ player.vy = PAD_V; player.airborne = true; }
-      } else {
-        player.falling = true;
+      // Reached the pit's far wall: just below the edge climbs out, deeper is a crash
+      // (the cube used to keep falling through the solid floor past the gap).
+      if (groundSolidAt(worldX+FOOT_HALF)){
+        if (player.y > -12) land(worldX); else { crash(); return; }
       }
+    } else if (player.y <= 0){
+      if (groundSolidAt(worldX-FOOT_HALF) || groundSolidAt(worldX+FOOT_HALF)) land(worldX);
+      else player.falling = true;
     } else {
       player.airborne = true;
     }
@@ -337,17 +389,13 @@ function update(dt){
     player.vy = Math.max(-SHIP_MAX_V, Math.min(SHIP_MAX_V, player.vy));
     player.y += player.vy*dt;
     if (player.y < 0){ player.y = 0; player.vy = Math.max(0, player.vy); }
-    if (player.y > CEIL_OFFSET){ player.y = CEIL_OFFSET; player.vy = Math.min(0, player.vy); }
+    // The ship's top stops at the ceiling line (it used to poke through it).
+    if (player.y > SHIP_TOP_Y){ player.y = SHIP_TOP_Y; player.vy = Math.min(0, player.vy); }
     player.rot = Math.max(-25, Math.min(25, -player.vy/SHIP_MAX_V*25));
   }
 
   if (hazardHit(worldX)){ crash(); return; }
-
-  document.getElementById('pbarFill').style.width = Math.min(100, scrollX/lv.length*100) + '%';
   if (scrollX >= lv.length){ win(); return; }
-
-  particles.forEach(function(p){ p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=GRAV*dt*0.3; p.life-=dt; });
-  particles = particles.filter(function(p){ return p.life>0; });
 }
 
 function drawSpike(sx, gy, w, n){
@@ -382,15 +430,16 @@ function drawSpikeTop(sx, gy, w, h){
 }
 
 function render(){
+  x.setTransform(VIEW_S,0,0,VIEW_S,0,0);
   var lv = LEVELS[curLevel] || LEVELS[0];
-  var grad = x.createLinearGradient(0,0,0,c.height);
+  var grad = x.createLinearGradient(0,0,0,VH);
   grad.addColorStop(0,'#05060f'); grad.addColorStop(1,'#0b0f1e');
-  x.fillStyle = grad; x.fillRect(0,0,c.width,c.height);
+  x.fillStyle = grad; x.fillRect(0,0,VW,VH);
 
   var gy = groundYScreen();
   x.strokeStyle = 'rgba(148,163,184,.08)'; x.lineWidth=1;
   var gridOff = -(scrollX%80);
-  for (var gx=gridOff; gx<c.width; gx+=80){ x.beginPath(); x.moveTo(gx,0); x.lineTo(gx,c.height); x.stroke(); }
+  for (var gx=gridOff; gx<VW; gx+=80){ x.beginPath(); x.moveTo(gx,0); x.lineTo(gx,VH); x.stroke(); }
 
   if (state==='play' || state==='dead'){
     var px0 = playerScreenX();
@@ -398,24 +447,24 @@ function render(){
 
     if (player.mode === 'ship'){
       x.strokeStyle = 'rgba(129,140,248,.4)'; x.lineWidth=3; x.shadowColor='#818cf8'; x.shadowBlur=8;
-      x.beginPath(); x.moveTo(0, gy-CEIL_OFFSET); x.lineTo(c.width, gy-CEIL_OFFSET); x.stroke();
+      x.beginPath(); x.moveTo(0, gy-CEIL_OFFSET); x.lineTo(VW, gy-CEIL_OFFSET); x.stroke();
       x.shadowBlur=0;
     }
 
     x.strokeStyle = lv.color[0]; x.lineWidth=3; x.shadowColor=lv.color[0]; x.shadowBlur=10;
     var segStart = null;
-    for (var sx0=-50; sx0<c.width+50; sx0+=6){
+    for (var sx0=-50; sx0<VW+50; sx0+=6){
       var wx = scrollX - px0 + sx0;
       var solid = groundSolidAt(wx);
       if (solid && segStart===null) segStart = sx0;
       if (!solid && segStart!==null){ x.beginPath(); x.moveTo(segStart,gy); x.lineTo(sx0,gy); x.stroke(); segStart=null; }
     }
-    if (segStart!==null){ x.beginPath(); x.moveTo(segStart,gy); x.lineTo(c.width+50,gy); x.stroke(); }
+    if (segStart!==null){ x.beginPath(); x.moveTo(segStart,gy); x.lineTo(VW+50,gy); x.stroke(); }
     x.shadowBlur=0;
 
     lv.portals.forEach(function(p){
       var screenX = p.x - scrollX + px0;
-      if (screenX < -60 || screenX > c.width+60) return;
+      if (screenX < -60 || screenX > VW+60) return;
       var col = p.toMode==='ship' ? '#22d3ee' : '#f472b6';
       x.strokeStyle = col; x.lineWidth = 6; x.shadowColor = col; x.shadowBlur = 20;
       x.beginPath(); x.moveTo(screenX, gy-CEIL_OFFSET*0.6); x.lineTo(screenX, gy+16); x.stroke();
@@ -425,10 +474,11 @@ function render(){
     obs.forEach(function(o){
       var screenX = o.x - scrollX + px0;
       if (o.type==='spike'){
-        if (o.h) drawFloorSpikeH(screenX, gy, o.w, o.h);
+        // Tall spikes are drawn around their centre, so they line up with their hitbox.
+        if (o.h) drawFloorSpikeH(screenX+o.w/2, gy, o.w, o.h);
         else drawSpike(screenX, gy, o.w, o.n||1);
       } else if (o.type==='spikeTop'){
-        drawSpikeTop(screenX, gy, o.w, o.h);
+        drawSpikeTop(screenX+o.w/2, gy, o.w, o.h);
       } else if (o.type==='pad'){
         x.fillStyle='#fb923c'; x.shadowColor='#fb923c'; x.shadowBlur=14;
         x.fillRect(screenX, gy-8, o.w, 8);
