@@ -213,8 +213,8 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
     [lastAi, imagesVersion]
   );
 
-  // A published site opened for editing arrives with its images embedded; swap them
-  // for placeholders so they aren't sent to the AI on every request.
+  // HTML that arrives with images embedded (a published site/game opened for editing,
+  // a saved draft) gets placeholders instead, so they aren't sent to the AI every time.
   useEffect(() => {
     const cur = messagesRef.current;
     if (!cur.some((m) => isHtmlMsg(m) && m.content.includes(";base64,"))) return;
@@ -227,7 +227,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
     return () => {
       alive = false;
     };
-  }, [projectId]);
+  }, [messages]);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => setUser(null));
@@ -387,7 +387,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
     for (const f of images) {
       try {
         placed.push(`bhimg:${await addImageFile(f)} (${f.name})`);
-      } catch (e) {
+      } catch {
         others.push(f);
       }
     }

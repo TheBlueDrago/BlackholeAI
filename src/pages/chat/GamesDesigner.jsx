@@ -10,6 +10,7 @@ import ModeToggle from "@/components/chat/ModeToggle";
 import { base44 } from "@/api/base44Client";
 import AiChooser from "@/components/AiChooser";
 import GitHubPush from "@/components/designer/GitHubPush";
+import { loadImages, onImagesChange, addImageFile, expandImages, packImages } from "@/lib/siteImages";
 import SheetSelect from "@/components/SheetSelect";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useLocation } from "react-router-dom";
@@ -152,8 +153,36 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
 
+  // Attached images: the chat holds bhimg: placeholders; previewHtml (preview, draft,
+  // publish, GitHub) has the real images. See lib/siteImages.js.
+  const [imagesVersion, setImagesVersion] = useState(0);
+  useEffect(() => {
+    const off = onImagesChange(() => setImagesVersion((v) => v + 1));
+    loadImages();
+    return off;
+  }, []);
   const lastAi = [...messages].reverse().find(isHtmlMsg);
-  const previewHtml = lastAi ? extractHtml(lastAi.content) : "";
+  const previewHtml = useMemo(
+    () => (lastAi ? expandImages(extractHtml(lastAi.content)) : ""),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [lastAi, imagesVersion]
+  );
+
+  // HTML that arrives with images embedded (a published site/game opened for editing,
+  // a saved draft) gets placeholders instead, so they aren't sent to the AI every time.
+  useEffect(() => {
+    const cur = messagesRef.current;
+    if (!cur.some((m) => isHtmlMsg(m) && m.content.includes(";base64,"))) return;
+    let alive = true;
+    Promise.all(cur.map(async (m) => (isHtmlMsg(m) ? { ...m, content: await packImages(m.content) } : m))).then((next) => {
+      if (!alive || messagesRef.current !== cur) return;
+      messagesRef.current = next;
+      setMessages(next);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [messages]);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => setUser(null));
@@ -261,7 +290,21 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
   };
 
   const runPrompt = async (text, ai) => {
-    const fileNote = files.length ? `\n[Attached files: ${files.map((f) => f.name).join(", ")}]` : "";
+    const images = files.filter((f) => /^image\//.test(f.type));
+    const others = files.filter((f) => !/^image\//.test(f.type));
+    const placed = [];
+    for (const f of images) {
+      try {
+        placed.push(`bhimg:${await addImageFile(f)} (${f.name})`);
+      } catch {
+        others.push(f);
+      }
+    }
+    setFiles([]);
+    const fileNote =
+      (placed.length
+        ? `\n[Attached images. Use them in the game with exactly these src values (they are already hosted — never replace them with other URLs, and keep them in any later version): ${placed.join(", ")}]`
+        : "") + (others.length ? `\n[Attached files: ${others.map((f) => f.name).join(", ")}]` : "");
     const prior = messagesRef.current;
     pushMsg({ role: "user", content: text + (files.length ? ` (attached: ${files.map((f) => f.name).join(", ")})` : "") });
     setInput("");
