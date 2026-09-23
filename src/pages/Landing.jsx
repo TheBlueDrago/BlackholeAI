@@ -152,7 +152,7 @@ export default function Landing() {
   }, []);
 
   return (
-    <PublicLayout>
+    <PublicLayout title="Make websites and games with AI">
       {/* Hero */}
       <section className="grid lg:grid-cols-2 gap-12 items-center pt-10 sm:pt-16 pb-12">
         <motion.div
