@@ -2,34 +2,11 @@
 // "Restore" still works after a reload. localStorage only keeps the newest build (older
 // copies blew its ~5 MB quota); IndexedDB allows far more. Only one project is kept,
 // under a single key, so this never grows past MAX_BUILDS pages.
-const DB = "blackhole-designer";
-const STORE = "builds";
+import { run as runIn } from "./designerDb";
+
 const KEY = "current";
 export const MAX_BUILDS = 20;
-
-function open() {
-  return new Promise((resolve, reject) => {
-    if (typeof indexedDB === "undefined") return reject(new Error("no IndexedDB"));
-    const req = indexedDB.open(DB, 1);
-    req.onupgradeneeded = () => req.result.createObjectStore(STORE);
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-async function run(mode, fn) {
-  const db = await open();
-  try {
-    return await new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE, mode);
-      const req = fn(tx.objectStore(STORE));
-      tx.oncomplete = () => resolve(req && req.result);
-      tx.onerror = () => reject(tx.error);
-    });
-  } finally {
-    db.close();
-  }
-}
+const run = (mode, fn) => runIn("builds", mode, fn);
 
 // builds: every build's HTML in order (oldest first). Keeps the newest MAX_BUILDS.
 export async function saveBuilds(projectId, builds) {

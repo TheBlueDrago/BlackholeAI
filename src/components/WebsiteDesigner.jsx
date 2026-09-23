@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Globe, Search, RefreshCw, Plus, X, Crown, Rocket, Paperclip, RotateCcw } from "lucide-react";
@@ -27,6 +27,7 @@ import SaveStatus from "@/components/designer/SaveStatus";
 import { EDIT_NOTE, hasEditBlocks, applyEdits } from "@/lib/htmlEdits";
 import { DESIGNER_STORE_KEY } from "@/lib/designerStore";
 import { saveBuilds, loadBuilds } from "@/lib/buildHistory";
+import { loadImages, onImagesChange, addImageFile, expandImages, packImages } from "@/lib/siteImages";
 
 const STORE_KEY = DESIGNER_STORE_KEY;
 const TAKEN_KEY = "infinity-ai-taken-sites";
@@ -197,8 +198,36 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Attached images: the chat holds bhimg: placeholders, and previewHtml (used for the
+  // preview, publishing, download and GitHub) has the real images (lib/siteImages.js).
+  const [imagesVersion, setImagesVersion] = useState(0);
+  useEffect(() => {
+    const off = onImagesChange(() => setImagesVersion((v) => v + 1));
+    loadImages();
+    return off;
+  }, []);
   const lastAi = [...messages].reverse().find(isHtmlMsg);
-  const previewHtml = lastAi ? extractHtml(lastAi.content) : "";
+  const previewHtml = useMemo(
+    () => (lastAi ? expandImages(extractHtml(lastAi.content)) : ""),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [lastAi, imagesVersion]
+  );
+
+  // A published site opened for editing arrives with its images embedded; swap them
+  // for placeholders so they aren't sent to the AI on every request.
+  useEffect(() => {
+    const cur = messagesRef.current;
+    if (!cur.some((m) => isHtmlMsg(m) && m.content.includes(";base64,"))) return;
+    let alive = true;
+    Promise.all(cur.map(async (m) => (isHtmlMsg(m) ? { ...m, content: await packImages(m.content) } : m))).then((next) => {
+      if (!alive || messagesRef.current !== cur) return;
+      messagesRef.current = next;
+      setMessages(next);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [projectId]);
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => setUser(null));
@@ -352,7 +381,21 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   };
 
   const runPrompt = async (text, ai) => {
-    const fileNote = files.length ? `\n[Attached files: ${files.map((f) => f.name).join(", ")}]` : "";
+    const images = files.filter((f) => /^image\//.test(f.type));
+    const others = files.filter((f) => !/^image\//.test(f.type));
+    const placed = [];
+    for (const f of images) {
+      try {
+        placed.push(`bhimg:${await addImageFile(f)} (${f.name})`);
+      } catch (e) {
+        others.push(f);
+      }
+    }
+    setFiles([]);
+    const fileNote =
+      (placed.length
+        ? `\n[Attached images. Use them in the page with exactly these src values (they are already hosted — never replace them with other URLs, and keep them in any later version): ${placed.join(", ")}]`
+        : "") + (others.length ? `\n[Attached files: ${others.map((f) => f.name).join(", ")}]` : "");
     const prior = messagesRef.current;
     pushMsg({ role: "user", content: text + (files.length ? ` (attached: ${files.map((f) => f.name).join(", ")})` : "") });
     setInput("");
