@@ -11,6 +11,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import AiChooser from "@/components/AiChooser";
 import { siteLimit } from "@/lib/publishLimits";
 import { resetDesignerProject, loadDesignerHtmlIntoProject } from "@/lib/designerStore";
+import { SITE_TEMPLATES } from "@/lib/siteTemplates";
 
 const SUGGESTIONS = [
   "A portfolio site for a photographer",
@@ -193,6 +194,12 @@ export default function DesignerDashboard() {
     navigate("/chat/designer/build");
   };
 
+  // Opens a ready-made page in the builder; no AI call, so it costs no credits.
+  const openTemplate = (t) => {
+    loadDesignerHtmlIntoProject(`my-${t.id}`, t.html);
+    navigate("/chat/designer/build");
+  };
+
   const toggleHidden = async (s) => {
     try {
       await base44.entities.PublishedSite.update(s.id, { hidden: !s.hidden });
@@ -323,6 +330,27 @@ export default function DesignerDashboard() {
               </button>
             ))}
           </div>
+
+          {/* Starter templates */}
+          <section className="max-w-3xl mx-auto mt-10">
+            <h2 className="text-sm font-semibold text-slate-300 mb-1">Or start from a template</h2>
+            <p className="text-xs text-slate-500 mb-3">Free to open — change anything by chatting with the AI.</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {SITE_TEMPLATES.map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => openTemplate(t)}
+                  className="text-left rounded-xl bg-slate-900/60 border border-slate-700/50 p-2 hover:border-indigo-500/50 transition-colors"
+                >
+                  <div className="relative aspect-video rounded-lg overflow-hidden bg-slate-800">
+                    <SitePreviewThumb html={t.html} />
+                  </div>
+                  <p className="text-sm text-white font-medium mt-2 px-1">{t.title}</p>
+                  <p className="text-[11px] text-slate-500 px-1 pb-1">{t.blurb}</p>
+                </button>
+              ))}
+            </div>
+          </section>
 
           {/* Usage */}
           <div className="max-w-2xl mx-auto mt-8 flex items-center justify-between gap-3 px-1">
