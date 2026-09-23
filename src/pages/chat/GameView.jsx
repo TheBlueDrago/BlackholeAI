@@ -67,11 +67,11 @@ export default function GameView() {
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-fuchsia-600/80 text-white text-xs font-medium hover:bg-fuchsia-500 transition-colors"
               title="Open a copy of this game in the Game Designer and change it by chatting"
             >
-              <Wand2 className="w-3.5 h-3.5" /> Remix
+              <Wand2 className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Remix</span>
             </button>
           )}
           {!loading && !notFound && (
-            <ShareLink url={`${window.location.origin}/play/${name}`} title={title} className="bg-white/10 hover:bg-white/20 text-slate-200 py-1.5" />
+            <ShareLink url={`${window.location.origin}/play/${name}`} title={title} className="bg-white/10 hover:bg-white/20 text-slate-200 py-1.5" iconOnlyOnPhone />
           )}
           {!findBuiltInGame(name) && !notFound && (
             <a
