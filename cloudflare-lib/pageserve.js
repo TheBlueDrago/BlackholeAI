@@ -62,9 +62,27 @@ export const HEADERS = {
   "x-content-type-options": "nosniff",
 };
 
+// Title/text come from the page's HTML, so entities like &amp; are already escaped.
+const esc = (t) => String(t).replace(/"/g, "&quot;").replace(/</g, "&lt;");
+
+// Link previews (chat apps, social sites) for pages that don't set their own: the
+// page's <title> and first paragraph-ish text, credited to Blackhole AI.
+export function withShareTags(html) {
+  if (/<meta[^>]+property\s*=\s*["']?og:title/i.test(html)) return html;
+  const title = ((html.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [])[1] || "").trim();
+  if (!title) return html;
+  const text = ((html.match(/<p\b[^>]*>([\s\S]*?)<\/p>/i) || [])[1] || "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim().slice(0, 180);
+  const tags =
+    `<meta data-bh property="og:type" content="website"><meta data-bh property="og:title" content="${esc(title)}">` +
+    (text ? `<meta data-bh property="og:description" content="${esc(text)}">` : "") +
+    `<meta data-bh property="og:site_name" content="Made with Blackhole AI"><meta data-bh name="twitter:card" content="summary">`;
+  const i = html.search(/<\/head>/i);
+  return i >= 0 ? html.slice(0, i) + tags + html.slice(i) : html;
+}
+
 // The page as visitors get it: old copies of the added scripts removed, fresh ones added.
 export function preparePage(html, kind, name) {
-  let out = stripInjected(html);
+  let out = withShareTags(stripInjected(html));
   if (kind === "site") out = withCheckoutBridge(out, name);
   return withReportLink(out, kind, name);
 }

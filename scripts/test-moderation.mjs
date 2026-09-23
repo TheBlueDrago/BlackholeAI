@@ -216,3 +216,13 @@ store.set("blocked:site:inline", "x");
 assert(b.html.includes("has been removed") && !b.html.includes("<h1>Inline</h1>"), "take-down applies even to inline HTML");
 [s, b] = await getSite("nobody");
 assert(s === 404, "unknown site 404");
+
+// ---- link-preview tags ----
+const { withShareTags } = await import(R + "cloudflare-lib/pageserve.js");
+const { stripInjected } = await import(R + "cloudflare-lib/injected.js");
+const ogPage = '<html><head><title>Tom &amp; Co "Bakery"</title></head><body><p>Fresh <b>bread</b>\n daily.</p></body></html>';
+const tagged = withShareTags(ogPage);
+assert(tagged.includes('og:title" content="Tom &amp; Co &quot;Bakery&quot;"') && tagged.includes('og:description" content="Fresh bread daily."'), "og tags from title + first paragraph");
+assert(stripInjected(tagged) === ogPage, "added tags are stripped again before saving");
+const own = '<html><head><meta property="og:title" content="Mine"><title>x</title></head></html>';
+assert(withShareTags(own) === own, "pages with their own og:title are left alone");
