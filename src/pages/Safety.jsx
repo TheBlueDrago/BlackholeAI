@@ -82,7 +82,7 @@ const RECENT = {
   items: [
     "Sign-in is protected against password guessing: after too many wrong tries, that account pauses for a few minutes.",
     "New passwords that are easy to guess can't be used, and you can show your password while typing it.",
-    "Signing in without \"Remember me\" now signs you out when you close the browser, for shared and school computers.",
+    "On shared and school computers: signing in without \"Remember me\" signs you out and clears your chats when the browser closes, and Settings → Security can sign out and clear the browser any time.",
     "Pages asking for a crypto wallet's secret recovery phrase can't be published.",
     "The Blackhole Browser leaves out adult, gambling and piracy sites.",
     "The chat asks before you send something that looks like a card number, password or phone number.",

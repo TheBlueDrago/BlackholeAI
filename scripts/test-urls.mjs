@@ -37,7 +37,7 @@ for (const ok of ["https://en.wikipedia.org/wiki/Essex", "https://www.sussex.ac.
   const { markSessionOnly, forgetIfBrowserWasClosed, FLAG } = await import(R + "src/lib/sessionOnly.js");
   const mem = () => {
     const m = new Map();
-    return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), removeItem: (k) => m.delete(k), m };
+    return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), removeItem: (k) => m.delete(k), clear: () => m.clear(), m };
   };
   const doc = { cookie: "" };
   let s = mem();
@@ -45,11 +45,16 @@ for (const ok of ["https://en.wikipedia.org/wiki/Essex", "https://www.sussex.ac.
   markSessionOnly(true, s, doc);
   assert(s.getItem(FLAG) === "1" && doc.cookie.startsWith("bh_session=1") && /Secure/.test(doc.cookie), "unticking Remember me marks this browser session");
   assert(!forgetIfBrowserWasClosed(s, "other=1; bh_session=1") && s.getItem("base44_access_token") === "tok", "reloading or opening a new tab keeps you signed in");
-  assert(forgetIfBrowserWasClosed(s, "other=1") && s.getItem("base44_access_token") === null && s.getItem("token") === null && s.getItem(FLAG) === null, "after the browser was closed, you're signed out");
+  s.setItem("infinity-ai-conversations", "[{\"title\":\"my chat\"}]");
+  const deleted = [];
+  const idb = { deleteDatabase: (n) => deleted.push(n) };
+  assert(forgetIfBrowserWasClosed(s, "other=1", idb) && s.getItem("base44_access_token") === null && s.getItem("token") === null && s.getItem(FLAG) === null, "after the browser was closed, you're signed out");
+  assert(s.getItem("infinity-ai-conversations") === null && deleted.includes("blackhole-designer"), "and the chats and projects saved in the browser are cleared for the next person");
   s = mem();
   s.setItem("base44_access_token", "tok");
   markSessionOnly(false, s, { cookie: "" });
-  assert(!forgetIfBrowserWasClosed(s, "") && s.getItem("base44_access_token") === "tok", "with Remember me ticked you stay signed in");
+  s.setItem("infinity-ai-conversations", "[]");
+  assert(!forgetIfBrowserWasClosed(s, "") && s.getItem("base44_access_token") === "tok" && s.getItem("infinity-ai-conversations") === "[]", "with Remember me ticked you stay signed in and keep your chats");
   assert(!forgetIfBrowserWasClosed({ getItem: () => { throw new Error("blocked"); } }, ""), "blocked storage doesn't break start-up");
 }
 

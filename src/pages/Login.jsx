@@ -130,6 +130,11 @@ export default function Login() {
               />
               Remember me
             </label>
+            {!remember && (
+              <p className="text-xs text-slate-400 -mt-1">
+                Shared computer? You'll be signed out when the browser closes, and your chats saved in it will be cleared.
+              </p>
+            )}
             <button
               type="submit"
               disabled={loading}

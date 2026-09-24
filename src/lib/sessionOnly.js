@@ -23,12 +23,30 @@ export function markSessionOnly(sessionOnly, storage = globalThis.localStorage, 
   }
 }
 
-// At start-up. -> true when it signed the browser out.
-export function forgetIfBrowserWasClosed(storage = globalThis.localStorage, cookies = globalThis.document && globalThis.document.cookie) {
+// Everything this browser keeps for the person using it: chats, designer projects, drafts,
+// settings (all of localStorage) and the designers' database. Used on a shared computer.
+export function clearThisBrowser(storage = globalThis.localStorage, idb = globalThis.indexedDB) {
+  try {
+    storage.clear();
+  } catch {
+    // storage blocked: nothing saved
+  }
+  try {
+    if (idb) idb.deleteDatabase("blackhole-designer");
+  } catch {
+    // no database
+  }
+}
+
+// At start-up. -> true when it signed the browser out. Someone who chose not to be remembered
+// is treated as being on a shared computer: their chats and projects saved in this browser go
+// too, so the next person can't see them.
+export function forgetIfBrowserWasClosed(storage = globalThis.localStorage, cookies = globalThis.document && globalThis.document.cookie, idb = globalThis.indexedDB) {
   try {
     if (storage.getItem(FLAG) !== "1" || hasSessionCookie(cookies)) return false;
     for (const k of TOKEN_KEYS) storage.removeItem(k);
     storage.removeItem(FLAG);
+    clearThisBrowser(storage, idb);
     return true;
   } catch {
     return false;
