@@ -16,6 +16,7 @@ import { useEffort, effortFor } from "@/lib/effort";
 import { streamChat } from "@/lib/aiStream";
 import { shrinkImage } from "@/lib/siteImages";
 import EffortPicker from "@/components/chat/EffortPicker";
+import VoiceInput from "@/components/chat/VoiceInput";
 import { useAppShell } from "@/components/AppShellContext";
 import useStickToBottom from "@/hooks/useStickToBottom";
 
@@ -324,6 +325,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
             >
               <Plus className="w-4 h-4" />
             </button>
+            <VoiceInput onText={(t) => setInput((cur) => (cur.trim() ? `${cur.trimEnd()} ${t}` : t))} />
             <AiChooser value={selectedAi} onChange={setSelectedAi} plan={plan} allowFable={true} />
             <EffortPicker value={effort} onChange={setEffort} />
             {buildMode.visible && <ModeToggle mode={buildMode.mode} onChange={buildMode.setMode} />}

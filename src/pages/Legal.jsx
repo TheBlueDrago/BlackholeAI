@@ -140,6 +140,7 @@ export function Privacy() {
         <li><strong>Usage:</strong> how many credits you use on each AI, your plan, promo codes you redeem, and who invited you or whom you invited. When you join through an invite link we keep a scrambled (hashed) form of your IP address with it, to spot one person creating many accounts.</li>
         <li><strong>Payments:</strong> what you bought and when. Card details go straight to the payment provider; we never see your full card number.</li>
         <li><strong>Messages:</strong> what you send through the contact form, with your email address so we can reply.</li>
+        <li><strong>Voice:</strong> if you use the microphone button, your browser turns what you say into text (Chrome and Edge do this on Google's or Microsoft's servers). We only receive the text you then send.</li>
         <li><strong>Enterprise applications:</strong> your organization's legal name, type, where it's registered, registration number or EIN, website, and your name, role, work email and phone. Only the Blackhole AI team sees them, to check the organization is real and send a quote.</li>
         <li><strong>Admin actions:</strong> when the Blackhole AI team changes an account's plan, credits, access or a promo code, or takes a page down, we record what changed, on which account, and which team member did it, to catch mistakes and misuse.</li>
         <li><strong>Reports:</strong> when you report a site we keep your reason and note, plus a scrambled (hashed) form of your IP address so the same person can't report one page many times.</li>

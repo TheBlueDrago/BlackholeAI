@@ -31,6 +31,7 @@ import { useEffort, effortFor } from "@/lib/effort";
 import { streamChat } from "@/lib/aiStream";
 import LiveReply from "@/components/chat/LiveReply";
 import EffortPicker from "@/components/chat/EffortPicker";
+import VoiceInput from "@/components/chat/VoiceInput";
 import { EXPLAIN_NOTE, splitBuildReply, introBeforeCode } from "@/lib/buildReply";
 import { GAME_DESIGNER_STORE_KEY } from "@/lib/gameDesignerStore";
 import { notifyGamesChanged } from "@/lib/gameEvents";
@@ -700,6 +701,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
               >
                 <Plus className="w-4 h-4" />
               </button>
+              <VoiceInput onText={(t) => setInput((cur) => (cur.trim() ? `${cur.trimEnd()} ${t}` : t))} />
               <AiChooser value={selectedAi} onChange={setSelectedAi} plan={plan} allowFable={true} />
               <EffortPicker value={effort} onChange={setEffort} />
               {buildMode.visible && <ModeToggle mode={buildMode.mode} onChange={buildMode.setMode} />}

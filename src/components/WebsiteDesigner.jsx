@@ -25,6 +25,7 @@ import { useEffort, effortFor } from "@/lib/effort";
 import { streamChat } from "@/lib/aiStream";
 import LiveReply from "@/components/chat/LiveReply";
 import EffortPicker from "@/components/chat/EffortPicker";
+import VoiceInput from "@/components/chat/VoiceInput";
 import { EXPLAIN_NOTE, splitBuildReply, editReplyNote, introBeforeCode } from "@/lib/buildReply";
 import { syncSiteProducts } from "@/lib/siteProducts";
 import SaveStatus from "@/components/designer/SaveStatus";
@@ -831,6 +832,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
               >
                 <Plus className="w-4 h-4" />
               </button>
+              <VoiceInput onText={(t) => setInput((cur) => (cur.trim() ? `${cur.trimEnd()} ${t}` : t))} />
               <AiChooser value={selectedAi} onChange={setSelectedAi} plan={plan} allowFable={true} />
               <EffortPicker value={effort} onChange={setEffort} />
               {buildMode.visible && <ModeToggle mode={buildMode.mode} onChange={buildMode.setMode} />}
