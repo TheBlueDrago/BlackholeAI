@@ -15,9 +15,13 @@ import useEscape from "@/hooks/useEscape";
 import useDialogFocus from "@/hooks/useDialogFocus";
 import { markSessionOnly, noteSignedOut } from "@/lib/sessionOnly";
 import { stashChats } from "@/lib/chatStash";
+import { useAppShell } from "@/components/AppShellContext";
+import { useAuth } from "@/lib/AuthContext";
 
 export default function Profile({ open, onClose, initialView = "main", onMonitor, onPromos }) {
   const [user, setUser] = useState(null);
+  const shell = useAppShell();
+  const auth = useAuth();
   useEscape(open, onClose);
   const dialogRef = useDialogFocus(open);
   const [loading, setLoading] = useState(true);
@@ -76,7 +80,9 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
 
   const handleLogout = () => {
     markSessionOnly(false); // the next person to sign in here chooses for themselves
-    stashChats(user?.id); // and doesn't see your chats (they come back when you sign in)
+    // and doesn't see your chats (they come back when you sign in). The app already knows who's
+    // signed in if this window hasn't finished loading yet.
+    stashChats(user?.id || shell?.currentUser?.id || auth?.user?.id);
     noteSignedOut("signed-out");
     base44.auth.logout();
   };
