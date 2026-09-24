@@ -9,5 +9,10 @@ Disallow: /published/
 Disallow: /buy
 Disallow: /billing
 Disallow: /report
+Disallow: /ThankYou
+Disallow: /promo-success
+Disallow: /reset-password
+Disallow: /forgot-password
+Disallow: /oauth
 
 Sitemap: https://blackhole-ai-tech.com/sitemap.xml
