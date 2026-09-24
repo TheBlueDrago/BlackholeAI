@@ -33,3 +33,6 @@ base44/.app.jsonc
 
 # Local Claude Code config
 .claude/
+
+# Local Cloudflare dev state (wrangler pages dev / wrangler dev)
+.wrangler/
