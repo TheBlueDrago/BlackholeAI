@@ -48,7 +48,8 @@
     --c-slate-200: 226 232 240;
     --c-slate-300: 203 213 225;
     --c-slate-400: 148 163 184;
-    --c-slate-500: 100 116 139;
+    /* Muted text: a little lighter than Tailwind's slate-500 so small print passes WCAG AA (4.5:1) on the dark surfaces. */
+    --c-slate-500: 125 139 160;
     --c-slate-600: 71 85 105;
     --c-slate-700: 51 65 85;
     --c-slate-800: 30 41 59;
@@ -99,7 +100,7 @@
     --c-slate-200: 30 41 59;
     --c-slate-300: 51 65 85;
     --c-slate-400: 71 85 105;
-    --c-slate-500: 100 116 139;
+    --c-slate-500: 90 104 128; /* darker than stock, for 4.5:1 on the light surfaces */
     --c-slate-600: 148 163 184;
     --c-slate-700: 203 213 225;
     --c-slate-800: 226 232 240;

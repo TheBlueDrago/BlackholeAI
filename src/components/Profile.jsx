@@ -293,7 +293,7 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                   onClick={handleDeleteAccount}
                   // The box shows capitals whatever's typed, so "delete" has to count too.
                   disabled={delBusy || !delAck || delText.trim().toUpperCase() !== "DELETE"}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-600 text-white font-medium hover:bg-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-700 text-[#fff] font-medium hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {delBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                   Delete account
@@ -453,7 +453,7 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                 </div>
                   <button
                   onClick={() => setView("delete")}
-                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-red-900/40 text-red-300 hover:bg-red-900/60 transition-colors border border-red-800/50"
+                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-red-500/10 text-red-300 hover:bg-red-500/20 transition-colors border border-red-500/30"
                   >
                   <span className="flex items-center gap-2 font-medium">
                     <Trash2 className="w-4 h-4" />
@@ -580,7 +580,7 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                   </button>
                   <button
                     onClick={handleLogout}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-600/90 text-white font-medium hover:bg-red-500 transition-colors"
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-700 text-[#fff] font-medium hover:bg-red-600 transition-colors"
                   >
                     <LogOut className="w-4 h-4" />
                     Log out
