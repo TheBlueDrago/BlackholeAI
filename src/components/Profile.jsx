@@ -262,6 +262,10 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                 <p className="text-sm text-slate-300 mb-4 leading-relaxed">
                   This permanently deletes your account, your published websites and games, your saved game draft, and the chats and projects saved in this browser. This action cannot be undone.
                 </p>
+                <p className="text-xs text-amber-200/90 bg-amber-500/10 border border-amber-400/30 rounded-xl px-3 py-2 mb-4 leading-relaxed">
+                  Paying for a plan? Deleting your account doesn't cancel the payment by itself.{" "}
+                  <a href="/contact?topic=billing" className="underline hover:text-white">Contact us</a> to cancel it first.
+                </p>
                 <label className="text-xs text-slate-400">
                   Type <span className="font-semibold text-red-400">DELETE</span> to confirm
                 </label>
