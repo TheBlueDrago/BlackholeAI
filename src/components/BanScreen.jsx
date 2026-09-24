@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { ShieldX, LogOut } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -16,6 +17,18 @@ export default function BanScreen({ banned, until }) {
           {banned
             ? "Your account has been permanently banned by an administrator."
             : `Your access is restricted until ${until ? new Date(until).toLocaleString() : "later"}.`}
+        </p>
+        {/* Blocked accounts can still reach us (the contact endpoint lets them). */}
+        <p className="text-slate-400 mt-3 text-sm leading-relaxed">
+          Think this is a mistake?{" "}
+          <Link to="/contact?topic=account" className="text-sky-300 underline underline-offset-2 hover:text-sky-200">
+            Contact us
+          </Link>{" "}
+          and we'll look at it. You can also read our{" "}
+          <Link to="/terms" className="text-sky-300 underline underline-offset-2 hover:text-sky-200">
+            rules
+          </Link>
+          .
         </p>
         <button
           onClick={() => base44.auth.logout()}

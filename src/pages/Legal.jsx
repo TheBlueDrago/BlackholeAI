@@ -104,7 +104,8 @@ export function Terms() {
       <p>
         Anyone can report a published site or game with the Report link on it. We can take down content, remove
         credits, or suspend or delete accounts that break these terms, with or without warning. Content that was
-        taken down can't be published again under the same name.
+        taken down can't be published again under the same name. If you think we made a mistake, tell us through
+        the contact page and we'll look at it again.
       </p>
 
       <h2>No warranty</h2>
@@ -181,7 +182,8 @@ export function Privacy() {
       <h2>Stored on your device</h2>
       <p>
         We use your browser's storage for sign-in, settings such as your theme, and your chats, website projects and
-        attached images. We don't use advertising or tracking cookies.
+        attached images. When you sign out, your chats are put aside on that device and come back when you sign in
+        there again; Settings → Security can remove them completely. We don't use advertising or tracking cookies.
       </p>
 
       <h2>Keeping and deleting</h2>
