@@ -74,7 +74,7 @@ export default function SubscriptionPanel({ onBack, onManagePeople }) {
         </p>
         {source === "paid" && (
           <button onClick={() => navigate("/contact?topic=billing")} className="mt-2 text-sm text-indigo-300 hover:text-indigo-200">
-            Contact us about your subscription →
+            Cancel or ask about your subscription →
           </button>
         )}
       </div>
@@ -125,14 +125,6 @@ export default function SubscriptionPanel({ onBack, onManagePeople }) {
         {["team", "enterprise", "secret"].includes(credits.plan) && source !== "member" && (
           <button onClick={onManagePeople} className="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-800 text-slate-200 font-medium hover:bg-slate-700">
             <Users className="w-4 h-4" /> Manage people
-          </button>
-        )}
-        {source === "paid" && (
-          <button
-            onClick={() => navigate("/contact?topic=billing")}
-            className="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-800 text-slate-200 font-medium hover:bg-slate-700"
-          >
-            Cancel or change my plan
           </button>
         )}
         {/* Settings has no Membership button any more: members see their team (and can leave it) here. */}

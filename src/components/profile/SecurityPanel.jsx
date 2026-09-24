@@ -27,7 +27,7 @@ export default function SecurityPanel({ email, onBack, onChangePassword, busy })
       <button
         onClick={onChangePassword}
         disabled={busy || !email}
-        className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-indigo-500 text-white font-medium hover:bg-indigo-400 transition-colors disabled:opacity-60"
+        className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-indigo-500 text-[#fff] font-medium hover:bg-indigo-400 transition-colors disabled:opacity-60"
       >
         {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />}
         Change password
