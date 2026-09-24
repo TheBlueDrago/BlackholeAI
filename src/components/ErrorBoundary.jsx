@@ -27,6 +27,10 @@ export default class ErrorBoundary extends React.Component {
         >
           Reload
         </button>
+        {/* A plain link: this screen can show when the page's own navigation is what broke. */}
+        <a href="/contact?topic=bug" className="text-xs text-slate-400 underline underline-offset-2 hover:text-slate-200">
+          Keeps happening? Tell us
+        </a>
       </div>
     );
   }
