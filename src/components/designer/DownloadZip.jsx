@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Download, Loader2, Lock } from "lucide-react";
-import JSZip from "jszip";
 import { hasProFeatures } from "@/lib/plans";
 
 export default function DownloadZip({ html, name, plan, onUpgrade }) {
@@ -11,6 +10,8 @@ export default function DownloadZip({ html, name, plan, onUpgrade }) {
     if (!canDownload || !html || downloading) return;
     setDownloading(true);
     try {
+      // Loaded on the first download only, so the designer itself opens faster.
+      const { default: JSZip } = await import("jszip");
       const zip = new JSZip();
       zip.file("index.html", html);
       const blob = await zip.generateAsync({ type: "blob" });
