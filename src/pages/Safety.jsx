@@ -120,7 +120,7 @@ export default function Safety() {
         <div className="rounded-3xl bg-slate-900/50 border border-slate-800 p-6">
           <Flag className="w-7 h-7 text-rose-300" />
           <h2 className="mt-3 text-xl font-semibold text-white">Seen something wrong?</h2>
-          <p className="mt-2 text-slate-400 text-sm">Report a site or game that looks like a scam, copies someone else, or isn't OK for kids.</p>
+          <p className="mt-2 text-slate-400 text-sm">Report a site or game that looks like a scam, bullies someone, copies someone else, or isn't OK for kids.</p>
           <Link to="/report" className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-white hover:text-rose-200">
             Report a page <ArrowRight className="w-4 h-4" />
           </Link>

@@ -18,6 +18,7 @@ export const REASONS = {
   malware: "Malware or harmful downloads",
   adult: "Adult or violent content",
   hate: "Hate or harassment",
+  bullying: "Bullying someone or sharing their private info",
   copyright: "Copyright or impersonation",
   other: "Something else",
 };

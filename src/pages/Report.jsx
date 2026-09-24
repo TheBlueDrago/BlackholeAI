@@ -11,6 +11,7 @@ const REASONS = [
   ["malware", "Malware or harmful downloads"],
   ["adult", "Adult or violent content"],
   ["hate", "Hate or harassment"],
+  ["bullying", "Bullying someone or sharing their private info"],
   ["copyright", "Copyright or impersonation"],
   ["other", "Something else"],
 ];
@@ -57,6 +58,9 @@ export default function Report() {
             <h1 className="text-xl font-semibold text-white">Thanks — report sent</h1>
             <p className="text-sm text-slate-400">
               We'll look at {address}. Pages that break the rules are taken down.
+            </p>
+            <p className="text-sm text-slate-400">
+              If you're worried about someone's safety right now, tell a parent, teacher or another adult you trust.
             </p>
             <a href="/" className="inline-block text-sm text-indigo-300 underline">Go to Blackhole AI</a>
           </div>

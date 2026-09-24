@@ -21,3 +21,13 @@ assert(makerName("  Maya ") === "Maya" && makerName("BLACKHOLE") === "" && maker
 const j = (...p) => p.join("");
 for (const bad of [j("https://www.", "porn", "hub.com/"), j("https://", "xvideos", ".com"), "https://best-casino-online.example/", j("https://thepirate", "bay.org/")]) assert(notForKids(bad), `browser leaves out ${bad.replace(/https?:\/\/(www\.)?/, "").slice(0, 12)}…`);
 for (const ok of ["https://en.wikipedia.org/wiki/Essex", "https://www.sussex.ac.uk/", "https://example.com/?q=porn", "not a url"]) assert(!notForKids(ok), `browser shows ${ok}`);
+
+// The report form's reasons match the ones the server accepts (cloudflare-lib/reports.js).
+{
+  const { readFileSync } = await import("node:fs");
+  const { REASONS } = await import(R + "cloudflare-lib/reports.js");
+  const form = readFileSync(new URL("../src/pages/Report.jsx", import.meta.url), "utf8");
+  const list = form.slice(form.indexOf("const REASONS = ["), form.indexOf("];", form.indexOf("const REASONS = [")));
+  const keys = [...list.matchAll(/\["([a-z]+)", "/g)].map((m) => m[1]);
+  assert(keys.length > 0 && keys.join() === Object.keys(REASONS).join(), `report reasons match the server (${keys.join(", ")})`);
+}
