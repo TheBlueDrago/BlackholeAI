@@ -4,7 +4,7 @@ import Intro from "@/components/Intro";
 const SEEN_KEY = "bh-splash-seen";
 // No intro on pages people open to get one thing done (often from a published site or
 // game), or on the public pages new visitors land on, which should show up right away.
-const SKIP = /^\/($|buy|report|site\/|play\/|terms|privacy|contact|ThankYou|promo-success|arcade|templates|pricing|business|about|showcase|enterprise)/;
+const SKIP = /^\/($|buy|report|site\/|play\/|terms|privacy|contact|ThankYou|promo-success|arcade|templates|pricing|business|about|showcase|enterprise|guides|safety)/;
 
 // The intro plays once per tab, not again on every reload.
 function shouldShow() {

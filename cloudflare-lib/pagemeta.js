@@ -5,15 +5,30 @@
 const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const ORIGIN = "https://blackhole-ai-tech.com";
 
+// Replacements are functions, never strings: in a replacement string "$1" or "$&" means a
+// matched part, so a description like "Pro is $1 a month" came out garbled.
 export function withMeta(html, { title, description, path }) {
   const full = `${title} · Blackhole AI`;
   const setMeta = (out, attr, key, value) =>
-    out.replace(new RegExp(`(<meta\\s+${attr}="${key}"\\s+content=")[^"]*(")`, "i"), `$1${esc(value)}$2`);
-  let out = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${esc(full)}</title>`);
+    out.replace(new RegExp(`(<meta\\s+${attr}="${key}"\\s+content=")[^"]*(")`, "i"), (_, a, b) => a + esc(value) + b);
+  let out = html.replace(/<title>[\s\S]*?<\/title>/i, () => `<title>${esc(full)}</title>`);
   out = setMeta(out, "property", "og:title", full);
   out = setMeta(out, "property", "og:description", description);
   out = setMeta(out, "name", "description", description);
-  if (path) out = setMeta(out, "property", "og:url", ORIGIN + path);
+  if (path) {
+    out = setMeta(out, "property", "og:url", ORIGIN + path);
+    // Tells search engines this page's one true address (not the home page, not ?query copies).
+    const canonical = `<link rel="canonical" href="${esc(ORIGIN + path)}" />\n</head>`;
+    out = out.replace(/<link\s+rel="canonical"[^>]*>\s*/i, "").replace(/<\/head>/i, () => canonical);
+  }
+  return out;
+}
+
+// Extra tags for <head> (structured data) and text shown inside #root until the app starts,
+// so search engines that don't run scripts still read the page. React replaces it on start.
+export function withContent(html, { head = "", body = "" }) {
+  let out = head ? html.replace(/<\/head>/i, () => `${head}\n</head>`) : html;
+  if (body) out = out.replace(/<div id="root"><\/div>/i, () => `<div id="root">${body}</div>`);
   return out;
 }
 
@@ -51,5 +66,6 @@ export const PAGES = {
   about: { title: "About us", description: "We help people make websites and games just by describing them, on any phone or computer.", path: "/about" },
   contact: { title: "Contact us", description: "Questions, ideas, business or partnerships: email us, call us or send a message.", path: "/contact" },
   safety: { title: "Trust & safety", description: "How Blackhole AI keeps your account, your payments and the sites you publish safe, in plain words.", path: "/safety" },
+  guides: { title: "Guides", description: "Short, step-by-step guides to making websites and games with AI, and getting them in front of people. No coding needed.", path: "/guides" },
   showcase: { title: "Gallery", description: "Real websites people made with Blackhole AI by describing them in a sentence.", path: "/showcase" },
 };
