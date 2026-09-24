@@ -24,6 +24,21 @@ export async function onRequest(context) {
   const path = Array.isArray(params.path) ? params.path.join("/") : (params.path || "");
   const url = new URL(request.url);
   const target = `${BACKEND}/api/${path}${url.search}`;
+  // Only Base44's API is reachable through here: a path that climbs out of /api/ (../), or
+  // has a part that would once decoded (..%2f), is refused instead of fetching some other
+  // page of that host and serving it as if it came from this site.
+  const odd = (Array.isArray(params.path) ? params.path : [path]).some((seg) => {
+    let d = String(seg);
+    try {
+      d = decodeURIComponent(d);
+    } catch {
+      return true;
+    }
+    return d === "." || d === ".." || /[/\\]/.test(d); // no API address has these in a part
+  });
+  if (odd || !new URL(target).pathname.startsWith("/api/")) {
+    return new Response(JSON.stringify({ error: "Not found" }), { status: 404, headers: { "content-type": "application/json" } });
+  }
 
   const limited = await authLimit(request, path);
   if (limited) return limited;
@@ -44,6 +59,9 @@ export async function onRequest(context) {
   const resHeaders = new Headers(res.headers);
   resHeaders.delete("content-encoding");
   resHeaders.delete("content-length");
+  // The browser takes each answer as the type Base44 says it is, never guessing (a JSON
+  // answer can't be treated as a page or a script). _headers doesn't cover function answers.
+  resHeaders.set("x-content-type-options", "nosniff");
 
   return new Response(res.body, {
     status: res.status,

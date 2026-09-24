@@ -121,3 +121,19 @@ assert(r.status === 200 && r.forwarded.body === huge, "an oversized body isn't r
 cacheBroken = true;
 r = await times(30, () => call(`${APP}/auth/login`, login));
 assert(r.status === 200, "if counting fails, nobody is locked out");
+
+// Only Base44's /api/ is reachable through the proxy.
+cacheBroken = false;
+{
+  const up = await onRequest({ request: new Request("https://blackhole-ai-tech.com/api/x"), params: { path: ["..", "evil-page"] } });
+  assert(up.status === 404 && sent.every((s) => !String(s.url).includes("evil-page")), "a path climbing out of /api/ is refused and nothing is fetched");
+  const enc = await onRequest({ request: new Request("https://blackhole-ai-tech.com/api/x"), params: { path: ["%2e%2e", "evil-page"] } });
+  assert(enc.status === 404, "also written as %2e%2e");
+  for (const seg of ["..%2fsecret", "..%2F..%2Fsecret", "a%5c..%5csecret", "%E0%A4%A"]) {
+    const r2 = await onRequest({ request: new Request("https://blackhole-ai-tech.com/api/x"), params: { path: ["apps", seg] } });
+    assert(r2.status === 404, `a part like ${seg} is refused`);
+  }
+  const ok = await call(`${APP}/entities/PublishedSite`, undefined, { method: "GET" });
+  assert(ok.status === 200 && ok.forwarded.url === `https://blackhole-ai.base44.app/api/${APP}/entities/PublishedSite`, "normal API calls still go to Base44's /api/");
+  assert(ok.res.headers.get("x-content-type-options") === "nosniff", "answers can't be type-guessed by the browser");
+}

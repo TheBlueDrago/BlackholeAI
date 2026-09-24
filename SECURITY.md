@@ -60,6 +60,9 @@ A short map for anyone changing this code. Keep these rules when you touch the f
 - **Guessing is limited.** Sign-in, sign-up codes, sign-up and reset emails pass through the
   `/api` proxy (`functions/api/[[path]].js`), which refuses too many tries per account and per
   network with a 429 (`cloudflare-lib/authlimit.js`).
+- **The proxy only reaches Base44's API.** A path that climbs out of `/api/` (`../`, or `..%2f`
+  once decoded) is refused, so no other page of the Base44 host can be served as if it came from
+  this site, and every answer tells the browser not to guess its type (`nosniff`).
 - **Admin actions are logged** (`cloudflare-lib/audit.js`, Monitor → Admin log) with where they
   came from, and Monitor warns when they came from more than one country in 30 days. Every
   admin endpoint checks the admin role on the server.
