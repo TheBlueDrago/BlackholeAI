@@ -27,6 +27,12 @@ const call = async (body) => {
 };
 let [s, b] = await call({ prompt: "Name this chat", internal: true, model: "claude-sonnet-5" });
 assert(s === 200 && b.content === "My Title" && models.join(",") === "gemini-3.5-flash", "internal call uses the basic model only");
+{
+  const sent = bodies[bodies.length - 1];
+  const rules = sent.systemInstruction && sent.systemInstruction.parts && sent.systemInstruction.parts[0].text;
+  assert(typeof rules === "string" && /children/.test(rules) && /recovery phrase/.test(rules), "every call carries the server's safety rules as the system instruction");
+  assert(Object.keys(sent).sort().join() === "contents,generationConfig,systemInstruction", "and only the fields Gemini accepts");
+}
 [s, b] = await call({ prompt: "x".repeat(2000), internal: true });
 assert(s === 400, "long internal prompt refused");
 let last;

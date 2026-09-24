@@ -56,6 +56,7 @@ const SECTIONS = [
     icon: Baby,
     title: "Safe for young makers",
     points: [
+      "Our AI is set up on our server to keep what it writes suitable for kids, and it won't build scam or password-stealing pages.",
       "Pages are checked for adult content, scams, hidden code and other harmful things before they go live.",
       "Every published page has a Report link, and reports are reviewed by a person.",
       "Pages that break the rules are taken down, and their owner can't put them back up.",

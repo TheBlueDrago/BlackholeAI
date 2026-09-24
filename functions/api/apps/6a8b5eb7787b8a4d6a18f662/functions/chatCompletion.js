@@ -73,6 +73,17 @@ function promptParts(prompt, images) {
   return parts;
 }
 
+// Rules every reply follows, sent as Gemini's system instruction from here rather than by
+// the app, so they can't be removed from a browser. They match what publishing refuses
+// (cloudflare-lib/scan.js, phishing.js), so nobody spends credits on a page that can't go live.
+export const SAFETY_RULES =
+  "Blackhole AI is used by people of all ages, including children and teens, so keep everything you write suitable for them. " +
+  "Never ask the user for passwords, card numbers or other private details. " +
+  "Don't build pages that send passwords or card numbers to another website, ask for a crypto wallet's recovery phrase or private key, " +
+  "copy the sign-in page of Blackhole AI or another real company, or run code meant to trick, steal from or harm people " +
+  "(malware, crypto miners, fake 'free Robux' or gift-card generators). If asked for one of these, say briefly that it isn't allowed " +
+  "on Blackhole AI and offer a safe version instead. Everything else the user asks for, help with fully.";
+
 // If a model hasn't even started answering within this long, give up on it and try
 // the next one (overloaded models take ~20-40s just to return their 503).
 const HEADERS_TIMEOUT_MS = 20000;
@@ -101,7 +112,11 @@ async function generate(apiKey, model, prompt, generationConfig, timeoutMs, { on
     res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse`, {
       method: "POST",
       headers: { "content-type": "application/json", "x-goog-api-key": apiKey },
-      body: JSON.stringify({ contents: [{ parts: typeof prompt === "string" ? [{ text: prompt }] : prompt }], generationConfig }),
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: SAFETY_RULES }] },
+        contents: [{ parts: typeof prompt === "string" ? [{ text: prompt }] : prompt }],
+        generationConfig,
+      }),
       signal: ctrl.signal,
     });
   } catch (err) {
