@@ -1,14 +1,19 @@
 // One-time credit packs: bought instead of a plan (whatever the plan), added to the buyer's
 // bonus balance (credits.js), and never reset at the end of the month. Every AI comes in
 // the same sizes. The Base44 create-checkout function holds the authoritative prices, so keep
-// PACK_PRICES in step with its copy. Payments can't be under $0.50, so the small packs start there.
+// PACK_BASE and PACK_MULT in step with its copy.
+//
+// 5 credits cost the AI's base price. Doubling the pack doubles the price minus half of the
+// smaller pack's price (10 = 1.5x, 50 = 1.5x the 25 pack), and 25 credits are 3x the base,
+// so bigger packs cost less per credit.
 export const PACK_SIZES = [5, 10, 25, 50];
-export const PACK_PRICES = {
-  ai: { 5: "0.50", 10: "0.60", 25: "0.80", 50: "1.00" },
-  aiCode: { 5: "0.50", 10: "0.75", 25: "1.00", 50: "1.75" },
-  galaxy5: { 5: "0.50", 10: "0.75", 25: "1.00", 50: "1.75" },
-  space5: { 5: "0.50", 10: "0.75", 25: "1.00", 50: "1.75" },
-};
+export const PACK_BASE = { ai: 1, aiCode: 2, galaxy5: 3, space5: 4 };
+export const PACK_MULT = { 5: 1, 10: 1.5, 25: 3, 50: 4.5 };
+export const PACK_PRICES = {};
+for (const [tier, base] of Object.entries(PACK_BASE)) {
+  PACK_PRICES[tier] = {};
+  for (const size of PACK_SIZES) PACK_PRICES[tier][size] = (base * PACK_MULT[size]).toFixed(2);
+}
 // Product ids: credits-<ai>-<size>, e.g. "credits-galaxy-25".
 const SLUG = { ai: "ai", aiCode: "code", galaxy5: "galaxy", space5: "space" };
 

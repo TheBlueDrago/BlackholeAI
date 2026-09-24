@@ -111,17 +111,19 @@ Deno.serve(async (req: Request) => {
     };
     // One-time credit packs of 5-50 credits for each AI: bought instead of a plan, no
     // subscription, added to the buyer's bonus credits by the credit server. Ids are
-    // credits-<ai>-<size>. Keep the prices in step with cloudflare-lib/creditPacks.js.
-    const PACK_PRICES: Record<string, { name: string; prices: Record<number, string> }> = {
-      ai: { name: "Blackhole AI", prices: { 5: "0.50", 10: "0.60", 25: "0.80", 50: "1.00" } },
-      code: { name: "Blackhole Code", prices: { 5: "0.50", 10: "0.75", 25: "1.00", 50: "1.75" } },
-      galaxy: { name: "Galaxy", prices: { 5: "0.50", 10: "0.75", 25: "1.00", 50: "1.75" } },
-      space: { name: "Space", prices: { 5: "0.50", 10: "0.75", 25: "1.00", 50: "1.75" } },
+    // credits-<ai>-<size>. Price = the AI's 5-credit price x the size's multiplier. Keep both in
+    // step with PACK_BASE and PACK_MULT in cloudflare-lib/creditPacks.js.
+    const PACK_BASE: Record<string, { name: string; base: number }> = {
+      ai: { name: "Blackhole AI", base: 1 },
+      code: { name: "Blackhole Code", base: 2 },
+      galaxy: { name: "Galaxy", base: 3 },
+      space: { name: "Space", base: 4 },
     };
+    const PACK_MULT: Record<number, number> = { 5: 1, 10: 1.5, 25: 3, 50: 4.5 };
     const CREDIT_PACKS: Record<string, { name: string; price: string; currency: string }> = {};
-    for (const [slug, p] of Object.entries(PACK_PRICES)) {
-      for (const [size, price] of Object.entries(p.prices)) {
-        CREDIT_PACKS[`credits-${slug}-${size}`] = { name: `${size} ${p.name} credits`, price, currency: "USD" };
+    for (const [slug, p] of Object.entries(PACK_BASE)) {
+      for (const [size, mult] of Object.entries(PACK_MULT)) {
+        CREDIT_PACKS[`credits-${slug}-${size}`] = { name: `${size} ${p.name} credits`, price: (p.base * mult).toFixed(2), currency: "USD" };
       }
     }
     const isPack = Object.prototype.hasOwnProperty.call(CREDIT_PACKS, productId);

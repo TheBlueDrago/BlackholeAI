@@ -40,7 +40,7 @@ o = outOfCreditsOptions("space5", { plan: "enterprise", shared: true, seats: 4 }
 assert(o.upgrade === null && o.refresh.amount === 100, "Enterprise: the pool refills 25 Space per seat");
 
 o = outOfCreditsOptions("ai", { plan: "free" }, now);
-assert(o.pack && o.pack.id === "credits-ai-25" && o.pack.min === 5 && o.pack.max === 50 && o.pack.from === 0.5, "Blackhole AI packs of 5-50 credits, from $0.50, starting on 25");
+assert(o.pack && o.pack.id === "credits-ai-25" && o.pack.min === 5 && o.pack.max === 50 && o.pack.from === 1, "Blackhole AI packs of 5-50 credits, from $1, starting on 25");
 o = outOfCreditsOptions("space5", { plan: "team" }, now);
 assert(o.upgrade === null && o.pack.id === "credits-space-25", "Team, nothing to upgrade to: can still buy a Space pack");
 o = outOfCreditsOptions("galaxy5", { plan: "free" }, now);
@@ -49,3 +49,8 @@ const P = await import(R + "cloudflare-lib/creditPacks.js");
 const ids = Object.keys(P.CREDIT_PACKS);
 assert(ids.length === 16 && ["ai", "code", "galaxy", "space"].every((a) => [5, 10, 25, 50].every((n) => P.CREDIT_PACKS[`credits-${a}-${n}`])), "every AI has packs of 5, 10, 25 and 50");
 assert(Object.values(P.CREDIT_PACKS).every((p) => Number(p.price) >= 0.5), "no pack is under the $0.50 payment minimum");
+const price = (id) => P.CREDIT_PACKS[id].price;
+assert(["credits-ai-5", "credits-code-5", "credits-galaxy-5", "credits-space-5"].map(price).join() === "1.00,2.00,3.00,4.00", "5 credits: AI $1, Code $2, Galaxy $3, Space $4");
+assert(price("credits-ai-10") === "1.50" && price("credits-code-10") === "3.00" && price("credits-galaxy-10") === "4.50" && price("credits-space-10") === "6.00", "10 credits: double minus half (AI $1.50, Code $3)");
+assert(price("credits-ai-25") === "3.00" && price("credits-space-25") === "12.00", "25 credits: 3x the 5-credit price (AI $3)");
+assert(price("credits-ai-50") === "4.50" && price("credits-space-50") === "18.00", "50 credits: 1.5x the 25 pack");
