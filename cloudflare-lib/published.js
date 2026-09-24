@@ -33,9 +33,11 @@ export const kvKey = (kind, name) => `${kind}:${name}`;
 
 // The maker's name as anyone can read it on a published page's record: a first name
 // only, never an email address (the records are public and many users are kids).
+// Names that would make a page look official ("by Blackhole", "by Admin") aren't shown.
+export const OFFICIAL_SOUNDING = /blackhole|black\s*hole|official|admin|staff|support|moderator|\bteam\b/i;
 export function publicName(user) {
   const first = String((user && user.full_name) || "").trim().split(/\s+/)[0] || "";
-  return first.includes("@") ? "" : first.slice(0, 40);
+  return first.includes("@") || OFFICIAL_SOUNDING.test(first) ? "" : first.slice(0, 40);
 }
 
 export const publishedUrl = (kind, name) => `${PUBLIC_ORIGIN}/published/${kind}/${encodeURIComponent(name)}?v=${Date.now()}`;

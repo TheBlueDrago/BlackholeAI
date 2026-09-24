@@ -41,3 +41,12 @@ export const siteUrl = (name) => {
   const n = String(name || "").toLowerCase();
   return SITE_NAME.test(n) ? `https://${n}.blackhole-ai-tech.com` : "";
 };
+
+// The maker's name to show next to a site or game. Records can be written straight into the
+// database, so a name that would make a page look official ("Blackhole AI", "Admin") or an
+// email address is replaced with a neutral one. Same rule as publicName in published.js.
+const OFFICIAL_SOUNDING = /blackhole|black\s*hole|official|admin|staff|support|moderator|\bteam\b/i;
+export const makerName = (name) => {
+  const n = String(name || "").trim().slice(0, 40);
+  return !n || n.includes("@") || OFFICIAL_SOUNDING.test(n) ? "" : n;
+};

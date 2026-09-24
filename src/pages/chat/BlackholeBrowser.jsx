@@ -11,7 +11,7 @@ import BrowserResults from "@/components/browser/BrowserResults";
 import BrowserGameFrame from "@/components/browser/BrowserGameFrame";
 import BrowserSiteFrame from "@/components/browser/BrowserSiteFrame";
 import BrowserWebFrame from "@/components/browser/BrowserWebFrame";
-import { domainOf, gameDomainOf, cleanAddress, resolveAddress } from "@/lib/blackholeDomain";
+import { domainOf, gameDomainOf, cleanAddress, resolveAddress, makerName } from "@/lib/blackholeDomain";
 import { builtInGameEntities, findBuiltInGame } from "@/lib/builtInGames";
 import { useWebSearch } from "@/hooks/useWebSearch";
 import useSiteCheckout from "@/hooks/useSiteCheckout";
@@ -55,10 +55,10 @@ export default function BlackholeBrowser() {
     const match = (...fields) => fields.some((f) => (f || "").toLowerCase().includes(term));
     const siteRows = sites
       .filter((s) => match(s.name, domainOf(s.name), s.ownerName))
-      .map((s) => ({ id: s.id, kind: "site", address: domainOf(s.name), title: s.name, owner: s.ownerName, description: `Website built with Blackhole AI Website Designer. Open ${domainOf(s.name)} in Blackhole Browser.` }));
+      .map((s) => ({ id: s.id, kind: "site", address: domainOf(s.name), title: s.name, owner: makerName(s.ownerName), description: `Website built with Blackhole AI Website Designer. Open ${domainOf(s.name)} in Blackhole Browser.` }));
     const gameRows = games
       .filter((g) => match(g.name, g.title, gameDomainOf(g.name, g.genre), g.ownerName))
-      .map((g) => ({ id: g.id, kind: "game", address: gameDomainOf(g.name, g.genre), title: g.title || g.name, owner: g.ownerName, description: `${g.genre} game on Blackhole Games · ${g.plays || 0} plays. Play ${gameDomainOf(g.name, g.genre)} in Blackhole Browser.` }));
+      .map((g) => ({ id: g.id, kind: "game", address: gameDomainOf(g.name, g.genre), title: g.title || g.name, owner: makerName(g.ownerName), description: `${g.genre} game on Blackhole Games · ${g.plays || 0} plays. Play ${gameDomainOf(g.name, g.genre)} in Blackhole Browser.` }));
     return [...siteRows, ...gameRows];
   }, [sites, games, query]);
 

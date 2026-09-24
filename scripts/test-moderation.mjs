@@ -346,3 +346,13 @@ assert(s === 200 && b.open === JSON.parse(store.get("contact")).messages.length,
   const { siteUrl } = await import(R + "src/lib/blackholeDomain.js");
   assert(siteUrl("nova") === "https://nova.blackhole-ai-tech.com" && siteUrl("evil.com#") === "" && siteUrl("x/y") === "", "site links are only built for valid names");
 }
+
+// ---- maker names that would look official aren't shown ----
+{
+  const { publicName } = await import(R + "cloudflare-lib/published.js");
+  const { makerName } = await import(R + "src/lib/blackholeDomain.js");
+  assert(publicName({ full_name: "Blackhole AI" }) === "" && publicName({ full_name: "Admin Bob" }) === "", "official-sounding first names aren't published");
+  assert(publicName({ full_name: "Maya Chen" }) === "Maya" && publicName({ full_name: "Steam Fan" }) === "Steam", "normal names are");
+  assert(makerName("Blackhole AI Official") === "" && makerName("Support Team") === "" && makerName("a@b.com") === "", "records can't show an official-looking maker");
+  assert(makerName("Maya") === "Maya", "normal maker names still show");
+}
