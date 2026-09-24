@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Loader2, ShieldCheck, Users, Zap } from "lucide-react";
+import { ArrowLeft, Loader2, ShieldCheck, Users, Zap, Gift } from "lucide-react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { paymentError } from "@/lib/paymentError";
 import { CREDIT_PACKS, PACK_SIZES, packsForTier } from "../../cloudflare-lib/creditPacks.js";
 import { TIER_NAMES, TIERS } from "../../cloudflare-lib/planTotals.js";
+import { discountedPrice } from "../../cloudflare-lib/discounts.js";
+import { savedDiscount, saveDiscount, promoPctFor } from "@/lib/promoDiscount";
 
 const money = (n) => (Number.isInteger(n) ? `$${n}` : `$${n.toFixed(2)}`);
 // The pack of `size` credits for another AI.
@@ -43,14 +45,19 @@ export default function Billing() {
   const [error, setError] = useState("");
   const [agreed, setAgreed] = useState(false);
   // The new-member discount, if this account has it right now (checkout applies it itself).
-  const [pct, setPct] = useState(0);
+  const [offerPct, setOfferPct] = useState(0);
+  // A discount promo code (from the Shop or typed here). Checkout checks it again on the server.
+  const [promo, setPromo] = useState(savedDiscount);
+  const [promoInput, setPromoInput] = useState(() => savedDiscount()?.code || "");
+  const [promoBusy, setPromoBusy] = useState(false);
+  const [promoErr, setPromoErr] = useState("");
   useEffect(() => {
     base44.functions
       .invoke("credits")
       .then((r) => {
         const o = r.data?.offer;
         // The new-member discount is for plans only, not credit packs.
-        setPct(o?.discountAvailable && !CREDIT_PACKS[requested] ? o.discountPct : 0);
+        setOfferPct(o?.discountAvailable && !CREDIT_PACKS[requested] ? o.discountPct : 0);
       })
       .catch(() => {});
   }, [requested]);
@@ -80,12 +87,40 @@ export default function Billing() {
   // Only plans and credit packs can be bought here; anything else (e.g. the old Secret) is Pro.
   const productId = chosenPack || (PLANS[requested] ? requested : "pro");
   const plan = PLANS[productId] || packPlan(productId);
+  // The bigger of the new-member offer and the promo code (they don't stack).
+  const promoPct = promoPctFor(promo, productId);
+  const usingPromo = promoPct > offerPct;
+  const pct = Math.max(offerPct, promoPct);
+  const finalPrice = money(discountedPrice(plan.amount, pct));
+
+  const applyPromo = async () => {
+    const code = promoInput.trim().toUpperCase();
+    if (!code || promoBusy) return;
+    setPromoErr("");
+    setPromoBusy(true);
+    try {
+      const r = await base44.functions.invoke("promo-discount", { code, productId });
+      const d = { code: r.data.code, pct: r.data.pct, target: r.data.target, label: r.data.label };
+      saveDiscount(d);
+      setPromo(d);
+    } catch (e) {
+      setPromoErr(e?.response?.data?.error || e?.message || "Could not check that code.");
+    } finally {
+      setPromoBusy(false);
+    }
+  };
+  const removePromo = () => {
+    saveDiscount(null);
+    setPromo(null);
+    setPromoInput("");
+    setPromoErr("");
+  };
 
   const startCheckout = async () => {
     setError("");
     setLoading(true);
     try {
-      const res = await base44.functions.invoke("create-checkout", { productId });
+      const res = await base44.functions.invoke("create-checkout", { productId, ...(usingPromo ? { promoCode: promo.code } : {}) });
       const redirectUrl = res.data?.redirectUrl;
       if (!redirectUrl) throw new Error("No checkout URL");
       window.location.href = redirectUrl;
@@ -122,7 +157,7 @@ export default function Billing() {
 
       <div className="mt-10 w-full max-w-md bg-slate-900/70 backdrop-blur-xl border border-slate-700/40 rounded-3xl p-8 shadow-2xl">
         <div className="flex items-center gap-3">
-          <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${plan.gradient} flex items-center justify-center`}>
+          <div className={`w-11 h-11 shrink-0 rounded-xl bg-gradient-to-br ${plan.gradient} flex items-center justify-center`}>
             <Icon className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -130,7 +165,9 @@ export default function Billing() {
             <p className="text-slate-400 text-sm">
               {pct ? (
                 <>
-                  <s className="opacity-60">{plan.price}</s> ${(Math.round(plan.amount * (100 - pct)) / 100).toFixed(2)} / month · {pct}% off, yours for as long as you stay subscribed
+                  <s className="opacity-60">{plan.price}</s> {finalPrice} {plan.pack ? "one-time" : "/ month"} ·{" "}
+                  {usingPromo ? `${promo.code}: ${pct}% off` : `${pct}% off`}
+                  {plan.pack ? "" : ", yours for as long as you stay subscribed"}
                 </>
               ) : (
                 plan.price
@@ -184,6 +221,44 @@ export default function Billing() {
           ))}
         </ul>
 
+        <div className="mt-5">
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={promoInput}
+              onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") applyPromo();
+              }}
+              placeholder="Promo code"
+              className="flex-1 min-w-0 bg-slate-800/70 border border-slate-700/50 focus:border-emerald-500/50 rounded-xl px-3 py-2 text-sm text-white placeholder:text-slate-500 outline-none uppercase tracking-wide"
+            />
+            {promo && promo.code === promoInput.trim() ? (
+              <button onClick={removePromo} className="px-3 py-2 rounded-xl bg-slate-800 text-slate-200 text-sm font-medium hover:bg-slate-700">
+                Remove
+              </button>
+            ) : (
+              <button
+                onClick={applyPromo}
+                disabled={promoBusy || !promoInput.trim()}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-500 disabled:opacity-50"
+              >
+                {promoBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Gift className="w-4 h-4" />} Apply
+              </button>
+            )}
+          </div>
+          {promoErr && <p className="mt-1.5 text-xs text-red-400">{promoErr}</p>}
+          {promo && !promoErr && (
+            <p className={`mt-1.5 text-xs ${promoPct ? "text-emerald-300" : "text-amber-300"}`}>
+              {!promoPct
+                ? `${promo.code} is only for: ${promo.label.toLowerCase()}.`
+                : usingPromo
+                  ? `${promo.code}: ${promo.pct}% off.`
+                  : `Your new-member offer (${offerPct}% off) is bigger than ${promo.code}, so it's used instead.`}
+            </p>
+          )}
+        </div>
+
         <p className="mt-5 pt-4 border-t border-slate-700/40 text-xs text-slate-400 leading-relaxed">
           Credits are the units Blackhole AI uses when you interact with Blackhole AI or connect your app to external tools. Credit usage adjusts dynamically based on how much work the builder needs to do behind the scenes.
         </p>
@@ -208,7 +283,7 @@ export default function Billing() {
           disabled={loading || !agreed}
           className={`mt-5 w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-br ${plan.gradient} text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed`}
         >
-          {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : pct ? `Subscribe — $${(Math.round(plan.amount * (100 - pct)) / 100).toFixed(2)}/mo` : plan.button}
+          {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : !pct ? plan.button : plan.pack ? `Buy — ${finalPrice}` : `Subscribe — ${finalPrice}/mo`}
         </button>
         <p className="mt-3 text-center text-xs text-slate-500">
           Secure checkout via Base44 Payments ·{" "}

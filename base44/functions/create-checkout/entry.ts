@@ -17,6 +17,10 @@
 import { createClientFromRequest } from "npm:@base44/sdk@0.8.31";
 
 const CONSTRUCT_URL = "https://www.wixapis.com/payments/platform/v1/checkout-sessions/construct";
+// Discount promo codes live in the Cloudflare app (cloudflare-lib/promos.js). This asks it, as the
+// buyer, what a code takes off. The pages.dev origin: blackhole-ai-tech.com's bot protection
+// challenges server-side requests. A fixed constant, never caller-controlled.
+const PROMO_CHECK_URL = "https://nebuluxai.pages.dev/api/apps/6a8b5eb7787b8a4d6a18f662/functions/promo-discount";
 
 // The app's public base URL for the buyer's return links. Use the platform-injected
 // `X-Base44-App-Url` header (server-set from app state — correct behind custom domains), then the
@@ -159,13 +163,44 @@ Deno.serve(async (req: Request) => {
         if (!used) discountPct = DISCOUNT_PCT;
       }
     }
-    const productName = discountPct ? `${product.name} (${OFFER_TAG})` : product.name;
-    const price = discountPct ? (Math.round(parseFloat(product.price) * (100 - discountPct)) / 100).toFixed(2) : product.price;
+    // A discount promo code (optional). Checked and counted by the Cloudflare app with the buyer's
+    // own sign-in; its answer is the only source of the percentage. It doesn't stack with the
+    // new-member offer: the bigger discount wins, and only that one is tagged as used.
+    const promoCode = String(body.promoCode ?? "").trim().toUpperCase();
+    let promoPct = 0;
+    if (promoCode) {
+      if (!appUser?.id) {
+        return new Response(JSON.stringify({ error: "Please sign in to use a promo code." }), { status: 401 });
+      }
+      let check: any = {};
+      let checkOk = false;
+      try {
+        const r = await fetch(PROMO_CHECK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: req.headers.get("Authorization") ?? "" },
+          body: JSON.stringify({ code: promoCode, productId, claim: true }),
+        });
+        checkOk = r.ok;
+        check = await r.json().catch(() => ({}));
+      } catch (e) {
+        console.error("create-checkout: promo check failed", e);
+      }
+      promoPct = checkOk ? Math.trunc(Number(check.pct)) || 0 : 0;
+      if (!(promoPct >= 1 && promoPct <= 100)) {
+        return new Response(JSON.stringify({ error: check.error || "That promo code can't be used for this." }), { status: 400 });
+      }
+    }
+    const usePromo = promoPct > discountPct;
+    const pct = usePromo ? promoPct : discountPct;
+    const tag = usePromo ? `promo ${promoCode}` : OFFER_TAG;
+    const productName = pct ? `${product.name} (${tag})` : product.name;
+    // Payments can't be under 0.50, so no discount goes below that (same rule as cloudflare-lib/discounts.js).
+    const price = pct ? Math.max(0.5, Math.round(parseFloat(product.price) * (100 - pct)) / 100).toFixed(2) : product.price;
     const currency = product.currency;
     const subscriptionInfo = isPack
       ? null
-      : discountPct
-        ? { ...product.subscriptionInfo, title: `${product.subscriptionInfo.title} (${OFFER_TAG})` }
+      : pct
+        ? { ...product.subscriptionInfo, title: `${product.subscriptionInfo.title} (${tag})` }
         : product.subscriptionInfo;
     // Where Wix returns the buyer. Both MUST be real, PUBLICLY reachable routes.
     const thankYouPath = "/ThankYou";

@@ -2,6 +2,8 @@ import React from "react";
 import { Sparkles, Code, Gem, Star } from "lucide-react";
 import { packsForTier } from "../../../cloudflare-lib/creditPacks.js";
 import { TIER_NAMES, TIERS } from "../../../cloudflare-lib/planTotals.js";
+import { discountedPrice } from "../../../cloudflare-lib/discounts.js";
+import { promoPctFor } from "@/lib/promoDiscount";
 
 const LOOK = {
   ai: { icon: Sparkles, color: "text-indigo-300", border: "border-indigo-500/50" },
@@ -12,8 +14,8 @@ const LOOK = {
 const money = (n) => (Number.isInteger(n) ? `$${n}` : `$${n.toFixed(2)}`);
 
 // The shop's Credits section: one-time packs of 5-50 credits for every AI, for any plan.
-// onBuy(productId) opens Billing on that pack.
-export default function CreditPacks({ onBuy }) {
+// onBuy(productId) opens Billing on that pack; `discount` is a promo code the person entered.
+export default function CreditPacks({ onBuy, discount }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
       {TIERS.map((tier) => {
@@ -26,16 +28,26 @@ export default function CreditPacks({ onBuy }) {
             </div>
             <p className="text-xs text-slate-400 mt-1">One-time, any plan. They don't reset at the end of the month.</p>
             <div className="grid grid-cols-4 gap-2 mt-4">
-              {packsForTier(tier).map(([id, p]) => (
-                <button
-                  key={id}
-                  onClick={() => onBuy(id)}
-                  className="rounded-xl border border-slate-700 bg-slate-800/60 hover:bg-slate-700/70 hover:border-slate-500 transition-colors px-2 py-2.5 text-center"
-                >
-                  <span className="block text-lg font-bold text-white">{p.credits}</span>
-                  <span className="block text-xs text-slate-300">{money(Number(p.price))}</span>
-                </button>
-              ))}
+              {packsForTier(tier).map(([id, p]) => {
+                const off = promoPctFor(discount, id);
+                return (
+                  <button
+                    key={id}
+                    onClick={() => onBuy(id)}
+                    className="rounded-xl border border-slate-700 bg-slate-800/60 hover:bg-slate-700/70 hover:border-slate-500 transition-colors px-2 py-2.5 text-center"
+                  >
+                    <span className="block text-lg font-bold text-white">{p.credits}</span>
+                    {off ? (
+                      <span className="block text-xs text-slate-300">
+                        <s className="opacity-60 mr-1">{money(Number(p.price))}</s>
+                        <span className="text-emerald-300">{money(discountedPrice(p.price, off))}</span>
+                      </span>
+                    ) : (
+                      <span className="block text-xs text-slate-300">{money(Number(p.price))}</span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
         );

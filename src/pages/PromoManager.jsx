@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, Loader2, Trash2, Ticket, Save } from "lucide-react";
+import { ArrowLeft, Plus, Loader2, Trash2, Ticket, Save, Percent } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { DISCOUNT_TARGETS, targetLabel } from "../../cloudflare-lib/discounts.js";
 
 const MODELS = [
   { id: "ai", label: "Blackhole AI" },
@@ -26,40 +27,104 @@ function modelLabel(id) {
   return MODELS.find((m) => m.id === id)?.label ?? id;
 }
 
+// "2026-10-01T00:00:00.000Z" <-> the date input's "2026-10-01" (the code ends at the end of that day, UTC).
+const dayOf = (iso) => (iso ? String(iso).slice(0, 10) : "");
+const endOfDay = (day) => (day ? `${day}T23:59:59Z` : "");
+
+// Free credits or a discount.
+function KindSwitch({ value, onChange }) {
+  return (
+    <div className="flex gap-1.5 mb-3">
+      {[
+        { id: "credits", label: "Free credits" },
+        { id: "discount", label: "Discount on plans / credits" },
+      ].map((k) => (
+        <button
+          key={k.id}
+          type="button"
+          onClick={() => onChange(k.id)}
+          className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+            value === k.id ? "bg-emerald-500/20 border-emerald-400/60 text-emerald-200" : "border-slate-700 text-slate-300 hover:bg-slate-800"
+          }`}
+        >
+          {k.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// The fields for a discount code.
+function DiscountFields({ f, set }) {
+  return (
+    <>
+      <Field label="Percent off">
+        <input type="number" min="1" max="100" value={f.pct} onChange={(e) => set("pct", Number(e.target.value))} className={inputCls} />
+      </Field>
+      <Field label="Makes cheaper">
+        <select value={f.target} onChange={(e) => set("target", e.target.value)} className={inputCls}>
+          {DISCOUNT_TARGETS.map((t) => (
+            <option key={t.id} value={t.id}>{t.label}</option>
+          ))}
+        </select>
+      </Field>
+      <Field label="How many people can use it (0 = no limit)">
+        <input type="number" min="0" value={f.maxUses} onChange={(e) => set("maxUses", Number(e.target.value))} className={inputCls} />
+      </Field>
+      <Field label="Ends on (optional)">
+        <input type="date" value={dayOf(f.expiresAt)} onChange={(e) => set("expiresAt", endOfDay(e.target.value))} className={inputCls} />
+      </Field>
+    </>
+  );
+}
+
 function CodeCard({ code, onSave, onDelete, busy }) {
-  const [f, setF] = useState({
-    aiModel: code.aiModel ?? "ai",
-    credits: code.credits ?? 10,
-    active: code.active !== false,
-    label: code.label ?? "",
-  });
+  const discount = code.kind === "discount";
+  const [f, setF] = useState(
+    discount
+      ? { pct: code.pct ?? 10, target: code.target ?? "all", maxUses: code.maxUses ?? 0, expiresAt: code.expiresAt ?? "", active: code.active !== false, label: code.label ?? "" }
+      : { aiModel: code.aiModel ?? "ai", credits: code.credits ?? 10, active: code.active !== false, label: code.label ?? "" }
+  );
+  const uses = (code.usedBy || []).length;
+  const ended = discount && code.expiresAt && Date.parse(code.expiresAt) < Date.now();
   const set = (k, v) => setF((s) => ({ ...s, [k]: v }));
 
   return (
     <div className="bg-slate-900/70 border border-slate-700/50 rounded-2xl p-4">
       <div className="flex items-center gap-2 mb-3 flex-wrap">
-        <Ticket className="w-4 h-4 text-sky-300" />
+        {discount ? <Percent className="w-4 h-4 text-amber-300" /> : <Ticket className="w-4 h-4 text-sky-300" />}
         <span className="text-sm font-semibold text-white tracking-wide">{code.code}</span>
         <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-          +{code.credits} {modelLabel(code.aiModel)}
+          {discount ? `${code.pct}% off ${targetLabel(code.target).toLowerCase()}` : `+${code.credits} ${modelLabel(code.aiModel)}`}
         </span>
-        {!f.active && (
+        {discount && (
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+            {uses} {code.maxUses > 0 ? `of ${code.maxUses}` : ""} used
+          </span>
+        )}
+        {(!f.active || ended) && (
           <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/15 text-red-300 border border-red-500/30">
-            used / inactive
+            {ended ? "ended" : discount ? "inactive" : "used / inactive"}
           </span>
         )}
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <Field label="AI model">
-          <select value={f.aiModel} onChange={(e) => set("aiModel", e.target.value)} className={inputCls}>
-            {MODELS.map((m) => (
-              <option key={m.id} value={m.id}>{m.label}</option>
-            ))}
-          </select>
-        </Field>
-        <Field label="Credits">
-          <input type="number" min="1" value={f.credits} onChange={(e) => set("credits", Number(e.target.value))} className={inputCls} />
-        </Field>
+        {discount ? (
+          <DiscountFields f={f} set={set} />
+        ) : (
+          <>
+            <Field label="AI model">
+              <select value={f.aiModel} onChange={(e) => set("aiModel", e.target.value)} className={inputCls}>
+                {MODELS.map((m) => (
+                  <option key={m.id} value={m.id}>{m.label}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Credits">
+              <input type="number" min="1" value={f.credits} onChange={(e) => set("credits", Number(e.target.value))} className={inputCls} />
+            </Field>
+          </>
+        )}
         <Field label="Label (note)">
           <input type="text" value={f.label} onChange={(e) => set("label", e.target.value)} placeholder="optional" className={inputCls} />
         </Field>
@@ -70,7 +135,11 @@ function CodeCard({ code, onSave, onDelete, busy }) {
           Active
         </label>
       </div>
-      <p className="text-[11px] text-slate-500 mt-2">Each code works once — it expires after the first redemption.</p>
+      <p className="text-[11px] text-slate-500 mt-2">
+        {discount
+          ? "Each person can use it once. On a plan, the lower price stays as long as they stay subscribed. Prices never go below $0.50."
+          : "Each code works once — it expires after the first redemption."}
+      </p>
       <div className="flex gap-2 mt-4">
         <button
           onClick={() => onSave(code.id, f)}
@@ -93,28 +162,36 @@ function CodeCard({ code, onSave, onDelete, busy }) {
 }
 
 function NewCard({ onCreate, busy }) {
-  const [f, setF] = useState({ code: "", aiModel: "ai", credits: 10, active: true, label: "" });
+  const [f, setF] = useState({ code: "", kind: "credits", aiModel: "ai", credits: 10, pct: 20, target: "all", maxUses: 0, expiresAt: "", active: true, label: "" });
   const set = (k, v) => setF((s) => ({ ...s, [k]: v }));
+  const discount = f.kind === "discount";
   return (
     <div className="bg-slate-900/70 border-2 border-emerald-500/40 rounded-2xl p-4">
       <div className="flex items-center gap-2 mb-3">
         <Plus className="w-4 h-4 text-emerald-300" />
         <h3 className="text-sm font-semibold text-white">New Promo Code</h3>
       </div>
+      <KindSwitch value={f.kind} onChange={(k) => set("kind", k)} />
       <div className="grid grid-cols-2 gap-3">
         <Field label="Code">
           <input type="text" value={f.code} onChange={(e) => set("code", e.target.value.toUpperCase())} placeholder="NEWCODE" className={inputCls + " uppercase tracking-wide"} />
         </Field>
-        <Field label="AI model">
-          <select value={f.aiModel} onChange={(e) => set("aiModel", e.target.value)} className={inputCls}>
-            {MODELS.map((m) => (
-              <option key={m.id} value={m.id}>{m.label}</option>
-            ))}
-          </select>
-        </Field>
-        <Field label="Credits">
-          <input type="number" min="1" value={f.credits} onChange={(e) => set("credits", Number(e.target.value))} className={inputCls} />
-        </Field>
+        {discount ? (
+          <DiscountFields f={f} set={set} />
+        ) : (
+          <>
+            <Field label="AI model">
+              <select value={f.aiModel} onChange={(e) => set("aiModel", e.target.value)} className={inputCls}>
+                {MODELS.map((m) => (
+                  <option key={m.id} value={m.id}>{m.label}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Credits">
+              <input type="number" min="1" value={f.credits} onChange={(e) => set("credits", Number(e.target.value))} className={inputCls} />
+            </Field>
+          </>
+        )}
         <Field label="Label (note)">
           <input type="text" value={f.label} onChange={(e) => set("label", e.target.value)} placeholder="optional" className={inputCls} />
         </Field>
@@ -211,7 +288,7 @@ export default function PromoManager({ onBack }) {
       <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-center">
         <span className="bh-wordmark bg-gradient-to-r from-white via-emerald-200 to-sky-200 bg-clip-text text-transparent">Promo Codes</span>
       </h1>
-      <p className="text-slate-400 mt-2 text-center text-sm">Create single-use codes that grant extra credits</p>
+      <p className="text-slate-400 mt-2 text-center text-sm">Codes that give free credits, or money off plans and credit packs</p>
 
       <div className="mt-8 w-full max-w-2xl space-y-4">
         {loading ? (
@@ -220,11 +297,11 @@ export default function PromoManager({ onBack }) {
           </div>
         ) : (
           <>
-            <NewCard onCreate={create} busy={busyId === "new"} />
-            {codes.map((c) => (
-              <CodeCard key={c.id} code={c} onSave={save} onDelete={del} busy={busyId === c.id} />
-            ))}
-            {codes.length === 0 && <p className="text-center text-slate-500 text-sm">No codes yet.</p>}
+                <NewCard onCreate={create} busy={busyId === "new"} />
+                {codes.map((c) => (
+                  <CodeCard key={c.id} code={c} onSave={save} onDelete={del} busy={busyId === c.id} />
+                ))}
+                {codes.length === 0 && <p className="text-center text-slate-500 text-sm">No codes yet.</p>}
           </>
         )}
         {err && <p className="text-center text-sm text-red-400">{err}</p>}
