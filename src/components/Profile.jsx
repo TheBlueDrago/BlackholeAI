@@ -12,11 +12,13 @@ import { notifyGamesChanged } from "@/lib/gameEvents";
 import { downloadChats, importChats } from "@/lib/chatBackup";
 import { useInstallApp } from "@/lib/installPrompt";
 import useEscape from "@/hooks/useEscape";
+import useDialogFocus from "@/hooks/useDialogFocus";
 import { markSessionOnly } from "@/lib/sessionOnly";
 
 export default function Profile({ open, onClose, initialView = "main", onMonitor, onPromos }) {
   const [user, setUser] = useState(null);
   useEscape(open, onClose);
+  const dialogRef = useDialogFocus(open);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState("main"); // main | settings | membership | games
   const navigate = useNavigate();
@@ -229,6 +231,7 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
             onClick={(e) => e.stopPropagation()}
             // Never taller than the screen: on small phones the longer views (Security,
             // Subscriptions) scroll inside the window instead of being cut off.
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-label="Account and settings"

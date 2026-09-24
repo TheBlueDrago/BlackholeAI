@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Users, Plus } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import useEscape from "@/hooks/useEscape";
+import useDialogFocus from "@/hooks/useDialogFocus";
 
 // Shows once when a user first becomes a Team owner with no members yet, prompting them
 // to add their 2 people now or later (Account → Settings → Membership).
@@ -38,6 +39,7 @@ export default function TeamWelcomePopup({ onAddPeople }) {
     setShow(false);
   };
   useEscape(show, dismiss);
+  const dialogRef = useDialogFocus(show);
 
   const addNow = () => {
     dismiss();
@@ -59,6 +61,7 @@ export default function TeamWelcomePopup({ onAddPeople }) {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             onClick={(e) => e.stopPropagation()}
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-label="Welcome to your team"

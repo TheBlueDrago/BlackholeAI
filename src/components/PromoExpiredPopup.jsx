@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AlertTriangle } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import useEscape from "@/hooks/useEscape";
+import useDialogFocus from "@/hooks/useDialogFocus";
 
 // Shows once when a promo-granted plan (pro or team) has passed its expiry, so the user
 // knows their free promo ended and can close it out without being charged.
@@ -34,6 +35,7 @@ export default function PromoExpiredPopup() {
     setBusy(false);
   };
   useEscape(show && !busy, close);
+  const dialogRef = useDialogFocus(show);
 
   return (
     <AnimatePresence>
@@ -48,6 +50,7 @@ export default function PromoExpiredPopup() {
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-label="Your promo membership expired"

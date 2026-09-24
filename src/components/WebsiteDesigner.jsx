@@ -38,6 +38,7 @@ import { loadImages, onImagesChange, addImageFile, expandImages, packImages } fr
 import { hasProFeatures, hasSpace } from "@/lib/plans";
 import { useAppShell } from "@/components/AppShellContext";
 import useEscape from "@/hooks/useEscape";
+import useDialogFocus from "@/hooks/useDialogFocus";
 
 const STORE_KEY = DESIGNER_STORE_KEY;
 const TAKEN_KEY = "infinity-ai-taken-sites";
@@ -187,6 +188,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   const [inviteErr, setInviteErr] = useState("");
   const [showPublish, setShowPublish] = useState(false);
   useEscape(showPublish, () => setShowPublish(false));
+  const dialogRef = useDialogFocus(showPublish);
   const [published, setPublished] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [publishErr, setPublishErr] = useState("");
@@ -959,6 +961,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
               exit={{ scale: 0.95, opacity: 0, y: 10 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
               onClick={(e) => e.stopPropagation()}
+              ref={dialogRef}
               role="dialog"
               aria-modal="true"
               aria-label="Publish your website"

@@ -5,11 +5,13 @@ import { base44 } from "@/api/base44Client";
 import RewardPicker, { REWARD_LABEL } from "@/components/profile/RewardPicker";
 import { clearWelcomePending } from "@/lib/referral";
 import useEscape from "@/hooks/useEscape";
+import useDialogFocus from "@/hooks/useDialogFocus";
 
 // Shown once to a new user who joined through a friend's invite link: they pick their
 // own welcome bonus (the friend picks one too — see ReferFriends).
 export default function WelcomeReward({ open, onClose, onClaimed }) {
   useEscape(open, onClose);
+  const dialogRef = useDialogFocus(open && !!data);
   const [data, setData] = useState(null);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(null);
@@ -57,6 +59,7 @@ export default function WelcomeReward({ open, onClose, onClaimed }) {
           <motion.div
             initial={{ scale: 0.95, y: 10 }}
             animate={{ scale: 1, y: 0 }}
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-label="Welcome bonus"

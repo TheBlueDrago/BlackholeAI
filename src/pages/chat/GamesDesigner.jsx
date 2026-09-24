@@ -38,6 +38,7 @@ import { notifyGamesChanged } from "@/lib/gameEvents";
 import { hasProFeatures, hasSpace } from "@/lib/plans";
 import { useAppShell } from "@/components/AppShellContext";
 import useEscape from "@/hooks/useEscape";
+import useDialogFocus from "@/hooks/useDialogFocus";
 
 const STORE_KEY = GAME_DESIGNER_STORE_KEY;
 const TAKEN_KEY = "infinity-ai-taken-games";
@@ -160,6 +161,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
   const [reloadKey, setReloadKey] = useState(0);
   const [showPublish, setShowPublish] = useState(false);
   useEscape(showPublish, () => setShowPublish(false));
+  const dialogRef = useDialogFocus(showPublish);
   const [published, setPublished] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [publishErr, setPublishErr] = useState("");
@@ -781,6 +783,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
               exit={{ scale: 0.95, opacity: 0, y: 10 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
               onClick={(e) => e.stopPropagation()}
+              ref={dialogRef}
               role="dialog"
               aria-modal="true"
               aria-label="Publish your game"

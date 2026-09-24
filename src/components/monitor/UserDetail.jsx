@@ -4,6 +4,7 @@ import { X, Loader2, Clock, MessageSquare } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import CreditControls from "./CreditControls";
 import useEscape from "@/hooks/useEscape";
+import useDialogFocus from "@/hooks/useDialogFocus";
 
 const LABELS = { ai: "Blackhole AI", aiCode: "Blackhole Code", galaxy5: "Galaxy", space5: "Space" };
 
@@ -16,6 +17,7 @@ function fmtTime(min) {
 
 export default function UserDetail({ user, onClose }) {
   useEscape(true, onClose);
+  const dialogRef = useDialogFocus(true);
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
 
@@ -32,6 +34,7 @@ export default function UserDetail({ user, onClose }) {
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
         onClick={(e) => e.stopPropagation()}
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label="User details"
