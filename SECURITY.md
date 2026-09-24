@@ -42,9 +42,11 @@ A short map for anyone changing this code. Keep these rules when you touch the f
   owner is whoever `publish()` recorded in KV metadata (`ownerOf` in
   `cloudflare-lib/published.js`); serving uses `cloudflare-lib/pagesource.js`. Site names are
   checked on the server (letters, digits, hyphens; official-looking names refused).
-- **Pages people make are walled off.** Published sites run on their own subdomain; on the
-  app's origin they're served with `Content-Security-Policy: sandbox`; in-app previews use
-  sandboxed frames without `allow-same-origin` (`src/lib/previewShim.js`).
+- **Pages people make are walled off.** Published sites run on their own subdomain (served by
+  `workers/blackhole-site-router`, which adds nosniff and a Permissions-Policy with no camera,
+  microphone, USB or payment sheet); on the app's origin they're served with
+  `Content-Security-Policy: sandbox`; in-app previews use sandboxed frames without
+  `allow-same-origin` (`src/lib/previewShim.js`, guarded by `scripts/test-frames.mjs`).
 - **Nothing dangerous is taken from a link.** App settings (`src/lib/app-params.js`), sign-in
   returns (`src/lib/authReturnTo.js`), site addresses (`siteUrl`) and the Blackhole Browser
   (`safeWebUrl`, both in `src/lib/blackholeDomain.js`) are all validated.
