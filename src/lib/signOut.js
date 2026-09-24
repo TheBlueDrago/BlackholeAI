@@ -2,7 +2,8 @@
 // blackhole-ai.base44.app to clear its cookies, and Base44 then ignores where to come back to
 // and leaves people on its old copy of the app. This site signs in with a token saved in the
 // browser (no cookies: the /api proxy passes none), so removing that token is signing out.
-const TOKEN_KEYS = ["base44_access_token", "token"];
+// "bh-me" is who was signed in (lib/AuthContext.jsx), kept to open the app faster.
+const TOKEN_KEYS = ["base44_access_token", "token", "bh-me"];
 
 export function clearSignIn() {
   for (const key of TOKEN_KEYS) {

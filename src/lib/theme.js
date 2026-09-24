@@ -11,11 +11,22 @@ export function prefersLight() {
   }
 }
 
+// The page colour under everything, per theme (the light theme's slate-950 is #f8fafc). Kept
+// on <body> so nothing white or black shows through while a page loads.
+export const THEME_BG = { dark: "#020617", light: "#f8fafc" };
+// The theme last used on this device: index.html applies it before the app starts, so opening
+// the app doesn't flash dark, then light (or the other way round).
+export const DEVICE_THEME_KEY = "bh-theme";
+
 export function applyThemeClass(light) {
   if (typeof document === "undefined") return;
   const el = document.documentElement;
   if (light) el.classList.add("light");
   else el.classList.remove("light");
+  if (document.body) document.body.style.background = light ? THEME_BG.light : THEME_BG.dark;
+  try {
+    localStorage.setItem(DEVICE_THEME_KEY, light ? "light" : "dark");
+  } catch {}
 }
 
 export function readUserTheme(id) {

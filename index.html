@@ -27,6 +27,21 @@
     <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Blackhole AI","url":"https://blackhole-ai-tech.com/","applicationCategory":"ProductivityApplication","operatingSystem":"Web","description":"An AI assistant for answers, homework, writing and code that also builds websites and games just by describing them.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
   </head>
   <body style="background:#020617">
+    <script>
+      // Before anything draws: the theme last used on this device (src/lib/theme.js), else the
+      // device's own light/dark setting, so opening the app doesn't flash black then white.
+      // The public pages are always dark.
+      (function () {
+        try {
+          var t = localStorage.getItem("bh-theme");
+          var light = t ? t === "light" : window.matchMedia("(prefers-color-scheme: light)").matches;
+          if (light && /^\/(chat|billing|plans|promo-success|ThankYou)(\/|$)/.test(location.pathname)) {
+            document.documentElement.classList.add("light");
+            document.body.style.background = "#f8fafc";
+          }
+        } catch (e) {}
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

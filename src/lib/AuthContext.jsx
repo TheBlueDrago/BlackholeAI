@@ -6,13 +6,36 @@ import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
 
 const AuthContext = createContext();
 
+// Who was signed in last time, saved on this device so the app (above all the home-screen app)
+// opens at once instead of waiting on Base44; the real check runs straight after and wins.
+// Only used while a sign-in token is saved; cleared with it (lib/signOut.js).
+export const ME_KEY = "bh-me";
+const cachedMe = () => {
+  if (!appParams.token) return null;
+  try {
+    const u = JSON.parse(localStorage.getItem(ME_KEY) || "null");
+    return u && u.id ? u : null;
+  } catch {
+    return null;
+  }
+};
+const saveMe = (u) => {
+  try {
+    if (u && u.id) localStorage.setItem(ME_KEY, JSON.stringify(u));
+    else localStorage.removeItem(ME_KEY);
+  } catch {
+    // Storage blocked: the app just waits for the check, as before.
+  }
+};
+
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
-  const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(true);
+  const [early] = useState(cachedMe);
+  const [user, setUser] = useState(early);
+  const [isAuthenticated, setIsAuthenticated] = useState(!!early);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(!early);
+  const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(!early);
   const [authError, setAuthError] = useState(null);
-  const [authChecked, setAuthChecked] = useState(false);
+  const [authChecked, setAuthChecked] = useState(!!early);
   const [appPublicSettings, setAppPublicSettings] = useState(null); // Contains only { id, public_settings }
 
   useEffect(() => {
@@ -21,7 +44,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkAppState = async () => {
     try {
-      setIsLoadingPublicSettings(true);
+      if (!early) setIsLoadingPublicSettings(true);
       setAuthError(null);
       
       // First, check app public settings (with token if available)
@@ -97,11 +120,12 @@ export const AuthProvider = ({ children }) => {
   // `pending`: an answer already on its way from checkAppState ({ u } or { e }).
   const checkUserAuth = async (pending) => {
     try {
-      // Now check if the user is authenticated
-      setIsLoadingAuth(true);
+      // Now check if the user is authenticated (no spinner when the app already opened)
+      if (!early) setIsLoadingAuth(true);
       const answer = pending && typeof pending.then === "function" ? await pending : { u: await base44.auth.me() };
       if (answer.e) throw answer.e;
       const currentUser = answer.u;
+      saveMe(currentUser);
       setUser(currentUser);
       setIsAuthenticated(true);
       setIsLoadingAuth(false);
@@ -114,6 +138,7 @@ export const AuthProvider = ({ children }) => {
       
       // If user auth fails, it might be an expired token
       if (error.status === 401 || error.status === 403) {
+        saveMe(null);
         setAuthError({
           type: 'auth_required',
           message: 'Authentication required'

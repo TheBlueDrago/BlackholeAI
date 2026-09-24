@@ -21,12 +21,8 @@ window.addEventListener('vite:preloadError', (event) => {
 ReactDOM.createRoot(document.getElementById('root')).render(
   <App />
 )
-// index.html paints the page dark until the app has drawn its first screen (no white flash on
-// launch); after that each screen sets its own background, light mode included.
-// (The timer is a backup: frames don't run while the page is hidden.)
-const clearStartBackground = () => document.body.style.removeProperty('background')
-requestAnimationFrame(() => requestAnimationFrame(clearStartBackground))
-setTimeout(clearStartBackground, 1500)
+// The page background matches the theme from before the first frame (index.html) and follows
+// it after (lib/theme.js applyThemeClass), so nothing white or black flashes while loading.
 
 // Keeps the app's files on the device so the home-screen app and repeat visits open fast
 // (public/sw.js). Registered after the page has loaded so it never slows the first visit.

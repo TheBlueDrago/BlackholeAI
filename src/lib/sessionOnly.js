@@ -7,7 +7,7 @@ import { STASH_PREFIX } from "./chatStash.js";
 
 export const FLAG = "bh-forget-on-close";
 export const COOKIE = "bh_session";
-const TOKEN_KEYS = ["base44_access_token", "token"];
+const TOKEN_KEYS = ["base44_access_token", "token", "bh-me"];
 
 export const hasSessionCookie = (cookies) => String(cookies || "").split(";").some((c) => c.trim().startsWith(`${COOKIE}=`));
 

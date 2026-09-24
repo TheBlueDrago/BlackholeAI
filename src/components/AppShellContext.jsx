@@ -5,7 +5,7 @@ import { useConversations } from "@/hooks/useConversations";
 import { useCredits } from "@/hooks/useCredits";
 import { claimPendingReferral, hasWelcomePending } from "@/lib/referral";
 import WelcomeReward from "@/components/WelcomeReward";
-import { applyThemeClass, readUserTheme, writeUserTheme, prefersLight } from "@/lib/theme";
+import { applyThemeClass, readUserTheme, writeUserTheme } from "@/lib/theme";
 import { restoreChats } from "@/lib/chatStash";
 
 const AppShellContext = createContext(null);
@@ -18,7 +18,7 @@ export function AppShellProvider({ children }) {
   const conv = useConversations();
   const credits = useCredits();
   const [currentUser, setCurrentUser] = useState(null);
-  const [lightMode, setLightMode] = useState(false);
+  const [lightMode, setLightMode] = useState(() => typeof document !== "undefined" && document.documentElement.classList.contains("light"));
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -42,10 +42,8 @@ export function AppShellProvider({ children }) {
     });
   }, [currentUser?.id]);
 
-  // Initial theme from OS preference, then refined per-user once we know who's logged in.
-  useEffect(() => {
-    setLightMode(prefersLight());
-  }, []);
+  // The theme index.html already applied (this device's last one, else the OS preference), then
+  // refined per-user once we know who's logged in. Starting from what's on screen avoids a flip.
   useEffect(() => {
     if (!currentUser?.id) return;
     const t = readUserTheme(currentUser.id);
