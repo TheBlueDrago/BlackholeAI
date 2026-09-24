@@ -25,6 +25,6 @@ for (const [k, p] of Object.entries(PAGES)) assert(p.path === "/" + k && p.title
   const res = await servePage(P.safety)({ request: new Request("https://blackhole-ai-tech.com/safety"), env });
   assert(res.headers.get("x-frame-options") === "SAMEORIGIN" && res.headers.get("x-content-type-options") === "nosniff", "served pages get the security headers");
   assert(!res.headers.get("content-length"), "the stale length header is dropped");
-  const file = (await import("node:fs")).readFileSync(R + "public/_headers", "utf8");
+  const file = (await import("node:fs")).readFileSync(new URL("../public/_headers", import.meta.url), "utf8");
   assert(Object.entries(APP_HEADERS).every(([k, v]) => file.toLowerCase().includes(`${k}: ${v}`.toLowerCase())), "the headers match public/_headers");
 }

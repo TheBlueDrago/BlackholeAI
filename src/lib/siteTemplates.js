@@ -139,9 +139,146 @@ h1{font-size:24px}.bio{margin:6px 0 26px;opacity:.8}
 <div class="social"><a href="#">IG</a><a href="#">YT</a><a href="#">SP</a><a href="#">TT</a></div></main>`
 );
 
+const business = base(
+  "Bright Paws Grooming",
+  `:root{--bg:#f0fdfa;--ink:#134e4a;--muted:#5f7f7b;--accent:#f97316;--card:#fff}
+body{background:var(--bg);color:var(--ink)}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 6vw;flex-wrap:wrap;gap:10px}
+.logo{font-weight:800;font-size:20px}.logo span{color:var(--accent)}
+nav a{margin-left:18px;text-decoration:none;color:var(--muted);font-weight:600;font-size:14px}
+.hero{display:grid;grid-template-columns:1.2fr 1fr;gap:5vw;align-items:center;padding:6vh 6vw 8vh}
+.hero h1{font-size:clamp(34px,6vw,58px);line-height:1.05}
+.hero p{margin:16px 0 24px;color:var(--muted);font-size:18px}
+.btn{display:inline-block;background:var(--accent);color:#fff;padding:13px 24px;border-radius:999px;text-decoration:none;font-weight:700;border:0;cursor:pointer;font-size:15px}
+.pic{aspect-ratio:1;border-radius:32px;background:radial-gradient(circle at 35% 35%,#fdba74,#f97316 45%,#0d9488 46%,#115e59);display:flex;align-items:center;justify-content:center;font-size:90px}
+.services{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;padding:0 6vw 8vh}
+.card{background:var(--card);border-radius:18px;padding:22px;box-shadow:0 8px 24px rgba(19,78,74,.08)}
+.card b{display:block;font-size:18px}.card small{color:var(--muted)}.card .p{margin-top:10px;color:var(--accent);font-weight:800;font-size:20px}
+.book{max-width:560px;margin:0 auto 8vh;background:var(--card);border-radius:24px;padding:28px;box-shadow:0 8px 24px rgba(19,78,74,.08)}
+.book h2{margin-bottom:14px}
+.book input,.book select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:12px;margin-bottom:10px;font-size:15px}
+.ok{display:none;margin-top:12px;color:#15803d;font-weight:700}
+.hours{text-align:center;color:var(--muted);padding:0 6vw 8vh}
+footer{text-align:center;padding:24px;color:var(--muted);font-size:13px}
+@media(max-width:760px){.hero{grid-template-columns:1fr}}`,
+  `<header><div class="logo">Bright <span>Paws</span></div><nav><a href="#services">Services</a><a href="#book">Book</a><a href="#hours">Hours</a></nav></header>
+<section class="hero"><div><h1>Happy, clean pups. Every time.</h1><p>Gentle grooming for dogs of every size, by people who love them. Walk-ins welcome on weekdays.</p><a class="btn" href="#book">Book a visit</a></div><div class="pic">🐶</div></section>
+<section class="services" id="services">
+<div class="card"><b>Bath &amp; brush</b><small>Shampoo, dry, brush-out, nails</small><div class="p">$35</div></div>
+<div class="card"><b>Full groom</b><small>Bath plus a breed-style haircut</small><div class="p">$60</div></div>
+<div class="card"><b>Puppy intro</b><small>A gentle first visit for pups under 6 months</small><div class="p">$25</div></div>
+<div class="card"><b>Nail trim</b><small>Quick in-and-out, no appointment</small><div class="p">$12</div></div>
+</section>
+<section class="book" id="book"><h2>Book a visit</h2>
+<form onsubmit="event.preventDefault();this.querySelector('.ok').style.display='block';this.reset();">
+<input required placeholder="Your name"><input required type="tel" placeholder="Phone number"><input required placeholder="Your dog's name">
+<select required><option value="">Choose a service</option><option>Bath &amp; brush</option><option>Full groom</option><option>Puppy intro</option><option>Nail trim</option></select>
+<input required type="date"><button class="btn" type="submit">Request appointment</button>
+<p class="ok">Thanks! We'll text you to confirm the time.</p></form></section>
+<p class="hours" id="hours">Open Mon–Fri 9am–6pm · Sat 9am–3pm · 123 Main Street</p>
+<footer>© Bright Paws Grooming</footer>`
+);
+
+const event = base(
+  "Maya & Leo's Wedding",
+  `:root{--bg:#fff7f5;--ink:#3f2a2a;--muted:#8c6f6f;--accent:#be7c6d}
+body{background:var(--bg);color:var(--ink);text-align:center}
+.hero{padding:14vh 20px 10vh;background:radial-gradient(circle at 50% 0,#fde2dc,transparent 70%)}
+.hero small{letter-spacing:.3em;text-transform:uppercase;color:var(--accent);font-size:12px}
+.hero h1{font-family:Georgia,serif;font-weight:400;font-size:clamp(44px,9vw,86px);margin:14px 0}
+.hero p{color:var(--muted);font-size:18px}
+.count{display:flex;gap:12px;justify-content:center;margin:34px 0 0;flex-wrap:wrap}
+.count div{background:#fff;border-radius:16px;padding:16px 18px;min-width:78px;box-shadow:0 6px 20px rgba(63,42,42,.06)}
+.count b{display:block;font-size:30px;font-family:Georgia,serif}.count span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.details{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;max-width:820px;margin:0 auto;padding:6vh 20px}
+.details div{background:#fff;border-radius:18px;padding:24px}
+.details h3{font-family:Georgia,serif;font-weight:400;font-size:24px;margin-bottom:6px}.details p{color:var(--muted)}
+.rsvp{max-width:480px;margin:0 auto 10vh;padding:0 20px}
+.rsvp h2{font-family:Georgia,serif;font-weight:400;font-size:36px;margin-bottom:16px}
+.rsvp input,.rsvp select{width:100%;padding:13px;border:1px solid #e7d3cf;border-radius:12px;margin-bottom:10px;font-size:15px;background:#fff}
+.btn{background:var(--accent);color:#fff;border:0;padding:14px 28px;border-radius:999px;font-size:15px;cursor:pointer}
+.ok{display:none;margin-top:14px;color:var(--accent);font-weight:700}
+footer{padding:24px;color:var(--muted);font-size:13px}`,
+  `<section class="hero"><small>We're getting married</small><h1>Maya &amp; Leo</h1><p>Saturday, June 12 · Sonoma, California</p>
+<div class="count"><div><b id="d">0</b><span>days</span></div><div><b id="h">0</b><span>hours</span></div><div><b id="m">0</b><span>minutes</span></div></div></section>
+<section class="details"><div><h3>Ceremony</h3><p>4:00 pm at the Old Mill Garden</p></div><div><h3>Dinner</h3><p>6:00 pm in the Barn Hall</p></div><div><h3>Dress code</h3><p>Garden party: light colors, comfy shoes</p></div></section>
+<section class="rsvp"><h2>Will you join us?</h2>
+<form onsubmit="event.preventDefault();this.querySelector('.ok').style.display='block';this.reset();">
+<input required placeholder="Your name"><input required type="email" placeholder="Email"><select required><option value="">Can you come?</option><option>Yes, can't wait!</option><option>Sadly, no</option></select>
+<input type="number" min="1" max="6" placeholder="How many guests?"><button class="btn" type="submit">Send RSVP</button><p class="ok">Thank you! We've got your RSVP.</p></form></section>
+<footer>Made with love by Maya &amp; Leo</footer>
+<script>
+(function(){var t=new Date();t=new Date(t.getFullYear()+(t.getMonth()>5?1:0),5,12,16,0,0);
+function tick(){var s=Math.max(0,(t-new Date())/1000);document.getElementById('d').textContent=Math.floor(s/86400);document.getElementById('h').textContent=Math.floor(s%86400/3600);document.getElementById('m').textContent=Math.floor(s%3600/60);}
+tick();setInterval(tick,30000);})();
+</script>`
+);
+
+const club = base(
+  "Westfield Robotics Club",
+  `:root{--bg:#0b1020;--card:#141b33;--ink:#e2e8f0;--muted:#94a3b8;--accent:#22d3ee}
+body{background:var(--bg);color:var(--ink)}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 6vw;flex-wrap:wrap;gap:10px}
+.logo{font-weight:800}.logo span{color:var(--accent)}
+nav a{margin-left:18px;color:var(--muted);text-decoration:none;font-size:14px}
+.hero{padding:10vh 6vw 8vh;max-width:860px}
+.hero h1{font-size:clamp(36px,7vw,68px);line-height:1.05}.hero h1 span{color:var(--accent)}
+.hero p{margin:18px 0 26px;color:var(--muted);font-size:18px;max-width:560px}
+.btn{display:inline-block;background:var(--accent);color:#06202a;padding:13px 24px;border-radius:12px;font-weight:800;text-decoration:none;border:0;cursor:pointer;font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;padding:0 6vw 8vh}
+.card{background:var(--card);border:1px solid #1f2a4d;border-radius:18px;padding:22px}
+.card .ic{font-size:28px}.card h3{margin:10px 0 6px}.card p{color:var(--muted);font-size:15px}
+h2{padding:0 6vw;margin-bottom:16px;font-size:28px}
+.join{max-width:560px;margin:0 6vw 10vh;background:var(--card);border:1px solid #1f2a4d;border-radius:20px;padding:26px}
+.join input,.join select{width:100%;padding:12px;border-radius:10px;border:1px solid #2a3760;background:#0b1020;color:var(--ink);margin-bottom:10px;font-size:15px}
+.ok{display:none;margin-top:12px;color:var(--accent);font-weight:700}
+footer{padding:24px 6vw;color:var(--muted);font-size:13px;border-top:1px solid #1f2a4d}`,
+  `<header><div class="logo">Westfield <span>Robotics</span></div><nav><a href="#meet">Meetings</a><a href="#projects">Projects</a><a href="#join">Join</a></nav></header>
+<section class="hero"><h1>We build robots that <span>actually move.</span></h1><p>A club for students in grades 6–12 who like to build, code and compete. No experience needed: we'll teach you.</p><a class="btn" href="#join">Join the club</a></section>
+<h2 id="meet">When we meet</h2>
+<section class="grid"><div class="card"><div class="ic">🛠️</div><h3>Build nights</h3><p>Tuesdays 3:30–5:30 pm in Room 214</p></div><div class="card"><div class="ic">💻</div><h3>Code lab</h3><p>Thursdays 3:30–5 pm in the computer lab</p></div><div class="card"><div class="ic">🏆</div><h3>Competitions</h3><p>Regional tournament in March, state in April</p></div></section>
+<h2 id="projects">This year's projects</h2>
+<section class="grid"><div class="card"><div class="ic">🤖</div><h3>Line-following racer</h3><p>A small robot that races around a taped track on its own.</p></div><div class="card"><div class="ic">🦾</div><h3>Robotic arm</h3><p>Picks up blocks and sorts them by color with a camera.</p></div><div class="card"><div class="ic">🚀</div><h3>Mars rover</h3><p>Our competition bot: six wheels, one very brave driver.</p></div></section>
+<section class="join" id="join"><h2 style="padding:0">Join us</h2>
+<form onsubmit="event.preventDefault();this.querySelector('.ok').style.display='block';this.reset();">
+<input required placeholder="Your name"><select required><option value="">Your grade</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option></select><input required type="email" placeholder="Parent or guardian email">
+<button class="btn" type="submit">Sign me up</button><p class="ok">You're on the list! See you at build night.</p></form></section>
+<footer>© Westfield Robotics Club · Faculty advisor: Ms. Rivera</footer>`
+);
+
+const resume = base(
+  "Sam Rivera — Resume",
+  `:root{--bg:#ffffff;--ink:#0f172a;--muted:#64748b;--accent:#4f46e5;--line:#e2e8f0}
+body{background:var(--bg);color:var(--ink)}
+.wrap{max-width:820px;margin:0 auto;padding:8vh 24px}
+.top{display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+.av{width:88px;height:88px;border-radius:24px;background:linear-gradient(135deg,#818cf8,#4f46e5);color:#fff;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:800}
+h1{font-size:clamp(30px,5vw,44px)}.role{color:var(--accent);font-weight:700}
+.links{margin-top:8px;display:flex;gap:14px;flex-wrap:wrap}.links a{color:var(--muted);text-decoration:none;font-size:14px}
+h2{font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:44px 0 14px}
+.about{font-size:18px;color:#334155;line-height:1.7}
+.job{display:grid;grid-template-columns:150px 1fr;gap:18px;padding:16px 0;border-top:1px solid var(--line)}
+.job .when{color:var(--muted);font-size:14px}.job b{display:block}.job span{color:var(--muted);font-size:15px}
+.skills{display:flex;flex-wrap:wrap;gap:8px}.skills span{background:#eef2ff;color:var(--accent);padding:7px 13px;border-radius:999px;font-size:14px;font-weight:600}
+.btn{display:inline-block;margin-top:30px;background:var(--ink);color:#fff;padding:13px 24px;border-radius:12px;text-decoration:none;font-weight:700}
+@media(max-width:600px){.job{grid-template-columns:1fr;gap:4px}}`,
+  `<main class="wrap"><section class="top"><div class="av">SR</div><div><h1>Sam Rivera</h1><div class="role">Product designer</div><div class="links"><a href="mailto:sam@example.com">sam@example.com</a><a href="#">Portfolio</a><a href="#">LinkedIn</a></div></div></section>
+<h2>About</h2><p class="about">I design simple, friendly apps for people who don't have time to learn complicated ones. Five years of turning messy problems into clear screens, working closely with engineers and customers.</p>
+<h2>Experience</h2>
+<div class="job"><div class="when">2023 – now</div><div><b>Senior designer, Northwind Health</b><span>Redesigned the patient app; sign-ups up 40% and support tickets down by a third.</span></div></div>
+<div class="job"><div class="when">2021 – 2023</div><div><b>Product designer, Fable Books</b><span>Led the reading app's first accessibility overhaul and a new onboarding flow.</span></div></div>
+<div class="job"><div class="when">2019 – 2021</div><div><b>UX intern → designer, Brightside Studio</b><span>Websites and brand kits for 20+ small businesses.</span></div></div>
+<h2>Skills</h2><div class="skills"><span>User research</span><span>Prototyping</span><span>Design systems</span><span>Accessibility</span><span>Figma</span><span>HTML &amp; CSS</span></div>
+<a class="btn" href="mailto:sam@example.com">Get in touch</a></main>`
+);
+
 export const SITE_TEMPLATES = [
   { id: "portfolio", title: "Portfolio", blurb: "Photographer or creative", html: portfolio },
   { id: "restaurant", title: "Restaurant menu", blurb: "Menu, hours and location", html: restaurant },
   { id: "landing", title: "Product landing", blurb: "Features and pricing", html: landing },
   { id: "links", title: "Link in bio", blurb: "All your links on one page", html: links },
+  { id: "business", title: "Local business", blurb: "Services, prices and booking", html: business },
+  { id: "event", title: "Event invite", blurb: "Countdown and RSVP", html: event },
+  { id: "club", title: "School club", blurb: "Meetings, projects, join form", html: club },
+  { id: "resume", title: "Resume", blurb: "Experience and skills", html: resume },
 ];
