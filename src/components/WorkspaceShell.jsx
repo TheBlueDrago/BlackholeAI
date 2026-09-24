@@ -25,6 +25,8 @@ export function WorkspaceShell() {
         onClick={() => setSidebarOpen((o) => !o)}
         className="fixed top-[max(1rem,env(safe-area-inset-top))] left-4 sm:top-5 sm:left-5 z-30 p-2 sm:p-2.5 rounded-xl bg-slate-800/70 border border-slate-700/50 text-slate-200 hover:bg-slate-700/70 transition-colors"
         title="Menu"
+        aria-label="Menu: chats and tools"
+        aria-expanded={sidebarOpen}
       >
         <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
       </button>
@@ -35,6 +37,7 @@ export function WorkspaceShell() {
           onClick={() => openProfile("main")}
           className="keep-color w-11 h-11 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-sm font-bold text-white hover:opacity-90 transition-opacity shadow-lg shadow-indigo-500/20"
           title="Profile"
+          aria-label="Your profile and settings"
         >
           {avatarInitial}
         </button>

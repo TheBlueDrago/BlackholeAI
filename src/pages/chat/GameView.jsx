@@ -87,7 +87,7 @@ export default function GameView() {
           <button
             onClick={() => openProfile("main")}
             className="keep-color w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-sm font-bold text-white hover:opacity-90 transition-opacity shrink-0"
-            title="Account"
+            title="Account" aria-label="Your profile and settings"
           >
             {avatarInitial}
           </button>

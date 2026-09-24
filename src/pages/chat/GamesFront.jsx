@@ -223,7 +223,7 @@ export default function GamesFront() {
 
       {/* Top bar */}
       <header className="h-14 shrink-0 flex items-center gap-3 px-4 border-b border-white/10 bg-slate-950/90 backdrop-blur z-30">
-        <button onClick={() => setSidebarOpen((o) => !o)} className="p-2 rounded-lg hover:bg-white/10 transition-colors" title="Menu">
+        <button onClick={() => setSidebarOpen((o) => !o)} className="p-2 rounded-lg hover:bg-white/10 transition-colors" title="Menu" aria-label="Menu: chats and tools">
           <Menu className="w-5 h-5" />
         </button>
         <div className="flex items-center gap-2 shrink-0">
@@ -258,7 +258,7 @@ export default function GamesFront() {
           <button
             onClick={() => setMenuOpen((o) => !o)}
             className="keep-color w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-sm font-bold text-white"
-            title="Account"
+            title="Account" aria-label="Your profile and settings"
           >
             {avatarInitial}
           </button>

@@ -608,7 +608,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
       {/* Top bar */}
       {/* On phones the bar wraps to a second row so Publish/Download stay on screen. */}
       <header className="relative z-20 flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 sm:h-[calc(3.5rem+env(safe-area-inset-top))] pt-[calc(0.5rem+env(safe-area-inset-top))] pb-2 sm:pt-[env(safe-area-inset-top)] sm:pb-0 px-3 sm:px-4 border-b border-slate-700/50 bg-slate-900/70 backdrop-blur-xl">
-        <button onClick={onToggleSidebar} title="Menu" className="p-1.5 rounded-lg hover:bg-slate-800 transition-colors shrink-0">
+        <button onClick={onToggleSidebar} title="Menu" aria-label="Menu: chats and tools" className="p-1.5 rounded-lg hover:bg-slate-800 transition-colors shrink-0">
           <div className="keep-color w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center">
             <BlackholeIcon className="w-5 h-5" />
           </div>
@@ -616,7 +616,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
         <span className="h-6 w-px bg-slate-700 shrink-0" />
         <button
           onClick={onOpenProfile}
-          title="Account"
+          title="Account" aria-label="Your profile and settings"
           className="keep-color w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-xs font-bold text-white hover:opacity-90 transition-opacity shrink-0"
         >
           {ownerInitial}
