@@ -117,6 +117,9 @@ export default function Safety() {
           <p className="mt-2 text-slate-400 text-sm">
             If you think you've found a way to get into accounts, credits or payments, please tell us privately first so we can fix it. We read every message.
           </p>
+          <Link to="/contact?topic=security" className="mt-4 mr-4 inline-flex items-center gap-1.5 text-sm font-semibold text-white hover:text-indigo-200">
+            Send a private message <ArrowRight className="w-4 h-4 shrink-0" />
+          </Link>
           <a href={`mailto:${CONTACT_EMAIL}?subject=Security%20report`} className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-white hover:text-indigo-200 break-all">
             {CONTACT_EMAIL} <ArrowRight className="w-4 h-4 shrink-0" />
           </a>
