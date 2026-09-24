@@ -14,6 +14,7 @@ import useMessageQueue from "@/hooks/useMessageQueue";
 import useBuildMode, { BUILD_NOTE, ANSWER_NOTE, resolveIntent } from "@/hooks/useBuildMode";
 import ModeToggle from "@/components/chat/ModeToggle";
 import useStickToBottom from "@/hooks/useStickToBottom";
+import { isNetworkError, OFFLINE_NOTE } from "@/lib/netError";
 
 export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICode, userInitial }) {
   const buildMode = useBuildMode("code");
@@ -56,7 +57,7 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
       setLive("");
       const data = e?.response?.data;
       if (data?.credits) onSpendAICode?.(data.credits);
-      setMessages((m) => [...m, { role: "ai", content: data?.error ? `⚠ ${data.error}` : "Sorry, something went wrong. Please try again." }]);
+      setMessages((m) => [...m, { role: "ai", content: data?.error ? `⚠ ${data.error}` : isNetworkError(e) ? `⚠ ${OFFLINE_NOTE}` : "Sorry, something went wrong. Please try again." }]);
     } finally {
       if (reqIdRef.current === myId) {
         setLoading(false);

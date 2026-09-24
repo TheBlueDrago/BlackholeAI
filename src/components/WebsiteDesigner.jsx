@@ -39,6 +39,7 @@ import { hasProFeatures, hasSpace } from "@/lib/plans";
 import { useAppShell } from "@/components/AppShellContext";
 import useEscape from "@/hooks/useEscape";
 import useDialogFocus from "@/hooks/useDialogFocus";
+import { isNetworkError, OFFLINE_NOTE } from "@/lib/netError";
 
 const STORE_KEY = DESIGNER_STORE_KEY;
 const TAKEN_KEY = "infinity-ai-taken-sites";
@@ -494,7 +495,9 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
           ? "That took too long to generate — your website is big, so rewriting the whole page can run past the time limit. Ask for one smaller change at a time (e.g. \"change the pricing section\") and it will go through."
           : data?.outOfCredits || e?.response?.status === 503
             ? `⚠ ${why}`
-            : `Sorry, something went wrong generating your website.${why ? ` (${why})` : ""} Please try again.`,
+            : isNetworkError(e)
+              ? `⚠ ${OFFLINE_NOTE}`
+              : `Sorry, something went wrong generating your website.${why ? ` (${why})` : ""} Please try again.`,
       });
     } finally {
       if (reqIdRef.current === myId) {

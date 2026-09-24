@@ -138,3 +138,12 @@ for (const ok of ["https://en.wikipedia.org/wiki/Essex", "https://www.sussex.ac.
   assert(promoWarning({ kind: "credits", code: "GIFT", credits: 50 }) === "" && /500 credits/.test(promoWarning({ kind: "credits", code: "BIG", credits: 500 })), "200+ free credits are confirmed");
   assert(/^This code/.test(promoWarning({ kind: "credits", credits: 999 })), "works before a code is typed");
 }
+
+// A dropped connection is explained in plain words, not "Failed to fetch".
+{
+  const { isNetworkError } = await import(R + "src/lib/netError.js");
+  assert(isNetworkError(new TypeError("Failed to fetch"), true) && isNetworkError({ message: "Network Error" }, true) && isNetworkError(new TypeError("Load failed"), true), "fetch and axios network failures are recognised (Chrome, axios, Safari)");
+  assert(isNetworkError(new Error("anything"), false), "anything while the browser is offline counts");
+  assert(!isNetworkError({ response: { status: 402, data: { error: "Out of credits" } }, message: "Request failed" }, false), "an answer from the server is never called a connection problem");
+  assert(!isNetworkError(new Error("Unexpected token"), true) && !isNetworkError(Object.assign(new Error("aborted"), { name: "AbortError" }), true), "other errors (and pressing Stop) aren't");
+}

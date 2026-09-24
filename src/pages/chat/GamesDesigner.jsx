@@ -39,6 +39,7 @@ import { hasProFeatures, hasSpace } from "@/lib/plans";
 import { useAppShell } from "@/components/AppShellContext";
 import useEscape from "@/hooks/useEscape";
 import useDialogFocus from "@/hooks/useDialogFocus";
+import { isNetworkError, OFFLINE_NOTE } from "@/lib/netError";
 
 const STORE_KEY = GAME_DESIGNER_STORE_KEY;
 const TAKEN_KEY = "infinity-ai-taken-games";
@@ -438,7 +439,9 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
         content:
           data?.outOfCredits || e?.response?.status === 503
             ? `⚠ ${why}`
-            : `Sorry, something went wrong generating your game.${why ? ` (${why})` : ""} Please try again.`,
+            : isNetworkError(e)
+              ? `⚠ ${OFFLINE_NOTE}`
+              : `Sorry, something went wrong generating your game.${why ? ` (${why})` : ""} Please try again.`,
       });
     } finally {
       if (reqIdRef.current === myId) {

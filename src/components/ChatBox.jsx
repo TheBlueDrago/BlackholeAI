@@ -21,6 +21,7 @@ import VoiceInput from "@/components/chat/VoiceInput";
 import { useAppShell } from "@/components/AppShellContext";
 import useStickToBottom from "@/hooks/useStickToBottom";
 import { privateInfoIn } from "@/lib/privateInfo";
+import { isNetworkError, OFFLINE_NOTE } from "@/lib/netError";
 
 const CODE_SYS = "You are Blackhole Code Assistant. Help with programming. Give clear, correct code with brief explanations.";
 const FABLE_SYS = "You are Space, Blackhole AI's premium creative model. Be imaginative and high-quality.";
@@ -119,7 +120,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
       const data = e?.response?.data;
       if (data?.credits) spend?.[ai]?.(data.credits);
       // Out-of-credits and "AI is busy" come back with a message worth showing as-is.
-      addMessage(convId, { role: "ai", content: data?.error ? `⚠ ${data.error}` : "Sorry, something went wrong. Please try again." });
+      addMessage(convId, { role: "ai", content: data?.error ? `⚠ ${data.error}` : isNetworkError(e) ? `⚠ ${OFFLINE_NOTE}` : "Sorry, something went wrong. Please try again." });
     } finally {
       if (reqIdRef.current === myId) {
         setLoading(false);
