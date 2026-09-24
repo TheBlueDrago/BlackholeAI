@@ -85,6 +85,7 @@ const FAQ = [
   ["Does it work on my phone?", "Yes. Everything works on phones, tablets and computers, and you can install it like an app from your profile."],
   ["What are credits?", "Credits are what the AI uses up when it works for you. Bigger jobs use more. Your plan gives you a fresh allowance every month."],
   ["Is it safe for kids?", "Every site and game is checked before it's published: adult content, scams, fake login forms and harmful code are blocked. Anyone can report a page, and makers' emails are never shown."],
+  ["Is paying safe?", "Yes. You pay on Base44 Payments' secure checkout page, so we never see or store your card number, and prices are set on our server. Plans are monthly and credit packs are one-time. See Trust & safety for more."],
   ["Can I take my site down?", "Yes. You can unpublish or delete your websites and games at any time from your profile."],
 ];
 
@@ -307,8 +308,13 @@ export default function Landing() {
           eyebrow="Safety"
           title="Safe for everyone, including kids."
           text="Blackhole AI is used by young people, so every website and game is checked before it goes live, and anyone can report a page for us to review."
-          bullets={["Adult content, scams and harmful code are blocked", "Fake login and card forms aren't allowed", "Makers' email addresses are never shown"]}
-          cta={{ to: "/about", label: "About us" }}
+          bullets={[
+            "Adult content, scams and harmful code are blocked",
+            "Fake login and card forms aren't allowed",
+            "Makers' email addresses are never shown",
+            "You pay on a secure checkout page, and we never see your card",
+          ]}
+          cta={{ to: "/safety", label: "How we keep you safe" }}
           Picture={SafetyShot}
           flip
         />

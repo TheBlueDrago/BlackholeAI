@@ -154,6 +154,12 @@ export default function Login() {
           <Link to="/terms" className="hover:underline">Terms</Link> ·{" "}
           <Link to="/privacy" className="hover:underline">Privacy</Link>
         </p>
+        {/* A phishing page can copy this screen, but not the address bar. */}
+        <p className="text-center text-slate-500 text-xs mt-3 px-2">
+          <Lock className="inline w-3.5 h-3.5 -mt-0.5 mr-1 text-emerald-400" />
+          Only sign in at <span className="text-slate-300">blackhole-ai-tech.com</span>. We never ask for your password anywhere else.{" "}
+          <Link to="/safety" className="hover:underline">Trust &amp; safety</Link>
+        </p>
       </div>
     </div>
   );

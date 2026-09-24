@@ -242,7 +242,8 @@ export default function Register() {
         <p className="text-xs text-muted-foreground text-center">
           By creating an account you agree to the{" "}
           <Link to="/terms" className="underline hover:text-foreground">Terms of Service</Link> and{" "}
-          <Link to="/privacy" className="underline hover:text-foreground">Privacy Policy</Link>.
+          <Link to="/privacy" className="underline hover:text-foreground">Privacy Policy</Link>. See how we keep you safe:{" "}
+          <Link to="/safety" className="underline hover:text-foreground">Trust &amp; safety</Link>.
         </p>
       </form>
     </AuthLayout>
