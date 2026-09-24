@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
 import { Flag, Check, Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import useEscape from "@/hooks/useEscape";
@@ -14,6 +14,7 @@ export default function ReportReply({ question, reply }) {
   const [error, setError] = useState("");
   const flagRef = useRef(null);
   const firstRef = useRef(null);
+  const group = useId(); // each open form's reasons are their own radio group
 
   const close = () => {
     setOpen(false);
@@ -65,7 +66,7 @@ export default function ReportReply({ question, reply }) {
             <legend className="text-xs font-medium text-slate-200 mb-1.5">What's wrong with this reply?</legend>
             {REPLY_REASONS.map(([k, label], i) => (
               <label key={k} className="flex items-center gap-2 py-1 text-xs text-slate-300 cursor-pointer">
-                <input ref={i === 0 ? firstRef : undefined} type="radio" name="reply-report-reason" value={k} checked={reason === k} onChange={() => setReason(k)} className="accent-indigo-500" />
+                <input ref={i === 0 ? firstRef : undefined} type="radio" name={group} value={k} checked={reason === k} onChange={() => setReason(k)} className="accent-indigo-500" />
                 {label}
               </label>
             ))}
