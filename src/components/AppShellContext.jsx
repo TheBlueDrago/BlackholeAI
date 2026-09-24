@@ -66,10 +66,11 @@ export function AppShellProvider({ children }) {
 
   const goHome = useCallback(() => { navigate("/chat"); setSidebarOpen(false); }, [navigate]);
   const goCode = useCallback(() => {
-    // Access follows credits: anyone with Blackhole Code credits (plan, referrals, admin) can use it.
-    if (credits.aiCodeRemaining > 0) { navigate("/chat/code"); } else { navigate("/chat/plans"); }
+    // Access follows credits: anyone with Blackhole Code credits can use it, and anyone without
+    // gets the page's out-of-credits card, where they can buy some whatever their plan.
+    navigate("/chat/code");
     setSidebarOpen(false);
-  }, [navigate, credits.aiCodeRemaining]);
+  }, [navigate]);
   const goDesigner = useCallback(() => { navigate("/chat/designer"); setSidebarOpen(false); }, [navigate]);
   const goBrowser = useCallback(() => { navigate("/chat/browser"); setSidebarOpen(false); }, [navigate]);
   const goGames = useCallback(() => { navigate("/chat/games"); setSidebarOpen(false); }, [navigate]);

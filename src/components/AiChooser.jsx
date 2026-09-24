@@ -24,8 +24,9 @@ export default function AiChooser({ value, onChange, plan, allowFable }) {
   }, []);
 
   // Access follows credits, not plans: an AI is unlocked while you have credits for it
-  // (from a plan, referrals, promo codes or an admin). Before credits load, allow the
-  // basics and fall back to the plan for the others.
+  // (from a plan, a bought pack, referrals, promo codes or an admin). Before credits load,
+  // allow the basics and fall back to the plan for the others. An AI with no credits can
+  // still be picked: the out-of-credits card then offers to buy its credits (any plan) or upgrade.
   const credits = useAppShell()?.credits;
   const REMAINING = { ai: "aiRemaining", code: "aiCodeRemaining", opus5: "galaxy5Remaining", fable: "space5Remaining" };
   const canUse = (id) => {
@@ -62,27 +63,31 @@ export default function AiChooser({ value, onChange, plan, allowFable }) {
           >
             {OPTIONS.map((o) => {
               const allowed = canUse(o.id);
+              const offHere = (o.id === "opus5" || o.id === "fable") && !allowFable;
               return (
                 <button
                   key={o.id}
                   type="button"
-                  disabled={!allowed}
+                  disabled={offHere}
                   onClick={() => {
-                    if (allowed) {
-                      onChange(o.id);
-                      setOpen(false);
-                    }
+                    if (offHere) return;
+                    onChange(o.id);
+                    setOpen(false);
                   }}
                   className={`w-full flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg text-sm transition-colors ${
                     o.id === value ? "bg-slate-800 text-white" : "text-slate-300 hover:bg-slate-800/60"
-                  } ${!allowed ? "opacity-50 cursor-not-allowed" : ""}`}
+                  } ${offHere ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                   <span className="flex items-center gap-2">
                     <o.icon className={`w-4 h-4 ${o.color}`} />
                     {o.id === "fable" && <span title="This AI uses more credits than the others" className="text-amber-400 font-bold cursor-help">!</span>}
                     {o.label}
                   </span>
-                  {!allowed && <Lock className="w-3.5 h-3.5 text-slate-500" />}
+                  {offHere ? (
+                    <Lock className="w-3.5 h-3.5 text-slate-500" />
+                  ) : (
+                    !allowed && <span className="text-[10px] font-semibold text-amber-300">Buy credits</span>
+                  )}
                 </button>
               );
             })}
@@ -90,7 +95,7 @@ export default function AiChooser({ value, onChange, plan, allowFable }) {
               <p className="px-2.5 py-1 text-[10px] text-slate-500">Galaxy & Space: Website Designer only</p>
             )}
             {OPTIONS.some((o) => !canUse(o.id)) && (
-              <p className="px-2.5 py-1 text-[10px] text-slate-500">🔒 = no credits. Refer friends (Account) or upgrade to unlock.</p>
+              <p className="px-2.5 py-1 text-[10px] text-slate-500">No credits for an AI? Pick it to buy its credits, whatever your plan, or upgrade.</p>
             )}
           </motion.div>
         )}
