@@ -49,7 +49,17 @@ async function describe(kv, kind, rec, owners) {
   const ai = review && review.fp === fp ? review : null;
   const own = set && set.fp === fp && FLAGS.includes(set.flag) ? set : null;
   // An admin's own verdict wins; otherwise the AI's, when it's stricter than the pattern check.
-  const flag = own ? own.flag : ai && flagRank(ai.flag) < flagRank(scan.flag) ? ai.flag : scan.flag;
+  // Pages that never went through publishing were written straight into the database, so
+  // they skipped its checks (only the password/card, miner and adult checks apply when they're
+  // served; see pagesource.js). A row copying someone else's published name is ignored when
+  // serving, but worth a look. Either one makes the page at least yellow.
+  const stored = kv.getWithMetadata ? await kv.getWithMetadata(kvKey(kind, name)).catch(() => null) : null;
+  const recordedOwner = stored && stored.value != null && stored.metadata && stored.metadata.owner;
+  const extra = [];
+  if (!String(rec.html || "").includes(`/published/${kind}/`)) extra.push("Put up without going through publishing (written straight into the database)");
+  if (recordedOwner && recordedOwner !== rec.created_by_id) extra.push("Uses the name of someone else's published page (ignored when serving)");
+  const autoFlag = ai && flagRank(ai.flag) < flagRank(scan.flag) ? ai.flag : scan.flag;
+  const flag = own ? own.flag : extra.length && autoFlag === "green" ? "yellow" : autoFlag;
   const owner = owners.get(rec.created_by_id) || {};
   return {
     kind,
@@ -64,9 +74,9 @@ async function describe(kv, kind, rec, owners) {
     size: html.length,
     flag,
     malware: scan.malware,
-    reasons: scan.reasons,
+    reasons: [...extra, ...scan.reasons],
     ai: ai ? { flag: ai.flag, reasons: ai.reasons, at: ai.at } : null,
-    autoFlag: ai && flagRank(ai.flag) < flagRank(scan.flag) ? ai.flag : scan.flag,
+    autoFlag,
     setByAdmin: own ? { flag: own.flag, at: own.at } : null,
   };
 }
