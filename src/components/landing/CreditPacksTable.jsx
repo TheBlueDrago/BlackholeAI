@@ -18,7 +18,8 @@ export default function CreditPacksTable() {
       <p className="mt-1 text-sm text-slate-400">
         Need a few more credits without a plan? Buy a one-time pack for any AI. They don't reset at the end of the month, and get used before your monthly credits.
       </p>
-      <div className="mt-4 overflow-x-auto">
+      {/* On narrow phones the table scrolls sideways; focusable so keyboards can scroll it too. */}
+      <div className="mt-4 overflow-x-auto" tabIndex={0} role="region" aria-label="Credit pack prices">
         <table className="w-full min-w-[420px] text-sm">
           <thead>
             <tr className="text-left text-slate-400">
