@@ -11,6 +11,7 @@ import EnterpriseApps from "@/components/monitor/EnterpriseApps";
 import GrowthCard from "@/components/monitor/GrowthCard";
 import PublishedContent from "@/components/monitor/PublishedContent";
 import AdminLog from "@/components/monitor/AdminLog";
+import SecurityGlance from "@/components/monitor/SecurityGlance";
 
 export default function Monitor({ onBack }) {
   const [users, setUsers] = useState([]);
@@ -102,6 +103,8 @@ export default function Monitor({ onBack }) {
         </h1>
         <div className="w-16" />
       </div>
+
+      <SecurityGlance />
 
       {!loading && <GrowthCard users={users} complete={allLoaded} />}
 
