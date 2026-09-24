@@ -34,7 +34,11 @@ export default function BrowserWebFrame({ url: raw, reloadKey }) {
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-white">
       <div className="shrink-0 flex items-center justify-between gap-3 px-3 sm:px-4 py-1.5 bg-amber-50 border-b border-amber-200 text-amber-800 text-xs">
-        <span className="truncate">Some sites don't allow being shown inside another page.</span>
+        {/* Which website this really is, in plain words: fake pages rely on people not checking. */}
+        <span className="min-w-0 [overflow-wrap:anywhere]">
+          <span className="font-semibold">{new URL(url).hostname}</span> · not Blackhole AI.
+          <span className="hidden sm:inline"> Don't type passwords here unless you trust it.</span>
+        </span>
         <a
           href={url}
           target="_blank"

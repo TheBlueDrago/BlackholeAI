@@ -85,6 +85,7 @@ const RECENT = {
     "Signing in without \"Remember me\" now signs you out when you close the browser, for shared and school computers.",
     "Pages asking for a crypto wallet's secret recovery phrase can't be published.",
     "The Blackhole Browser leaves out adult, gambling and piracy sites.",
+    "The chat asks before you send something that looks like a card number, password or phone number.",
     "You can report a page for bullying someone or sharing their private information.",
     "You can download a copy of your account's data from Settings.",
   ],
