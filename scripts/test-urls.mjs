@@ -127,3 +127,14 @@ for (const ok of ["https://en.wikipedia.org/wiki/Essex", "https://www.sussex.ac.
   const saved = (await listMessages(kv))[0];
   assert(saved.topic === "ai" && saved.message === msg, "the whole report is kept for Monitor");
 }
+
+// Monitor → Promo codes: big giveaways are confirmed before they go live.
+{
+  const { promoWarning } = await import(R + "src/lib/promoRisk.js");
+  assert(promoWarning({ kind: "discount", code: "SAVE10", pct: 10, maxUses: 0 }) === "", "a small discount goes straight through");
+  assert(/FREEALL makes it free for anyone who has the code, with no use limit/.test(promoWarning({ kind: "discount", code: "FREEALL", pct: 100, maxUses: 0 })), "100% off with no limit is confirmed");
+  assert(/up to 5 people/.test(promoWarning({ kind: "discount", code: "VIP", pct: 100, maxUses: 5 })), "100% off for a few people is confirmed, saying how many");
+  assert(/60% off to anyone/.test(promoWarning({ kind: "discount", code: "HALF", pct: 60, maxUses: 0 })) && promoWarning({ kind: "discount", code: "HALF", pct: 60, maxUses: 20 }) === "", "half off or more is confirmed only without a use limit");
+  assert(promoWarning({ kind: "credits", code: "GIFT", credits: 50 }) === "" && /500 credits/.test(promoWarning({ kind: "credits", code: "BIG", credits: 500 })), "200+ free credits are confirmed");
+  assert(/^This code/.test(promoWarning({ kind: "credits", credits: 999 })), "works before a code is typed");
+}

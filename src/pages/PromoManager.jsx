@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Plus, Loader2, Trash2, Ticket, Save, Percent } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { DISCOUNT_TARGETS, targetLabel } from "../../cloudflare-lib/discounts.js";
+import { promoWarning } from "@/lib/promoRisk";
 
 const MODELS = [
   { id: "ai", label: "Blackhole AI" },
@@ -235,6 +236,8 @@ export default function PromoManager({ onBack }) {
   }, []);
 
   const create = async (f) => {
+    const warn = promoWarning(f);
+    if (warn && !window.confirm(warn)) return;
     setErr("");
     setBusyId("new");
     try {
@@ -248,6 +251,10 @@ export default function PromoManager({ onBack }) {
   };
 
   const save = async (id, f) => {
+    // Ask only when the change makes the code risky, or differently risky, than it was.
+    const before = codes.find((c) => c.id === id) || {};
+    const warn = promoWarning({ ...before, ...f });
+    if (warn && warn !== promoWarning(before) && !window.confirm(warn.replace("Create it?", "Save it?"))) return;
     setErr("");
     setBusyId(id);
     try {
