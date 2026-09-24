@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, CreditCard, Sparkles, Users, Clock, ArrowRight } from "lucide-react";
 import { useAppShell } from "@/components/AppShellContext";
+import PurchaseHistory from "@/components/profile/PurchaseHistory";
 
 const PLAN = {
   free: { name: "Free", price: "$0" },
@@ -133,6 +134,7 @@ export default function SubscriptionPanel({ onBack, onManagePeople }) {
           </button>
         )}
       </div>
+      <PurchaseHistory />
     </div>
   );
 }
