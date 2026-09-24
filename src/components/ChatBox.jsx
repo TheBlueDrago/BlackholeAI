@@ -19,6 +19,7 @@ import EffortPicker from "@/components/chat/EffortPicker";
 import VoiceInput from "@/components/chat/VoiceInput";
 import { useAppShell } from "@/components/AppShellContext";
 import useStickToBottom from "@/hooks/useStickToBottom";
+import { privateInfoIn } from "@/lib/privateInfo";
 
 const CODE_SYS = "You are Blackhole Code Assistant. Help with programming. Give clear, correct code with brief explanations.";
 const FABLE_SYS = "You are Space, Blackhole AI's premium creative model. Be imaginative and high-quality.";
@@ -155,6 +156,9 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
   const send = () => {
     const text = input.trim();
     if (!text) return;
+    // A card number, password or phone number: check first (the text stays in the box if not).
+    const risky = privateInfoIn(text);
+    if (risky && !window.confirm(`This looks like it has ${risky} in it. It's safer not to share that with the AI (or anyone online). Send it anyway?`)) return;
     if (q.shouldQueue(loading)) {
       q.push(text);
       setInput("");
