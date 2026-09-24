@@ -62,7 +62,7 @@ export default function Arcade() {
       </section>
 
       <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
-        <label className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900/70 border border-slate-700/60">
+        <label className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900/70 border border-slate-700/60 focus-within:border-indigo-400/70 transition-colors">
           <Search className="w-4 h-4 text-slate-500" />
           <input
             value={q}
