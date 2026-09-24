@@ -35,7 +35,7 @@ assert(!handled("/chat", { method: "POST" }), "only GETs are touched");
 assert(!handled("/chat", { destination: "iframe" }), "pages inside frames (previews) are never the app page");
 assert(!handled("/", { origin: "https://nova.blackhole-ai-tech.com" }) && !handled("/assets/x.js", { origin: "https://evil.example", mode: "no-cors", destination: "script" }), "other addresses are never touched");
 assert(/isCode\(r\)/.test(src) && /text\\\/html/.test(src), "a missing code file (served as a page) is never saved as code");
-assert(/import\.meta\.env\.PROD/.test(main) && main.includes("register('/sw.js')"), "it's switched on for the live site only");
+assert(/import\.meta\.env\.PROD/.test(main) && main.includes("register('/sw.js'"), "it's switched on for the live site only");
 assert(/\/sw\.js\s*\n\s*Cache-Control: no-cache/.test(headers), "fixes to it reach everyone at once (never cached)");
 
 if (failed) {
