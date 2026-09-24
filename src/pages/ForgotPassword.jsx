@@ -11,17 +11,23 @@ export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
     setLoading(true);
     try {
       await base44.auth.resetPasswordRequest(email);
-    } catch {
-      // Always show success regardless
+      setSent(true);
+    } catch (err) {
+      // Too many reset emails asked for (cloudflare-lib/authlimit.js): say so rather than
+      // promise an email that won't come. That limit applies whether or not the account
+      // exists, so it gives nothing away. Any other error still shows the usual message.
+      if (err?.status === 429) setError(err.message || "Too many tries. Please wait up to an hour and try again.");
+      else setSent(true);
     } finally {
       setLoading(false);
-      setSent(true);
     }
   };
 
@@ -42,6 +48,7 @@ export default function ForgotPassword() {
         </p>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
+          {error && <div className="p-3 rounded-lg bg-red-500/10 text-red-400 text-sm">{error}</div>}
           <div className="space-y-2">
             <Label htmlFor="email">Email address</Label>
             <div className="relative">
