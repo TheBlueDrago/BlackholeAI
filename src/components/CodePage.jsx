@@ -209,7 +209,7 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
             <EffortPicker value={effort} onChange={setEffort} />
             <ModeToggle mode={buildMode.mode} onChange={buildMode.setMode} />
           </div>
-          <p className="text-center text-xs text-slate-600 mt-2">Blackhole AI can make mistakes. Check important info.</p>
+          <p className="text-center text-xs text-slate-600 mt-2">Blackhole AI can make mistakes. Check important info, and never share passwords or card numbers with it.</p>
         </div>
       </div>
     </div>

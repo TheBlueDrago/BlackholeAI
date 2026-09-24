@@ -339,7 +339,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
               e.target.value = "";
             }}
           />
-          <p className="text-center text-xs text-slate-600 mt-2">Blackhole AI can make mistakes. Check important info.</p>
+          <p className="text-center text-xs text-slate-600 mt-2">Blackhole AI can make mistakes. Check important info, and never share passwords or card numbers with it.</p>
         </div>
       </div>
     </div>
