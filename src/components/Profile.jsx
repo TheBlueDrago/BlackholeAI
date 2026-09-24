@@ -287,7 +287,8 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                 {delError && <p className="text-sm text-red-400 mb-2">{delError}</p>}
                 <button
                   onClick={handleDeleteAccount}
-                  disabled={delBusy || !delAck || delText !== "DELETE"}
+                  // The box shows capitals whatever's typed, so "delete" has to count too.
+                  disabled={delBusy || !delAck || delText.trim().toUpperCase() !== "DELETE"}
                   className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-600 text-white font-medium hover:bg-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {delBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
