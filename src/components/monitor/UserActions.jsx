@@ -58,6 +58,7 @@ export default function UserActions({ user, onApply }) {
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
         <select
+          aria-label="Plan"
           value={plan}
           onChange={(e) => setPlan(e.target.value)}
           className="bg-slate-800 border border-slate-700/60 rounded-lg px-2 py-1.5 text-xs text-white outline-none"
@@ -73,6 +74,7 @@ export default function UserActions({ user, onApply }) {
               type="number"
               min={2}
               value={seats}
+              aria-label="Seats"
               onChange={(e) => setSeats(Math.max(2, Number(e.target.value) || 2))}
               className="w-16 bg-slate-800 border border-slate-700/60 rounded-lg px-2 py-1.5 text-xs text-white outline-none"
             />
@@ -85,6 +87,7 @@ export default function UserActions({ user, onApply }) {
               type="number"
               min={1}
               value={days}
+              aria-label="Plan length in days"
               onChange={(e) => setDays(Math.max(1, Number(e.target.value) || 1))}
               className="w-16 bg-slate-800 border border-slate-700/60 rounded-lg px-2 py-1.5 text-xs text-white outline-none"
             />
@@ -98,7 +101,7 @@ export default function UserActions({ user, onApply }) {
         <button
           onClick={applyPlan}
           disabled={busy}
-          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-500/90 text-white text-xs font-medium hover:bg-indigo-500 disabled:opacity-50"
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-600 text-[#fff] text-xs font-medium hover:bg-indigo-500 disabled:opacity-50"
         >
           <Crown className="w-3.5 h-3.5" /> Set membership
         </button>
@@ -108,7 +111,7 @@ export default function UserActions({ user, onApply }) {
         <button
           onClick={ban}
           disabled={busy || isBanned}
-          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-600/90 text-white text-xs font-medium hover:bg-red-500 disabled:opacity-50"
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-700 text-[#fff] text-xs font-medium hover:bg-red-600 disabled:opacity-50"
         >
           <Ban className="w-3.5 h-3.5" /> Ban forever
         </button>
@@ -116,11 +119,13 @@ export default function UserActions({ user, onApply }) {
           type="number"
           min={1}
           value={bN}
+          aria-label="Block for how long"
           onChange={(e) => setBN(Math.max(1, Number(e.target.value) || 1))}
           className="w-14 bg-slate-800 border border-slate-700/60 rounded-lg px-2 py-1.5 text-xs text-white outline-none"
         />
         <select
           value={bUnit}
+          aria-label="Block length unit"
           onChange={(e) => setBUnit(e.target.value)}
           className="bg-slate-800 border border-slate-700/60 rounded-lg px-2 py-1.5 text-xs text-white outline-none"
         >
@@ -131,7 +136,7 @@ export default function UserActions({ user, onApply }) {
         <button
           onClick={block}
           disabled={busy || isBlocked}
-          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-orange-500/90 text-white text-xs font-medium hover:bg-orange-500 disabled:opacity-50"
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-orange-700 text-[#fff] text-xs font-medium hover:bg-orange-600 disabled:opacity-50"
         >
           <Clock className="w-3.5 h-3.5" /> Block
         </button>
@@ -139,7 +144,7 @@ export default function UserActions({ user, onApply }) {
           <button
             onClick={unblock}
             disabled={busy}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600/90 text-white text-xs font-medium hover:bg-emerald-500 disabled:opacity-50"
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-700 text-[#fff] text-xs font-medium hover:bg-emerald-600 disabled:opacity-50"
           >
             <ShieldCheck className="w-3.5 h-3.5" /> Unblock / unban
           </button>
