@@ -277,7 +277,7 @@ export default function TeamMembership({ onBack }) {
               <div className="flex gap-2">
                 <button
                   onClick={() => setShowAdd(true)}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-500 text-white font-medium hover:opacity-90"
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-br from-sky-700 to-indigo-600 text-[#fff] font-medium hover:opacity-90"
                 >
                   {isEnterprise ? "Add people" : members.length === 0 ? `Add ${memberCap} people` : `Add ${memberCap - members.length} more`}
                 </button>

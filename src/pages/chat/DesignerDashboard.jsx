@@ -346,7 +346,7 @@ export default function DesignerDashboard() {
         <ThemeToggle light={lightMode} onToggle={toggleLight} />
         <button
           onClick={() => navigate("/chat/shop")}
-          className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 text-white text-sm font-medium hover:opacity-90 transition-opacity"
+          className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-br from-amber-700 to-orange-700 text-[#fff] text-sm font-medium hover:opacity-90 transition-opacity"
         >
           <Crown className="w-4 h-4" /> Upgrade
         </button>
@@ -386,7 +386,7 @@ export default function DesignerDashboard() {
               <AiChooser value={selectedAi} onChange={setSelectedAi} plan={effPlan} allowFable={true} />
               <button
                 onClick={handleCreate}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-500 text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-br from-sky-700 to-indigo-600 text-[#fff] text-sm font-semibold hover:opacity-90 transition-opacity"
               >
                 <Sparkles className="w-4 h-4" /> Create
               </button>

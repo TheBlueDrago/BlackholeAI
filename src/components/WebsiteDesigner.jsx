@@ -682,7 +682,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
 
           <button
             onClick={onUpgrade}
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 text-white text-sm font-medium hover:opacity-90 transition-opacity"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-br from-amber-700 to-orange-700 text-[#fff] text-sm font-medium hover:opacity-90 transition-opacity"
           >
             <Crown className="w-4 h-4" /> Upgrade
           </button>

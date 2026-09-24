@@ -138,7 +138,7 @@ export default function GitHubPush({ html, siteName, plan, onUpgrade }) {
                   <p className="text-slate-400 text-xs mb-3">GitHub integration requires Pro or above.</p>
                   <button
                     onClick={onUpgrade}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 text-white text-sm font-medium hover:opacity-90 transition-opacity"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-br from-amber-700 to-orange-700 text-[#fff] text-sm font-medium hover:opacity-90 transition-opacity"
                   >
                     <Crown className="w-4 h-4" /> Upgrade to Pro
                   </button>

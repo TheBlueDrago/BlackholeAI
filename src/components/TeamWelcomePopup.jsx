@@ -79,7 +79,7 @@ export default function TeamWelcomePopup({ onAddPeople }) {
               </button>
               <button
                 onClick={addNow}
-                className="flex-1 py-2.5 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-500 text-white font-medium hover:opacity-90 inline-flex items-center justify-center gap-1.5"
+                className="flex-1 py-2.5 rounded-xl bg-gradient-to-br from-sky-700 to-indigo-600 text-[#fff] font-medium hover:opacity-90 inline-flex items-center justify-center gap-1.5"
               >
                 <Plus className="w-4 h-4" /> Add people
               </button>

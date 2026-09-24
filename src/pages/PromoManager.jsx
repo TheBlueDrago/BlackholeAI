@@ -204,7 +204,7 @@ function NewCard({ onCreate, busy }) {
       <button
         onClick={() => onCreate(f)}
         disabled={busy || !f.code.trim()}
-        className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 text-white text-sm font-medium disabled:opacity-50 hover:opacity-90 transition-opacity"
+        className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-gradient-to-br from-emerald-700 to-teal-700 text-[#fff] text-sm font-medium disabled:opacity-50 hover:opacity-90 transition-opacity"
       >
         {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
         Create

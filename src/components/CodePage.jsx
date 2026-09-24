@@ -134,7 +134,7 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
               <div
                 className={`max-w-[80%] min-w-0 px-4 py-3 rounded-2xl text-sm leading-relaxed ${
                   m.role === "user"
-                    ? "whitespace-pre-wrap bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-br-sm"
+                    ? "whitespace-pre-wrap bg-gradient-to-br from-emerald-700 to-emerald-800 text-[#fff] rounded-br-sm"
                     : "bg-slate-800 text-slate-100 rounded-bl-sm border border-emerald-700/40"
                 }`}
               >
