@@ -125,6 +125,13 @@ export const AuthProvider = ({ children }) => {
       const answer = pending && typeof pending.then === "function" ? await pending : { u: await base44.auth.me() };
       if (answer.e) throw answer.e;
       const currentUser = answer.u;
+      // Never confirmed their email: not let into the site at all. Signed out here and sent to
+      // the code screen, which signs them in only once the emailed code is entered.
+      if (currentUser && currentUser.is_verified === false && currentUser.role !== "admin") {
+        clearSignIn();
+        window.location.replace("/register?verify=" + encodeURIComponent(currentUser.email || ""));
+        return;
+      }
       saveMe(currentUser);
       setUser(currentUser);
       setIsAuthenticated(true);

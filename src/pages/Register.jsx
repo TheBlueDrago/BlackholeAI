@@ -20,13 +20,16 @@ import usePageTitle from "@/hooks/usePageTitle";
 
 export default function Register() {
   usePageTitle("Create your account");
-  const [email, setEmail] = useState("");
+  // ?verify=<email>: an account that signed up but never entered its code, sent here instead of
+  // into the site (lib/AuthContext.jsx). It goes straight to the code screen.
+  const [verifyOnly] = useState(() => new URLSearchParams(window.location.search).get("verify") || "");
+  const [email, setEmail] = useState(verifyOnly);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showOtp, setShowOtp] = useState(false);
+  const [showOtp, setShowOtp] = useState(!!verifyOnly);
   const [otpCode, setOtpCode] = useState("");
   const [invited] = useState(() => hasPendingReferral());
   const typo = useEmailTypo(email);
@@ -113,7 +116,7 @@ export default function Register() {
       <AuthLayout
         icon={Mail}
         title="Verify your email"
-        subtitle={`We sent a code to ${email}`}
+        subtitle={verifyOnly ? `Confirm ${email} to get in: tap Resend for a code, then enter it.` : `We sent a code to ${email}`}
       >
         {error && (
           <div className="mb-4 p-3 rounded-lg bg-red-500/10 text-red-400 text-sm">
