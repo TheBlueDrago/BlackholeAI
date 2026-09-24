@@ -34,7 +34,7 @@ assert(s === 200 && b.content === "My Title" && models.join(",") === "gemini-3.5
 {
   const sent = bodies[bodies.length - 1];
   const rules = sent.systemInstruction && sent.systemInstruction.parts && sent.systemInstruction.parts[0].text;
-  assert(typeof rules === "string" && /children/.test(rules) && /recovery phrase/.test(rules), "every call carries the server's safety rules as the system instruction");
+  assert(typeof rules === "string" && /children/.test(rules) && /recovery phrase/.test(rules) && /bully/.test(rules), "every call carries the server's safety rules as the system instruction");
   assert(Object.keys(sent).sort().join() === "contents,generationConfig,systemInstruction", "and only the fields Gemini accepts");
 }
 [s, b] = await call({ prompt: "x".repeat(2000), internal: true });
