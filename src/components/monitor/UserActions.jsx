@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { askConfirm } from "@/lib/dialogs";
 import { Crown, Ban, Clock, ShieldCheck, EyeOff } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -26,9 +27,9 @@ export default function UserActions({ user, onApply }) {
   };
 
   const who = user.email || "this account";
-  const applyPlan = () => {
+  const applyPlan = async () => {
     // Giving away a paid plan is confirmed first (it's worth money, and one click did it).
-    if (plan !== "free" && !window.confirm(`Give ${who} the ${plan} plan ${forever ? "forever" : `for ${days} day${days === 1 ? "" : "s"}`}?`)) return;
+    if (plan !== "free" && !await askConfirm(`Give ${who} the ${plan} plan ${forever ? "forever" : `for ${days} day${days === 1 ? "" : "s"}`}?`)) return;
     let planExpiresAt = null;
     if (plan !== "free" && !forever) {
       planExpiresAt = new Date(Date.now() + days * UNIT_MS.days).toISOString();
@@ -36,8 +37,8 @@ export default function UserActions({ user, onApply }) {
     run(plan === "enterprise" ? { plan, planExpiresAt, seats } : { plan, planExpiresAt });
   };
 
-  const ban = () => {
-    if (!window.confirm(`Ban ${who} forever? They can't use Blackhole AI until you unban them.`)) return;
+  const ban = async () => {
+    if (!await askConfirm(`Ban ${who} forever? They can't use Blackhole AI until you unban them.`)) return;
     run({ banned: true, blockedUntil: null });
   };
   const block = () =>
@@ -46,7 +47,7 @@ export default function UserActions({ user, onApply }) {
   // Take down every site and game this account owns (admin-reports "hide-owner").
   const [takeNote, setTakeNote] = useState("");
   const takeDownAll = async () => {
-    if (!window.confirm(`Take down every site and game ${who} owns? They go offline for everyone. You can put each back from Published sites & games.`)) return;
+    if (!await askConfirm(`Take down every site and game ${who} owns? They go offline for everyone. You can put each back from Published sites & games.`)) return;
     setBusy(true);
     setTakeNote("");
     try {

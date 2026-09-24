@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { askConfirm, askText } from "@/lib/dialogs";
 import { Building2, Loader2, AlertTriangle, ExternalLink, Search } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -34,7 +35,7 @@ export default function EnterpriseApps() {
   }, []);
 
   const act = async (a, body, confirmText) => {
-    if (confirmText && !window.confirm(confirmText)) return;
+    if (confirmText && !await askConfirm(confirmText)) return;
     setBusy(a.id);
     await call({ ...body, id: a.id });
     setBusy("");
@@ -138,8 +139,8 @@ export default function EnterpriseApps() {
                 )}
                 {a.status !== "rejected" && a.status !== "active" && (
                   <button
-                    onClick={() => {
-                      const note = window.prompt("Reason (optional, only you see it):", "") ?? null;
+                    onClick={async () => {
+                      const note = await askText("Reason (optional, only you see it):");
                       if (note !== null) act(a, { action: "set-status", status: "rejected", note });
                     }}
                     disabled={!!busy}

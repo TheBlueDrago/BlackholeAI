@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { askConfirm } from "@/lib/dialogs";
 import { Flag, Loader2, EyeOff, Eye, Check, ExternalLink } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { siteUrl } from "@/lib/blackholeDomain";
@@ -34,12 +35,12 @@ export default function ReportedSites() {
     call({ action: "list" });
   }, []);
 
-  const act = (action, p) => {
+  const act = async (action, p) => {
     const ask = {
       hide: `Take ${p.name} offline? Visitors will see "removed" and its owner can't publish it again (you can undo this).`,
       dismiss: `Clear the reports for ${p.name} and leave it online?`,
     }[action];
-    if (ask && !window.confirm(ask)) return;
+    if (ask && !await askConfirm(ask)) return;
     call({ action, kind: p.kind, name: p.name }, `${action}:${p.kind}:${p.name}`);
   };
 

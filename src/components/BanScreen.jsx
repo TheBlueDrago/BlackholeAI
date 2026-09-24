@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { ShieldX, LogOut } from "lucide-react";
-import { base44 } from "@/api/base44Client";
+import { signOut } from "@/lib/signOut";
 
 export default function BanScreen({ banned, until }) {
   return (
@@ -31,7 +31,7 @@ export default function BanScreen({ banned, until }) {
           .
         </p>
         <button
-          onClick={() => base44.auth.logout()}
+          onClick={() => signOut()}
           className="mt-6 w-full py-2.5 rounded-xl bg-slate-800 text-slate-200 font-medium hover:bg-slate-700 transition-colors"
         >
           <span className="inline-flex items-center gap-2 justify-center">

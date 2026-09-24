@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { askConfirm } from "@/lib/dialogs";
 import { Loader2, Plus, Minus, Undo2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
@@ -31,13 +32,13 @@ export default function CreditControls({ userId }) {
   }, [userId]);
 
   // Big changes are confirmed first, so an extra zero typed by mistake doesn't go through.
-  const adjust = (tier, sign) => {
+  const adjust = async (tier, sign) => {
     const n = Number(amounts[tier]) || 0;
-    if (n >= 100 && !window.confirm(`${sign > 0 ? "Add" : "Remove"} ${n} ${LABELS[tier]} credits ${sign > 0 ? "to" : "from"} this account?`)) return;
+    if (n >= 100 && !await askConfirm(`${sign > 0 ? "Add" : "Remove"} ${n} ${LABELS[tier]} credits ${sign > 0 ? "to" : "from"} this account?`)) return;
     call({ action: "adjust", tier, delta: sign * n }, `${tier}${sign}`);
   };
-  const revoke = (referredId) => {
-    if (window.confirm("Take this referral back? Both rewards — this user's and their friend's welcome bonus — will be removed.")) call({ action: "revoke", referredId }, referredId);
+  const revoke = async (referredId) => {
+    if (await askConfirm("Take this referral back? Both rewards — this user's and their friend's welcome bonus — will be removed.")) call({ action: "revoke", referredId }, referredId);
   };
 
   if (!data) {

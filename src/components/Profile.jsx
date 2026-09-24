@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { askConfirm } from "@/lib/dialogs";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Download, Upload, LogOut, Mail, Shield, KeyRound, ArrowLeft, Loader2, Crown, Settings, Users, Lock, ShieldCheck, Ticket, Trash2, Gamepad2, Pencil, Eye, EyeOff, Globe, Gift, Smartphone, Building2, CreditCard } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { signOut } from "@/lib/signOut";
 import TeamMembership from "@/components/TeamMembership";
 import SecurityPanel from "@/components/profile/SecurityPanel";
 import PublishedSites from "@/components/profile/PublishedSites";
@@ -84,7 +86,7 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
     // signed in if this window hasn't finished loading yet.
     stashChats(user?.id || shell?.currentUser?.id || auth?.user?.id);
     noteSignedOut("signed-out");
-    base44.auth.logout();
+    signOut();
   };
 
   const startReset = async () => {
@@ -115,7 +117,7 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
       } catch {
         // Storage blocked: nothing saved to clear.
       }
-      base44.auth.logout();
+      signOut("/");
     } catch (e) {
       setDelError(e?.response?.data?.error || e?.message || "Could not delete account");
       setDelBusy(false);
@@ -180,7 +182,7 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
     }
   };
   const deleteGame = async (g) => {
-    if (!window.confirm(`Delete "${g.title || g.name}"? This cannot be undone.`)) return;
+    if (!await askConfirm(`Delete "${g.title || g.name}"? This cannot be undone.`)) return;
     try {
       await base44.entities.PublishedGame.delete(g.id);
       loadGames();
@@ -192,7 +194,7 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
   const [deletingAll, setDeletingAll] = useState(false);
   const deleteAllGames = async () => {
     if (!games.length) return;
-    if (!window.confirm(`Delete all ${games.length} game${games.length === 1 ? "" : "s"}? This cannot be undone.`)) return;
+    if (!await askConfirm(`Delete all ${games.length} game${games.length === 1 ? "" : "s"}? This cannot be undone.`)) return;
     setDeletingAll(true);
     setGamesErr("");
     try {

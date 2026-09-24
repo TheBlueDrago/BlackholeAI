@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { askConfirm } from "@/lib/dialogs";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Loader2, Globe, Gamepad2, Sparkles, EyeOff, Eye, ExternalLink, ArrowLeft, ChevronRight } from "lucide-react";
 import { base44 } from "@/api/base44Client";
@@ -99,7 +100,7 @@ export default function PublishedContent() {
   };
 
   const takeDown = async (it, hide) => {
-    if (hide && !window.confirm(`Take down "${it.title}"? Visitors will see that it was removed.`)) return;
+    if (hide && !await askConfirm(`Take down "${it.title}"? Visitors will see that it was removed.`)) return;
     setBusy(`td:${it.kind}:${it.name}`);
     try {
       await base44.functions.invoke("admin-reports", { action: hide ? "hide" : "unhide", kind: it.kind, name: it.name.toLowerCase() });

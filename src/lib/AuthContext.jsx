@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { appParams } from '@/lib/app-params';
+import { clearSignIn, signInAgain, signOut } from '@/lib/signOut';
 import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
 
 const AuthContext = createContext();
@@ -125,18 +126,18 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setIsAuthenticated(false);
     
+    // Not base44.auth.logout(): it always leaves for blackhole-ai.base44.app (lib/signOut.js).
     if (shouldRedirect) {
-      // Use the SDK's logout method which handles token cleanup and redirect
-      base44.auth.logout(window.location.href);
+      signOut();
     } else {
-      // Just remove the token without redirect
-      base44.auth.logout();
+      clearSignIn();
     }
   };
 
+  // This site's own sign-in page, not Base44's (the SDK's redirectToLogin goes to
+  // blackhole-ai.base44.app, which doesn't reliably come back here). See lib/signOut.js.
   const navigateToLogin = () => {
-    // Use the SDK's redirectToLogin method
-    base44.auth.redirectToLogin(window.location.href);
+    signInAgain();
   };
 
   return (

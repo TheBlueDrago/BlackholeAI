@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { showNotice } from "@/lib/dialogs";
 import { base44 } from "@/api/base44Client";
 import { paymentError } from "@/lib/paymentError";
 
@@ -17,9 +18,9 @@ export default function useSiteCheckout(siteName) {
           quantity: Number(d.quantity || 1),
         });
         if (res.data?.redirectUrl) window.location.href = res.data.redirectUrl;
-        else window.alert(res.data?.error || "Checkout is unavailable right now.");
+        else showNotice(res.data?.error || "Checkout is unavailable right now.");
       } catch (err) {
-        window.alert(paymentError(err, "Checkout is unavailable right now."));
+        showNotice(paymentError(err, "Checkout is unavailable right now."));
       }
     };
     window.addEventListener("message", handler);

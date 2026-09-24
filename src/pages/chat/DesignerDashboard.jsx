@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { askConfirm, askText } from "@/lib/dialogs";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 import {
@@ -207,7 +208,7 @@ export default function DesignerDashboard() {
     setErr("");
     try {
       if (gallery.has(s.name)) return await setInGallery(s, false);
-      const title = window.prompt("Show it in the public gallery as (optional title, up to 60 characters):", "");
+      const title = await askText("Show it in the public gallery as (optional title, up to 60 characters):", { maxLength: 60 });
       if (title === null) return; // cancelled
       await setInGallery(s, true, title.trim().slice(0, 60));
     } catch (e) {
@@ -283,7 +284,7 @@ export default function DesignerDashboard() {
   };
 
   const removeSite = async (s) => {
-    if (!window.confirm(`Delete "${s.name}"? This cannot be undone.`)) return;
+    if (!await askConfirm(`Delete "${s.name}"? This cannot be undone.`)) return;
     try {
       if (gallery.has(s.name)) await setInGallery(s, false).catch(() => {});
       await base44.entities.PublishedSite.delete(s.id);

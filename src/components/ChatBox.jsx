@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { askConfirm } from "@/lib/dialogs";
 import Markdown, { CopyButton } from "@/components/chat/Markdown";
 import ReportReply from "@/components/chat/ReportReply";
 import { Plus, X, Paperclip, RotateCcw } from "lucide-react";
@@ -156,13 +157,13 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
     setInput("");
   };
 
-  const send = () => {
+  const send = async () => {
     const text = input.trim();
     if (!text) return;
     // A card number, secret key, password, phone number or home address: check first (the text
     // stays in the box if not).
     const risky = privateInfoIn(text);
-    if (risky && !window.confirm(`This looks like it has ${risky} in it. It's safer not to share that with the AI (or anyone online). Send it anyway?`)) return;
+    if (risky && !await askConfirm(`This looks like it has ${risky} in it. It's safer not to share that with the AI (or anyone online). Send it anyway?`)) return;
     if (q.shouldQueue(loading)) {
       q.push(text);
       setInput("");

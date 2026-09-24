@@ -1,8 +1,9 @@
 import React, { useState } from "react";
+import { askConfirm } from "@/lib/dialogs";
 import { Link } from "react-router-dom";
 import { ArrowLeft, ShieldCheck, KeyRound, Loader2, Check, Flag, ExternalLink, Download } from "lucide-react";
 import { collectMyData, downloadJson } from "@/lib/myData";
-import { base44 } from "@/api/base44Client";
+import { signOut } from "@/lib/signOut";
 import { clearThisBrowser, noteSignedOut } from "@/lib/sessionOnly";
 
 const TIPS = [
@@ -102,11 +103,11 @@ export default function SecurityPanel({ user, email, onBack, onChangePassword, b
 // Signing out on a shared computer: a normal sign-out puts chats aside (src/lib/chatStash.js),
 // but projects and settings are kept in the browser. This removes them as well.
 function SharedComputer() {
-  const leave = () => {
-    if (!window.confirm("Sign out and remove your chats, projects and settings from this browser? Download anything you want to keep first.")) return;
+  const leave = async () => {
+    if (!await askConfirm("Sign out and remove your chats, projects and settings from this browser? Download anything you want to keep first.")) return;
     clearThisBrowser();
     noteSignedOut("cleared");
-    base44.auth.logout();
+    signOut();
   };
   return (
     <div className="mt-5 pt-4 border-t border-slate-700/50">

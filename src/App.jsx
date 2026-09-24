@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { lazyRetry as lazy } from '@/lib/lazyRetry';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { Toaster } from "@/components/ui/toaster"
+import DialogHost from "@/components/DialogHost";
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
@@ -161,6 +162,7 @@ function App() {
           </ErrorBoundary>
         </Router>
         <Toaster />
+        <DialogHost />
       </QueryClientProvider>
     </AuthProvider>
   )

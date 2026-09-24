@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { askText } from "@/lib/dialogs";
 import { Share2, Check } from "lucide-react";
 
 // "Share" button for the publish toast: the phone/computer share sheet when there is
@@ -20,7 +21,7 @@ export default function ShareLink({ url, title, className = "ml-1 bg-white/20 ho
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      window.prompt("Copy this link:", url);
+      await askText("Copy this link:", { defaultValue: url, confirmLabel: "Done" });
     }
   };
   return (

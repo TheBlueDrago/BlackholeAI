@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { askConfirm } from "@/lib/dialogs";
 import { motion } from "framer-motion";
 import { ArrowLeft, Plus, Loader2, Trash2, Ticket, Save, Percent } from "lucide-react";
 import { base44 } from "@/api/base44Client";
@@ -237,7 +238,7 @@ export default function PromoManager({ onBack }) {
 
   const create = async (f) => {
     const warn = promoWarning(f);
-    if (warn && !window.confirm(warn)) return;
+    if (warn && !await askConfirm(warn)) return;
     setErr("");
     setBusyId("new");
     try {
@@ -254,7 +255,7 @@ export default function PromoManager({ onBack }) {
     // Ask only when the change makes the code risky, or differently risky, than it was.
     const before = codes.find((c) => c.id === id) || {};
     const warn = promoWarning({ ...before, ...f });
-    if (warn && warn !== promoWarning(before) && !window.confirm(warn.replace("Create it?", "Save it?"))) return;
+    if (warn && warn !== promoWarning(before) && !await askConfirm(warn.replace("Create it?", "Save it?"))) return;
     setErr("");
     setBusyId(id);
     try {
@@ -268,7 +269,7 @@ export default function PromoManager({ onBack }) {
   };
 
   const del = async (id) => {
-    if (!window.confirm("Delete this promo code?")) return;
+    if (!await askConfirm("Delete this promo code?")) return;
     setErr("");
     setBusyId(id);
     try {

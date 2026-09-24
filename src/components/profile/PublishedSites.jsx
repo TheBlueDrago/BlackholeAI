@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { askConfirm } from "@/lib/dialogs";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Globe, Loader2, Pencil, Trash2, Eye, EyeOff } from "lucide-react";
 import { base44 } from "@/api/base44Client";
@@ -50,7 +51,7 @@ export default function PublishedSites({ user, plan, onBack }) {
   };
 
   const remove = async (s) => {
-    if (!window.confirm(`Delete "${s.name}"? This cannot be undone.`)) return;
+    if (!await askConfirm(`Delete "${s.name}"? This cannot be undone.`)) return;
     try {
       await base44.entities.PublishedSite.delete(s.id);
       load();
