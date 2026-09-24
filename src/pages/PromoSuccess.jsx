@@ -2,10 +2,19 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Gift } from "lucide-react";
 import { Link, Navigate, useLocation } from "react-router-dom";
+import MotionPrefs from "@/components/MotionPrefs";
 
 const AI_LABELS = { ai: "Blackhole AI", aiCode: "Blackhole Code", galaxy5: "Galaxy", space5: "Space" };
 
-export default function PromoSuccess() {
+export default function PromoSuccessPage() {
+  return (
+    <MotionPrefs>
+      <PromoSuccess />
+    </MotionPrefs>
+  );
+}
+
+function PromoSuccess() {
   const location = useLocation();
   const aiModel = location.state?.aiModel ?? "ai";
   const credits = location.state?.credits ?? 0;

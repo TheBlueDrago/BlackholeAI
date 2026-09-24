@@ -9,6 +9,8 @@ const SKIP = /^\/($|buy|report|site\/|play\/|terms|privacy|contact|ThankYou|prom
 // The intro plays once per tab, not again on every reload.
 function shouldShow() {
   if (SKIP.test(window.location.pathname)) return false;
+  // Devices set to reduce motion skip the animated intro altogether.
+  if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return false;
   try {
     if (sessionStorage.getItem(SEEN_KEY)) return false;
     sessionStorage.setItem(SEEN_KEY, "1");

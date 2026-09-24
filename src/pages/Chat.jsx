@@ -6,6 +6,7 @@ import PromoExpiredPopup from "@/components/PromoExpiredPopup";
 import TeamWelcomePopup from "@/components/TeamWelcomePopup";
 import BanScreen from "@/components/BanScreen";
 import MobileTabBar from "@/components/MobileTabBar";
+import MotionPrefs from "@/components/MotionPrefs";
 
 const PageSpinner = () => (
   <div className="relative z-10 min-h-screen flex items-center justify-center">
@@ -65,7 +66,9 @@ function ChatLayout() {
 export default function Chat() {
   return (
     <AppShellProvider>
-      <ChatLayout />
+      <MotionPrefs>
+        <ChatLayout />
+      </MotionPrefs>
     </AppShellProvider>
   );
 }

@@ -8,6 +8,7 @@ import { CREDIT_PACKS, PACK_SIZES, packsForTier } from "../../cloudflare-lib/cre
 import { TIER_NAMES, TIERS } from "../../cloudflare-lib/planTotals.js";
 import { discountedPrice } from "../../cloudflare-lib/discounts.js";
 import { savedDiscount, saveDiscount, promoPctFor } from "@/lib/promoDiscount";
+import MotionPrefs from "@/components/MotionPrefs";
 
 const money = (n) => (Number.isInteger(n) ? `$${n}` : `$${n.toFixed(2)}`);
 // The pack of `size` credits for another AI.
@@ -35,7 +36,15 @@ function packPlan(id) {
   };
 }
 
-export default function Billing() {
+export default function BillingPage() {
+  return (
+    <MotionPrefs>
+      <Billing />
+    </MotionPrefs>
+  );
+}
+
+function Billing() {
   const navigate = useNavigate();
   const location = useLocation();
   const requested = location.state?.productId ?? "pro";

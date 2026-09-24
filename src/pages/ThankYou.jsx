@@ -3,11 +3,20 @@ import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { siteUrl } from "@/lib/blackholeDomain";
+import MotionPrefs from "@/components/MotionPrefs";
 
 // After paying. Plans and credit packs come back here from create-checkout; purchases on a
 // site someone made come back with ?site=<name> from site-checkout (older checkouts without
 // it get the wording that covers both).
-export default function ThankYou() {
+export default function ThankYouPage() {
+  return (
+    <MotionPrefs>
+      <ThankYou />
+    </MotionPrefs>
+  );
+}
+
+function ThankYou() {
   const [params] = useSearchParams();
   const siteHome = siteUrl(params.get("site") || "");
   const help = (
