@@ -25,7 +25,10 @@ export default function UserActions({ user, onApply }) {
     }
   };
 
+  const who = user.email || "this account";
   const applyPlan = () => {
+    // Giving away a paid plan is confirmed first (it's worth money, and one click did it).
+    if (plan !== "free" && !window.confirm(`Give ${who} the ${plan} plan ${forever ? "forever" : `for ${days} day${days === 1 ? "" : "s"}`}?`)) return;
     let planExpiresAt = null;
     if (plan !== "free" && !forever) {
       planExpiresAt = new Date(Date.now() + days * UNIT_MS.days).toISOString();
@@ -33,14 +36,17 @@ export default function UserActions({ user, onApply }) {
     run(plan === "enterprise" ? { plan, planExpiresAt, seats } : { plan, planExpiresAt });
   };
 
-  const ban = () => run({ banned: true, blockedUntil: null });
+  const ban = () => {
+    if (!window.confirm(`Ban ${who} forever? They can't use Blackhole AI until you unban them.`)) return;
+    run({ banned: true, blockedUntil: null });
+  };
   const block = () =>
     run({ banned: false, blockedUntil: new Date(Date.now() + bN * UNIT_MS[bUnit]).toISOString() });
   const unblock = () => run({ banned: false, blockedUntil: null });
   // Take down every site and game this account owns (admin-reports "hide-owner").
   const [takeNote, setTakeNote] = useState("");
   const takeDownAll = async () => {
-    if (!window.confirm(`Take down every site and game ${user.email || "this account"} owns? They go offline for everyone. You can put each back from Published sites & games.`)) return;
+    if (!window.confirm(`Take down every site and game ${who} owns? They go offline for everyone. You can put each back from Published sites & games.`)) return;
     setBusy(true);
     setTakeNote("");
     try {

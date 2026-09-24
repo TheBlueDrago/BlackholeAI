@@ -30,7 +30,12 @@ export default function CreditControls({ userId }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
-  const adjust = (tier, sign) => call({ action: "adjust", tier, delta: sign * (Number(amounts[tier]) || 0) }, `${tier}${sign}`);
+  // Big changes are confirmed first, so an extra zero typed by mistake doesn't go through.
+  const adjust = (tier, sign) => {
+    const n = Number(amounts[tier]) || 0;
+    if (n >= 100 && !window.confirm(`${sign > 0 ? "Add" : "Remove"} ${n} ${LABELS[tier]} credits ${sign > 0 ? "to" : "from"} this account?`)) return;
+    call({ action: "adjust", tier, delta: sign * n }, `${tier}${sign}`);
+  };
   const revoke = (referredId) => {
     if (window.confirm("Take this referral back? Both rewards — this user's and their friend's welcome bonus — will be removed.")) call({ action: "revoke", referredId }, referredId);
   };
@@ -68,6 +73,7 @@ export default function CreditControls({ userId }) {
                   type="number"
                   min={1}
                   value={amounts[k]}
+                  aria-label={`${LABELS[k]} credits to add or remove`}
                   onChange={(e) => setAmounts((a) => ({ ...a, [k]: Math.max(1, Number(e.target.value) || 1) }))}
                   className="w-16 bg-slate-900 border border-slate-700/60 rounded-lg px-2 py-1 text-xs text-white outline-none"
                 />
