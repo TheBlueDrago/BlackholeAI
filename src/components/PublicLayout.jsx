@@ -96,6 +96,13 @@ export default function PublicLayout({ title, children }) {
         <div className="absolute top-20 left-1/4 w-[400px] h-[400px] bg-fuchsia-600/10 rounded-full blur-[100px]" />
       </div>
 
+      {/* For keyboard users: jump past the menu to the page itself. Hidden until focused. */}
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2 focus:rounded-xl focus:bg-indigo-600 focus:text-[#fff] focus:font-medium"
+      >
+        Skip to content
+      </a>
       <header className="sticky top-0 z-30 bg-[#020617]/80 backdrop-blur-lg border-b border-white/5">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
           <Link to="/" className="flex items-center gap-2 font-bold tracking-tight shrink-0">
@@ -146,7 +153,7 @@ export default function PublicLayout({ title, children }) {
         )}
       </header>
 
-      <main className="relative z-10 max-w-6xl mx-auto px-4 pb-16">{children}</main>
+      <main id="main" tabIndex={-1} className="relative z-10 max-w-6xl mx-auto px-4 pb-16 outline-none">{children}</main>
 
       <footer className="relative z-10 border-t border-slate-800/80 bg-black/30">
         <div className="max-w-6xl mx-auto px-4 py-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-sm">
