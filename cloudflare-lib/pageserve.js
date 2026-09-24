@@ -32,7 +32,10 @@ export function withReportLink(html, kind, name) {
     `var st='font:12px system-ui,sans-serif;color:#cbd5e1;background:rgba(15,23,42,.8);padding:4px 9px;border-radius:999px;` +
     `text-decoration:none;border:1px solid rgba(148,163,184,.35);margin-left:6px';` +
     `r.innerHTML='<a target="_blank" rel="noopener" style="'+st+'">\u2728 Made with Blackhole AI</a><a target="_blank" rel="noopener" style="'+st+'">\u2691 Report</a>';` +
-    `var a=r.querySelectorAll("a");a[0].href=${badge};a[1].href=${href};document.documentElement.appendChild(h);}` +
+    `var a=r.querySelectorAll("a");a[0].href=${badge};a[1].href=${href};` +
+    // Says whose page this is, so nobody mistakes a user's page for an official one.
+    `a[0].title="Made by someone using Blackhole AI, not by Blackhole AI itself";a[1].title="Report this page to Blackhole AI";` +
+    `document.documentElement.appendChild(h);}` +
     `if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",add);else add();})();</script>`);
 }
 
