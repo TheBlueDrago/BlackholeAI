@@ -118,7 +118,9 @@ export async function ownerOf(request, kv, kind, name, rows) {
 }
 
 // The whole publish flow for both kinds; `extra` holds the kind-specific entity fields.
-export async function publish(context, kind, { name, html: rawHtml, extra }) {
+// `checkLimit(user)` (optional) -> an error message when a page that's new to this person
+// would go over their plan's limit (see functions/.../publish-site.js).
+export async function publish(context, kind, { name, html: rawHtml, extra, checkLimit }) {
   const { request, env } = context;
   const html = stripInjected(rawHtml);
   const label = kind === "site" ? "Website" : "Game";
@@ -179,6 +181,12 @@ export async function publish(context, kind, { name, html: rawHtml, extra }) {
     const owner = await ownerOf(request, env.PUBLISHED_HTML, kind, name, rows);
     if (owner && owner !== user.id && user.role !== "admin") {
       return json({ error: "That name is taken. Try another." }, 409);
+    }
+
+    // Plan limits, for a page that's new to this person (republishing your own never counts).
+    if (checkLimit && user.role !== "admin" && owner !== user.id && !mine) {
+      const limit = await checkLimit(user);
+      if (limit) return json({ error: limit }, 403);
     }
 
     // An admin publishing over someone else's page (say, to restore it) keeps them as the

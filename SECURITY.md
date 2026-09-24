@@ -34,6 +34,9 @@ A short map for anyone changing this code. Keep these rules when you touch the f
 - **Bans are enforced on the server.** Admin bans and blocks live in KV (`grant:<id>`), which
   only admins write; `cloudflare-lib/bans.js` checks them in the AI, publishing, promo codes,
   referral rewards, team invites and the gallery. Clearing your own User row can't lift one.
+- **Plan limits are enforced when publishing** (`cloudflare-lib/publishLimits.js`, checked by
+  the publish functions through `publishcheck.js`), not only in the app. Game play counts are
+  never taken from the page.
 - **Published page names belong to their owner.** Anyone can write their own
   PublishedSite/PublishedGame rows straight into Base44, so a row alone proves nothing. The
   owner is whoever `publish()` recorded in KV metadata (`ownerOf` in

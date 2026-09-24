@@ -6,6 +6,7 @@
 // cloudflare-lib/published.js for why and how.
 // Same contract the frontend expects: { name, html, ownerName } -> { ok, id }.
 import { json, publish } from "../../../../../cloudflare-lib/published.js";
+import { planLimitCheck } from "../../../../../cloudflare-lib/publishcheck.js";
 
 export async function onRequestPost(context) {
   let body;
@@ -18,5 +19,6 @@ export async function onRequestPost(context) {
     name: String(body.name || "").toLowerCase(),
     html: String(body.html || ""),
     extra: { ownerName: String(body.ownerName || "") },
+    checkLimit: planLimitCheck(context, "site"),
   });
 }
