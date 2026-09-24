@@ -36,3 +36,46 @@ function hostOf(url) {
     return "another website";
   }
 }
+
+// Stricter checks, used when a page is published and in Monitor's scan (scan.js), but not
+// when already-published pages are served, so an existing page is never taken down by them
+// without a person looking. Returns a short description, or "".
+//
+// 1. A page with a password or card-number field that sends data to another website from a
+//    script (fetch, XMLHttpRequest, sendBeacon, WebSocket, an image "beacon" built from
+//    values, or a form whose action is changed by script). A form isn't needed for that.
+// 2. A sign-in page dressed up as Blackhole AI's (its title or main heading says Blackhole
+//    AI, and it asks for a password), to trick people into typing their real password.
+const SENSITIVE_FIELD =
+  /<input\b[^>]*\btype\s*=\s*["']?password\b|\b(autocomplete|name|id)\s*=\s*["']?(cc-number|cc-csc|cardnumber|card[-_]?number|cvv|cvc|card[-_]?cvc)\b/i;
+const HOST = "(?:https?:|wss?:)?\\/\\/([^\\/`'\"\\s?#:]+)";
+const SENDERS = [
+  new RegExp(`\\bfetch\\s*\\(\\s*[\`'"]${HOST}`, "gi"),
+  new RegExp(`\\.open\\s*\\(\\s*[\`'"][A-Za-z]+[\`'"]\\s*,\\s*[\`'"]${HOST}`, "gi"),
+  new RegExp(`sendBeacon\\s*\\(\\s*[\`'"]${HOST}`, "gi"),
+  new RegExp(`new\\s+WebSocket\\s*\\(\\s*[\`'"]${HOST}`, "gi"),
+  new RegExp(`\\.src\\s*=\\s*[\`'"]${HOST}[^\`'"]*[\`'"]\\s*\\+`, "gi"),
+  new RegExp(`\\.action\\s*=\\s*[\`'"]${HOST}`, "gi"),
+];
+
+export function findCredentialLeak(html) {
+  const text = String(html || "");
+  if (!SENSITIVE_FIELD.test(text)) return "";
+  const what = /type\s*=\s*["']?password/i.test(text) ? "password" : "card number";
+  for (const re of SENDERS) {
+    re.lastIndex = 0;
+    let m;
+    while ((m = re.exec(text))) {
+      const host = m[1].toLowerCase();
+      if (!isOurs(host)) return `a ${what} field and a script that sends data to ${host}`;
+    }
+  }
+  const title = (text.match(/<title\b[^>]*>([\s\S]*?)<\/title>/i) || [])[1] || "";
+  const heading = (text.match(/<h[12]\b[^>]*>([\s\S]*?)<\/h[12]>/i) || [])[1] || "";
+  if (what === "password" && /blackhole\s*ai/i.test(`${title} ${heading.replace(/<[^>]+>/g, " ")}`)) {
+    return "a sign-in page that looks like Blackhole AI's own";
+  }
+  return "";
+}
+
+const isOurs = (host) => host === "blackhole-ai-tech.com" || host.endsWith(".blackhole-ai-tech.com") || host.endsWith("nebuluxai.pages.dev");

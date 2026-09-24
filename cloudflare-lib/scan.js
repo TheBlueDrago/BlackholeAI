@@ -6,7 +6,7 @@
 //   green  — nothing suspicious found
 // It's a quick pattern check, not a guarantee; Monitor also offers an "AI check" that
 // has Gemini read the page (reviewPage below).
-import { findCredentialForm } from "./phishing.js";
+import { findCredentialForm, findCredentialLeak } from "./phishing.js";
 
 const FLAG_RANK = { red: 0, yellow: 1, green: 2 };
 export const flagRank = (f) => FLAG_RANK[f] ?? 2;
@@ -71,6 +71,15 @@ export function scanPage(html) {
     red = true;
     malware += 60;
     reasons.push(`Phishing: ${phish}`);
+  }
+  // Stricter: passwords or card numbers sent away by script, or a fake Blackhole AI sign-in.
+  // Refused at publish; only flagged (not taken down) for pages that are already live.
+  const leak = !phish && findCredentialLeak(src);
+  if (leak) {
+    red = true;
+    malware += 60;
+    reasons.push(`Phishing: ${leak}`);
+    block.push(leak);
   }
   if (MINER.test(src)) {
     red = true;

