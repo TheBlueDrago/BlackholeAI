@@ -205,6 +205,13 @@
 }
 .bh-rise { animation: bh-rise 1s ease-out both; }
 .bh-fade-in { animation: bh-fade-in 1s ease-out both; }
+/* Home page (src/pages/Landing.jsx): the hero rises in, and sections fade up as they scroll
+   into view (Reveal adds .bh-shown). Also CSS, to keep framer-motion off the first page. */
+.bh-up { animation: bh-rise 0.6s ease-out both; }
+.bh-up-late { animation: bh-rise 0.7s 0.15s ease-out both; }
+.bh-reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.5s ease-out, transform 0.5s ease-out; }
+.bh-reveal.bh-shown { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) {
-  .bh-rise, .bh-fade-in { animation: none; }
+  .bh-rise, .bh-fade-in, .bh-up, .bh-up-late { animation: none; }
+  .bh-reveal { opacity: 1; transform: none; transition: none; }
 }

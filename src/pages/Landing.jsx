@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, Smartphone, Globe, ShieldCheck, Gamepad2, Play, Check, ChevronDown, Mail, Phone } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import SiteThumb from "@/components/SiteThumb";
@@ -99,18 +98,29 @@ function cameFrom() {
   return m ? { kind: m[1], name: m[2] } : null;
 }
 
-// Fades a section in as it scrolls into view.
+// Fades a section in as it scrolls into view (CSS .bh-reveal in index.css; no animation
+// library, so the home page loads faster). Without IntersectionObserver it's just shown.
 function Reveal({ children, className = "" }) {
+  const ref = useRef(null);
+  const [shown, setShown] = useState(() => typeof IntersectionObserver === "undefined");
+  useEffect(() => {
+    if (shown || !ref.current) return undefined;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setShown(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "0px 0px -60px 0px" },
+    );
+    io.observe(ref.current);
+    return () => io.disconnect();
+  }, [shown]);
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      className={className}
-    >
+    <div ref={ref} className={`bh-reveal${shown ? " bh-shown" : ""}${className ? ` ${className}` : ""}`}>
       {children}
-    </motion.div>
+    </div>
   );
 }
 
@@ -168,11 +178,8 @@ export default function Landing() {
     <PublicLayout title="Make websites and games with AI">
       {/* Hero */}
       <section className="grid lg:grid-cols-2 gap-12 items-center pt-10 sm:pt-16 pb-12">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="text-center lg:text-left"
+        <div
+          className="bh-up text-center lg:text-left"
         >
           {from && (
             <p className="inline-flex items-center gap-1.5 mb-6 px-3 py-1.5 rounded-full bg-slate-800/70 border border-slate-700/60 text-xs text-slate-300">
@@ -203,10 +210,10 @@ export default function Landing() {
             </a>
           </div>
           <p className="mt-4 text-xs text-slate-500">New accounts get a free week of Pro · No credit card needed</p>
-        </motion.div>
-        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }}>
+        </div>
+        <div className="bh-up-late">
           <HeroCollage />
-        </motion.div>
+        </div>
       </section>
 
       {/* Quick facts */}
