@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { Download, Loader2, Lock } from "lucide-react";
-import { hasProFeatures } from "@/lib/plans";
+import { useExportAccess } from "@/lib/exportAccess";
 
 export default function DownloadZip({ html, name, plan, onUpgrade }) {
   const [downloading, setDownloading] = useState(false);
-  const canDownload = hasProFeatures(plan);
+  const access = useExportAccess(plan);
+  const canDownload = access.allowed;
 
   const handleDownload = async () => {
     if (!canDownload || !html || downloading) return;
@@ -35,7 +36,7 @@ export default function DownloadZip({ html, name, plan, onUpgrade }) {
       <button
         type="button"
         onClick={onUpgrade}
-        title="Download ZIP requires Pro or above"
+        title={access.why}
         className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800/70 border border-slate-700/50 text-slate-400 text-sm font-medium hover:bg-slate-700/70 transition-colors"
       >
         <Lock className="w-4 h-4" />

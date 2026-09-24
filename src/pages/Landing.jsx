@@ -83,9 +83,9 @@ const FEATURES = [
 ];
 
 const STEPS = [
-  ["Describe it", "Type what you want in your own words, or pick a template."],
-  ["Change anything", "Ask for new colors, pages, levels or features until it's right."],
-  ["Publish and share", "Get a link anyone can open on a phone or computer."],
+  ["Ask or describe", "Type or say what you need: a question, homework, an essay, some code, or the website or game you want."],
+  ["Get it in seconds", "A clear answer you can ask more about, or a working first version of your site or game to try right away."],
+  ["Make it yours", "Ask follow-ups or changes until it's right, then keep it, copy it, or publish what you made with a link."],
 ];
 
 // Built-in games (src/lib/builtInGames.js), listed by name so their code isn't loaded here.

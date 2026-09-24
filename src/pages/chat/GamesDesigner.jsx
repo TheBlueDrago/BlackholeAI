@@ -16,6 +16,7 @@ import ModeToggle from "@/components/chat/ModeToggle";
 import { base44 } from "@/api/base44Client";
 import AiChooser from "@/components/AiChooser";
 import GitHubPush from "@/components/designer/GitHubPush";
+import DownloadZip from "@/components/designer/DownloadZip";
 import { loadImages, onImagesChange, addImageFile, expandImages, packImages } from "@/lib/siteImages";
 import SheetSelect from "@/components/SheetSelect";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -591,6 +592,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
             <Crown className="w-4 h-4" /> Upgrade
           </button>
           <GitHubPush html={previewHtml} siteName={gameName} plan={plan} onUpgrade={onUpgrade} />
+          <DownloadZip html={previewHtml} name={gameName || "game"} plan={plan} onUpgrade={onUpgrade} />
           <button
             onClick={() => setShowPublish(true)}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-fuchsia-600 text-[#fff] text-sm font-medium hover:bg-fuchsia-500 transition-colors"
