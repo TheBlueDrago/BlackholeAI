@@ -81,6 +81,11 @@ const PARENTS = [
 const RECENT = {
   month: "September 2026",
   items: [
+    "Every new account confirms its email with a code before it can use anything, so nobody can sign up with someone else's address.",
+    "Accounts that break the rules can be removed for good: their email can't be used to sign up again.",
+    "Only a few new accounts can be made from one network, which stops people making lots of fake accounts.",
+    "Signing out and signing in always stay on blackhole-ai-tech.com.",
+    "Your GitHub connection stays in your own browser and is only ever sent to GitHub.",
     "Paste code with an API key or access token in it, and the chat asks first, so your accounts stay yours.",
     "You can report an AI reply that's harmful or wrong with the flag under it.",
     "Signing out puts your chats away: the next person on that computer starts with none, and yours come back when you sign in again.",

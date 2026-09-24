@@ -64,7 +64,17 @@ export default function Monitor({ onBack }) {
     }
   };
   const removedIds = new Set(removed.map((r) => r.userId));
-  const visible = users.filter((u) => !removedIds.has(u.id) && u.removed !== true);
+  // Accounts that never confirmed their email and are over 3 days old (a made-up or someone
+  // else's address): they can't use anything, so they're tucked away unless asked for.
+  const [showStale, setShowStale] = useState(false);
+  const stale = (u) => {
+    if (u.is_verified !== false) return false;
+    const raw = String(u.created_date || "");
+    const t = Date.parse(/Z|[+-]\d\d:?\d\d$/.test(raw) ? raw : raw + "Z");
+    return Date.now() - t > 3 * 86400000;
+  };
+  const staleCount = users.filter((u) => !removedIds.has(u.id) && stale(u)).length;
+  const visible = users.filter((u) => !removedIds.has(u.id) && u.removed !== true && (showStale || !stale(u)));
 
   const q = query.trim().toLowerCase();
 
@@ -161,6 +171,14 @@ export default function Monitor({ onBack }) {
           {recent.map((u) => (
             <UserCard key={u.id} user={u} onApply={apply} onOpenDetail={setDetailUser} />
           ))}
+        </div>
+      )}
+
+      {!loading && staleCount > 0 && (
+        <div className="w-full max-w-3xl mt-6">
+          <button onClick={() => setShowStale((v) => !v)} className="text-slate-400 text-sm hover:text-slate-200">
+            {showStale ? "Hide" : "Show"} {staleCount} account{staleCount === 1 ? "" : "s"} that never confirmed their email (over 3 days old)
+          </button>
         </div>
       )}
 
