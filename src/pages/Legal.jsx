@@ -143,6 +143,7 @@ export function Privacy() {
         <li><strong>Enterprise applications:</strong> your organization's legal name, type, where it's registered, registration number or EIN, website, and your name, role, work email and phone. Only the Blackhole AI team sees them, to check the organization is real and send a quote.</li>
         <li><strong>Admin actions:</strong> when the Blackhole AI team changes an account's plan, credits, access or a promo code, or takes a page down, we record what changed, on which account, and which team member did it, to catch mistakes and misuse.</li>
         <li><strong>Reports:</strong> when you report a site we keep your reason and note, plus a scrambled (hashed) form of your IP address so the same person can't report one page many times.</li>
+        <li><strong>Usage analytics:</strong> basic information about how the app is used, such as which pages are opened, how long a visit lasts and which website sent you here. It's collected by Base44, which runs the app's sign-in and database, and helps us see what's working. We don't use it for ads.</li>
         <li><strong>Technical data:</strong> like any website, our hosting provider handles IP addresses and basic request logs to deliver pages and block attacks.</li>
       </ul>
 
