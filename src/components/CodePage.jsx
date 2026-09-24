@@ -15,6 +15,7 @@ import useBuildMode, { BUILD_NOTE, ANSWER_NOTE, resolveIntent } from "@/hooks/us
 import ModeToggle from "@/components/chat/ModeToggle";
 import useStickToBottom from "@/hooks/useStickToBottom";
 import { isNetworkError, OFFLINE_NOTE } from "@/lib/netError";
+import { secretKeyIn } from "@/lib/privateInfo";
 
 export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICode, userInitial }) {
   const buildMode = useBuildMode("code");
@@ -87,6 +88,8 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
   const send = () => {
     const text = input.trim();
     if (!text) return;
+    // Pasted code often carries a real API key or token: check first (the text stays in the box).
+    if (secretKeyIn(text) && !window.confirm("This looks like it has a secret key (like an API key or access token) in it. Anyone who gets it can use that account, so replace it with something like YOUR_API_KEY first. Send it anyway?")) return;
     if (q.shouldQueue(loading)) {
       q.push(text);
       setInput("");

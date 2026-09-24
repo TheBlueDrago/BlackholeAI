@@ -27,3 +27,37 @@ for (const text of [
   "make my site show 555 visitors",
   "",
 ]) assert(privateInfoIn(text) === "", `leaves ${JSON.stringify(text)} alone`);
+
+// Secret keys (built here from pieces, so this file itself holds no key-shaped text).
+{
+  const { secretKeyIn, privateInfoOnPage } = await import(new URL("../src/lib/privateInfo.js", import.meta.url).href);
+  const r = (n, chars = "aB3xY9kQ2mZ7") => Array.from({ length: n }, (_, i) => chars[(i * 7 + 3) % chars.length]).join("");
+  const keys = {
+    OpenAI: "s" + "k-proj-" + r(40),
+    Anthropic: "s" + "k-ant-api03-" + r(40),
+    GitHub: "gh" + "p_" + r(36),
+    "GitHub fine-grained": "github" + "_pat_" + r(50),
+    AWS: "AK" + "IA" + "QWERTYUIOPASDFGH",
+    Stripe: "s" + "k_live_" + r(30),
+    Slack: "xo" + "xb-" + "123456789012-" + r(20),
+    "private key": "-----BEGIN " + "RSA PRIVATE KEY-----\nMIIE...",
+    "assigned key": `const API_KEY = "${r(32)}";`,
+    Google: "AI" + "za" + r(35),
+  };
+  for (const [what, k] of Object.entries(keys)) {
+    assert(secretKeyIn(`here is my code: ${k} thanks`) === "a secret key", `spots a ${what} key`);
+    assert(privateInfoIn(`fix this: ${k}`) === "a secret key", `the main chat asks before sending a ${what} key`);
+  }
+  for (const text of [
+    'const API_KEY = "YOUR_API_KEY_GOES_HERE_1234";',
+    'const apiKey = process.env.OPENAI_API_KEY;',
+    'token: "<paste your token here, it is long>"',
+    "I asked about my task-management app with 40 tasks",
+    "what's a good skateboard for beginners?",
+    'password = input("Password: ")',
+  ]) assert(secretKeyIn(text) === "", `leaves ${JSON.stringify(text)} alone`);
+  const page = (js) => `<!DOCTYPE html><html><body><h1>Hi</h1><script>${js}</script></body></html>`;
+  const parse = (html) => ({ querySelectorAll: () => [], body: { textContent: html.replace(/<script\b[\s\S]*?<\/script>/gi, "").replace(/<[^>]+>/g, " ") } });
+  assert(/secret key/.test(privateInfoOnPage(page(`fetch(u, { headers: { Authorization: "Bearer ${keys.OpenAI}" } })`), parse)), "a key hidden in a page's script is pointed out at publish");
+  assert(privateInfoOnPage(page(`loadMaps("${keys.Google}")`), parse) === "", "but a Google browser key (made to be public) isn't");
+}
