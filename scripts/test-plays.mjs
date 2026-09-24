@@ -72,6 +72,9 @@ assert(data.totals["old-hit"] === 121 && data.totals["new-one"] === 2 && data.pl
   const { onRequest } = await import(R("functions/api/apps/6a8b5eb7787b8a4d6a18f662/functions/game-plays.js"));
   let data = await (await onRequest({ request: new Request("https://x/"), env: { PUBLISHED_HTML: kv3 } })).json();
   assert((data.takenDown || []).includes("scam-game"), "a taken-down game is in the list the game pages leave out");
+  const td = await import(R("functions/api/apps/6a8b5eb7787b8a4d6a18f662/functions/taken-down.js"));
+  const both = await (await td.onRequest({ request: new Request("https://x/"), env: { PUBLISHED_HTML: kv3 } })).json();
+  assert(both.game.includes("scam-game") && Array.isArray(both.site), "taken-down gives the list to the Blackhole Browser too");
   await setBlocked(kv3, new Request("https://x/"), "game", "scam-game", false);
   data = await (await onRequest({ request: new Request("https://x/"), env: { PUBLISHED_HTML: kv3 } })).json();
   assert(!(data.takenDown || []).includes("scam-game"), "and back in the lists when an admin restores it");

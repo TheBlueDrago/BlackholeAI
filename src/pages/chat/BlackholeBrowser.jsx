@@ -34,10 +34,15 @@ export default function BlackholeBrowser() {
     Promise.all([
       base44.entities.PublishedSite.list("-created_date", 500).catch(() => []),
       base44.entities.PublishedGame.list("-plays", 500).catch(() => []),
+      // Taken down by an admin: left out even if the record's hidden flag was cleared.
+      base44.functions.invoke("taken-down").then((r) => r.data || {}).catch(() => ({})),
     ])
-      .then(([s, g]) => {
-        setSites((s || []).filter((x) => !x.hidden));
-        const real = (g || []).filter((x) => !x.hidden);
+      .then(([s, g, down]) => {
+        const off = (kind) => new Set(down[kind] || []);
+        const siteOff = off("site");
+        const gameOff = off("game");
+        setSites((s || []).filter((x) => !x.hidden && !siteOff.has(x.name)));
+        const real = (g || []).filter((x) => !x.hidden && !gameOff.has(x.name));
         const realNames = new Set(real.map((x) => x.name));
         setGames([...builtInGameEntities().filter((x) => !realNames.has(x.name)), ...real]);
       })
