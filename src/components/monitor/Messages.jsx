@@ -17,7 +17,9 @@ export default function Messages() {
       if (r.data?.error) throw new Error(r.data.error);
       // Security reports first, so a report of a scam or a hole in the app is seen right away.
       const list = r.data?.messages || [];
-      setMessages([...list.filter((m) => m.topic === "security"), ...list.filter((m) => m.topic !== "security")]);
+      // Security reports first, then parents and teachers, then everything else.
+      const rank = (m) => (m.topic === "security" ? 0 : m.topic === "parent" ? 1 : 2);
+      setMessages(list.map((m, i) => [m, i]).sort((a, b) => rank(a[0]) - rank(b[0]) || a[1] - b[1]).map(([m]) => m));
     } catch (e) {
       setError(e?.response?.data?.error || e?.message || "Could not load messages.");
     }
