@@ -64,3 +64,43 @@ assert(Object.entries(PACK_BASE).every(([tier, b]) => base[SLUG[tier]] === b), `
 const multSrc = (checkout.match(/PACK_MULT: Record<number, number> = (\{[^}]+\})/) || [])[1] || "";
 const mult = Object.fromEntries([...multSrc.matchAll(/(\d+): ([\d.]+)/g)].map((m) => [m[1], Number(m[2])]));
 assert(Object.entries(PACK_MULT).every(([size, m]) => mult[size] === m) && Object.keys(mult).length === Object.keys(PACK_MULT).length, "credit-pack size multipliers match checkout");
+
+// Prices written out in words anywhere in the app, link previews and guides ("Pro is $1 a
+// month", "$5 a month for the whole team"): each one next to "Pro" or "Team" must be that
+// plan's checkout price.
+{
+  const { readdirSync, statSync } = await import("node:fs");
+  const root = new URL("../", import.meta.url);
+  const files = [];
+  const walk = (rel) => {
+    for (const f of readdirSync(new URL(rel, root))) {
+      const p = `${rel}${f}`;
+      if (statSync(new URL(p, root)).isDirectory()) walk(`${p}/`);
+      else if (/\.(jsx?|mjs)$/.test(f)) files.push(p);
+    }
+  };
+  walk("src/");
+  walk("cloudflare-lib/");
+  walk("functions/");
+  let checked = 0;
+  const wrong = [];
+  for (const file of files) {
+    const text = read(file);
+    for (const m of text.matchAll(/\$(\d+(?:\.\d+)?)(?= ?(?:a |per |\/ ?)(?:month|mo)\b)/g)) {
+      const around = text.slice(Math.max(0, m.index - 40), m.index + 40);
+      const at = Math.min(40, m.index);
+      const near = (re) => {
+        let best = Infinity;
+        for (const k of around.matchAll(re)) best = Math.min(best, Math.abs(k.index - at));
+        return best;
+      };
+      const dPro = near(/\bPro\b/g);
+      const dTeam = near(/\b[Tt]eam\b/g);
+      if (dPro === Infinity && dTeam === Infinity) continue;
+      const plan = dPro < dTeam ? "pro" : "team";
+      checked++;
+      if (Number(m[1]) !== PRICE[plan]) wrong.push(`${file}: "${around.replace(/\s+/g, " ").trim()}" (${plan} is $${PRICE[plan]})`);
+    }
+  }
+  assert(checked >= 8 && wrong.length === 0, `every written Pro/Team price matches checkout (${checked} checked)${wrong.length ? ": " + wrong.join(" | ") : ""}`);
+}
