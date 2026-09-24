@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Loader2, TrendingUp, Globe } from "lucide-react";
+import { Loader2, TrendingUp, Globe, ShieldAlert } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { payoutWarnings, payoutSummary, HOLD_DAYS } from "@/lib/payoutChecks";
 
 const money = (n) => `$${(Math.round(n * 100) / 100).toFixed(2)}`;
 
@@ -36,6 +37,9 @@ export default function RevenueAnalytics() {
   });
   const top = Object.entries(bySite).sort((a, b) => b[1].gross - a[1].gross);
   const max = top[0]?.[1].gross || 1;
+  // Before paying creators by hand: what's fine to pay, what to hold, and why.
+  const summary = payoutSummary(sales);
+  const flagged = sales.map((r) => ({ r, why: payoutWarnings(r, sales).filter((w) => !w.startsWith("Paid less than")) })).filter((x) => x.why.length);
 
   return (
     <div className="w-full max-w-3xl mt-8">
@@ -56,6 +60,41 @@ export default function RevenueAnalytics() {
           </div>
         ))}
       </div>
+
+      {summary.length > 0 && (
+        <div className="mt-5">
+          <p className="text-slate-300 text-sm font-medium inline-flex items-center gap-2">
+            <ShieldAlert className="w-4 h-4 text-amber-300" /> Before you pay creators
+          </p>
+          <p className="text-[11px] text-slate-500 mt-0.5 mb-2">
+            Hold payouts for sales from the last {HOLD_DAYS} days (card disputes come then) and for anything flagged below: buying from your own site with a
+            stolen card is the usual way people try to cash out.
+          </p>
+          <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl divide-y divide-slate-700/50">
+            {summary.map((c) => (
+              <div key={c.creatorEmail} className="px-3 py-2 flex items-center justify-between gap-3 text-sm">
+                <span className="text-slate-200 truncate">{c.creatorEmail}</span>
+                <span className="shrink-0 text-xs text-slate-400">
+                  <span className="text-emerald-300 font-semibold">{money(c.ready)}</span> ready ·{" "}
+                  <span className={c.hold ? "text-amber-300 font-semibold" : ""}>{money(c.hold)}</span> hold
+                </span>
+              </div>
+            ))}
+          </div>
+          {flagged.length > 0 && (
+            <div className="mt-2 space-y-1.5">
+              {flagged.slice(0, 20).map(({ r, why }) => (
+                <div key={r.id || r.checkoutSessionId} className="bg-amber-500/10 border border-amber-400/30 rounded-xl px-3 py-2 text-xs">
+                  <p className="text-amber-100">
+                    {r.siteName} · {money(num(r.gross))} · buyer {r.buyerEmail || "unknown"}
+                  </p>
+                  <p className="text-amber-300/90">{why.join(" · ")}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="mt-5 space-y-2">
         <p className="text-slate-300 text-sm font-medium">Top earning sites</p>
