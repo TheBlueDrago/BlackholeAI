@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Download, Upload, LogOut, Mail, Shield, KeyRound, ArrowLeft, Loader2, Crown, Settings, Users, Lock, ShieldCheck, Ticket, Trash2, Gamepad2, Pencil, Eye, EyeOff, Globe, Gift, Smartphone } from "lucide-react";
+import { Download, Upload, LogOut, Mail, Shield, KeyRound, ArrowLeft, Loader2, Crown, Settings, Users, Lock, ShieldCheck, Ticket, Trash2, Gamepad2, Pencil, Eye, EyeOff, Globe, Gift, Smartphone, Building2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import TeamMembership from "@/components/TeamMembership";
 import PublishedSites from "@/components/profile/PublishedSites";
@@ -33,15 +33,15 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
   const installApp = useInstallApp();
   const [iosHelp, setIosHelp] = useState(false);
 
-  // Admins: reported sites and contact messages waiting (badge on the Monitor button).
-  const [openReports, setOpenReports] = useState({ reports: 0, messages: 0 });
+  // Admins: reported sites, contact messages and Enterprise applications waiting (badge on the Monitor button).
+  const [openReports, setOpenReports] = useState({ reports: 0, messages: 0, enterprise: 0 });
   useEffect(() => {
     if (!open || user?.role !== "admin") return;
     Promise.all(
-      ["admin-reports", "contact"].map((fn) =>
+      ["admin-reports", "contact", "enterprise"].map((fn) =>
         base44.functions.invoke(fn, { action: "count" }).then((r) => r.data?.open || 0).catch(() => 0)
       )
-    ).then(([reports, messages]) => setOpenReports({ reports, messages }));
+    ).then(([reports, messages, enterprise]) => setOpenReports({ reports, messages, enterprise }));
   }, [open, user?.role]);
 
   useEffect(() => {
@@ -200,8 +200,10 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
 
   const isPro = user?.plan === "pro" && (!user?.planExpiresAt || new Date(user.planExpiresAt) > new Date());
   const isTeam = user?.plan === "team" && (!user?.planExpiresAt || new Date(user.planExpiresAt) > new Date());
-  const isSecret = user?.role === "admin" || (user?.plan === "secret" && (!user?.planExpiresAt || new Date(user.planExpiresAt) > new Date()));
-  const effPlan = isSecret ? "secret" : isTeam ? "team" : isPro ? "pro" : "free";
+  // Secret can't be bought any more; accounts that already have it still show it.
+  const isSecret = user?.plan === "secret" && (!user?.planExpiresAt || new Date(user.planExpiresAt) > new Date());
+  const isEnterprise = user?.plan === "enterprise" && (!user?.planExpiresAt || new Date(user.planExpiresAt) > new Date());
+  const effPlan = user?.role === "admin" ? "admin" : isEnterprise ? "enterprise" : isSecret ? "secret" : isTeam ? "team" : isPro ? "pro" : "free";
 
   return (
     <AnimatePresence>
@@ -448,7 +450,12 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                       <h3 className="mt-4 text-lg font-semibold text-white">
                         {user.full_name || "Blackhole User"}
                       </h3>
-                      {isSecret ? (
+                      {isEnterprise ? (
+                        <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-gradient-to-r from-violet-500/25 to-indigo-500/25 text-violet-200 border border-violet-400/50">
+                          <Building2 className="w-3 h-3" />
+                          Enterprise
+                        </span>
+                      ) : isSecret ? (
                         <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-black text-slate-100 border border-slate-700">
                           <Lock className="w-3 h-3" />
                           Secret
@@ -490,12 +497,12 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                     >
                       <ShieldCheck className="w-4 h-4" />
                       Monitor
-                      {openReports.reports + openReports.messages > 0 && (
+                      {openReports.reports + openReports.messages + openReports.enterprise > 0 && (
                         <span
                           className="text-[11px] bg-red-500 text-white rounded-full px-1.5 py-0.5 leading-none"
-                          title={`${openReports.reports} reported site(s), ${openReports.messages} message(s) waiting`}
+                          title={`${openReports.reports} reported site(s), ${openReports.messages} message(s), ${openReports.enterprise} Enterprise application(s) waiting`}
                         >
-                          {openReports.reports + openReports.messages}
+                          {openReports.reports + openReports.messages + openReports.enterprise}
                         </span>
                       )}
                     </button>

@@ -26,15 +26,18 @@ export const TIERS = ["ai", "aiCode", "galaxy5", "space5"];
 export const TIER_OF_MODEL = { automatic: "ai", claude_sonnet_4_6: "aiCode", claude_opus_4_8: "galaxy5", "claude-sonnet-5": "space5" };
 export const TIER_NAMES = { ai: "Blackhole AI", aiCode: "Blackhole Code", galaxy5: "Galaxy", space5: "Space" };
 
-// Monthly allowance per plan (same numbers the app has always shown).
-const PLAN_TOTALS = {
+// Monthly allowance per plan (same numbers the app has always shown). Enterprise is per
+// seat: every person in the organization gets these, and the org pays $12 a seat a month.
+// Secret can no longer be bought; accounts that already have it keep it.
+export const PLAN_TOTALS = {
   free: { ai: 50, aiCode: 0, galaxy5: 0, space5: 0 },
   pro: { ai: 100, aiCode: 50, galaxy5: 50, space5: 50 },
   team: { ai: 150, aiCode: 100, galaxy5: 100, space5: 100 },
   secret: { ai: 150, aiCode: 100, galaxy5: 100, space5: 100 },
+  enterprise: { ai: 100, aiCode: 75, galaxy5: 50, space5: 25 },
   admin: { ai: 150, aiCode: 100, galaxy5: 100, space5: 100 },
 };
-const RANK = { free: 0, pro: 1, team: 2, secret: 3, admin: 4 };
+const RANK = { free: 0, pro: 1, team: 2, secret: 3, enterprise: 4, admin: 5 };
 
 // Whole credits: 1 per started 10,000 characters of reply, times the effort level.
 export const CHARS_PER_CREDIT = 10000;
@@ -235,6 +238,8 @@ export async function applyGrant(kv, userId, patch) {
   const key = `grant:${userId}`;
   const grant = await getJSON(kv, key, {});
   for (const f of ["plan", "planExpiresAt", "banned", "blockedUntil"]) if (f in patch) grant[f] = patch[f];
+  // Enterprise: how many people the organization pays for (the owner counts as one).
+  if ("seats" in patch) grant.seats = Math.max(1, Math.min(10000, Math.trunc(Number(patch.seats)) || 1));
   if (patch.bonus && typeof patch.bonus === "object") {
     const b = { ai: 0, aiCode: 0, galaxy5: 0, space5: 0, applied: [] };
     for (const t of TIERS) b[t] = Math.max(0, Number(patch.bonus[t]) || 0);

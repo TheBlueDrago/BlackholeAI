@@ -6,7 +6,7 @@ import { base44 } from "@/api/base44Client";
 import SiteThumb from "@/components/SiteThumb";
 import PublicLayout, { START_FREE } from "@/components/PublicLayout";
 import PricingCards from "@/components/landing/PricingCards";
-import { HeroCollage, ChatShot, SiteShot, GameShot, ShopShot, TeamShot, SafetyShot } from "@/components/landing/ProductShots";
+import { HeroCollage, ChatShot, SiteShot, GameShot, ShopShot, TeamShot, SafetyShot, EnterpriseShot } from "@/components/landing/ProductShots";
 import { CONTACT_EMAIL, CONTACT_PHONE, CONTACT_PHONE_LINK } from "@/lib/company";
 
 const FACTS = [
@@ -56,6 +56,14 @@ const FEATURES = [
     bullets: ["Invite by email", "Everyone builds with the same credits", "$5 a month for the whole team"],
     cta: { to: "/pricing", label: "See pricing" },
     Picture: TeamShot,
+  },
+  {
+    eyebrow: "Enterprise",
+    title: "Bring your whole organization.",
+    text: "For registered businesses and organizations: a seat for everyone, with credits for each person every month. The price depends on how many people you have.",
+    bullets: ["Verified organizations only (LLC, corporation, nonprofit…)", "Every seat: 100 AI, 75 Code, 50 Galaxy and 25 Space credits a month", "Add and remove people yourself"],
+    cta: { to: "/enterprise", label: "Apply for Enterprise" },
+    Picture: EnterpriseShot,
   },
 ];
 
@@ -213,7 +221,7 @@ export default function Landing() {
       <section className="mt-24 sm:mt-32">
         <Reveal className="text-center max-w-2xl mx-auto">
           <h2 className="text-3xl sm:text-5xl font-bold text-white">One place to make anything</h2>
-          <p className="mt-4 text-slate-400 text-lg">Chat, websites, games, shops and teams, all with the same AI helper.</p>
+          <p className="mt-4 text-slate-400 text-lg">Chat, websites, games, shops, teams and whole organizations, all with the same AI helper.</p>
         </Reveal>
         <div className="mt-16 space-y-24 sm:space-y-32">
           {FEATURES.map((f, i) => (

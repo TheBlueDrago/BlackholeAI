@@ -32,6 +32,7 @@ const FOOTER = [
       ["/about", "About us"],
       ["/contact", "Contact us"],
       ["/business", "For business"],
+      ["/enterprise", "Enterprise"],
       ["/contact?topic=partnership", "Partners & investors"],
     ],
   },

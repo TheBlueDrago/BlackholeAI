@@ -2,11 +2,12 @@
 // (User.plan/banned are self-editable via updateMe, so the credit system ignores
 // them). The Monitor page calls this alongside its User update. Also used once to
 // snapshot every existing user's plan and bonus balance when server-side credits
-// went live. Body: { grants: [{ userId, plan?, planExpiresAt?, banned?, blockedUntil?, bonus? }] }
+// went live. Body: { grants: [{ userId, plan?, planExpiresAt?, seats?, banned?, blockedUntil?, bonus? }] }
+// (Secret can't be granted any more; Enterprise takes the number of seats.)
 import { json } from "../../../../../cloudflare-lib/published.js";
 import { currentUser, applyGrant } from "../../../../../cloudflare-lib/credits.js";
 
-const PLANS = ["free", "pro", "team", "secret"];
+const PLANS = ["free", "pro", "team", "enterprise"];
 
 export async function onRequestPost(context) {
   const { request, env } = context;

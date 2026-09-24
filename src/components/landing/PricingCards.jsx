@@ -4,17 +4,20 @@ import { Check } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 import { PUBLIC_PLANS } from "@/lib/publicPlans";
 
-// Free / Pro / Team cards for the public pages. Paid plans are bought from the app's
-// Plans page, so new people sign up first and land there.
+// Free / Pro / Team / Enterprise cards for the public pages. Paid plans are bought from the
+// app's Plans page, so new people sign up first and land there; Enterprise goes to the
+// application page.
 export default function PricingCards() {
   const { isAuthenticated } = useAuth();
   const go = (id) =>
-    id === "free"
+    id === "enterprise"
+      ? "/enterprise"
+      : id === "free"
       ? isAuthenticated ? "/chat" : "/register?returnTo=" + encodeURIComponent("/chat")
       : isAuthenticated ? "/chat/plans" : "/register?returnTo=" + encodeURIComponent("/chat/plans");
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
       {PUBLIC_PLANS.map((p) => (
         <div
           key={p.id}
@@ -44,7 +47,7 @@ export default function PricingCards() {
               p.highlight ? "bg-white text-slate-900 hover:bg-slate-200" : "bg-slate-800 text-white hover:bg-slate-700"
             }`}
           >
-            {p.id === "free" ? "Get started for free" : `Choose ${p.name}`}
+            {p.id === "free" ? "Get started for free" : p.id === "enterprise" ? "Contact sales" : `Choose ${p.name}`}
           </Link>
         </div>
       ))}

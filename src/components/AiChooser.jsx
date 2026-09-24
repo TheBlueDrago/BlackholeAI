@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Code, Gem, Star, ChevronDown, Lock } from "lucide-react";
 import { useAppShell } from "@/components/AppShellContext";
+import { hasProFeatures } from "@/lib/plans";
 
 const OPTIONS = [
   { id: "ai", label: "AI", icon: Sparkles, color: "text-indigo-400" },
@@ -32,7 +33,7 @@ export default function AiChooser({ value, onChange, plan, allowFable }) {
     const left = credits?.[REMAINING[id]];
     if (typeof left === "number" && Number.isFinite(left)) return left > 0;
     if (id === "ai" || id === "code") return true;
-    return plan === "pro" || plan === "team" || plan === "secret" || plan === "admin";
+    return hasProFeatures(plan);
   };
 
   const current = OPTIONS.find((o) => o.id === value) || OPTIONS[0];

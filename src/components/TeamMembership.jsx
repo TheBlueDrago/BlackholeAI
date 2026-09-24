@@ -183,7 +183,7 @@ export default function TeamMembership({ onBack }) {
     return (
       <div className="p-6">
         {backBtn}
-        <h3 className="text-center text-lg font-bold text-white">Team Membership</h3>
+        <h3 className="text-center text-lg font-bold text-white">{isEnterprise ? "Your organization" : "Team Membership"}</h3>
         <div className="mt-6 rounded-2xl bg-slate-800/40 border border-slate-700/40 p-4 space-y-2 text-sm">
           <div className="flex justify-between"><span className="text-slate-400">Plan</span><span className="text-slate-200">Secret (Admin)</span></div>
           <div className="flex justify-between"><span className="text-slate-400">Blackhole AI credits</span><span className="text-slate-200">50</span></div>
@@ -200,8 +200,12 @@ export default function TeamMembership({ onBack }) {
   const members = team.memberEmails ?? [];
   const isOwner = team.isOwner;
   const isSecretTeam = team.ownerPlan === "secret";
-  const memberCap = isSecretTeam ? 4 : 2;
-  const slots = isSecretTeam ? [0, 1, 2, 3] : [0, 1];
+  const isEnterprise = team.ownerPlan === "enterprise";
+  // How many people besides the owner (from the server; Enterprise follows its seats).
+  const memberCap = typeof team.cap === "number" ? team.cap : isSecretTeam ? 4 : 2;
+  // Enterprise can have many seats, so it shows a list instead of a circle per seat.
+  const slots = isEnterprise ? [] : Array.from({ length: memberCap }, (_, i) => i);
+  const planName = isEnterprise ? "Enterprise" : isSecretTeam ? "Secret" : "Team";
   const full = members.length >= memberCap;
   const myEmail = (me?.email ?? "").toLowerCase();
   const iAmPending = (team.pendingRemovalEmails ?? []).map((e) => String(e).toLowerCase()).includes(myEmail);
@@ -211,8 +215,30 @@ export default function TeamMembership({ onBack }) {
       {backBtn}
       <h3 className="text-center text-lg font-bold text-white">Team Membership</h3>
 
-      {/* Owner + 2 member slots */}
-      <div className="flex items-center justify-center gap-4 mt-6">
+      {isEnterprise && (
+        <div className="mt-5">
+          <p className="text-center text-sm text-slate-300">
+            {members.length + 1} of {memberCap + 1} seats used
+          </p>
+          <div className="mt-3 max-h-48 overflow-y-auto sidebar-scroll space-y-1.5">
+            {members.map((m) => (
+              <button
+                key={m}
+                onClick={() => mode === "remove" && toggleSelect(m)}
+                className={`w-full text-left px-3 py-2 rounded-lg text-sm truncate border ${
+                  mode === "remove" && selected.includes(m) ? "border-red-500/60 bg-red-950/30 text-red-100" : "border-slate-700/50 bg-slate-800/50 text-slate-200"
+                }`}
+              >
+                {m}
+              </button>
+            ))}
+            {members.length === 0 && <p className="text-center text-xs text-slate-500">No one added yet.</p>}
+          </div>
+        </div>
+      )}
+
+      {/* Owner + member slots */}
+      <div className={`flex items-center justify-center gap-4 mt-6 ${isEnterprise ? "hidden" : ""}`}>
         <MemberCircle kind="owner" />
         {slots.map((i) => {
           const m = members[i];
@@ -248,12 +274,25 @@ export default function TeamMembership({ onBack }) {
                 Remove
               </button>
             ) : (
-              <button
-                onClick={() => setShowAdd(true)}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-500 text-white font-medium hover:opacity-90"
-              >
-                {members.length === 0 ? `Add ${memberCap} people` : `Add ${memberCap - members.length} more`}
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowAdd(true)}
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-500 text-white font-medium hover:opacity-90"
+                >
+                  {isEnterprise ? "Add people" : members.length === 0 ? `Add ${memberCap} people` : `Add ${memberCap - members.length} more`}
+                </button>
+                {isEnterprise && members.length > 0 && (
+                  <button
+                    onClick={() => {
+                      setMode("remove");
+                      setSelected([]);
+                    }}
+                    className="px-5 py-2.5 rounded-xl bg-slate-800 text-slate-200 font-medium hover:bg-slate-700"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
             )
           ) : (
             <div className="flex gap-2">
@@ -311,12 +350,16 @@ export default function TeamMembership({ onBack }) {
       <div className="mt-6 rounded-2xl bg-slate-800/40 border border-slate-700/40 p-4 space-y-2 text-sm">
         <div className="flex justify-between">
           <span className="text-slate-400">Plan</span>
-          <span className="text-slate-200">{isSecretTeam ? "Secret" : "Team"}</span>
+          <span className="text-slate-200">{planName}</span>
         </div>
-        <div className="flex justify-between">
-          <span className="text-slate-400">Shared Blackhole Code credits</span>
-          <span className="text-slate-200">{team.aiCodeUsed ?? 0} / 25</span>
-        </div>
+        {isEnterprise ? (
+          <p className="text-xs text-slate-400">Everyone gets 100 Blackhole AI, 75 Code, 50 Galaxy and 25 Space credits a month.</p>
+        ) : (
+          <div className="flex justify-between">
+            <span className="text-slate-400">Shared Blackhole Code credits</span>
+            <span className="text-slate-200">{team.aiCodeUsed ?? 0} / 25</span>
+          </div>
+        )}
         {team.isPromo && team.ownerPlanExpiresAt && (
           <div className="flex justify-between">
             <span className="text-slate-400">Promo ends</span>

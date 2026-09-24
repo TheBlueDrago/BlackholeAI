@@ -63,7 +63,9 @@ export default function TeamWelcomePopup({ onAddPeople }) {
             </div>
             <h3 className="text-lg font-semibold text-white">Redeem your membership</h3>
             <p className="text-slate-400 text-sm mt-2">
-              Add up to {ownerPlan === "secret" ? 4 : 2} people to your {ownerPlan === "secret" ? "Secret" : "Team"} now, or add them later from your account → Settings → Membership.
+              {ownerPlan === "enterprise"
+                ? "Add the people in your organization now, or later from your account → Settings → Membership."
+                : `Add up to ${ownerPlan === "secret" ? 4 : 2} people to your ${ownerPlan === "secret" ? "Secret" : "Team"} now, or add them later from your account → Settings → Membership.`}
             </p>
             <div className="flex gap-3 mt-5">
               <button

@@ -6,11 +6,23 @@
 //                        ownerLeaving, ownerPlan, ownerPlanAt }
 //   teamof:<email>  -> ownerId (which team a member belongs to)
 //
-// A team exists for anyone whose own plan is Team or Secret (or an admin). Members get
+// A team exists for anyone whose own plan is Team, Secret or Enterprise (or an admin). Members get
 // the team plan while the owner still has it: ownerPlan is refreshed whenever the owner
 // uses the app, and a record not refreshed for OWNER_STALE_DAYS stops granting access.
-export const TEAM_PLANS = ["team", "secret", "admin"];
+export const TEAM_PLANS = ["team", "secret", "enterprise", "admin"];
 export const TEAM_CAP = { team: 2, secret: 4, admin: 4 };
+
+// Enterprise organizations have as many seats as they pay for (set by an admin in
+// grant:<ownerId>, see applyGrant in credits.js); the owner takes one of them.
+export async function seatsOf(kv, ownerId) {
+  const grant = await getJSON(kv, `grant:${ownerId}`, null);
+  return Math.max(1, Math.trunc(Number(grant && grant.seats)) || 1);
+}
+async function capOf(kv, ownerId, plan) {
+  return plan === "enterprise" ? (await seatsOf(kv, ownerId)) - 1 : TEAM_CAP[plan];
+}
+// The plan a member gets from their owner's plan.
+const memberPlan = (ownerPlan) => (ownerPlan === "enterprise" ? "enterprise" : ownerPlan === "secret" || ownerPlan === "admin" ? "secret" : "team");
 const OWNER_STALE_DAYS = 35;
 
 async function getJSON(kv, key, fallback) {
@@ -67,7 +79,7 @@ function teamActive(team) {
 // For credits: which shared pool (if any) this user draws Blackhole Code from, and the
 // plan a membership gives. basePlan is the user's own plan (admin, grant or payment).
 export async function teamFor(kv, user, basePlan) {
-  if (["team", "secret"].includes(basePlan)) {
+  if (["team", "secret", "enterprise"].includes(basePlan)) {
     await refreshOwnerPlan(kv, user, basePlan);
     return { plan: basePlan, teamId: user.id };
   }
@@ -77,7 +89,7 @@ export async function teamFor(kv, user, basePlan) {
   if (!ownerId || ownerId === user.id) return null;
   const team = await readTeam(kv, ownerId);
   if (!team || !team.memberEmails.includes(email) || !teamActive(team)) return null;
-  return { plan: team.ownerPlan === "secret" || team.ownerPlan === "admin" ? "secret" : "team", teamId: ownerId };
+  return { plan: memberPlan(team.ownerPlan), teamId: ownerId };
 }
 
 // The shape the Team screens expect (formerly from Base44's my-team).
@@ -99,6 +111,7 @@ export async function myTeam(kv, user, basePlan, aiCodeUsed) {
       ownerPlanExpiresAt: null,
       isPromo: false,
       isAdmin,
+      cap: await capOf(kv, user.id, basePlan),
     };
   }
   const email = cleanEmail(user.email);
@@ -119,13 +132,14 @@ export async function myTeam(kv, user, basePlan, aiCodeUsed) {
     ownerPlanExpiresAt: null,
     isPromo: false,
     isAdmin: false,
+    cap: await capOf(kv, ownerId, team.ownerPlan),
   };
 }
 
 export async function invite(kv, owner, basePlan, emails) {
-  if (!TEAM_PLANS.includes(basePlan)) throw new Error("Only a Team or Secret plan owner can invite members.");
+  if (!TEAM_PLANS.includes(basePlan)) throw new Error("Only a Team or Enterprise plan owner can invite members.");
   const team = (await readTeam(kv, owner.id)) || blankTeam(owner, basePlan);
-  const cap = TEAM_CAP[basePlan];
+  const cap = await capOf(kv, owner.id, basePlan);
   const own = cleanEmail(owner.email);
   for (const raw of Array.isArray(emails) ? emails : [emails]) {
     const e = cleanEmail(raw);

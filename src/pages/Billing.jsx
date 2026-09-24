@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Loader2, ShieldCheck, Users, Lock } from "lucide-react";
+import { ArrowLeft, Loader2, ShieldCheck, Users } from "lucide-react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { paymentError } from "@/lib/paymentError";
@@ -8,22 +8,12 @@ import { paymentError } from "@/lib/paymentError";
 export default function Billing() {
   const navigate = useNavigate();
   const location = useLocation();
-  const productId = location.state?.productId ?? "pro";
+  const requested = location.state?.productId ?? "pro";
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [agreed, setAgreed] = useState(false);
 
   const PLANS = {
-    secret: {
-      name: "Secret Plan",
-      price: "$10 / month",
-      gradient: "from-slate-800 to-black",
-      glow: "bg-fuchsia-600/10",
-      // Must match PLAN_TOTALS in cloudflare-lib/credits.js (what the server actually gives).
-      features: ["4 AI's (incl. Galaxy and Space)", "5 people total — invite up to 4", "150 Blackhole AI credits / month", "100 Blackhole Code credits / month", "100 Galaxy credits / month", "100 Space credits / month"],
-      button: "Subscribe — $10/mo",
-      icon: Lock,
-    },
     team: {
       name: "Team Plan",
       price: "$5 / month",
@@ -43,7 +33,9 @@ export default function Billing() {
       icon: ShieldCheck,
     },
   };
-  const plan = PLANS[productId] ?? PLANS.pro;
+  // Only plans that can be bought here; anything else (e.g. the old Secret) is Pro.
+  const productId = PLANS[requested] ? requested : "pro";
+  const plan = PLANS[productId];
 
   const startCheckout = async () => {
     setError("");
@@ -82,7 +74,7 @@ export default function Billing() {
           Billing
         </span>
       </h1>
-      <p className="text-slate-400 mt-3 text-center">Upgrade to {productId === "secret" ? "Secret" : productId === "team" ? "Team" : "Pro"}</p>
+      <p className="text-slate-400 mt-3 text-center">Upgrade to {productId === "team" ? "Team" : "Pro"}</p>
 
       <div className="mt-10 w-full max-w-md bg-slate-900/70 backdrop-blur-xl border border-slate-700/40 rounded-3xl p-8 shadow-2xl">
         <div className="flex items-center gap-3">

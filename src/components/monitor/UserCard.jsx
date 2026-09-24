@@ -7,6 +7,7 @@ function PlanBadge({ plan }) {
     pro: { label: "Pro", cls: "bg-amber-500/20 text-amber-200 border border-amber-400/40" },
     team: { label: "Team", cls: "bg-sky-500/20 text-sky-200 border border-sky-400/40" },
     secret: { label: "Secret", cls: "bg-black text-slate-100 border border-slate-600" },
+    enterprise: { label: "Enterprise", cls: "bg-violet-500/20 text-violet-200 border border-violet-400/40" },
   };
   const m = map[plan] || map.free;
   return <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${m.cls}`}>{m.label}</span>;

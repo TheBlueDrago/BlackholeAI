@@ -12,6 +12,7 @@ import AiChooser from "@/components/AiChooser";
 import { siteLimit } from "@/lib/publishLimits";
 import { resetDesignerProject, loadDesignerHtmlIntoProject } from "@/lib/designerStore";
 import { SITE_TEMPLATES } from "@/lib/siteTemplates";
+import { hasProFeatures, hasSpace } from "@/lib/plans";
 
 const SUGGESTIONS = [
   "A portfolio site for a photographer",
@@ -170,8 +171,8 @@ export default function DesignerDashboard() {
   const [takenDown, setTakenDown] = useState(() => new Set());
   const textareaRef = useRef(null);
 
-  const opusAllowed = effPlan === "pro" || effPlan === "team" || effPlan === "secret" || effPlan === "admin";
-  const fableAllowed = effPlan === "team" || effPlan === "secret" || effPlan === "admin";
+  const opusAllowed = hasProFeatures(effPlan);
+  const fableAllowed = hasSpace(effPlan);
 
   const load = async () => {
     setLoading(true);

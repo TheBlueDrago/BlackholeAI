@@ -13,7 +13,6 @@ export function PlansView() {
       onFree={shell.goBack}
       onPro={() => shell.goBilling("pro")}
       onTeam={() => shell.goBilling("team")}
-      onSecret={() => shell.goBilling("secret")}
     />
   );
 }

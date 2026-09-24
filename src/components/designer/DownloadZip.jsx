@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { Download, Loader2, Lock } from "lucide-react";
 import JSZip from "jszip";
+import { hasProFeatures } from "@/lib/plans";
 
 export default function DownloadZip({ html, name, plan, onUpgrade }) {
   const [downloading, setDownloading] = useState(false);
-  const canDownload = plan === "pro" || plan === "team" || plan === "secret" || plan === "admin";
+  const canDownload = hasProFeatures(plan);
 
   const handleDownload = async () => {
     if (!canDownload || !html || downloading) return;

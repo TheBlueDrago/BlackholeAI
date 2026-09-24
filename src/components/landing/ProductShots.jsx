@@ -1,5 +1,5 @@
 import React from "react";
-import { ShieldCheck, Check, Flag, Sparkles, ShoppingBag, Users } from "lucide-react";
+import { ShieldCheck, Check, Flag, Sparkles, ShoppingBag, Users, Building2, BadgeCheck } from "lucide-react";
 import SiteThumb from "@/components/SiteThumb";
 import BlackholeIcon from "@/components/BlackholeIcon";
 import { SITE_TEMPLATES } from "@/lib/siteTemplates";
@@ -168,6 +168,45 @@ export function TeamShot({ className = "" }) {
         <div className="mt-1 h-2 rounded-full bg-slate-800 overflow-hidden">
           <div className="h-full w-3/4 bg-gradient-to-r from-sky-400 to-indigo-500" />
         </div>
+      </div>
+    </div>
+  );
+}
+
+export function EnterpriseShot({ className = "" }) {
+  const seats = [
+    ["A", "from-violet-500 to-indigo-500"],
+    ["B", "from-sky-500 to-cyan-500"],
+    ["C", "from-fuchsia-500 to-rose-500"],
+    ["D", "from-emerald-500 to-teal-500"],
+    ["E", "from-amber-500 to-orange-500"],
+    ["F", "from-indigo-500 to-sky-500"],
+  ];
+  return (
+    <div className={`rounded-2xl bg-slate-900/95 border border-slate-700/70 shadow-2xl shadow-indigo-950/60 p-5 ${className}`}>
+      <div className="flex items-center gap-3">
+        <span className="w-11 h-11 rounded-xl bg-violet-500/15 border border-violet-400/40 flex items-center justify-center">
+          <Building2 className="w-6 h-6 text-violet-300" />
+        </span>
+        <span className="min-w-0">
+          <span className="flex items-center gap-1.5 text-sm font-semibold text-white">
+            Northside Dental LLC <BadgeCheck className="w-4 h-4 text-sky-400" />
+          </span>
+          <span className="block text-xs text-slate-500">Verified organization · 24 seats</span>
+        </span>
+      </div>
+      <div className="mt-4 flex -space-x-2">
+        {seats.map(([l, c]) => (
+          <span key={l} className={`w-9 h-9 rounded-full ring-2 ring-slate-900 bg-gradient-to-br ${c} flex items-center justify-center text-xs font-bold text-white`}>{l}</span>
+        ))}
+        <span className="w-9 h-9 rounded-full ring-2 ring-slate-900 bg-slate-700 flex items-center justify-center text-[11px] font-semibold text-slate-200">+18</span>
+      </div>
+      <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
+        {[["Blackhole AI", "100"], ["Code", "75"], ["Galaxy", "50"], ["Space", "25"]].map(([n, v]) => (
+          <span key={n} className="rounded-lg bg-slate-800/70 border border-slate-700/50 px-3 py-2 text-slate-400">
+            {n} <b className="block text-white text-sm">{v} / seat</b>
+          </span>
+        ))}
       </div>
     </div>
   );

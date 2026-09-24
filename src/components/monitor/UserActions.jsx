@@ -4,7 +4,8 @@ import { Crown, Ban, Clock, ShieldCheck } from "lucide-react";
 const UNIT_MS = { days: 86400000, months: 30 * 86400000, years: 365 * 86400000 };
 
 export default function UserActions({ user, onApply }) {
-  const [plan, setPlan] = useState(user.plan || "free");
+  const [plan, setPlan] = useState(user.plan === "secret" ? "free" : user.plan || "free");
+  const [seats, setSeats] = useState(5);
   const [days, setDays] = useState(30);
   const [forever, setForever] = useState(false);
   const [bN, setBN] = useState(1);
@@ -25,10 +26,10 @@ export default function UserActions({ user, onApply }) {
 
   const applyPlan = () => {
     let planExpiresAt = null;
-    if (plan !== "free" && plan !== "secret" && !forever) {
+    if (plan !== "free" && !forever) {
       planExpiresAt = new Date(Date.now() + days * UNIT_MS.days).toISOString();
     }
-    run({ plan, planExpiresAt });
+    run(plan === "enterprise" ? { plan, planExpiresAt, seats } : { plan, planExpiresAt });
   };
 
   const ban = () => run({ banned: true, blockedUntil: null });
@@ -47,9 +48,21 @@ export default function UserActions({ user, onApply }) {
           <option value="free">Free</option>
           <option value="pro">Pro</option>
           <option value="team">Team</option>
-          <option value="secret">Secret</option>
+          <option value="enterprise">Enterprise</option>
         </select>
-        {(plan === "pro" || plan === "team") && (
+        {plan === "enterprise" && (
+          <>
+            <input
+              type="number"
+              min={2}
+              value={seats}
+              onChange={(e) => setSeats(Math.max(2, Number(e.target.value) || 2))}
+              className="w-16 bg-slate-800 border border-slate-700/60 rounded-lg px-2 py-1.5 text-xs text-white outline-none"
+            />
+            <span className="text-xs text-slate-400">seats</span>
+          </>
+        )}
+        {(plan === "pro" || plan === "team" || plan === "enterprise") && (
           <>
             <input
               type="number"

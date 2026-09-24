@@ -10,7 +10,6 @@ export default function Plans() {
         onFree={() => navigate("/chat")}
         onPro={() => navigate("/billing", { state: { productId: "pro" } })}
         onTeam={() => navigate("/billing", { state: { productId: "team" } })}
-        onSecret={() => navigate("/billing", { state: { productId: "secret" } })}
       />
     </div>
   );

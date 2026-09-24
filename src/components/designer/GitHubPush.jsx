@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Github, Loader2, Check, X, ChevronDown, Upload, Crown } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { hasProFeatures } from "@/lib/plans";
 
 const CONNECTOR_ID = "6aa8a3d7b5e549c2a9d23e26";
 
 export default function GitHubPush({ html, siteName, plan, onUpgrade }) {
-  const canConnect = plan === "pro" || plan === "team" || plan === "secret" || plan === "admin";
+  const canConnect = hasProFeatures(plan);
   const [open, setOpen] = useState(false);
   const [connected, setConnected] = useState(false);
   const [repos, setRepos] = useState([]);

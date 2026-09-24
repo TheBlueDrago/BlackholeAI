@@ -31,6 +31,7 @@ import { EDIT_NOTE, hasEditBlocks, applyEdits } from "@/lib/htmlEdits";
 import { DESIGNER_STORE_KEY } from "@/lib/designerStore";
 import { saveBuilds, loadBuilds } from "@/lib/buildHistory";
 import { loadImages, onImagesChange, addImageFile, expandImages, packImages } from "@/lib/siteImages";
+import { hasProFeatures, hasSpace } from "@/lib/plans";
 
 const STORE_KEY = DESIGNER_STORE_KEY;
 const TAKEN_KEY = "infinity-ai-taken-sites";
@@ -153,7 +154,7 @@ function sanitizeSite(s) {
 }
 
 function capFor(plan) {
-  if (plan === "secret") return 5;
+  if (plan === "secret" || plan === "enterprise") return 5;
   if (plan === "team" || plan === "pro") return 3;
   return 2;
 }
@@ -185,8 +186,8 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   const [saveState, setSaveState] = useState("saved");
   const [nameTaken, setNameTaken] = useState(false);
   const [isRepublish, setIsRepublish] = useState(false);
-  const opusAllowed = plan === "pro" || plan === "team" || plan === "secret" || plan === "admin";
-  const fableAllowed = plan === "team" || plan === "secret" || plan === "admin";
+  const opusAllowed = hasProFeatures(plan);
+  const fableAllowed = hasSpace(plan);
   const [selectedAi, setSelectedAi] = useState(fableAllowed ? "fable" : opusAllowed ? "opus5" : "ai");
   const [files, setFiles] = useState([]);
   const [focused, setFocused] = useState(false);

@@ -86,6 +86,7 @@ Deno.serve(async (req: Request) => {
     //   if (!product) return new Response(JSON.stringify({ error: "Unknown product" }), { status: 400 });
     //   const productName = product.name; const price = String(product.price); const currency = product.currency ?? "USD";
     // Resolve the product and its price SERVER-SIDE. Only a product id comes from the client.
+    // (Secret is no longer sold; Enterprise is quoted per seat after an application.)
     const PRODUCTS = {
       pro: {
         name: "Pro Plan",
@@ -105,16 +106,6 @@ Deno.serve(async (req: Request) => {
           subscriptionSettings: { frequency: "MONTH" },
           title: "Team Plan",
           description: "150 Blackhole AI, 100 Code, 100 Galaxy 5, 100 Space 5 shared credits, and up to 2 members (3 with you), billed monthly",
-        },
-      },
-      secret: {
-        name: "Secret Plan",
-        price: "10.00",
-        currency: "USD",
-        subscriptionInfo: {
-          subscriptionSettings: { frequency: "MONTH" },
-          title: "Secret Plan",
-          description: "150 Blackhole AI, 100 Code, 100 Galaxy 5, 100 Space 5 shared credits, and up to 4 members (5 with you), billed monthly",
         },
       },
     };

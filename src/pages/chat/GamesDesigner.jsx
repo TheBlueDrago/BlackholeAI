@@ -32,6 +32,7 @@ import EffortPicker from "@/components/chat/EffortPicker";
 import { EXPLAIN_NOTE, splitBuildReply, introBeforeCode } from "@/lib/buildReply";
 import { GAME_DESIGNER_STORE_KEY } from "@/lib/gameDesignerStore";
 import { notifyGamesChanged } from "@/lib/gameEvents";
+import { hasProFeatures, hasSpace } from "@/lib/plans";
 
 const STORE_KEY = GAME_DESIGNER_STORE_KEY;
 const TAKEN_KEY = "infinity-ai-taken-games";
@@ -160,8 +161,8 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
   const [isRepublish, setIsRepublish] = useState(false);
   const [files, setFiles] = useState([]);
   const [focused, setFocused] = useState(false);
-  const opusAllowed = plan === "pro" || plan === "team" || plan === "secret";
-  const fableAllowed = plan === "team" || plan === "secret" || plan === "admin";
+  const opusAllowed = hasProFeatures(plan);
+  const fableAllowed = hasSpace(plan);
   const [selectedAi, setSelectedAi] = useState(fableAllowed ? "fable" : opusAllowed ? "opus5" : "ai");
   const buildMode = useBuildMode(selectedAi);
   const [effort, setEffort] = useEffort();

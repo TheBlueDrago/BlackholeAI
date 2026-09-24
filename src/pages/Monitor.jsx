@@ -7,6 +7,7 @@ import UserDetail from "@/components/monitor/UserDetail";
 import RevenueAnalytics from "@/components/monitor/RevenueAnalytics";
 import ReportedSites from "@/components/monitor/ReportedSites";
 import Messages from "@/components/monitor/Messages";
+import EnterpriseApps from "@/components/monitor/EnterpriseApps";
 import PublishedContent from "@/components/monitor/PublishedContent";
 
 export default function Monitor({ onBack }) {
@@ -138,6 +139,7 @@ export default function Monitor({ onBack }) {
       )}
 
       {!loading && !q && <ReportedSites />}
+      {!loading && !q && <EnterpriseApps />}
       {!loading && !q && <Messages />}
       {!loading && !q && <RevenueAnalytics />}
 

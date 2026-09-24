@@ -47,8 +47,9 @@ export default function Business() {
         <div className="mt-8">
           <PricingCards />
         </div>
-        <p className="text-center mt-4">
+        <p className="text-center mt-4 flex flex-wrap justify-center gap-x-6 gap-y-2">
           <Link to="/templates" className="text-sm text-indigo-300 hover:text-indigo-200">Start from a free template →</Link>
+          <Link to="/enterprise" className="text-sm text-violet-300 hover:text-violet-200">Enterprise for registered businesses →</Link>
         </p>
       </section>
 

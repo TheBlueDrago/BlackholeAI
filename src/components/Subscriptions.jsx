@@ -119,7 +119,44 @@ function TeamCard({ onTeam }) {
   );
 }
 
-export default function Subscriptions({ onFree, onPro, onTeam, onSecret }) {
+function EnterpriseCard({ onEnterprise }) {
+  const features = [
+    "For registered organizations (LLC, corporation, nonprofit…)",
+    "As many seats as you need",
+    "Every seat gets 100 Blackhole AI, 75 Code, 50 Galaxy and 25 Space credits a month",
+    "All 4 AI's, ZIP download and GitHub push",
+    "10 published websites and 10 new games a month",
+  ];
+  return (
+    <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-violet-500/60 rounded-3xl p-6 shadow-2xl shadow-violet-500/10 flex flex-col">
+      <div className="flex items-center justify-between">
+        <h3 className="text-xl font-bold text-white">Enterprise</h3>
+        <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/40">Custom</span>
+      </div>
+      <div className="h-px bg-slate-700/60 my-4" />
+      <ul className="space-y-3 flex-1">
+        {features.map((f) => (
+          <li key={f} className="flex items-start gap-2 text-slate-200 text-sm">
+            <Check className="w-4 h-4 text-violet-400 mt-0.5 shrink-0" />
+            <span>{f}</span>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-4 pt-4 border-t border-slate-700/40">
+        <p className="text-xs text-slate-400 leading-relaxed">Price and credits depend on how many people use it. Tell us about your organization and we'll send a quote.</p>
+      </div>
+      <button
+        onClick={onEnterprise}
+        className="mt-4 w-full inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-500 text-white font-medium hover:opacity-90 transition-opacity"
+      >
+        Contact sales
+        <ArrowRight className="w-4 h-4" />
+      </button>
+    </div>
+  );
+}
+
+export default function Subscriptions({ onFree, onPro, onTeam }) {
   const navigate = useNavigate();
   const [promoInput, setPromoInput] = useState("");
   const [promoBusy, setPromoBusy] = useState(false);
@@ -153,20 +190,15 @@ export default function Subscriptions({ onFree, onPro, onTeam, onSecret }) {
       animate={{ opacity: 1, transition: { duration: 0.6, ease: "easeInOut" } }}
     >
       <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-center">
-        <button
-          type="button"
-          onClick={onSecret}
-          className="bh-wordmark bg-gradient-to-r from-white via-indigo-200 to-fuchsia-200 bg-clip-text text-transparent cursor-pointer select-none"
-        >
-          Subscriptions
-        </button>
+        <span className="bh-wordmark bg-gradient-to-r from-white via-indigo-200 to-fuchsia-200 bg-clip-text text-transparent">Subscriptions</span>
       </h1>
       <p className="text-slate-400 mt-3 text-center">Choose the plan that fits you</p>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10 max-w-5xl w-full">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mt-10 max-w-7xl w-full">
         <FreeCard onFree={onFree} />
         <Plan2Card onPro={onPro} />
         <TeamCard onTeam={onTeam} />
+        <EnterpriseCard onEnterprise={() => navigate("/enterprise")} />
       </div>
 
       <div className="mt-10 w-full max-w-md mx-auto">
