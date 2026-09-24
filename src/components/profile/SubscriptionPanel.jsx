@@ -18,6 +18,9 @@ const TIER_NAMES = [
   ["space5", "Space"],
 ];
 
+// Accounts with a practically endless bonus (e.g. the owner's) show "Unlimited", not 1e+91.
+const HUGE = 1e6;
+
 const fmtDate = (iso) => new Date(iso).toLocaleDateString(undefined, { month: "long", day: "numeric" });
 function timeLeft(iso) {
   const ms = new Date(iso).getTime() - Date.now();
@@ -97,9 +100,7 @@ export default function SubscriptionPanel({ onBack, onManagePeople }) {
                 <div key={k}>
                   <div className="flex justify-between text-xs text-slate-400">
                     <span>{name}</span>
-                    <span>
-                      {t.remaining} of {t.total} left
-                    </span>
+                    <span>{t.total >= HUGE ? "Unlimited" : `${t.remaining} of ${t.total} left`}</span>
                   </div>
                   <div className="mt-1 h-1.5 rounded-full bg-slate-800 overflow-hidden">
                     <div className="h-full bg-gradient-to-r from-indigo-400 to-fuchsia-400" style={{ width: `${pct}%` }} />
