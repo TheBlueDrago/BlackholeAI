@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Loader2, ExternalLink } from "lucide-react";
+import { Loader2, ExternalLink, Flag } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import SiteThumb from "@/components/SiteThumb";
 import { Link } from "react-router-dom";
@@ -55,24 +55,28 @@ export default function Showcase() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {sites.map((s) => (
-            <a
-              key={s.name}
-              href={siteUrl(s.name) || "/showcase"}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group rounded-2xl bg-slate-900/60 border border-slate-700/50 p-3 hover:border-indigo-500/50 transition-colors"
-            >
-              <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-slate-800">
-                <SiteThumb name={s.name} />
-              </div>
-              <div className="flex items-center gap-2 mt-3 px-1">
-                <div className="min-w-0 flex-1">
-                  <p className="text-white text-sm font-medium truncate">{s.title || s.name}</p>
-                  <p className="text-[11px] text-slate-500 truncate">{s.name}.blackhole-ai-tech.com</p>
+            <div key={s.name} className="rounded-2xl bg-slate-900/60 border border-slate-700/50 p-3 hover:border-indigo-500/50 transition-colors">
+              <a href={siteUrl(s.name) || "/showcase"} target="_blank" rel="noopener noreferrer" className="group block">
+                <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-slate-800">
+                  <SiteThumb name={s.name} />
                 </div>
-                <ExternalLink className="w-4 h-4 text-slate-500 group-hover:text-slate-300 shrink-0" />
-              </div>
-            </a>
+                <div className="flex items-center gap-2 mt-3 px-1">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-white text-sm font-medium truncate">{s.title || s.name}</p>
+                    <p className="text-[11px] text-slate-400 truncate">{s.name}.blackhole-ai-tech.com</p>
+                  </div>
+                  <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-slate-200 shrink-0" />
+                </div>
+              </a>
+              {/* Made by people, not us: anyone can flag one that breaks the rules. */}
+              <Link
+                to={`/report?${new URLSearchParams({ kind: "site", name: s.name })}`}
+                className="mt-2 ml-1 inline-flex items-center gap-1 text-[11px] text-slate-400 hover:text-red-300"
+                aria-label={`Report ${s.title || s.name}`}
+              >
+                <Flag className="w-3 h-3" /> Report
+              </Link>
+            </div>
           ))}
         </div>
       )}
