@@ -28,3 +28,41 @@ export async function countPlay(kv, name, userId) {
     // KV daily write limit: skip counting rather than fail the game.
   }
 }
+
+// Plays Base44 counted before counting moved here (2026-09-23) are frozen: captured once from
+// the PublishedGame rows into the "legacyplays" key. Owners can edit their own rows, so after
+// that the rows' plays field is never trusted again: a made-up number can't lift a game up
+// the "Top Games" list. `loadRows()` -> the rows (only called while there's no snapshot).
+const LEGACY_KEY = "legacyplays";
+
+export async function legacyPlays(kv, loadRows) {
+  if (!kv) return {};
+  try {
+    const saved = await kv.get(LEGACY_KEY, "json");
+    if (saved) return saved;
+  } catch {
+    return {};
+  }
+  if (!loadRows) return {};
+  const rows = await loadRows().catch(() => null);
+  if (!Array.isArray(rows)) return {}; // try again next time
+  const snap = {};
+  for (const r of rows) {
+    const n = Math.trunc(Number(r && r.plays) || 0);
+    if (r && r.name && n > 0) snap[r.name] = n;
+  }
+  try {
+    await kv.put(LEGACY_KEY, JSON.stringify(snap));
+  } catch {
+    // KV write limit: use it for this answer, save it next time
+  }
+  return snap;
+}
+
+// Every game's plays: the frozen Base44 count plus the players counted here. -> { name: n }
+export async function totalPlays(kv, loadRows) {
+  const [counted, legacy] = await Promise.all([readPlays(kv), legacyPlays(kv, loadRows)]);
+  const out = { ...legacy };
+  for (const [name, g] of Object.entries(counted)) out[name] = (out[name] || 0) + ((g && g.count) || 0);
+  return out;
+}

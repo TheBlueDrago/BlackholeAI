@@ -2,12 +2,12 @@
 // once the Base44 integration allowance ran out). Same contract:
 // { name } -> { html, id, title, genre, plays }. Runs the same checks as get-site-html
 // (admin take-down, forms that send passwords/cards elsewhere) and counts the play.
-import { json } from "../../../../../cloudflare-lib/published.js";
+import { json, base44 } from "../../../../../cloudflare-lib/published.js";
 import { isBlocked } from "../../../../../cloudflare-lib/reports.js";
 import { pageFor } from "../../../../../cloudflare-lib/pagesource.js";
 import { removedPage } from "../../../../../cloudflare-lib/pageserve.js";
 import { currentUser } from "../../../../../cloudflare-lib/credits.js";
-import { countPlay, readPlays } from "../../../../../cloudflare-lib/plays.js";
+import { countPlay, totalPlays } from "../../../../../cloudflare-lib/plays.js";
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -20,9 +20,10 @@ export async function onRequestPost(context) {
     const page = await pageFor(request, kv, "game", name);
     if (!page) return json({ error: "not found" }, 404);
     const game = page.rec;
-    const extra = (await readPlays(kv))[name];
-    const reply = (html) =>
-      json({ html, id: game.id, title: game.title || game.name, genre: game.genre, plays: (game.plays || 0) + ((extra && extra.count) || 0) });
+    // Base44's frozen count plus the players counted here (the record's own plays field can be
+    // edited by its owner, so it isn't used; see totalPlays).
+    const plays = (await totalPlays(kv, () => base44(request, "GET", "entities/PublishedGame?limit=1000")))[name] || 0;
+    const reply = (html) => json({ html, id: game.id, title: game.title || game.name, genre: game.genre, plays });
 
     if (kv && (await isBlocked(kv, "game", name))) return reply(removedPage("game"));
     if (page.removed) return reply(removedPage("game", page.removed));

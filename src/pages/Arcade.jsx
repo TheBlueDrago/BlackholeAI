@@ -34,9 +34,9 @@ export default function Arcade() {
     const builtIns = builtInGameEntities();
     Promise.all([
       base44.entities.PublishedGame.list("-plays", 500).catch(() => []),
-      base44.functions.invoke("game-plays").then((r) => r.data?.plays || {}).catch(() => ({})),
-    ]).then(([list, extra]) => {
-      const real = (list || []).filter((g) => !g.hidden).map((g) => ({ ...g, plays: (g.plays || 0) + (extra[g.name] || 0) }));
+      base44.functions.invoke("game-plays").then((r) => r.data || {}).catch(() => ({})),
+    ]).then(([list, counts]) => {
+      const real = (list || []).filter((g) => !g.hidden).map((g) => ({ ...g, plays: counts.totals ? counts.totals[g.name] || 0 : (g.plays || 0) + ((counts.plays || {})[g.name] || 0) }));
       const names = new Set(real.map((g) => g.name));
       setGames([...builtIns.filter((g) => !names.has(g.name)), ...real].sort((a, b) => (b.plays || 0) - (a.plays || 0)));
     });
