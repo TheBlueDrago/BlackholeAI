@@ -175,7 +175,16 @@ async function handleOrderApproved(db: any, eventData: any): Promise<Response> {
     const matched = await db.entities.User.filter({ email: buyerEmail });
     grantUserId = matched?.[0]?.id ?? null;
   }
-  if (grantUserId) {
+  // A one-time credit pack isn't a plan: the credit server adds its credits from this paid row
+  // (cloudflare-lib/credits.js), so only let the admins know.
+  if (String(purchase.productId || "").startsWith("credits-")) {
+    console.log("payments-webhook: credit pack paid", { userId: grantUserId, productId: purchase.productId, quantity: purchase.quantity });
+    await notifyAdmins(
+      db,
+      "Credits bought on Blackhole AI",
+      `Credits were bought.\n\nEmail: ${buyerEmail ?? "unknown"}\nProduct: ${purchase.productName ?? purchase.productId} x${purchase.quantity ?? 1}\nAmount: ${purchase.amount ?? "?"} ${purchase.currency ?? ""}`
+    );
+  } else if (grantUserId) {
     await db.entities.User.update(grantUserId, { plan: purchase.productId });
     // Team plan: activate (or create) the team owned by this buyer with a fresh shared credit pool.
     if (purchase.productId === "team" || purchase.productId === "secret") {

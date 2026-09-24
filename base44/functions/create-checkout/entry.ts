@@ -109,7 +109,23 @@ Deno.serve(async (req: Request) => {
         },
       },
     };
-    const product = PRODUCTS[productId];
+    // One-time credit packs: bought instead of a plan, no subscription, added to the buyer's
+    // bonus credits by the credit server (keep in step with cloudflare-lib/creditPacks.js).
+    const CREDIT_PACKS = {
+      "credits-ai": { name: "50 Blackhole AI credits", price: "1.00", currency: "USD" },
+      "credits-code": { name: "25 Blackhole Code credits", price: "1.00", currency: "USD" },
+      "credits-galaxy": { name: "25 Galaxy credits", price: "1.00", currency: "USD" },
+      "credits-space": { name: "25 Space credits", price: "1.00", currency: "USD" },
+    };
+    const isPack = Object.prototype.hasOwnProperty.call(CREDIT_PACKS, productId);
+    // Packs go to an account, so the buyer must be signed in (the credit server finds them by appUserId).
+    if (isPack && !appUser?.id) {
+      return new Response(JSON.stringify({ error: "Please sign in to buy credits." }), { status: 401 });
+    }
+    if (isPack && quantity > 10) {
+      return new Response(JSON.stringify({ error: "Invalid quantity" }), { status: 400 });
+    }
+    const product = isPack ? CREDIT_PACKS[productId] : PRODUCTS[productId];
     if (!product) {
       return new Response(JSON.stringify({ error: "Unknown product" }), { status: 400 });
     }
@@ -124,7 +140,7 @@ Deno.serve(async (req: Request) => {
     const DISCOUNT_PCT = 30;
     const OFFER_TAG = "new member 30% off";
     let discountPct = 0;
-    if (appUser?.id && appUser.created_date) {
+    if (!isPack && appUser?.id && appUser.created_date) {
       const raw = String(appUser.created_date);
       const created = Date.parse(/Z|[+-]\d\d:?\d\d$/.test(raw) ? raw : raw + "Z");
       const now = Date.now();
@@ -137,9 +153,11 @@ Deno.serve(async (req: Request) => {
     const productName = discountPct ? `${product.name} (${OFFER_TAG})` : product.name;
     const price = discountPct ? (Math.round(parseFloat(product.price) * (100 - discountPct)) / 100).toFixed(2) : product.price;
     const currency = product.currency;
-    const subscriptionInfo = discountPct
-      ? { ...product.subscriptionInfo, title: `${product.subscriptionInfo.title} (${OFFER_TAG})` }
-      : product.subscriptionInfo;
+    const subscriptionInfo = isPack
+      ? null
+      : discountPct
+        ? { ...product.subscriptionInfo, title: `${product.subscriptionInfo.title} (${OFFER_TAG})` }
+        : product.subscriptionInfo;
     // Where Wix returns the buyer. Both MUST be real, PUBLICLY reachable routes.
     const thankYouPath = "/ThankYou";
     const postFlowPath = "/plans";

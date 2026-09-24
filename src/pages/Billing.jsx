@@ -1,9 +1,33 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Loader2, ShieldCheck, Users } from "lucide-react";
+import { ArrowLeft, Loader2, ShieldCheck, Users, Zap } from "lucide-react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { paymentError } from "@/lib/paymentError";
+import { CREDIT_PACKS } from "../../cloudflare-lib/creditPacks.js";
+import { TIER_NAMES } from "../../cloudflare-lib/planTotals.js";
+
+// A one-time credit pack laid out like a plan (prices are checked again by create-checkout).
+function packPlan(id) {
+  const p = CREDIT_PACKS[id];
+  const amount = Number(p.price);
+  return {
+    name: `${p.credits} ${TIER_NAMES[p.tier]} credits`,
+    amount,
+    price: `$${amount} one-time`,
+    gradient: "from-amber-500 to-orange-500",
+    glow: "bg-amber-600/15",
+    features: [
+      "One-time purchase, no subscription",
+      "Added to your account as soon as the payment goes through",
+      "They don't reset at the end of the month: they stay until you use them",
+      "Used before your monthly credits",
+    ],
+    button: `Buy — $${amount}`,
+    icon: Zap,
+    pack: true,
+  };
+}
 
 export default function Billing() {
   const navigate = useNavigate();
@@ -19,10 +43,11 @@ export default function Billing() {
       .invoke("credits")
       .then((r) => {
         const o = r.data?.offer;
-        setPct(o?.discountAvailable ? o.discountPct : 0);
+        // The new-member discount is for plans only, not credit packs.
+        setPct(o?.discountAvailable && !CREDIT_PACKS[requested] ? o.discountPct : 0);
       })
       .catch(() => {});
-  }, []);
+  }, [requested]);
 
   const PLANS = {
     team: {
@@ -46,9 +71,9 @@ export default function Billing() {
       icon: ShieldCheck,
     },
   };
-  // Only plans that can be bought here; anything else (e.g. the old Secret) is Pro.
-  const productId = PLANS[requested] ? requested : "pro";
-  const plan = PLANS[productId];
+  // Only plans and credit packs can be bought here; anything else (e.g. the old Secret) is Pro.
+  const productId = PLANS[requested] || CREDIT_PACKS[requested] ? requested : "pro";
+  const plan = PLANS[productId] || packPlan(productId);
 
   const startCheckout = async () => {
     setError("");
@@ -87,7 +112,7 @@ export default function Billing() {
           Billing
         </span>
       </h1>
-      <p className="text-slate-400 mt-3 text-center">Upgrade to {productId === "team" ? "Team" : "Pro"}</p>
+      <p className="text-slate-400 mt-3 text-center">{plan.pack ? "Buy credits" : `Upgrade to ${productId === "team" ? "Team" : "Pro"}`}</p>
 
       <div className="mt-10 w-full max-w-md bg-slate-900/70 backdrop-blur-xl border border-slate-700/40 rounded-3xl p-8 shadow-2xl">
         <div className="flex items-center gap-3">
@@ -129,7 +154,7 @@ export default function Billing() {
           />
           <span className="text-xs text-slate-300 leading-relaxed">
             I agree and acknowledge that I am responsible for this purchase. If I get into trouble for
-            buying this subscription, I take full responsibility for my decision.
+            buying this {plan.pack ? "credit pack" : "subscription"}, I take full responsibility for my decision.
           </span>
         </label>
 

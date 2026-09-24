@@ -23,6 +23,7 @@
 import { base44 } from "./published.js";
 import { teamFor, seatsOf } from "./teams.js";
 import { offerFor, OFFER_TAG } from "./offers.js";
+import { CREDIT_PACKS } from "./creditPacks.js";
 
 // Plan allowances live in planTotals.js so the app can show them too (out-of-credits card).
 export { TIERS, TIER_OF_MODEL, TIER_NAMES, PLAN_TOTALS } from "./planTotals.js";
@@ -68,11 +69,20 @@ export async function currentUser(request) {
   }
 }
 
+// The user's Base44Purchase rows (a promise; null when Base44 couldn't be reached). The plan
+// and the bonus balance both need them, so entitlement() reads them once and passes them on.
+const purchasesOf = (request, user) =>
+  base44(request, "GET", `entities/Base44Purchase?q=${q({ appUserId: user.id })}`).then(
+    (rows) => rows || [],
+    () => null
+  );
+
 // The best plan the user has paid for, and whether they've already bought something with the
 // one-time new-member discount (checkout tags those purchases, see create-checkout).
-async function paidPlan(request, user) {
+async function paidPlan(request, user, purchases) {
   try {
-    const rows = await base44(request, "GET", `entities/Base44Purchase?q=${q({ appUserId: user.id })}`);
+    const rows = await (purchases || purchasesOf(request, user));
+    if (!rows) throw new Error("Base44Purchase unavailable");
     let best = "free";
     let discountUsed = false;
     for (const p of rows || []) {
@@ -88,8 +98,9 @@ async function paidPlan(request, user) {
 // An admin looking at someone else: my-team only answers for the caller, so read the
 // (admin-readable) Team rows directly.
 
-// Server-owned bonus balance: seeded from the admin snapshot, plus each promo redemption once.
-async function syncBonus(kv, request, user, grant) {
+// Server-owned bonus balance: seeded from the admin snapshot, plus each promo redemption and
+// each paid credit pack (creditPacks.js) once.
+async function syncBonus(kv, request, user, grant, purchases) {
   const key = `bonus:${user.id}`;
   let b = await getJSON(kv, key, null);
   let changed = false;
@@ -115,13 +126,24 @@ async function syncBonus(kv, request, user, grant) {
     const tier = TIERS.includes(r.aiModel) ? r.aiModel : "ai";
     b[tier] = (Number(b[tier]) || 0) + (Number(r.credits) || 0);
   }
+  // Base44Purchase rows are written only by the payment functions (service role), so a paid
+  // pack row can be trusted; "buy:<id>" keeps it apart from redemption ids in `applied`.
+  for (const p of (await (purchases || purchasesOf(request, user))) || []) {
+    const pack = p && p.status === "paid" && CREDIT_PACKS[p.productId];
+    if (!pack || !p.id || b.applied.includes(`buy:${p.id}`)) continue;
+    b.applied.push(`buy:${p.id}`);
+    changed = true;
+    if (since && p.paidAt && p.paidAt <= since) continue;
+    const packs = Math.max(1, Math.trunc(Number(p.quantity)) || 1);
+    b[pack.tier] = (Number(b[pack.tier]) || 0) + pack.credits * packs;
+  }
   if (changed) await putJSON(kv, key, b);
   return b;
 }
 
 // The user's own plan, before team membership: admin role, an admin grant, a payment, or
 // the new-account free week of Pro (offers.js). Pass `details` to learn where it came from.
-export async function basePlanOf(kv, request, user, grant, details) {
+export async function basePlanOf(kv, request, user, grant, details, purchases) {
   if (grant === undefined) grant = await getJSON(kv, `grant:${user.id}`, null);
   let plan = "free";
   let source = "free";
@@ -135,7 +157,7 @@ export async function basePlanOf(kv, request, user, grant, details) {
   };
   if (user.role === "admin") consider("admin", "admin");
   if (grant && grant.plan && !(grant.planExpiresAt && new Date(grant.planExpiresAt) < new Date())) consider(grant.plan, "grant", grant.planExpiresAt || null);
-  const paid = await paidPlan(request, user);
+  const paid = await paidPlan(request, user, purchases);
   consider(paid.plan, "paid");
   const offer = offerFor(user);
   if (offer && offer.trialActive) consider("pro", "trial", offer.trialEndsAt);
@@ -152,7 +174,11 @@ export async function basePlanOf(kv, request, user, grant, details) {
 export async function entitlement(kv, request, user, { other = false } = {}) {
   const grant = await getJSON(kv, `grant:${user.id}`, null);
   const details = {};
-  const [base, bonus] = await Promise.all([basePlanOf(kv, request, user, grant, details), syncBonus(kv, request, user, grant)]);
+  const purchases = purchasesOf(request, user);
+  const [base, bonus] = await Promise.all([
+    basePlanOf(kv, request, user, grant, details, purchases),
+    syncBonus(kv, request, user, grant, purchases),
+  ]);
   const team = await teamFor(kv, user, base);
   let plan = base;
   if (team && RANK[team.plan] > RANK[plan]) {

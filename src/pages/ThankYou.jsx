@@ -15,9 +15,9 @@ export default function ThankYou() {
       <div className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center mb-5">
         <CheckCircle2 className="w-9 h-9 text-white" />
       </div>
-      <h1 className="text-3xl sm:text-4xl font-bold text-white text-center">Thanks for subscribing!</h1>
+      <h1 className="text-3xl sm:text-4xl font-bold text-white text-center">Thanks for your purchase!</h1>
       <p className="text-slate-400 mt-3 text-center max-w-md">
-        We're confirming your payment. Your Pro access will activate shortly.
+        We're confirming your payment. Your plan or credits will be ready shortly.
       </p>
       <Link
         to="/chat"

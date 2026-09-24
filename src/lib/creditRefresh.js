@@ -1,8 +1,9 @@
 // What to offer someone who has run out of credits, like Base44 does: upgrade now for a
-// price, or wait until the monthly credits come back. Uses relative imports so the offline
+// price, buy a one-time pack of credits, or wait until the monthly credits come back. Uses relative imports so the offline
 // test (scripts/test-refresh.mjs) can load it with plain node.
 import { PLAN_TOTALS, TIER_NAMES } from "../../cloudflare-lib/planTotals.js";
 import { discounted } from "../../cloudflare-lib/offers.js";
+import { packForTier } from "../../cloudflare-lib/creditPacks.js";
 
 // The plans a person can buy themselves, cheapest first (prices as in create-checkout).
 const UPGRADES = [
@@ -33,7 +34,8 @@ export function waitText(ms) {
 }
 
 // `tier` is "ai", "aiCode", "galaxy5" or "space5"; `credits` is the useCredits() status.
-// -> { name, upgrade: { id, name, price, salePrice, extra } | null, refresh: { at, amount } | null }
+// -> { name, upgrade: { id, name, price, salePrice, extra } | null, pack: { id, credits, price } | null,
+//      refresh: { at, amount } | null }
 export function outOfCreditsOptions(tier, credits, now = Date.now()) {
   const plan = PLAN_TOTALS[credits?.plan] ? credits.plan : "free";
   const has = PLAN_TOTALS[plan][tier] || 0;
@@ -55,5 +57,9 @@ export function outOfCreditsOptions(tier, credits, now = Date.now()) {
   const amount = (PLAN_TOTALS[endsFirst ? "free" : plan][tier] || 0) * seats;
   const refresh = amount > 0 ? { at, amount } : null;
 
-  return { name: TIER_NAMES[tier] || "Blackhole AI", upgrade, refresh };
+  // A pack of just these credits, for anyone who'd rather not subscribe (or has no plan to go up to).
+  const found = packForTier(tier);
+  const pack = found ? { id: found[0], credits: found[1].credits, price: Number(found[1].price) } : null;
+
+  return { name: TIER_NAMES[tier] || "Blackhole AI", upgrade, pack, refresh };
 }

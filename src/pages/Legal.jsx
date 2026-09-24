@@ -55,6 +55,7 @@ export function Terms() {
         <li>Using the AIs costs credits. Your plan gives you a monthly allowance, and you can also get credits from referrals, promo codes or the Blackhole AI team.</li>
         <li>Credits have no cash value, can't be sold or transferred, and may expire as described in the app.</li>
         <li>Paid plans are charged through our payment provider (Base44 Payments) at the price shown before you pay. We never see or store your full card number.</li>
+        <li>Instead of a plan you can buy a one-time pack of credits for one AI. Bought credits are used before your monthly allowance and don't reset at the end of the month. The new-member discount doesn't apply to credit packs.</li>
         <li>Credits or rewards gained by cheating — fake sign-ups, abusing referrals, exploiting bugs — can be removed, and the account can be suspended.</li>
       </ul>
 

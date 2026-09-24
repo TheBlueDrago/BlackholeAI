@@ -137,3 +137,19 @@ assert(act.prompts === 2 && act.sessions === 1 && act.recent[0].prompt === "make
 
 // Credit cost
 assert(C.creditsFor("x".repeat(10000), "low") === 1 && C.creditsFor("x".repeat(10001), "low") === 2 && C.creditsFor("hi", "ultracode") === 4, "cost: 1 per started 10,000 chars, times effort");
+
+// One-time credit packs: a paid pack adds to the bonus balance exactly once
+fresh();
+db.purchases = [
+  { id: "b1", appUserId: "u9", productId: "credits-galaxy", status: "paid", quantity: 2 },
+  { id: "b2", appUserId: "u9", productId: "credits-ai", status: "pending", quantity: 1 },
+];
+s = await status({ id: "u9" });
+assert(s.plan === "free" && s.tiers.galaxy5.remaining === 50 && s.tiers.ai.remaining === 50, "2 paid Galaxy packs add 50 Galaxy credits; a pending pack adds nothing; plan stays Free");
+s = await status({ id: "u9" });
+assert(s.tiers.galaxy5.remaining === 50, "a pack is only added once");
+ent = await C.entitlement(kv, req, { id: "u9" });
+await C.charge(kv, ent, "galaxy5", 10);
+db.purchases[1].status = "paid";
+s = await status({ id: "u9" });
+assert(s.tiers.galaxy5.remaining === 40 && s.tiers.ai.remaining === 100, "spending uses bought credits; a pack that gets paid later is added then");

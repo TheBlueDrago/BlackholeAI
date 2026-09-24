@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Clock, Zap } from "lucide-react";
+import { Clock, Zap, Coins } from "lucide-react";
 import { useAppShell } from "@/components/AppShellContext";
 import { outOfCreditsOptions, nextRefresh, waitText } from "@/lib/creditRefresh";
 
 const price = (n) => `$${n}`;
 
 // Shown above the message box once the chosen AI is out of credits, like Base44: upgrade now
-// for a price, or wait for the monthly refresh (with a live countdown). `tier` is "ai",
-// "aiCode", "galaxy5" or "space5".
+// for a price, buy a one-time pack of credits, or wait for the monthly refresh (with a live
+// countdown). `tier` is "ai", "aiCode", "galaxy5" or "space5".
 export default function OutOfCredits({ tier, canSwitch = true }) {
   const shell = useAppShell();
   const credits = shell?.credits;
@@ -24,17 +24,19 @@ export default function OutOfCredits({ tier, canSwitch = true }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [due]);
 
-  const { name, upgrade, refresh } = outOfCreditsOptions(tier, credits, now);
+  const { name, upgrade, pack, refresh } = outOfCreditsOptions(tier, credits, now);
   const wait = refresh ? waitText(refresh.at - now) : "";
   const day = refresh ? new Date(refresh.at).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "";
   const cost = upgrade ? price(upgrade.salePrice || upgrade.price) : "";
   const otherAi = canSwitch && Object.entries(credits?.tiers || {}).some(([k, t]) => k !== tier && t.remaining > 0);
 
-  const summary = upgrade && refresh
-    ? `Upgrade to ${upgrade.name} for ${cost}/month, or wait ${wait} for your credits to refresh.`
-    : upgrade
-      ? `Your plan doesn't include ${name} credits each month. Upgrade to ${upgrade.name} for ${cost}/month to get ${upgrade.extra}.`
-      : `Your credits refresh in ${wait}.`;
+  const choices = [
+    upgrade && `upgrade to ${upgrade.name} for ${cost}/month`,
+    pack && `buy ${pack.credits} credits for ${price(pack.price)}`,
+    refresh && `wait ${wait} for your credits to refresh`,
+  ].filter(Boolean);
+  const list = choices.length > 1 ? `${choices.slice(0, -1).join(", ")}${choices.length > 2 ? "," : ""} or ${choices[choices.length - 1]}` : choices[0] || "";
+  const summary = `${refresh ? "" : `Your plan doesn't include ${name} credits each month. `}${list.charAt(0).toUpperCase()}${list.slice(1)}.`;
 
   return (
     <div className="mb-2 rounded-2xl border border-red-500/30 bg-gradient-to-r from-red-500/10 to-indigo-500/10 px-4 py-3">
@@ -56,6 +58,17 @@ export default function OutOfCredits({ tier, canSwitch = true }) {
             <span className="block text-xs text-indigo-100 mt-0.5">
               +{upgrade.extra} {name} credits right away{upgrade.salePrice ? " · new-member price" : ""}
             </span>
+          </button>
+        )}
+        {pack && (
+          <button
+            onClick={() => shell?.goBilling(pack.id)}
+            className="flex-1 text-left rounded-xl border border-amber-400/40 bg-amber-500/10 hover:bg-amber-500/20 transition-colors px-3 py-2"
+          >
+            <span className="flex items-center gap-1.5 text-sm font-semibold text-amber-200">
+              <Coins className="w-4 h-4 shrink-0" /> Buy {pack.credits} credits · {price(pack.price)}
+            </span>
+            <span className="block text-xs text-slate-400 mt-0.5">One-time, no plan. They don't reset.</span>
           </button>
         )}
         {refresh && (

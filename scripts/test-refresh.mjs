@@ -38,3 +38,8 @@ assert(o.upgrade === null && o.refresh.amount === 100, "Team: nothing to upgrade
 
 o = outOfCreditsOptions("space5", { plan: "enterprise", shared: true, seats: 4 }, now);
 assert(o.upgrade === null && o.refresh.amount === 100, "Enterprise: the pool refills 25 Space per seat");
+
+o = outOfCreditsOptions("ai", { plan: "free" }, now);
+assert(o.pack && o.pack.id === "credits-ai" && o.pack.credits === 50 && o.pack.price === 1, "a one-time pack of 50 Blackhole AI credits for $1");
+o = outOfCreditsOptions("space5", { plan: "team" }, now);
+assert(o.upgrade === null && o.pack.id === "credits-space" && o.pack.credits === 25, "Team, nothing to upgrade to: can still buy a Space pack");
