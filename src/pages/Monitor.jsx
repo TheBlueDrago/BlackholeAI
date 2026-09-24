@@ -8,6 +8,7 @@ import RevenueAnalytics from "@/components/monitor/RevenueAnalytics";
 import ReportedSites from "@/components/monitor/ReportedSites";
 import Messages from "@/components/monitor/Messages";
 import EnterpriseApps from "@/components/monitor/EnterpriseApps";
+import GrowthCard from "@/components/monitor/GrowthCard";
 import PublishedContent from "@/components/monitor/PublishedContent";
 
 export default function Monitor({ onBack }) {
@@ -100,6 +101,8 @@ export default function Monitor({ onBack }) {
         </h1>
         <div className="w-16" />
       </div>
+
+      {!loading && <GrowthCard users={users} complete={allLoaded} />}
 
       {/* Published sites & games with safety flags, red first. */}
       <PublishedContent />
