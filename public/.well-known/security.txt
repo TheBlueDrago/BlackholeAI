@@ -1,7 +1,7 @@
-# How to report a security problem with Blackhole AI (https://securitytxt.org).
-# Please report privately first so it can be fixed before anyone else finds it.
+# Found a security problem in Blackhole AI? Please tell us privately first so we can fix it.
 Contact: mailto:thebluedragonstriker@gmail.com
-Expires: 2027-09-24T00:00:00.000Z
+Contact: https://blackhole-ai-tech.com/contact?topic=security
+Policy: https://blackhole-ai-tech.com/safety#security
 Preferred-Languages: en
 Canonical: https://blackhole-ai-tech.com/.well-known/security.txt
-Policy: https://blackhole-ai-tech.com/safety
+Expires: 2027-09-24T00:00:00.000Z

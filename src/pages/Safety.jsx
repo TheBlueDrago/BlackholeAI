@@ -198,7 +198,7 @@ export default function Safety() {
             Report a page <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
-        <div className="rounded-3xl bg-slate-900/50 border border-slate-800 p-6">
+        <div id="security" className="scroll-mt-20 rounded-3xl bg-slate-900/50 border border-slate-800 p-6">
           <Mail className="w-7 h-7 text-indigo-300" />
           <h2 className="mt-3 text-xl font-semibold text-white">Found a security problem?</h2>
           <p className="mt-2 text-slate-400 text-sm">

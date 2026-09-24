@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { Flag, Loader2, CheckCircle2 } from "lucide-react";
 import Honeypot from "@/components/Honeypot";
 import { base44 } from "@/api/base44Client";
+import usePageTitle from "@/hooks/usePageTitle";
 
 // Keys must match REASONS in cloudflare-lib/reports.js.
 const REASONS = [
@@ -20,6 +21,7 @@ const REASONS = [
 // functions/published/[kind]/[name].js) and the flag buttons in the app. Public on
 // purpose: most visitors of a published site have no Blackhole account.
 export default function Report() {
+  usePageTitle("Report a page");
   const [params] = useSearchParams();
   const [kind, setKind] = useState(params.get("kind") === "game" ? "game" : "site");
   const [name, setName] = useState((params.get("name") || "").toLowerCase());

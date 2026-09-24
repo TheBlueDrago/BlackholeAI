@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import usePageTitle from "@/hooks/usePageTitle";
 
 // Public /terms and /privacy pages, linked from sign-up, log-in, billing and the
 // report page. Plain language on purpose; keep them in step with what the app does.
@@ -17,6 +18,7 @@ function Contact() {
 }
 
 function LegalPage({ title, other, children }) {
+  usePageTitle(title);
   return (
     <div className="min-h-screen bg-slate-950 text-slate-300 px-4 py-10">
       <article className="max-w-2xl mx-auto text-sm leading-relaxed [&_h2]:text-white [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:mt-8 [&_h2]:mb-2 [&_p]:mb-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-3 [&_li]:mb-1 [&_a]:text-indigo-300 [&_a]:underline">
