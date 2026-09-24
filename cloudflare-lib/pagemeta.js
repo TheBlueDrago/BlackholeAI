@@ -17,14 +17,29 @@ export function withMeta(html, { title, description, path }) {
   return out;
 }
 
+// The app's security headers (keep in step with public/_headers). Pages built by a function
+// from the app page set them themselves, so they're protected the same way as the static app.
+export const APP_HEADERS = {
+  "x-frame-options": "SAMEORIGIN",
+  "strict-transport-security": "max-age=31536000",
+  "content-security-policy": "frame-ancestors 'self'; object-src 'none'; base-uri 'self'",
+  "x-content-type-options": "nosniff",
+  "referrer-policy": "strict-origin-when-cross-origin",
+  "permissions-policy": "camera=(), microphone=(), usb=(), payment=()",
+};
+export function withAppHeaders(from) {
+  const headers = new Headers(from);
+  headers.delete("content-length");
+  for (const [k, v] of Object.entries(APP_HEADERS)) headers.set(k, v);
+  return headers;
+}
+
 // A Pages Function handler that serves the app page with this page's preview details.
 export const servePage = (meta) =>
   async function onRequestGet({ request, env }) {
     const page = await env.ASSETS.fetch(new URL("/", request.url));
     if (!page.ok) return page;
-    const headers = new Headers(page.headers);
-    headers.delete("content-length");
-    return new Response(withMeta(await page.text(), meta), { status: 200, headers });
+    return new Response(withMeta(await page.text(), meta), { status: 200, headers: withAppHeaders(page.headers) });
   };
 
 export const PAGES = {
