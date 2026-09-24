@@ -1,6 +1,6 @@
 import React from "react";
 import { ExternalLink, ShieldAlert } from "lucide-react";
-import { safeWebUrl } from "@/lib/blackholeDomain";
+import { safeWebUrl, notForKids } from "@/lib/blackholeDomain";
 
 // What an outside page may do in the frame: run as its own site, show forms and open
 // popups, but never navigate the app's tab away (that's how a page would swap the app for a
@@ -19,6 +19,15 @@ export default function BrowserWebFrame({ url: raw, reloadKey }) {
         <ShieldAlert className="w-8 h-8 text-amber-400" />
         <p className="font-medium">This address can't be opened.</p>
         <p className="text-sm text-slate-500">Only web addresses starting with http:// or https:// work here.</p>
+      </div>
+    );
+  }
+  if (notForKids(url)) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center gap-2 p-6 text-center text-slate-300">
+        <ShieldAlert className="w-8 h-8 text-amber-400" />
+        <p className="font-medium">This site isn't available in Blackhole Browser.</p>
+        <p className="text-sm text-slate-500">Lots of kids use Blackhole AI, so adult, gambling and piracy sites are left out.</p>
       </div>
     );
   }

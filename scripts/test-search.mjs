@@ -38,6 +38,7 @@ reply = {
     r("Win big tonight", "https://example-casino.com/", "Play slots and win"),
     r("Watch free movies", j("https://", "123movies", ".example/")),
     r("Download", "https://example.org/x", j("Free ", "torrent", " of every game")),
+    r("Volcano deals", j("https://www.best", "casino", "deals.example/")),
     r("Volcanoes for kids", "https://kids.nationalgeographic.com/volcano"),
     r("Not https", "http://example.com/"),
   ],

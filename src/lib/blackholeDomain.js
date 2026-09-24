@@ -1,3 +1,5 @@
+import { familySafeHost } from "../../cloudflare-lib/familysafe.js";
+
 export const BLACKHOLE_TLD = ".blackhole";
 
 // Game genre → address ending. A shooter called "shooter.io" lives at shooter.io.shooter.
@@ -55,6 +57,16 @@ export const makerName = (name) => {
 // page's own link (?weburl=), so anyone could send a link carrying "javascript:…", which in
 // an iframe (or a link) runs inside the app with the viewer's sign-in.
 // -> the cleaned address, or "" if it isn't http(s).
+// True for an address Blackhole Browser won't show because kids use it (adult, gambling or
+// piracy sites; cloudflare-lib/familysafe.js). Only the site's name is checked.
+export function notForKids(url) {
+  try {
+    return !familySafeHost(new URL(url).hostname);
+  } catch {
+    return false;
+  }
+}
+
 export function safeWebUrl(raw) {
   try {
     const u = new URL(String(raw || "").trim());

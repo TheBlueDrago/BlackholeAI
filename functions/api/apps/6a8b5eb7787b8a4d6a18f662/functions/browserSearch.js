@@ -6,15 +6,22 @@
 import { json } from "../../../../../cloudflare-lib/published.js";
 import { currentUser } from "../../../../../cloudflare-lib/credits.js";
 import { allow, TOO_MANY } from "../../../../../cloudflare-lib/ratelimit.js";
+import { familySafeText, familySafeHost } from "../../../../../cloudflare-lib/familysafe.js";
 
 const MODELS = ["gemini-3.5-flash", "gemini-3.6-flash", "gemini-3.7-flash"];
 
 // Blackhole Browser is used by kids, so results are family-friendly, like SafeSearch: the
 // prompt asks for that, and any adult, gambling or piracy result that still comes back is
-// dropped here.
-const NOT_FAMILY =
-  /\b(porn\w*|xxx|nsfw|hentai|onlyfans|nudes?|camgirls?|escorts?|erotic\w*|xvideos|xhamster|xnxx|redtube|youporn|chaturbate|stripchat|casinos?|sportsbook|betting|torrents?|pirate ?bay|warez|123movies|fmovies|putlocker)\b/i;
-export const familySafe = (r) => !NOT_FAMILY.test(`${r.url} ${r.title} ${r.site || ""} ${r.description || ""}`);
+// dropped here (cloudflare-lib/familysafe.js).
+export const familySafe = (r) => {
+  let host = "";
+  try {
+    host = new URL(r.url).hostname;
+  } catch {
+    // not a URL: the https check drops it anyway
+  }
+  return familySafeHost(host) && familySafeText(`${r.url} ${r.title} ${r.site || ""} ${r.description || ""}`);
+};
 
 function extractJson(text) {
   const t = String(text || "");

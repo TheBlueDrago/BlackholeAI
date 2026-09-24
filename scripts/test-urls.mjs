@@ -2,7 +2,7 @@
 // view will open, which site addresses are built, and which maker names are shown.
 // Run: node scripts/test-urls.mjs
 const R = new URL("../", import.meta.url).pathname;
-const { safeWebUrl, siteUrl, makerName } = await import(R + "src/lib/blackholeDomain.js");
+const { safeWebUrl, siteUrl, makerName, notForKids } = await import(R + "src/lib/blackholeDomain.js");
 const assert = (c, m) => {
   if (!c) {
     console.error("FAIL", m);
@@ -17,3 +17,7 @@ assert(safeWebUrl(" http://example.com ") === "http://example.com/", "http addre
 for (const bad of ["evil.com#", "a/b", "x?y", "-x", "x-", "a..b", "", "UPPER spaces"]) assert(siteUrl(bad) === "", `no site address for ${JSON.stringify(bad)}`);
 assert(siteUrl("My-Site-2") === "https://my-site-2.blackhole-ai-tech.com", "site names are lower-cased into their address");
 assert(makerName("  Maya ") === "Maya" && makerName("BLACKHOLE") === "" && makerName("x@y.z") === "", "maker names");
+
+const j = (...p) => p.join("");
+for (const bad of [j("https://www.", "porn", "hub.com/"), j("https://", "xvideos", ".com"), "https://best-casino-online.example/", j("https://thepirate", "bay.org/")]) assert(notForKids(bad), `browser leaves out ${bad.replace(/https?:\/\/(www\.)?/, "").slice(0, 12)}…`);
+for (const ok of ["https://en.wikipedia.org/wiki/Essex", "https://www.sussex.ac.uk/", "https://example.com/?q=porn", "not a url"]) assert(!notForKids(ok), `browser shows ${ok}`);
