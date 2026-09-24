@@ -74,7 +74,8 @@ export default function RevenueAnalytics() {
           </p>
           <p className="text-[11px] text-slate-500 mt-0.5 mb-2">
             Hold payouts for sales from the last {HOLD_DAYS} days (card disputes come then) and for anything flagged below: buying from your own site with a
-            stolen card is the usual way people try to cash out.
+            stolen card is the usual way people try to cash out. Refunds and disputes aren't recorded here yet, so check each order in your Wix
+            dashboard before paying for it.
           </p>
           <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl divide-y divide-slate-700/50">
             {summary.map((c) => (

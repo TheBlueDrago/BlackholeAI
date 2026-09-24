@@ -86,7 +86,7 @@ export default async function (req) {
         `Site sale payouts for the last 24 hours (${day})\n\n` +
         `Orders: ${fresh.length}\nGross: ${money(gross)}\nPlatform fees: ${money(fees)}\nCreator payouts: ${money(payouts)}\n\n` +
         `Details:\n${lines}\n\n` +
-        `Before paying a creator, wait 14 days after the sale (card disputes come then), and don't pay anything marked HOLD without checking it first.\n` +
+        `Before paying a creator, wait 14 days after the sale (card disputes come then), and don't pay anything marked HOLD without checking it first. Refunds and card disputes aren't recorded here, so check each order in the Wix dashboard before paying for it.\n` +
         (failed ? `\nCouldn't check today whether these sites were taken down: look at Monitor before paying.\n` : '');
     }
 
