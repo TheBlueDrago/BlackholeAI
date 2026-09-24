@@ -12,6 +12,7 @@ const TOPICS = [
   ["billing", "Plans, credits or payments"],
   ["bug", "Something isn't working"],
   ["security", "A security problem or scam"],
+  ["parent", "I'm a parent or teacher"],
   ["idea", "Idea or feedback"],
   ["business", "Using Blackhole AI for my business"],
   ["partnership", "Partnership, investment or acquisition"],

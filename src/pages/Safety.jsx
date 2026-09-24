@@ -151,8 +151,8 @@ export default function Safety() {
           <Link to="/contact?topic=billing" className="inline-flex items-center gap-1.5 font-semibold text-white hover:text-sky-200">
             Ask about a payment <ArrowRight className="w-4 h-4 shrink-0" />
           </Link>
-          <Link to="/contact?topic=account" className="inline-flex items-center gap-1.5 font-semibold text-white hover:text-sky-200">
-            Get help with an account <ArrowRight className="w-4 h-4 shrink-0" />
+          <Link to="/contact?topic=parent" className="inline-flex items-center gap-1.5 font-semibold text-white hover:text-sky-200">
+            Contact us as a parent or teacher <ArrowRight className="w-4 h-4 shrink-0" />
           </Link>
         </div>
       </section>

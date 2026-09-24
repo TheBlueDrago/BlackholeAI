@@ -52,3 +52,15 @@ for (const ok of ["https://en.wikipedia.org/wiki/Essex", "https://www.sussex.ac.
   assert(!forgetIfBrowserWasClosed(s, "") && s.getItem("base44_access_token") === "tok", "with Remember me ticked you stay signed in");
   assert(!forgetIfBrowserWasClosed({ getItem: () => { throw new Error("blocked"); } }, ""), "blocked storage doesn't break start-up");
 }
+
+// The contact form's topics match the ones the server accepts (cloudflare-lib/contact.js).
+{
+  const { readFileSync } = await import("node:fs");
+  const { TOPICS } = await import(R + "cloudflare-lib/contact.js");
+  const form = readFileSync(new URL("../src/pages/Contact.jsx", import.meta.url), "utf8");
+  const list = form.slice(form.indexOf("const TOPICS = ["), form.indexOf("];", form.indexOf("const TOPICS = [")));
+  const keys = [...list.matchAll(/\["([a-z]+)", "/g)].map((m) => m[1]);
+  assert(keys.length > 0 && keys.slice().sort().join() === Object.keys(TOPICS).sort().join(), `contact topics match the server (${keys.join(", ")})`);
+  const monitor = readFileSync(new URL("../src/components/monitor/Messages.jsx", import.meta.url), "utf8");
+  assert(keys.every((k) => new RegExp(`\\b${k}: "`).test(monitor)), "and Monitor has a label for each");
+}
