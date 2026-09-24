@@ -11,9 +11,11 @@ import SubscriptionPanel from "@/components/profile/SubscriptionPanel";
 import { notifyGamesChanged } from "@/lib/gameEvents";
 import { downloadChats, importChats } from "@/lib/chatBackup";
 import { useInstallApp } from "@/lib/installPrompt";
+import useEscape from "@/hooks/useEscape";
 
 export default function Profile({ open, onClose, initialView = "main", onMonitor, onPromos }) {
   const [user, setUser] = useState(null);
+  useEscape(open, onClose);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState("main"); // main | settings | membership | games
   const navigate = useNavigate();

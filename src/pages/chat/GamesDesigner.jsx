@@ -37,6 +37,7 @@ import { GAME_DESIGNER_STORE_KEY } from "@/lib/gameDesignerStore";
 import { notifyGamesChanged } from "@/lib/gameEvents";
 import { hasProFeatures, hasSpace } from "@/lib/plans";
 import { useAppShell } from "@/components/AppShellContext";
+import useEscape from "@/hooks/useEscape";
 
 const STORE_KEY = GAME_DESIGNER_STORE_KEY;
 const TAKEN_KEY = "infinity-ai-taken-games";
@@ -158,6 +159,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
   const [previewMode, setPreviewMode] = useState("preview");
   const [reloadKey, setReloadKey] = useState(0);
   const [showPublish, setShowPublish] = useState(false);
+  useEscape(showPublish, () => setShowPublish(false));
   const [published, setPublished] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [publishErr, setPublishErr] = useState("");

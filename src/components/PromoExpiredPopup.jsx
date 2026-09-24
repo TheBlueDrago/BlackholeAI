@@ -2,11 +2,13 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertTriangle } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import useEscape from "@/hooks/useEscape";
 
 // Shows once when a promo-granted plan (pro or team) has passed its expiry, so the user
 // knows their free promo ended and can close it out without being charged.
 export default function PromoExpiredPopup() {
   const [show, setShow] = useState(false);
+
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -31,6 +33,7 @@ export default function PromoExpiredPopup() {
     setShow(false);
     setBusy(false);
   };
+  useEscape(show && !busy, close);
 
   return (
     <AnimatePresence>

@@ -2,11 +2,13 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, Plus } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import useEscape from "@/hooks/useEscape";
 
 // Shows once when a user first becomes a Team owner with no members yet, prompting them
 // to add their 2 people now or later (Account → Settings → Membership).
 export default function TeamWelcomePopup({ onAddPeople }) {
   const [show, setShow] = useState(false);
+
   const [ownerPlan, setOwnerPlan] = useState("team");
 
   useEffect(() => {
@@ -35,6 +37,7 @@ export default function TeamWelcomePopup({ onAddPeople }) {
       .catch(() => {});
     setShow(false);
   };
+  useEscape(show, dismiss);
 
   const addNow = () => {
     dismiss();

@@ -37,6 +37,7 @@ import { saveBuilds, loadBuilds } from "@/lib/buildHistory";
 import { loadImages, onImagesChange, addImageFile, expandImages, packImages } from "@/lib/siteImages";
 import { hasProFeatures, hasSpace } from "@/lib/plans";
 import { useAppShell } from "@/components/AppShellContext";
+import useEscape from "@/hooks/useEscape";
 
 const STORE_KEY = DESIGNER_STORE_KEY;
 const TAKEN_KEY = "infinity-ai-taken-sites";
@@ -185,6 +186,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteErr, setInviteErr] = useState("");
   const [showPublish, setShowPublish] = useState(false);
+  useEscape(showPublish, () => setShowPublish(false));
   const [published, setPublished] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [publishErr, setPublishErr] = useState("");

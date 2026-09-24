@@ -4,10 +4,12 @@ import { Gift, X, Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import RewardPicker, { REWARD_LABEL } from "@/components/profile/RewardPicker";
 import { clearWelcomePending } from "@/lib/referral";
+import useEscape from "@/hooks/useEscape";
 
 // Shown once to a new user who joined through a friend's invite link: they pick their
 // own welcome bonus (the friend picks one too — see ReferFriends).
 export default function WelcomeReward({ open, onClose, onClaimed }) {
+  useEscape(open, onClose);
   const [data, setData] = useState(null);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(null);

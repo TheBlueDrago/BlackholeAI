@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { X, Loader2, Clock, MessageSquare } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import CreditControls from "./CreditControls";
+import useEscape from "@/hooks/useEscape";
 
 const LABELS = { ai: "Blackhole AI", aiCode: "Blackhole Code", galaxy5: "Galaxy", space5: "Space" };
 
@@ -14,6 +15,7 @@ function fmtTime(min) {
 }
 
 export default function UserDetail({ user, onClose }) {
+  useEscape(true, onClose);
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
 
