@@ -94,7 +94,7 @@ Deno.serve(async (req: Request) => {
     const PRODUCTS = {
       pro: {
         name: "Pro Plan",
-        price: "1.00",
+        price: "1.50",
         currency: "USD",
         subscriptionInfo: {
           subscriptionSettings: { frequency: "MONTH" },
@@ -104,7 +104,7 @@ Deno.serve(async (req: Request) => {
       },
       team: {
         name: "Team Plan",
-        price: "5.00",
+        price: "6.00",
         currency: "USD",
         subscriptionInfo: {
           subscriptionSettings: { frequency: "MONTH" },
@@ -118,10 +118,10 @@ Deno.serve(async (req: Request) => {
     // credits-<ai>-<size>. Price = the AI's 5-credit price x the size's multiplier. Keep both in
     // step with PACK_BASE and PACK_MULT in cloudflare-lib/creditPacks.js.
     const PACK_BASE: Record<string, { name: string; base: number }> = {
-      ai: { name: "Blackhole AI", base: 1 },
-      code: { name: "Blackhole Code", base: 2 },
-      galaxy: { name: "Galaxy", base: 3 },
-      space: { name: "Space", base: 4 },
+      ai: { name: "Blackhole AI", base: 0.6667 },
+      code: { name: "Blackhole Code", base: 1.3333 },
+      galaxy: { name: "Galaxy", base: 2 },
+      space: { name: "Space", base: 2.6667 },
     };
     const PACK_MULT: Record<number, number> = { 5: 1, 10: 1.5, 25: 3, 50: 4.5 };
     const CREDIT_PACKS: Record<string, { name: string; price: string; currency: string }> = {};
@@ -155,16 +155,18 @@ Deno.serve(async (req: Request) => {
     const TRIAL_MS = 7 * 86400000;
     const DISCOUNT_MS = 48 * 3600000;
     const DISCOUNT_PCT = 30;
+    const PACK_DISCOUNT_PCT = 20; // credit packs get less off than plans (cloudflare-lib/offers.js)
     const OFFER_TAG = "new member 30% off";
     let discountPct = 0;
-    if (!isPack && appUser?.id && appUser.created_date) {
+    // Plans and credit packs alike: whichever is bought first with it uses it up.
+    if (appUser?.id && appUser.created_date) {
       const raw = String(appUser.created_date);
       const created = Date.parse(/Z|[+-]\d\d:?\d\d$/.test(raw) ? raw : raw + "Z");
       const now = Date.now();
       if (created >= OFFER_START && now >= created + TRIAL_MS && now < created + TRIAL_MS + DISCOUNT_MS) {
         const past = await base44.asServiceRole.entities.Base44Purchase.filter({ appUserId: appUser.id });
         const used = (past || []).some((p: any) => (p.status === "paid" || p.status === "canceled") && String(p.productName || "").includes(OFFER_TAG));
-        if (!used) discountPct = DISCOUNT_PCT;
+        if (!used) discountPct = isPack ? PACK_DISCOUNT_PCT : DISCOUNT_PCT;
       }
     }
     // A discount promo code (optional). Checked and counted by the Cloudflare app with the buyer's

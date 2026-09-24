@@ -68,7 +68,7 @@ const FEATURES = [
     eyebrow: "Teams",
     title: "Build it together.",
     text: "The Team plan puts up to 3 people on one plan, sharing one pool of AI credits.",
-    bullets: ["Invite by email", "Everyone builds with the same credits", "$5 a month for the whole team"],
+    bullets: ["Invite by email", "Everyone builds with the same credits", "$6 a month for the whole team"],
     cta: { to: "/pricing", label: "See pricing" },
     Picture: TeamShot,
   },
@@ -95,7 +95,7 @@ const GAMES = [
 ];
 
 const FAQ = [
-  ["Is Blackhole AI free?", "Yes. The Free plan gives you 50 AI credits every month and lets you publish a website and a game, and new accounts get a free week of Pro. Pro is $1 a month and Team is $5 a month when you want more."],
+  ["Is Blackhole AI free?", "Yes. The Free plan gives you 50 AI credits every month and lets you publish a website and a game, and new accounts get a free week of Pro. Pro is $1.50 a month and Team is $6 a month when you want more."],
   ["Do I need to know how to code?", "No. You describe what you want in your own words. If you do know code, you can edit it by hand, and on Pro you can download it or push it to GitHub."],
   ["Does it work on my phone?", "Yes. Everything works on phones, tablets and computers, and you can install it like an app from your profile."],
   ["What are credits?", "Credits are what the AI uses up when it works for you. Bigger jobs use more. Your plan gives you a fresh allowance every month."],
@@ -404,7 +404,7 @@ export default function Landing() {
         </Reveal>
         <PricingCards />
         <p className="mt-6 text-center text-slate-400">
-          Just need a few more credits? One-time packs start at $1, no subscription.{" "}
+          Just need a few more credits? One-time packs start at $0.67, no subscription.{" "}
           <Link to="/pricing#packs" className="text-indigo-300 hover:text-indigo-200">See credit packs</Link>
         </p>
       </section>

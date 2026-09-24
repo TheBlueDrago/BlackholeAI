@@ -3,7 +3,7 @@ import { Clock, Zap, Coins } from "lucide-react";
 import { useAppShell } from "@/components/AppShellContext";
 import { outOfCreditsOptions, nextRefresh, waitText } from "@/lib/creditRefresh";
 
-const price = (n) => `$${n}`;
+const price = (n) => `$${Number.isInteger(Number(n)) ? n : Number(n).toFixed(2)}`;
 const money = (n) => (Number.isInteger(n) ? `$${n}` : `$${n.toFixed(2)}`);
 
 // Shown above the message box once the chosen AI is out of credits, like Base44: upgrade now

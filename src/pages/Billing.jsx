@@ -67,8 +67,8 @@ function Billing() {
       .invoke("credits")
       .then((r) => {
         const o = r.data?.offer;
-        // The new-member discount is for plans only, not credit packs.
-        setOfferPct(o?.discountAvailable && !CREDIT_PACKS[requested] ? o.discountPct : 0);
+        // The new-member discount covers plans and credit packs; using it on either ends it.
+        setOfferPct(o?.discountAvailable ? (CREDIT_PACKS[requested] ? o.packDiscountPct || 20 : o.discountPct) : 0);
       })
       .catch(() => {});
   }, [requested]);
@@ -76,22 +76,22 @@ function Billing() {
   const PLANS = {
     team: {
       name: "Team Plan",
-      amount: 5,
-      price: "$5 / month",
+      amount: 6,
+      price: "$6 / month",
       gradient: "from-sky-500 to-indigo-500",
       glow: "bg-sky-600/15",
       features: ["4 AI's (incl. Galaxy and Space)", "150 Blackhole AI credits / month", "100 Blackhole Code credits / month (shared)", "100 Galaxy credits / month", "100 Space credits / month", "Add up to 2 people — shared credits"],
-      button: "Subscribe — $5/mo",
+      button: "Subscribe — $6/mo",
       icon: Users,
     },
     pro: {
       name: "Pro Plan",
-      amount: 1,
-      price: "$1 / month",
+      amount: 1.5,
+      price: "$1.50 / month",
       gradient: "from-emerald-500 to-teal-500",
       glow: "bg-emerald-600/15",
       features: ["4 AI's (incl. Galaxy and Space)", "100 Blackhole AI credits / month", "50 Blackhole Code credits / month", "50 Galaxy credits / month", "50 Space credits / month"],
-      button: "Subscribe — $1/mo",
+      button: "Subscribe — $1.50/mo",
       icon: ShieldCheck,
     },
   };

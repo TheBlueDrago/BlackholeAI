@@ -37,7 +37,7 @@ export default function PlanNotice() {
       ? {
           key: `bh-note-trial-ending:${planEndsAt}`,
           icon: Clock,
-          text: `Your free week of Pro ends in ${left(planEndsAt)}. After that you're back on Free, and for 48 hours every plan is ${offer.discountPct}% off.`,
+          text: `Your free week of Pro ends in ${left(planEndsAt)}. After that you're back on Free, and for 48 hours every plan is ${offer.discountPct}% off (credit packs ${offer.packDiscountPct || 20}% off).`,
           action: "Keep Pro",
         }
       : {
@@ -49,7 +49,7 @@ export default function PlanNotice() {
     note = {
       key: `bh-note-offer:${offer.discountEndsAt}`,
       icon: Sparkles,
-      text: `New-member offer: ${offer.discountPct}% off any plan for ${left(offer.discountEndsAt)}, and you keep that price as long as you stay subscribed.`,
+      text: `New-member offer: ${offer.discountPct}% off any plan (kept as long as you stay subscribed) or ${offer.packDiscountPct || 20}% off a credit pack, for ${left(offer.discountEndsAt)}. One purchase only.`,
       action: "See plans",
     };
   }

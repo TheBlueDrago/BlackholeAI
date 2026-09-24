@@ -6,8 +6,8 @@ import PurchaseHistory from "@/components/profile/PurchaseHistory";
 
 const PLAN = {
   free: { name: "Free", price: "$0" },
-  pro: { name: "Pro", price: "$1 a month" },
-  team: { name: "Team", price: "$5 a month" },
+  pro: { name: "Pro", price: "$1.50 a month" },
+  team: { name: "Team", price: "$6 a month" },
   secret: { name: "Secret", price: "$10 a month" },
   enterprise: { name: "Enterprise", price: "Per seat" },
   admin: { name: "Admin", price: "Free" },
@@ -82,7 +82,7 @@ export default function SubscriptionPanel({ onBack, onManagePeople }) {
       {offer?.discountAvailable && (
         <div className="mt-3 rounded-2xl border border-amber-400/40 bg-gradient-to-br from-amber-500/15 to-fuchsia-500/10 p-4">
           <p className="flex items-center gap-1.5 text-amber-100 font-semibold">
-            <Sparkles className="w-4 h-4" /> New-member offer: {offer.discountPct}% off any plan
+            <Sparkles className="w-4 h-4" /> New-member offer: {offer.discountPct}% off any plan or {offer.packDiscountPct || 20}% off a credit pack
           </p>
           <p className="mt-1 text-sm text-slate-300">
             {timeLeft(offer.discountEndsAt)}. Keep the lower price for as long as you stay subscribed. One purchase only.

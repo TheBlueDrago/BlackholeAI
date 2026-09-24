@@ -6,7 +6,7 @@ const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/"/g, "&quot;").repl
 const ORIGIN = "https://blackhole-ai-tech.com";
 
 // Replacements are functions, never strings: in a replacement string "$1" or "$&" means a
-// matched part, so a description like "Pro is $1 a month" came out garbled.
+// matched part, so a description with "$1" in it came out garbled.
 export function withMeta(html, { title, description, path }) {
   const full = `${title} · Blackhole AI`;
   const setMeta = (out, attr, key, value) =>
@@ -60,7 +60,7 @@ export const servePage = (meta) =>
 export const PAGES = {
   arcade: { title: "Free games made with AI", description: "Play free games in your browser on any phone or computer. No download, no account. Every one was made by describing it to Blackhole AI.", path: "/arcade" },
   templates: { title: "Free website templates", description: "Pick a free template and change anything by telling the AI what you want. Publish it free at yourname.blackhole-ai-tech.com.", path: "/templates" },
-  pricing: { title: "Pricing", description: "Free to start. Pro is $1 a month, Team is $5 a month for up to 3 people, credit packs start at $1, and Enterprise is priced per seat.", path: "/pricing" },
+  pricing: { title: "Pricing", description: "Free to start. Pro is $1.50 a month, Team is $6 a month for up to 3 people, credit packs start at $0.67, and Enterprise is priced per seat.", path: "/pricing" },
   business: { title: "Websites for your business", description: "Describe your business and get a website in minutes. Sell from your site, work as a team and keep your code.", path: "/business" },
   enterprise: { title: "Enterprise", description: "Blackhole AI for your whole organization: a seat for everyone and one shared pool of credits. For registered businesses.", path: "/enterprise" },
   about: { title: "About us", description: "We help people make websites and games just by describing them, on any phone or computer.", path: "/about" },

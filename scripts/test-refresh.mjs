@@ -18,17 +18,17 @@ assert(waitText(oct1 - now) === "6 days 4 hours", "wait shown in days and hours"
 assert(waitText(3 * 3600000 + 12 * 60000) === "3 hours 12 minutes" && waitText(5 * 60000) === "5 minutes" && waitText(1000) === "1 minute", "shorter waits");
 
 let o = outOfCreditsOptions("ai", { plan: "free" }, now);
-assert(o.upgrade.id === "pro" && o.upgrade.price === 1 && o.upgrade.extra === 50 && !o.upgrade.salePrice, "Free, Blackhole AI: Pro for $1, 50 more now");
+assert(o.upgrade.id === "pro" && o.upgrade.price === 1.5 && o.upgrade.extra === 50 && !o.upgrade.salePrice, "Free, Blackhole AI: Pro for $1.50, 50 more now");
 assert(o.refresh.at === oct1 && o.refresh.amount === 50, "Free, Blackhole AI: 50 come back on the 1st");
 
 o = outOfCreditsOptions("galaxy5", { plan: "free" }, now);
 assert(o.upgrade.id === "pro" && o.upgrade.extra === 50 && o.refresh === null, "Free has no Galaxy credits: upgrade only, nothing to wait for");
 
 o = outOfCreditsOptions("space5", { plan: "pro", planSource: "paid" }, now);
-assert(o.upgrade.id === "team" && o.upgrade.price === 5 && o.upgrade.extra === 50 && o.refresh.amount === 50, "Pro: Team for $5, or wait for 50");
+assert(o.upgrade.id === "team" && o.upgrade.price === 6 && o.upgrade.extra === 50 && o.refresh.amount === 50, "Pro: Team for $6, or wait for 50");
 
 o = outOfCreditsOptions("ai", { plan: "free", offer: { discountAvailable: true, discountPct: 30 } }, now);
-assert(o.upgrade.salePrice === "0.70", "new-member offer: Pro shown at $0.70");
+assert(o.upgrade.salePrice === "1.05", "new-member offer: Pro shown at $1.05 (30% off $1.50)");
 
 o = outOfCreditsOptions("ai", { plan: "pro", planSource: "trial", planEndsAt: "2026-09-28T00:00:00Z" }, now);
 assert(o.upgrade.id === "team" && o.refresh.amount === 50, "free Pro week ending before the 1st: Free's 50 come back");
@@ -40,7 +40,7 @@ o = outOfCreditsOptions("space5", { plan: "enterprise", shared: true, seats: 4 }
 assert(o.upgrade === null && o.refresh.amount === 100, "Enterprise: the pool refills 25 Space per seat");
 
 o = outOfCreditsOptions("ai", { plan: "free" }, now);
-assert(o.pack && o.pack.id === "credits-ai-25" && o.pack.min === 5 && o.pack.max === 50 && o.pack.from === 1, "Blackhole AI packs of 5-50 credits, from $1, starting on 25");
+assert(o.pack && o.pack.id === "credits-ai-25" && o.pack.min === 5 && o.pack.max === 50 && Number(o.pack.from) === 0.67, "Blackhole AI packs of 5-50 credits, from $0.67, starting on 25");
 o = outOfCreditsOptions("space5", { plan: "team" }, now);
 assert(o.upgrade === null && o.pack.id === "credits-space-25", "Team, nothing to upgrade to: can still buy a Space pack");
 o = outOfCreditsOptions("galaxy5", { plan: "free" }, now);
@@ -50,7 +50,7 @@ const ids = Object.keys(P.CREDIT_PACKS);
 assert(ids.length === 16 && ["ai", "code", "galaxy", "space"].every((a) => [5, 10, 25, 50].every((n) => P.CREDIT_PACKS[`credits-${a}-${n}`])), "every AI has packs of 5, 10, 25 and 50");
 assert(Object.values(P.CREDIT_PACKS).every((p) => Number(p.price) >= 0.5), "no pack is under the $0.50 payment minimum");
 const price = (id) => P.CREDIT_PACKS[id].price;
-assert(["credits-ai-5", "credits-code-5", "credits-galaxy-5", "credits-space-5"].map(price).join() === "1.00,2.00,3.00,4.00", "5 credits: AI $1, Code $2, Galaxy $3, Space $4");
-assert(price("credits-ai-10") === "1.50" && price("credits-code-10") === "3.00" && price("credits-galaxy-10") === "4.50" && price("credits-space-10") === "6.00", "10 credits: double minus half (AI $1.50, Code $3)");
-assert(price("credits-ai-25") === "3.00" && price("credits-space-25") === "12.00", "25 credits: 3x the 5-credit price (AI $3)");
-assert(price("credits-ai-50") === "4.50" && price("credits-space-50") === "18.00", "50 credits: 1.5x the 25 pack");
+assert(["credits-ai-5", "credits-code-5", "credits-galaxy-5", "credits-space-5"].map(price).join() === "0.67,1.33,2.00,2.67", "5 credits: a third off the first $1/$2/$3/$4 (AI $0.67, Space $2.67)");
+assert(price("credits-ai-10") === "1.00" && price("credits-code-10") === "2.00" && price("credits-galaxy-10") === "3.00" && price("credits-space-10") === "4.00", "10 credits: 1.5x the 5 pack (AI $1, Space $4)");
+assert(price("credits-ai-25") === "2.00" && price("credits-space-25") === "8.00", "25 credits: 3x the 5-credit price (AI $2, Space $8)");
+assert(price("credits-ai-50") === "3.00" && price("credits-space-50") === "12.00", "50 credits: 1.5x the 25 pack (Space $12, was $18)");

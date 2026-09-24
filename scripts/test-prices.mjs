@@ -17,6 +17,8 @@ const load = (p) => import(new URL("../" + p, import.meta.url).href);
 const checkout = read("base44/functions/create-checkout/entry.ts");
 const planPrice = (id) => Number((checkout.match(new RegExp(`\\b${id}: \\{\\s*name: "[^"]+",\\s*price: "([\\d.]+)"`)) || [])[1]);
 const PRICE = { pro: planPrice("pro"), team: planPrice("team") };
+// As prices are written: $6, $1.50.
+const usd = (n) => (Number.isInteger(n) ? String(n) : n.toFixed(2));
 assert(PRICE.pro > 0 && PRICE.team > 0, `checkout prices found (Pro $${PRICE.pro}, Team $${PRICE.team})`);
 
 // Every page that shows a plan price.
@@ -29,14 +31,14 @@ const billing = read("src/pages/Billing.jsx");
 for (const id of ["pro", "team"]) {
   const block = billing.slice(billing.indexOf(`    ${id}: {`), billing.indexOf("icon:", billing.indexOf(`    ${id}: {`)));
   const n = PRICE[id];
-  assert(block.includes(`amount: ${n},`) && block.includes(`price: "$${n} / month"`) && block.includes(`Subscribe — $${n}/mo`), `Billing shows and totals ${id} at $${n}`);
+  assert(block.includes(`amount: ${n},`) && block.includes(`price: "$${usd(n)} / month"`) && block.includes(`Subscribe — $${usd(n)}/mo`), `Billing shows and totals ${id} at $${n}`);
 }
 const shop = read("src/components/Subscriptions.jsx");
 const card = (fn) => shop.slice(shop.indexOf(`function ${fn}`), shop.indexOf("\nfunction ", shop.indexOf(`function ${fn}`) + 1));
 assert(card("Plan2Card").includes(`<PriceTag amount={${PRICE.pro}}`), "the Shop's Pro card shows checkout's price");
 assert(card("TeamCard").includes(`<PriceTag amount={${PRICE.team}}`), "the Shop's Team card shows checkout's price");
 const panel = read("src/components/profile/SubscriptionPanel.jsx");
-assert(panel.includes(`pro: { name: "Pro", price: "$${PRICE.pro} a month" }`) && panel.includes(`team: { name: "Team", price: "$${PRICE.team} a month" }`), "Settings → Subscriptions shows checkout's prices");
+assert(panel.includes(`pro: { name: "Pro", price: "$${usd(PRICE.pro)} a month" }`) && panel.includes(`team: { name: "Team", price: "$${usd(PRICE.team)} a month" }`), "Settings → Subscriptions shows checkout's prices");
 const refresh = read("src/lib/creditRefresh.js");
 assert(refresh.includes(`{ id: "pro", name: "Pro", price: ${PRICE.pro} }`) && refresh.includes(`{ id: "team", name: "Team", price: ${PRICE.team} }`), "the out-of-credits Upgrade button uses checkout's prices");
 

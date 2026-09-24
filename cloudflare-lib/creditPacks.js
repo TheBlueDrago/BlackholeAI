@@ -7,7 +7,8 @@
 // smaller pack's price (10 = 1.5x, 50 = 1.5x the 25 pack), and 25 credits are 3x the base,
 // so bigger packs cost less per credit.
 export const PACK_SIZES = [5, 10, 25, 50];
-export const PACK_BASE = { ai: 1, aiCode: 2, galaxy5: 3, space5: 4 };
+// A third off the first prices ($1/$2/$3/$4 for 5), rounded to the cent by toFixed below.
+export const PACK_BASE = { ai: 0.6667, aiCode: 1.3333, galaxy5: 2, space5: 2.6667 };
 export const PACK_MULT = { 5: 1, 10: 1.5, 25: 3, 50: 4.5 };
 export const PACK_PRICES = {};
 for (const [tier, base] of Object.entries(PACK_BASE)) {
