@@ -13,6 +13,28 @@ Any change pushed to the repo will also be reflected in the Base44 Builder.
 - **Published sites: the `blackhole-site-router` Worker** on `*.blackhole-ai-tech.com/*`. Its code is in `workers/blackhole-site-router/` (deploy with `npx wrangler deploy` from that folder).
 - **Base44:** sign-in, the database (entities), payments (`create-checkout`, `site-checkout`, `payments-webhook`) and a few remaining functions. Base44 is **not** connected to this repo or the domain (keep it that way: its GitHub sync moves `functions/` and breaks Cloudflare). To ship a payment change, deploy just that function with the Base44 CLI: `npx base44 login`, then `npx base44 --app-id 6a8b5eb7787b8a4d6a18f662 functions deploy <name>`. The deployed functions use `main.ts` as the entry file (payments-webhook is deployed flat, importing `./adminNotify.ts`), so stage a copy in that layout first (`functions pull <name>` shows it).
 
+## Money and safety features
+
+- **Out of credits:** the chat, Code page and both designers show upgrade / buy credits / wait
+  options (`src/components/chat/OutOfCredits.jsx`, `src/lib/creditRefresh.js`).
+- **Credit packs:** 5, 10, 25 and 50 credits for every AI, one-time, any plan. Prices come from
+  `PACK_BASE` × `PACK_MULT` in `cloudflare-lib/creditPacks.js` **and** the copy in
+  `base44/functions/create-checkout` (keep both the same). Paid packs are added to the buyer's
+  bonus balance by `cloudflare-lib/credits.js`.
+- **Promo codes:** Monitor → Promo codes makes free-credit codes or discount codes (% off plans
+  and/or packs, use limit, end date). Discounts are checked by the Cloudflare `promo-discount`
+  function, which `create-checkout` calls as the buyer.
+- **Shop:** `/chat/shop` (plans, credit packs, promo codes); `/chat/plans` still works.
+- **Monitor:** Security at a glance, Admin log (every change to plans, credits, bans, promo codes
+  and take-downs), payout safety under Site sales ("Before you pay creators"), and flags for
+  pages that skipped publishing or copy someone else's name.
+- **Trust & safety** page at `/safety`; `SECURITY.md` and `/.well-known/security.txt` say how to
+  report problems.
+
+**Base44 functions that must be deployed by hand after changing them** (see "How This App Is
+Hosted"): `payments-webhook` (deploy first), `create-checkout`, `site-checkout`,
+`dailyPayoutEmail`.
+
 ## Prerequisites
 
 1. Clone the repository using the project's Git URL.
