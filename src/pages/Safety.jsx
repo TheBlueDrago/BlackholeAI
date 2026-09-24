@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { CreditCard, Lock, ShieldCheck, Flag, Baby, KeyRound, Mail, ArrowRight, Check } from "lucide-react";
+import { CreditCard, Lock, ShieldCheck, Flag, Baby, KeyRound, Mail, ArrowRight, Check, Store } from "lucide-react";
 import PublicLayout from "@/components/PublicLayout";
 import { CONTACT_EMAIL } from "@/lib/company";
 
@@ -38,6 +38,16 @@ const SECTIONS = [
       "Previews in the app run in a locked-down frame that can't reach your account either.",
       "Pages with a form that sends passwords or card numbers to another website are refused when they're published, and when they're served.",
       "Buy buttons on sites people make always go through the same secure checkout. Sites can't collect card numbers themselves.",
+    ],
+  },
+  {
+    icon: Store,
+    title: "Buying and selling on sites people make",
+    points: [
+      "Buy buttons on a site always open the same secure checkout, where you see the seller's site, the price and any tax before you pay.",
+      "Only a site's real owner can set its prices and be paid for its sales.",
+      "Sellers are paid after a waiting period, so card disputes can come in first, and a sale that looks like fraud is held while we check it.",
+      "The seller is responsible for delivering what they sell and for refunds. If something's wrong, report the site.",
     ],
   },
   {
