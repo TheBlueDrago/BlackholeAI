@@ -50,3 +50,16 @@ export const makerName = (name) => {
   const n = String(name || "").trim().slice(0, 40);
   return !n || n.includes("@") || OFFICIAL_SOUNDING.test(n) ? "" : n;
 };
+
+// Only real web addresses, for the Blackhole Browser's web view. The address comes from the
+// page's own link (?weburl=), so anyone could send a link carrying "javascript:…", which in
+// an iframe (or a link) runs inside the app with the viewer's sign-in.
+// -> the cleaned address, or "" if it isn't http(s).
+export function safeWebUrl(raw) {
+  try {
+    const u = new URL(String(raw || "").trim());
+    return u.protocol === "https:" || u.protocol === "http:" ? u.href : "";
+  } catch {
+    return "";
+  }
+}

@@ -10,7 +10,7 @@
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc -p ./jsconfig.json",
     "preview": "vite preview",
-    "test": "node scripts/test-moderation.mjs && node scripts/test-ai-internal.mjs && node scripts/test-credits.mjs && node scripts/test-referrals.mjs && node scripts/test-scan.mjs && node scripts/test-playmeta.mjs && node scripts/test-enterprise.mjs && node scripts/test-offers.mjs && node scripts/test-pagemeta.mjs && node scripts/test-refresh.mjs && node scripts/test-discounts.mjs && node scripts/test-audit.mjs && node scripts/test-content.mjs && node scripts/test-payouts.mjs && node scripts/test-drafts.mjs"
+    "test": "node scripts/test-moderation.mjs && node scripts/test-ai-internal.mjs && node scripts/test-credits.mjs && node scripts/test-referrals.mjs && node scripts/test-scan.mjs && node scripts/test-playmeta.mjs && node scripts/test-enterprise.mjs && node scripts/test-offers.mjs && node scripts/test-pagemeta.mjs && node scripts/test-refresh.mjs && node scripts/test-discounts.mjs && node scripts/test-audit.mjs && node scripts/test-content.mjs && node scripts/test-payouts.mjs && node scripts/test-drafts.mjs && node scripts/test-urls.mjs"
   },
   "dependencies": {
     "@base44/sdk": "^0.8.48",

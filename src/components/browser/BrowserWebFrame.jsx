@@ -1,17 +1,6 @@
 import React from "react";
 import { ExternalLink, ShieldAlert } from "lucide-react";
-
-// Only real web addresses. The address comes from the page's own link (?weburl=), so anyone
-// could send a link carrying "javascript:…", which in an iframe (or a link) runs inside the
-// app with the viewer's sign-in. Returns the cleaned address, or "" if it isn't http(s).
-export function safeWebUrl(raw) {
-  try {
-    const u = new URL(String(raw || "").trim());
-    return u.protocol === "https:" || u.protocol === "http:" ? u.href : "";
-  } catch {
-    return "";
-  }
-}
+import { safeWebUrl } from "@/lib/blackholeDomain";
 
 // What an outside page may do in the frame: run as its own site, show forms and open
 // popups, but never navigate the app's tab away (that's how a page would swap the app for a
