@@ -57,6 +57,8 @@ const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
 // The prompt as Gemini "parts": the text, then any attached images. Returns an error
 // message instead when the images aren't acceptable.
+const MAX_PROMPT_CHARS = 800000;
+
 function promptParts(prompt, images) {
   if (!Array.isArray(images) || !images.length) return prompt;
   if (images.length > MAX_IMAGES) return { error: `Attach at most ${MAX_IMAGES} images.` };
@@ -246,6 +248,10 @@ export async function onRequestPost(context) {
     // per-user rate, so they can't be used as unlimited free AI (the Gemini free-tier
     // quota is shared by everyone's chats).
     const internal = !!body.internal;
+    // Credits are charged by the length of the reply, so a giant message would cost its sender
+    // almost nothing while using up the shared AI quota. Designer messages carry the whole
+    // page's code, so the cap is far above any real website.
+    if (prompt.length > MAX_PROMPT_CHARS) return json({ error: "That message is too long. Try a smaller change, or a shorter message." }, 413);
     if (internal) {
       if (prompt.length > 1500) return json({ error: "Internal prompt too long." }, 400);
       if (!(await allow(`internal:${user.id}`, 30, 3600))) return json({ error: "Too many requests." }, 429);
