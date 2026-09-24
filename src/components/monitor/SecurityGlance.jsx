@@ -8,7 +8,7 @@ const DAY = 86400000;
 // Monitor's first card: the things worth a look every day. Open reports, how many admin
 // actions happened in the last day, and the latest one (an action you didn't do means an
 // admin account may be in the wrong hands; see the Admin log further down).
-export default function SecurityGlance() {
+export default function SecurityGlance({ unconfirmed, removed, held }) {
   const [reports, setReports] = useState(null);
   const [log, setLog] = useState(null);
 
@@ -49,6 +49,12 @@ export default function SecurityGlance() {
           )}
         </div>
       </div>
+      {unconfirmed !== undefined && (
+        <p className="mt-3 text-xs text-slate-400">
+          Sign-ups stopped: <b className="text-white">{unconfirmed}</b> never confirmed their email · <b className="text-white">{held}</b> on hold (too many
+          accounts on one network) · <b className="text-white">{removed}</b> removed
+        </p>
+      )}
       {elsewhere && (
         <p className="mt-3 text-xs text-amber-300 flex items-start gap-1.5">
           <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />

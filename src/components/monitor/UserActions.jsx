@@ -15,7 +15,7 @@ export default function UserActions({ user, onApply }) {
   const [busy, setBusy] = useState(false);
 
   const isBanned = user.banned === true;
-  const isBlocked = user.blockedUntil && new Date(user.blockedUntil) > new Date();
+  const isBlocked = (user.blockedUntil && new Date(user.blockedUntil) > new Date()) || user.networkHold;
 
   const [err, setErr] = useState("");
   const run = async (patch) => {
@@ -90,6 +90,11 @@ export default function UserActions({ user, onApply }) {
 
   return (
     <div className="flex flex-col gap-3">
+      {user.networkHold && (
+        <p className="text-xs text-amber-300">
+          On hold: too many accounts were made on its network lately. If it's a real person (a school or shared network, say), press Unblock / unban to let it in.
+        </p>
+      )}
       {user.is_verified === false && (
         <p className="inline-flex items-center gap-1.5 text-xs text-amber-300">
           <MailWarning className="w-3.5 h-3.5" /> Email not confirmed: they can't use anything until they enter the code we email them.

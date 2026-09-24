@@ -35,8 +35,10 @@ assert(!(await networkFull(kv, from("9.9.9.9"), now)) && !(await noteAccount(kv,
 // On hold = blocked, and Unblock in Monitor lets them in.
 await applyGrant(kv, "u9", { networkLimit: true });
 assert(blockedBy({ id: "u9" }, JSON.parse(m.get("grant:u9"))), "an account on hold can't use the app");
+assert(JSON.parse(m.get("net-held")).some((r) => r.userId === "u9"), "Monitor can list the account as on hold");
 await applyGrant(kv, "u9", { banned: false, blockedUntil: null });
 assert(!blockedBy({ id: "u9" }, JSON.parse(m.get("grant:u9"))), "Unblock / unban in Monitor lets it in");
+assert(!JSON.parse(m.get("net-held")).some((r) => r.userId === "u9"), "and it comes off the on-hold list");
 
 if (failed) {
   console.log(`\n${failed} failed`);

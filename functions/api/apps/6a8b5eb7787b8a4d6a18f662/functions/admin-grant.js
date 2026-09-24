@@ -24,7 +24,11 @@ export async function onRequestPost(context) {
       return json({ error: "Invalid request body" }, 400);
     }
     // Monitor asks which accounts were removed, to hide them.
-    if (body.action === "removed") return json({ removed: (await env.PUBLISHED_HTML.get("removed-users", "json")) || [] });
+    if (body.action === "removed")
+      return json({
+        removed: (await env.PUBLISHED_HTML.get("removed-users", "json")) || [],
+        held: (await env.PUBLISHED_HTML.get("net-held", "json")) || [],
+      });
     const grants = Array.isArray(body.grants) ? body.grants : [];
     const saved = [];
     for (const g of grants) {

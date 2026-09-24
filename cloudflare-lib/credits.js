@@ -344,6 +344,12 @@ export async function applyGrant(kv, userId, patch) {
     if (patch.removed) await kv.put(k, JSON.stringify({ userId, at: new Date().toISOString() }));
     else await kv.delete(k);
   }
+  // Accounts the accounts-per-network limit put on hold, for Monitor (Unblock takes them off).
+  if ("networkLimit" in patch || (patch.banned === false && grant.networkLimit === undefined)) {
+    const held = (await getJSON(kv, "net-held", [])).filter((r) => r.userId !== userId);
+    if (patch.networkLimit) held.unshift({ userId, at: new Date().toISOString() });
+    await putJSON(kv, "net-held", held.slice(0, 2000));
+  }
   // The list Monitor hides removed accounts by (and shows under "Removed accounts").
   if ("removed" in patch) {
     const list = (await getJSON(kv, "removed-users", [])).filter((r) => r.userId !== userId);

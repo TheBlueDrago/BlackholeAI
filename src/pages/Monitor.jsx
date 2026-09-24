@@ -20,6 +20,8 @@ export default function Monitor({ onBack }) {
   const [detailUser, setDetailUser] = useState(null);
   // Accounts an admin removed (banned forever, email blocked): hidden from the lists below.
   const [removed, setRemoved] = useState([]);
+  // Accounts the accounts-per-network limit put on hold (Unblock lets them in).
+  const [held, setHeld] = useState([]);
   const [showRemoved, setShowRemoved] = useState(false);
   // The first page (newest 200) loads right away; searching loads everyone else, 500 at a
   // time, so older accounts can be found too.
@@ -43,7 +45,10 @@ export default function Monitor({ onBack }) {
     load();
     base44.functions
       .invoke("admin-grant", { action: "removed" })
-      .then((r) => setRemoved(r.data?.removed || []))
+      .then((r) => {
+        setRemoved(r.data?.removed || []);
+        setHeld(r.data?.held || []);
+      })
       .catch(() => {});
   }, []);
 
@@ -56,6 +61,7 @@ export default function Monitor({ onBack }) {
     // Mirror it on the User row so it shows everywhere; the server record is enough if this fails.
     await base44.entities.User.update(id, row).catch((e) => console.warn("Monitor: User row not updated", e));
     setUsers((us) => us.map((u) => (u.id === id ? { ...u, ...row } : u)));
+    if (patch.banned === false) setHeld((list) => list.filter((r) => r.userId !== id));
     if ("removed" in patch) {
       setRemoved((list) => [
         ...(patch.removed ? [{ userId: id, email: email || "", at: new Date().toISOString() }] : []),
@@ -64,6 +70,8 @@ export default function Monitor({ onBack }) {
     }
   };
   const removedIds = new Set(removed.map((r) => r.userId));
+  const heldIds = new Set(held.map((r) => r.userId));
+  const withHold = (u) => (heldIds.has(u.id) ? { ...u, networkHold: true } : u);
   // Accounts that never confirmed their email and are over 3 days old (a made-up or someone
   // else's address): they can't use anything, so they're tucked away unless asked for.
   const [showStale, setShowStale] = useState(false);
@@ -133,7 +141,11 @@ export default function Monitor({ onBack }) {
         <div className="w-16" />
       </div>
 
-      <SecurityGlance />
+      <SecurityGlance
+        unconfirmed={users.filter((u) => u.is_verified === false && !removedIds.has(u.id)).length}
+        removed={removed.length}
+        held={held.length}
+      />
 
       {!loading && <GrowthCard users={users} complete={allLoaded} />}
 
@@ -161,7 +173,7 @@ export default function Monitor({ onBack }) {
             {loadingMore && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
           </p>
           {filtered.map((u) => (
-            <UserCard key={u.id} user={u} onApply={apply} onOpenDetail={setDetailUser} />
+            <UserCard key={u.id} user={withHold(u)} onApply={apply} onOpenDetail={setDetailUser} />
           ))}
         </div>
       ) : (
@@ -169,7 +181,7 @@ export default function Monitor({ onBack }) {
           <p className="text-slate-300 text-sm font-medium">Recently joined</p>
           {recent.length === 0 && <p className="text-slate-500 text-sm">No users yet.</p>}
           {recent.map((u) => (
-            <UserCard key={u.id} user={u} onApply={apply} onOpenDetail={setDetailUser} />
+            <UserCard key={u.id} user={withHold(u)} onApply={apply} onOpenDetail={setDetailUser} />
           ))}
         </div>
       )}
