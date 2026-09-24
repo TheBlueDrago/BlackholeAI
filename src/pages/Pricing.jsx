@@ -3,9 +3,10 @@ import { Link } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import PublicLayout from "@/components/PublicLayout";
 import PricingCards from "@/components/landing/PricingCards";
+import CreditPacksTable from "@/components/landing/CreditPacksTable";
 
 const QUESTIONS = [
-  ["What are credits?", "Credits are what the AI uses up when it works for you. Bigger jobs, like building a whole website, use more than a quick question. Every plan gets a fresh allowance each month."],
+  ["What are credits?", "Credits are what the AI uses up when it works for you. Bigger jobs, like building a whole website, use more than a quick question. Every plan gets a fresh allowance each month, and you can buy one-time packs any time."],
   ["What are Code, Galaxy and Space?", "Extra AI models on Pro and Team: Blackhole Code for programming, and Galaxy and Space for more detailed websites and writing. Each has its own credits."],
   ["Can I cancel?", "Yes. Plans are monthly, and if you stop paying you go back to the Free plan and keep your account."],
   ["How does the Team plan work?", "The person who buys it can add up to 2 more people by email. Everyone draws from the same pool of credits, so the whole team shares one bill."],
@@ -18,9 +19,12 @@ export default function Pricing() {
     <PublicLayout title="Pricing">
       <section className="text-center pt-10 pb-12">
         <h1 className="text-4xl sm:text-6xl font-bold text-white">Simple prices</h1>
-        <p className="mt-4 text-slate-400 text-lg max-w-xl mx-auto">Start free. Pro is $1 a month, and Team is $5 a month for up to 3 people.</p>
+        <p className="mt-4 text-slate-400 text-lg max-w-xl mx-auto">Start free. Pro is $1 a month, Team is $5 a month for up to 3 people, and credit packs start at $1 with no subscription.</p>
       </section>
       <PricingCards />
+      <section id="packs" className="mt-10 max-w-3xl mx-auto scroll-mt-24">
+        <CreditPacksTable />
+      </section>
       <section className="mt-20 max-w-3xl mx-auto">
         <h2 className="text-center text-3xl font-bold text-white">Pricing questions</h2>
         <div className="mt-8 divide-y divide-slate-800 border-y border-slate-800">

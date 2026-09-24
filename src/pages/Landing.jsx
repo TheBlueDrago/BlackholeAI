@@ -328,6 +328,10 @@ export default function Landing() {
           <p className="mt-4 text-slate-400 text-lg">Start free. Upgrade only if you want more.</p>
         </Reveal>
         <PricingCards />
+        <p className="mt-6 text-center text-slate-400">
+          Just need a few more credits? One-time packs start at $1, no subscription.{" "}
+          <Link to="/pricing#packs" className="text-indigo-300 hover:text-indigo-200">See credit packs</Link>
+        </p>
       </section>
 
       {/* FAQ */}
