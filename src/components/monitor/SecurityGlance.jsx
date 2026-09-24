@@ -10,6 +10,23 @@ const DAY = 86400000;
 // admin account may be in the wrong hands; see the Admin log further down).
 export default function SecurityGlance({ unconfirmed, removed, held }) {
   const [reports, setReports] = useState(null);
+  // "Buying is paused" notice on the Shop and checkout (functions/site-status.js).
+  const [paused, setPaused] = useState(null);
+  const [pauseBusy, setPauseBusy] = useState(false);
+  useEffect(() => {
+    base44.functions.invoke("site-status", {}).then((r) => setPaused(r.data?.paymentsPaused === true)).catch(() => {});
+  }, []);
+  const togglePaused = async () => {
+    setPauseBusy(true);
+    try {
+      const r = await base44.functions.invoke("site-status", { action: "set", paymentsPaused: !paused });
+      setPaused(r.data?.paymentsPaused === true);
+    } catch {
+      // unchanged
+    } finally {
+      setPauseBusy(false);
+    }
+  };
   const [log, setLog] = useState(null);
 
   useEffect(() => {
@@ -49,6 +66,20 @@ export default function SecurityGlance({ unconfirmed, removed, held }) {
           )}
         </div>
       </div>
+      {paused !== null && (
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-400">
+          <span>
+            Shop notice: {paused ? <b className="text-amber-300">buying is paused</b> : <b className="text-white">off</b>}. Turn it on while Base44 payments are down.
+          </span>
+          <button
+            onClick={togglePaused}
+            disabled={pauseBusy}
+            className="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700/60 text-slate-200 hover:bg-slate-700 disabled:opacity-50"
+          >
+            {paused ? "Turn off" : "Turn on"}
+          </button>
+        </div>
+      )}
       {unconfirmed !== undefined && (
         <p className="mt-3 text-xs text-slate-400">
           Sign-ups stopped: <b className="text-white">{unconfirmed}</b> never confirmed their email · <b className="text-white">{held}</b> on hold (too many

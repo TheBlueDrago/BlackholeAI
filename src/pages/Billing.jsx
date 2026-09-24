@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import PaymentsNotice from "@/components/PaymentsNotice";
 import { motion } from "framer-motion";
 import { ArrowLeft, Loader2, ShieldCheck, Users, Zap, Gift, Lock, CalendarClock } from "lucide-react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
@@ -165,6 +166,7 @@ function Billing() {
         </span>
       </h1>
       <p className="text-slate-400 mt-3 text-center">{plan.pack ? "Buy credits" : `Upgrade to ${productId === "team" ? "Team" : "Pro"}`}</p>
+      <PaymentsNotice className="mt-4" />
 
       <div className="mt-10 w-full max-w-md bg-slate-900/70 backdrop-blur-xl border border-slate-700/40 rounded-3xl p-8 shadow-2xl">
         <div className="flex items-center gap-3">
