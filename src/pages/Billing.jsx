@@ -300,7 +300,7 @@ export default function Billing() {
           </li>
           <li className="flex items-start gap-2">
             <ShieldCheck className="w-3.5 h-3.5 mt-0.5 shrink-0 text-emerald-400" />
-            The price is set on our server, and you see the final amount before you pay.
+            The price is set on our server, and you see the final amount, including any tax for where you live, before you pay. Prices are in US dollars.
           </li>
         </ul>
         <p className="mt-3 text-center text-xs text-slate-500">

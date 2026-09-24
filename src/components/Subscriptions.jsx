@@ -236,6 +236,7 @@ export default function Subscriptions({ onFree, onPro, onTeam, onBuyPack, offer 
         </span>
         <span>Plans are monthly</span>
         <span>Credit packs are one-time</span>
+        <span>Prices in US dollars</span>
         <Link to="/safety" className="underline hover:text-slate-200">Trust &amp; safety</Link>
       </p>
 
