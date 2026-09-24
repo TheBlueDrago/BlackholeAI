@@ -6,6 +6,7 @@ import Monitor from "@/pages/Monitor";
 import PromoManager from "@/pages/PromoManager";
 
 // Thin route components so the secondary views live on real URLs and support swipe-back.
+// The Shop tab (also at the old /chat/plans).
 export function PlansView() {
   const shell = useAppShell();
   return (
@@ -14,6 +15,7 @@ export function PlansView() {
       offer={shell.credits.offer}
       onPro={() => shell.goBilling("pro")}
       onTeam={() => shell.goBilling("team")}
+      onBuyPack={(id) => shell.goBilling(id)}
     />
   );
 }

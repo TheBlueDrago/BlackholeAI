@@ -345,7 +345,7 @@ export default function DesignerDashboard() {
         <div className="flex-1" />
         <ThemeToggle light={lightMode} onToggle={toggleLight} />
         <button
-          onClick={() => navigate("/chat/plans")}
+          onClick={() => navigate("/chat/shop")}
           className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 text-white text-sm font-medium hover:opacity-90 transition-opacity"
         >
           <Crown className="w-4 h-4" /> Upgrade
@@ -433,7 +433,7 @@ export default function DesignerDashboard() {
               <span className="capitalize text-slate-300">{effPlan}</span> plan
             </p>
             {atLimit && (
-              <button onClick={() => navigate("/chat/plans")} className="text-xs text-amber-400 hover:text-amber-300 font-medium">
+              <button onClick={() => navigate("/chat/shop")} className="text-xs text-amber-400 hover:text-amber-300 font-medium">
                 Upgrade for more →
               </button>
             )}

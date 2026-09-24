@@ -75,7 +75,7 @@ export function AppShellProvider({ children }) {
   const goBrowser = useCallback(() => { navigate("/chat/browser"); setSidebarOpen(false); }, [navigate]);
   const goGames = useCallback(() => { navigate("/chat/games"); setSidebarOpen(false); }, [navigate]);
   const goGameDesigner = useCallback(() => { navigate("/chat/game-designer", { state: { fresh: Date.now() } }); setSidebarOpen(false); }, [navigate]);
-  const goPlans = useCallback(() => { navigate("/chat/plans"); setSidebarOpen(false); }, [navigate]);
+  const goPlans = useCallback(() => { navigate("/chat/shop"); setSidebarOpen(false); }, [navigate]);
   const goMonitor = useCallback(() => { navigate("/chat/monitor"); setSidebarOpen(false); }, [navigate]);
   const goPromos = useCallback(() => { navigate("/chat/promos"); setSidebarOpen(false); }, [navigate]);
   const newChat = useCallback(() => { conv.createConversation("New Chat"); navigate("/chat"); setSidebarOpen(false); }, [navigate, conv]);

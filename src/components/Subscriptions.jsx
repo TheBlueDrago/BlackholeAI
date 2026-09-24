@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Check, ArrowRight, Loader2, Gift } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import CreditPacks from "@/components/shop/CreditPacks";
 
 function FreeCard({ onFree }) {
   const features = ["50 Blackhole AI credits"];
@@ -166,8 +167,20 @@ function EnterpriseCard({ onEnterprise }) {
   );
 }
 
+// A heading for each part of the shop.
+function SectionTitle({ title, sub }) {
+  return (
+    <div className="text-center">
+      <h2 className="text-2xl sm:text-3xl font-bold text-white">{title}</h2>
+      {sub && <p className="text-slate-400 mt-2 text-sm">{sub}</p>}
+    </div>
+  );
+}
+
+// The Shop: plans at the top, then one-time credit packs for every AI, then promo codes.
 // offer: the signed-in user's new-member offer (from the credit status), if any.
-export default function Subscriptions({ onFree, onPro, onTeam, offer }) {
+// onBuyPack(productId): open Billing on a credit pack.
+export default function Subscriptions({ onFree, onPro, onTeam, onBuyPack, offer }) {
   const pct = offer?.discountAvailable ? offer.discountPct : 0;
   const navigate = useNavigate();
   const [promoInput, setPromoInput] = useState("");
@@ -196,22 +209,26 @@ export default function Subscriptions({ onFree, onPro, onTeam, offer }) {
 
   return (
     <motion.div
-      key="subscriptions"
+      key="shop"
       className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-10"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1, transition: { duration: 0.6, ease: "easeInOut" } }}
     >
       <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-center">
-        <span className="bh-wordmark bg-gradient-to-r from-white via-indigo-200 to-fuchsia-200 bg-clip-text text-transparent">Subscriptions</span>
+        <span className="bh-wordmark bg-gradient-to-r from-white via-indigo-200 to-fuchsia-200 bg-clip-text text-transparent">Shop</span>
       </h1>
-      <p className="text-slate-400 mt-3 text-center">Choose the plan that fits you</p>
+      <p className="text-slate-400 mt-3 text-center">Plans, credits and promo codes</p>
+
+      <div className="mt-10">
+        <SectionTitle title="Plans" sub="Monthly credits for every AI, plus more features" />
+      </div>
       {pct > 0 && (
         <p className="mt-4 px-4 py-2 rounded-full bg-amber-500/15 border border-amber-400/40 text-amber-100 text-sm text-center">
           New-member offer: {pct}% off any plan, and you keep that price as long as you stay subscribed.
         </p>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mt-10 max-w-7xl w-full">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mt-8 max-w-7xl w-full">
         <FreeCard onFree={onFree} />
         <Plan2Card onPro={onPro} pct={pct} />
         <TeamCard onTeam={onTeam} pct={pct} />
@@ -228,9 +245,18 @@ export default function Subscriptions({ onFree, onPro, onTeam, offer }) {
         </button>
       </div>
 
-      {/* Promo code */}
-      <div className="mt-12 w-full max-w-md mx-auto">
-        <p className="text-center text-slate-300 text-sm font-medium mb-3">Have A Promo Code?</p>
+      {/* Credits */}
+      <div className="mt-16 w-full max-w-4xl mx-auto">
+        <SectionTitle title="Credits" sub="Rather not subscribe? Buy 5 to 50 credits for any AI, whatever your plan." />
+        <div className="mt-8">
+          <CreditPacks onBuy={onBuyPack || ((id) => navigate("/billing", { state: { productId: id } }))} />
+        </div>
+      </div>
+
+      {/* Promo codes */}
+      <div className="mt-16 mb-6 w-full max-w-md mx-auto">
+        <SectionTitle title="Promo codes" sub="Have a promo code? Redeem it for free credits." />
+        <div className="mt-6" />
         <div className="flex items-center gap-2">
           <input
             type="text"

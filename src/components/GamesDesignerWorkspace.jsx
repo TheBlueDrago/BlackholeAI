@@ -37,7 +37,7 @@ export default function GamesDesignerWorkspace() {
       <GamesDesigner
         onToggleSidebar={() => setSidebarOpen((o) => !o)}
         onOpenProfile={() => openProfile("main")}
-        onUpgrade={() => shell.navigate("/chat/plans")}
+        onUpgrade={() => shell.navigate("/chat/shop")}
         lightMode={lightMode}
         onToggleLight={toggleLight}
         plan={effPlan}

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Pen, Plus, Code, Sparkles, Gem, Star, Check, X, CreditCard, Globe, Gamepad2, Compass, Search } from "lucide-react";
+import { Pen, Plus, Code, Sparkles, Gem, Star, Check, X, ShoppingBag, Globe, Gamepad2, Compass, Search } from "lucide-react";
 import BlackholeIcon from "@/components/BlackholeIcon";
 import PullToRefresh from "@/components/PullToRefresh";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -144,9 +144,9 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
               className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-slate-300 hover:bg-slate-800/70 transition-colors"
             >
               <div className="w-6 h-6 rounded-md bg-slate-800 flex items-center justify-center">
-                <CreditCard className="w-3.5 h-3.5 text-amber-300" />
+                <ShoppingBag className="w-3.5 h-3.5 text-amber-300" />
               </div>
-              <span className="text-[13px] font-medium">Plans</span>
+              <span className="text-[13px] font-medium">Shop</span>
             </button>
             <button
               onClick={onNewChat}

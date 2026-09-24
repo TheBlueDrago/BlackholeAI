@@ -115,7 +115,7 @@ export default function SubscriptionPanel({ onBack, onManagePeople }) {
       <div className="mt-5 space-y-2">
         {source !== "admin" && source !== "member" && (
           <button
-            onClick={() => navigate("/chat/plans")}
+            onClick={() => navigate("/chat/shop")}
             className="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-white font-medium hover:opacity-90"
           >
             {credits.plan === "free" || source === "trial" ? "Choose a plan" : "Change plan"} <ArrowRight className="w-4 h-4" />

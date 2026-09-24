@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { PUBLIC_PLANS } from "@/lib/publicPlans";
 
 // Free / Pro / Team / Enterprise cards for the public pages. Paid plans are bought from the
-// app's Plans page, so new people sign up first and land there; Enterprise goes to the
+// app's Shop, so new people sign up first and land there; Enterprise goes to the
 // application page.
 export default function PricingCards() {
   const { isAuthenticated } = useAuth();
@@ -14,7 +14,7 @@ export default function PricingCards() {
       ? "/enterprise"
       : id === "free"
       ? isAuthenticated ? "/chat" : "/register?returnTo=" + encodeURIComponent("/chat")
-      : isAuthenticated ? "/chat/plans" : "/register?returnTo=" + encodeURIComponent("/chat/plans");
+      : isAuthenticated ? "/chat/shop" : "/register?returnTo=" + encodeURIComponent("/chat/shop");
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">

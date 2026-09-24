@@ -128,6 +128,7 @@ const AuthenticatedApp = () => {
           <Route path="games" element={<GamesFront />} />
           <Route path="game-designer" element={<GamesDesignerWorkspace />} />
           <Route path="game/:name" element={<GameView />} />
+          <Route path="shop" element={<PlansView />} />
           <Route path="plans" element={<PlansView />} />
           <Route path="monitor" element={<MonitorView />} />
           <Route path="promos" element={<PromosView />} />
