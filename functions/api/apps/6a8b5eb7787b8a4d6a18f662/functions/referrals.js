@@ -5,6 +5,7 @@
 // { action: "claim-welcome", tier }    -> the new user takes their own welcome bonus
 import { json } from "../../../../../cloudflare-lib/published.js";
 import { currentUser, entitlement, creditStatus } from "../../../../../cloudflare-lib/credits.js";
+import { allow, TOO_MANY } from "../../../../../cloudflare-lib/ratelimit.js";
 import { REWARDS, referralCode, referralLink, listReferrals, joinWithCode, claimReward, getWelcome, claimWelcome, networkId, publicReferrals } from "../../../../../cloudflare-lib/referrals.js";
 
 export async function onRequestPost(context) {
@@ -15,6 +16,9 @@ export async function onRequestPost(context) {
     if (!user) return json({ error: "Please sign in." }, 401);
     const body = await request.json().catch(() => ({}));
     const credits = async () => creditStatus(kv, await entitlement(kv, request, user));
+    // Joining and claiming hand out credits (which can be bought, so they're worth money):
+    // a limited number of tries per hour.
+    if (body.action && !(await allow(`referral:${user.id}`, 20, 3600))) return json({ error: TOO_MANY }, 429);
 
     if (body.action === "join") {
       const r = await joinWithCode(kv, user, body.code, await networkId(request.headers.get("cf-connecting-ip")));

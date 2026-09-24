@@ -5,6 +5,7 @@
 // The app calls delete-my-content first to remove their sites, games and drafts.
 import { json, base44 } from "../../../../../cloudflare-lib/published.js";
 import { currentUser } from "../../../../../cloudflare-lib/credits.js";
+import { allow, TOO_MANY } from "../../../../../cloudflare-lib/ratelimit.js";
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -12,6 +13,7 @@ export async function onRequestPost(context) {
   try {
     const user = await currentUser(request);
     if (!user) return json({ error: "Unauthorized" }, 401);
+    if (!(await allow(`delete-account:${user.id}`, 5, 3600))) return json({ error: TOO_MANY }, 429);
     try {
       await base44(request, "DELETE", `entities/User/${encodeURIComponent(user.id)}`);
     } catch {
