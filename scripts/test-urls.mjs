@@ -1,7 +1,7 @@
 // Offline test for the app's address helpers (src/lib/blackholeDomain.js): what the browser
 // view will open, which site addresses are built, and which maker names are shown.
 // Run: node scripts/test-urls.mjs
-const R = new URL("../", import.meta.url).pathname;
+const R = new URL("../", import.meta.url).href; // a file URL, so imports work on Windows too
 const { safeWebUrl, siteUrl, makerName, notForKids } = await import(R + "src/lib/blackholeDomain.js");
 const assert = (c, m) => {
   if (!c) {
@@ -108,4 +108,22 @@ for (const ok of ["https://en.wikipedia.org/wiki/Essex", "https://www.sussex.ac.
   assert(keys.length > 0 && keys.slice().sort().join() === Object.keys(TOPICS).sort().join(), `contact topics match the server (${keys.join(", ")})`);
   const monitor = readFileSync(new URL("../src/components/monitor/Messages.jsx", import.meta.url), "utf8");
   assert(keys.every((k) => new RegExp(`\\b${k}: "`).test(monitor)), "and Monitor has a label for each");
+}
+
+// "Report this reply" in the chat: the report fits in one contact message and names the reason.
+{
+  const { replyReportMessage, REPLY_REASONS } = await import(R + "src/lib/replyReport.js");
+  const { TOPICS, addMessage, listMessages } = await import(R + "cloudflare-lib/contact.js");
+  assert(TOPICS.ai, "the server accepts the AI reply topic");
+  const long = "x".repeat(5000);
+  const msg = replyReportMessage("harmful", "It told me to do something dangerous", long, long + "END");
+  assert(msg.startsWith("Reported AI reply: Harmful or unsafe") && msg.includes("Note: It told me") && msg.length <= 2000, `a long question and reply are cut to fit (${msg.length} characters)`);
+  assert(!msg.includes("END") && msg.includes("Question: xxx") && msg.includes("Reply: xxx"), "keeping the start of each");
+  assert(/^Reported AI reply: Something else\n\nQuestion: \(none\)\n\nReply: Hi$/.test(replyReportMessage("made-up", "", undefined, "Hi")), "an unknown reason, no question and no note still make a clear report");
+  assert(REPLY_REASONS.map(([k]) => k).join() === "harmful,wrong,other", "reasons: harmful, wrong, other");
+  const m = new Map();
+  const kv = { get: async (k) => (m.has(k) ? JSON.parse(m.get(k)) : null), put: async (k, v) => m.set(k, v) };
+  await addMessage(kv, { topic: "ai", message: msg, email: "k@e.com", userId: "u1", who: "u1" });
+  const saved = (await listMessages(kv))[0];
+  assert(saved.topic === "ai" && saved.message === msg, "the whole report is kept for Monitor");
 }

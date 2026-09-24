@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Mail, Check, Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
-const TOPIC = { account: "Account", billing: "Billing", bug: "Bug", security: "🔒 Security", parent: "👪 Parent / teacher", idea: "Idea", business: "💼 Business", partnership: "🤝 Partnership / investor", other: "Other" };
+const TOPIC = { account: "Account", billing: "Billing", bug: "Bug", ai: "🤖 AI reply", security: "🔒 Security", parent: "👪 Parent / teacher", idea: "Idea", business: "💼 Business", partnership: "🤝 Partnership / investor", other: "Other" };
 
 // Monitor → messages sent from the /contact page (functions/contact.js).
 export default function Messages() {
@@ -15,10 +15,9 @@ export default function Messages() {
     try {
       const r = await base44.functions.invoke("contact", body);
       if (r.data?.error) throw new Error(r.data.error);
-      // Security reports first, so a report of a scam or a hole in the app is seen right away.
       const list = r.data?.messages || [];
-      // Security reports first, then parents and teachers, then everything else.
-      const rank = (m) => (m.topic === "security" ? 0 : m.topic === "parent" ? 1 : 2);
+      // Security reports first, then parents and teachers, then reported AI replies, then the rest.
+      const rank = (m) => ({ security: 0, parent: 1, ai: 2 })[m.topic] ?? 3;
       setMessages(list.map((m, i) => [m, i]).sort((a, b) => rank(a[0]) - rank(b[0]) || a[1] - b[1]).map(([m]) => m));
     } catch (e) {
       setError(e?.response?.data?.error || e?.message || "Could not load messages.");

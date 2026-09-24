@@ -11,6 +11,7 @@ const TOPICS = [
   ["account", "Account or sign-in"],
   ["billing", "Plans, credits or payments"],
   ["bug", "Something isn't working"],
+  ["ai", "A problem with an AI reply"],
   ["security", "A security problem or scam"],
   ["parent", "I'm a parent or teacher"],
   ["idea", "Idea or feedback"],

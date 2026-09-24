@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import Markdown, { CopyButton } from "@/components/chat/Markdown";
+import ReportReply from "@/components/chat/ReportReply";
 import { Plus, X, Paperclip, RotateCcw } from "lucide-react";
 import BlackholeIcon from "@/components/BlackholeIcon";
 import AiChooser from "@/components/AiChooser";
@@ -245,7 +246,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
                 ) : (
                   <>
                     <Markdown text={m.content} />
-                    <div className="flex justify-end gap-1 mt-1 -mb-1">
+                    <div className="flex flex-wrap justify-end gap-1 mt-1 -mb-1">
                       {i === messages.length - 1 && !loading && !isExhausted && (
                         <button
                           type="button"
@@ -258,6 +259,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
                         </button>
                       )}
                       <CopyButton getText={() => m.content} label="Copy reply" className="p-1 rounded-md text-slate-500 hover:text-slate-200" />
+                      <ReportReply question={messages[i - 1]?.role === "user" ? messages[i - 1].content : ""} reply={m.content} />
                     </div>
                   </>
                 )}
