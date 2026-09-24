@@ -9,8 +9,10 @@ import AuthLayout from "@/components/AuthLayout";
 import { passwordProblem } from "@/lib/passwordCheck";
 import PasswordHint from "@/components/PasswordHint";
 import ShowPasswordButton from "@/components/ShowPasswordButton";
+import usePageTitle from "@/hooks/usePageTitle";
 
 export default function ResetPassword() {
+  usePageTitle("Set a new password");
   const [searchParams] = useSearchParams();
   const resetToken = searchParams.get("token");
 

@@ -7,6 +7,7 @@ import TeamWelcomePopup from "@/components/TeamWelcomePopup";
 import BanScreen from "@/components/BanScreen";
 import MobileTabBar from "@/components/MobileTabBar";
 import MotionPrefs from "@/components/MotionPrefs";
+import usePageTitle, { appTitleFor } from "@/hooks/usePageTitle";
 
 const PageSpinner = () => (
   <div className="relative z-10 min-h-screen flex items-center justify-center">
@@ -19,6 +20,7 @@ function ChatLayout() {
   const { isBanned, isBlocked, blockedUntil, openProfile, closeProfile } = shell;
   const loc = useLocation();
   const navigate = useNavigate();
+  usePageTitle(appTitleFor(loc.pathname));
 
   // The profile opens over whatever page is showing (see openProfile), so that page stays put behind it.
   const profileView = loc.state?.profile;

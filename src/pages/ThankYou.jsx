@@ -4,6 +4,7 @@ import { CheckCircle2 } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { siteUrl } from "@/lib/blackholeDomain";
 import MotionPrefs from "@/components/MotionPrefs";
+import usePageTitle from "@/hooks/usePageTitle";
 
 // After paying. Plans and credit packs come back here from create-checkout; purchases on a
 // site someone made come back with ?site=<name> from site-checkout (older checkouts without
@@ -17,6 +18,7 @@ export default function ThankYouPage() {
 }
 
 function ThankYou() {
+  usePageTitle("Thank you");
   const [params] = useSearchParams();
   const siteHome = siteUrl(params.get("site") || "");
   const help = (

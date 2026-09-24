@@ -9,6 +9,7 @@ import { TIER_NAMES, TIERS } from "../../cloudflare-lib/planTotals.js";
 import { discountedPrice } from "../../cloudflare-lib/discounts.js";
 import { savedDiscount, saveDiscount, promoPctFor } from "@/lib/promoDiscount";
 import MotionPrefs from "@/components/MotionPrefs";
+import usePageTitle from "@/hooks/usePageTitle";
 
 const money = (n) => (Number.isInteger(n) ? `$${n}` : `$${n.toFixed(2)}`);
 // The pack of `size` credits for another AI.
@@ -45,6 +46,7 @@ export default function BillingPage() {
 }
 
 function Billing() {
+  usePageTitle("Checkout");
   const navigate = useNavigate();
   const location = useLocation();
   const requested = location.state?.productId ?? "pro";

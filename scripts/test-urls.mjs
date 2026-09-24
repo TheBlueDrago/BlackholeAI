@@ -171,3 +171,10 @@ for (const ok of ["https://en.wikipedia.org/wiki/Essex", "https://www.sussex.ac.
   assert(spokenReply("Try this:\n```js\nconsole.log(1)\n```\nDone.") === "Try this: (code) Done.", "code blocks are called (code)");
   assert(spokenReply("word ".repeat(200)).length <= 301, "long replies are cut short");
 }
+
+// Signed-in pages get their own tab titles.
+{
+  const { appTitleFor } = await import(R + "src/hooks/usePageTitle.js");
+  const want = { "/chat": "Chat", "/chat/": "Chat", "/chat/code": "Blackhole Code", "/chat/designer/build": "Website Designer", "/chat/game-designer": "Game Designer", "/chat/games": "Games", "/chat/game/zap": "Game", "/chat/shop": "Shop", "/chat/monitor": "Monitor", "/somewhere": "" };
+  assert(Object.entries(want).every(([p, t]) => appTitleFor(p) === t), "each signed-in page has its own title");
+}

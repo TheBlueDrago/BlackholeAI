@@ -8,6 +8,7 @@ import { safeReturnTo } from "@/lib/authReturnTo";
 import ShowPasswordButton from "@/components/ShowPasswordButton";
 import EmailTypoHint, { useEmailTypo } from "@/components/EmailTypoHint";
 import { markSessionOnly, signedOutNote, forgetSignedOutNote } from "@/lib/sessionOnly";
+import usePageTitle from "@/hooks/usePageTitle";
 
 // Why you were just signed out (set by the sign-out buttons and at start-up).
 const SIGNED_OUT_NOTES = {
@@ -17,6 +18,7 @@ const SIGNED_OUT_NOTES = {
 };
 
 export default function Login() {
+  usePageTitle("Sign in");
   const [email, setEmail] = useState("");
   const typo = useEmailTypo(email);
   const [password, setPassword] = useState("");

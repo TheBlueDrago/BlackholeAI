@@ -7,8 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Mail, ArrowLeft, Loader2 } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
 import EmailTypoHint, { useEmailTypo } from "@/components/EmailTypoHint";
+import usePageTitle from "@/hooks/usePageTitle";
 
 export default function ForgotPassword() {
+  usePageTitle("Forgot password");
   const [email, setEmail] = useState("");
   const typo = useEmailTypo(email);
   const [loading, setLoading] = useState(false);

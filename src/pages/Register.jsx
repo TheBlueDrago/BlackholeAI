@@ -16,8 +16,10 @@ import PasswordHint from "@/components/PasswordHint";
 import ShowPasswordButton from "@/components/ShowPasswordButton";
 import { markSessionOnly } from "@/lib/sessionOnly";
 import EmailTypoHint, { useEmailTypo } from "@/components/EmailTypoHint";
+import usePageTitle from "@/hooks/usePageTitle";
 
 export default function Register() {
+  usePageTitle("Create your account");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
