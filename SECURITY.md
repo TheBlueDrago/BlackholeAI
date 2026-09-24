@@ -19,6 +19,11 @@ A short map for anyone changing this code. Keep these rules when you touch the f
   (the browser only sends a product id). Discount codes are checked by the Cloudflare
   `promo-discount` function, which `create-checkout` asks as the buyer. Site sales:
   `base44/functions/site-checkout` uses the site owner's stored products.
+- **Taken-down sites can't sell.** `site-checkout` asks the Cloudflare `page-status` function
+  before charging, and Monitor's payout checks and the daily payout email hold any sale from a
+  taken-down site (`src/lib/payoutChecks.js`). Plans are always quantity 1 at checkout.
+- **Shown prices match charged prices.** `scripts/test-prices.mjs` fails if any page's plan
+  price or credit amount drifts from `create-checkout` or `PLAN_TOTALS`.
 - **A payment only counts when the provider's signed message says so**
   (`base44/functions/payments-webhook`, RS256-verified). Purchase and sale records can only be
   written by the payment functions (entity RLS: admin/service only).
