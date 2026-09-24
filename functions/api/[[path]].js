@@ -10,6 +10,13 @@
 // Cloudflare Pages requires this exact file at functions/api/[[path]].js to work,
 // so if it goes missing again after a Base44 auto-sync commit, restore it from
 // base44/functions/api/[[path]]/entry.ts (same content, different required path).
+//
+// Sign-in, sign-up and password-reset calls are counted on the way through, so password
+// or code guessing and repeated emails are refused with a 429 (cloudflare-lib/authlimit.js).
+// The entry.ts copy above predates this: if you restore from it, add the authLimit import
+// and call back (scripts/test-authlimit.mjs fails without them).
+import { authLimit } from "../../cloudflare-lib/authlimit.js";
+
 const BACKEND = "https://blackhole-ai.base44.app";
 
 export async function onRequest(context) {
@@ -17,6 +24,9 @@ export async function onRequest(context) {
   const path = Array.isArray(params.path) ? params.path.join("/") : (params.path || "");
   const url = new URL(request.url);
   const target = `${BACKEND}/api/${path}${url.search}`;
+
+  const limited = await authLimit(request, path);
+  if (limited) return limited;
 
   const headers = new Headers(request.headers);
   headers.delete("host");

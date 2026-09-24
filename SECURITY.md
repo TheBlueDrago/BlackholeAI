@@ -39,6 +39,9 @@ A short map for anyone changing this code. Keep these rules when you touch the f
   (`safeWebUrl`, both in `src/lib/blackholeDomain.js`) are all validated.
 - **Easy-to-guess passwords are refused** at sign-up and password reset
   (`src/lib/passwordCheck.js`, before the password is sent to Base44).
+- **Guessing is limited.** Sign-in, sign-up codes, sign-up and reset emails pass through the
+  `/api` proxy (`functions/api/[[path]].js`), which refuses too many tries per account and per
+  network with a 429 (`cloudflare-lib/authlimit.js`).
 - **Admin actions are logged** (`cloudflare-lib/audit.js`, Monitor → Admin log) and every admin
   endpoint checks the admin role on the server.
 - **Phishing checks at publish** (`cloudflare-lib/phishing.js`, `scan.js`): forms or scripts
