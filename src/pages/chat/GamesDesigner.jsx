@@ -587,7 +587,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
           <GitHubPush html={previewHtml} siteName={gameName} plan={plan} onUpgrade={onUpgrade} />
           <button
             onClick={() => setShowPublish(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-fuchsia-500 text-white text-sm font-medium hover:bg-fuchsia-400 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-fuchsia-600 text-[#fff] text-sm font-medium hover:bg-fuchsia-500 transition-colors"
           >
             <Rocket className="w-4 h-4" /> Publish
           </button>
@@ -605,7 +605,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
                   <Gamepad2 className="w-6 h-6 text-white" />
                 </div>
                 <p className="text-slate-300 font-medium">Describe your game</p>
-                <p className="text-slate-500 text-sm mt-1">Blackhole AI will build it live</p>
+                <p className="text-slate-400 text-sm mt-1">Blackhole AI will build it live</p>
                 <div className="flex flex-wrap justify-center gap-2 mt-4">
                   {GAME_IDEAS.map((idea) => (
                     <button
@@ -758,7 +758,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
                   <Gamepad2 className="w-7 h-7 text-white" />
                 </div>
                 <p className="text-slate-300 font-medium">Your game preview will appear here</p>
-                <p className="text-slate-500 text-sm mt-1">Describe what you want to build in the chat</p>
+                <p className="text-slate-400 text-sm mt-1">Describe what you want to build in the chat</p>
               </div>
             )}
           </div>
@@ -838,7 +838,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
                 <button
                   onClick={confirmPublish}
                   disabled={!gameName || publishing || !previewHtml || taken}
-                  className="flex-1 py-2.5 rounded-xl bg-fuchsia-500 text-white font-medium hover:bg-fuchsia-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  className="flex-1 py-2.5 rounded-xl bg-fuchsia-600 text-[#fff] font-medium hover:bg-fuchsia-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   {publishing ? (isRepublish ? "Re-publishing…" : "Publishing…") : isRepublish ? "Re-publish" : "Publish"}
                 </button>
@@ -856,7 +856,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="fixed top-20 right-4 left-4 sm:left-auto sm:right-6 z-50 bg-emerald-500 text-white px-4 py-2.5 rounded-xl shadow-2xl flex flex-wrap items-center gap-2 text-sm font-medium"
+            className="fixed top-20 right-4 left-4 sm:left-auto sm:right-6 z-50 bg-emerald-700 text-[#fff] px-4 py-2.5 rounded-xl shadow-2xl flex flex-wrap items-center gap-2 text-sm font-medium"
           >
             <Rocket className="w-4 h-4" /> {isRepublish ? "Game updated!" : "Game published!"}
             {publishUrl && (

@@ -144,7 +144,7 @@ function CodeCard({ code, onSave, onDelete, busy }) {
         <button
           onClick={() => onSave(code.id, f)}
           disabled={busy}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-500 text-white text-sm font-medium disabled:opacity-50 hover:bg-indigo-400 transition-colors"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-600 text-[#fff] text-sm font-medium disabled:opacity-50 hover:bg-indigo-500 transition-colors"
         >
           {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           Save

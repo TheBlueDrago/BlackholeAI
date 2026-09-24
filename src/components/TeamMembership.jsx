@@ -336,7 +336,7 @@ export default function TeamMembership({ onBack }) {
               <button
                 onClick={addMember}
                 disabled={busy || !addEmail.trim()}
-                className="px-4 py-2.5 rounded-xl bg-sky-500 text-white text-sm font-medium disabled:opacity-50"
+                className="px-4 py-2.5 rounded-xl bg-sky-700 text-[#fff] text-sm font-medium disabled:opacity-50"
               >
                 Add
               </button>

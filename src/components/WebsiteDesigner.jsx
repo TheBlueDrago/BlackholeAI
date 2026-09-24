@@ -690,7 +690,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
           <DownloadZip html={previewHtml} name={siteName} plan={plan} onUpgrade={onUpgrade} />
           <button
             onClick={() => setShowPublish(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500 text-white text-sm font-medium hover:bg-indigo-400 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 text-[#fff] text-sm font-medium hover:bg-indigo-500 transition-colors"
           >
             <Rocket className="w-4 h-4" /> Publish
           </button>
@@ -727,7 +727,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
               />
               <button
                 onClick={addMember}
-                className="px-3 py-2 rounded-lg bg-indigo-500 text-white text-sm font-medium hover:bg-indigo-400 transition-colors"
+                className="px-3 py-2 rounded-lg bg-indigo-600 text-[#fff] text-sm font-medium hover:bg-indigo-500 transition-colors"
               >
                 Add
               </button>
@@ -1000,7 +1000,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
                 <button
                   onClick={confirmPublish}
                   disabled={!siteName || publishing || !previewHtml || taken}
-                  className="flex-1 py-2.5 rounded-xl bg-indigo-500 text-white font-medium hover:bg-indigo-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  className="flex-1 py-2.5 rounded-xl bg-indigo-600 text-[#fff] font-medium hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   {publishing ? (isRepublish ? "Re-publishing…" : "Publishing…") : isRepublish ? "Re-publish" : "Publish"}
                 </button>
@@ -1033,7 +1033,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="fixed top-20 right-4 left-4 sm:left-auto sm:right-6 z-50 bg-emerald-500 text-white px-4 py-2.5 rounded-xl shadow-2xl flex flex-wrap items-center gap-2 text-sm font-medium"
+            className="fixed top-20 right-4 left-4 sm:left-auto sm:right-6 z-50 bg-emerald-700 text-[#fff] px-4 py-2.5 rounded-xl shadow-2xl flex flex-wrap items-center gap-2 text-sm font-medium"
           >
             <Rocket className="w-4 h-4" /> {isRepublish ? "Website updated!" : "Website published!"}
             {publishUrl && (

@@ -248,7 +248,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
                     />
                     <button
                       onClick={(e) => { e.stopPropagation(); saveEdit(); }}
-                      className="w-11 h-11 flex items-center justify-center rounded-lg bg-indigo-500 text-white shrink-0"
+                      className="w-11 h-11 flex items-center justify-center rounded-lg bg-indigo-600 text-[#fff] shrink-0"
                     >
                       <Check className="w-4 h-4" />
                     </button>

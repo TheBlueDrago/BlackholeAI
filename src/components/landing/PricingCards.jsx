@@ -26,7 +26,7 @@ export default function PricingCards() {
           }`}
         >
           {p.highlight && (
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[11px] font-semibold px-3 py-1 rounded-full bg-indigo-500 text-white">Most popular</span>
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[11px] font-semibold px-3 py-1 rounded-full bg-indigo-600 text-[#fff]">Most popular</span>
           )}
           <p className="text-lg font-semibold text-white">{p.name}</p>
           <p className="mt-2">
