@@ -5,12 +5,14 @@ import { json, findByName } from "../../../../../cloudflare-lib/published.js";
 import { REASONS, addReport } from "../../../../../cloudflare-lib/reports.js";
 import { currentUser } from "../../../../../cloudflare-lib/credits.js";
 import { allow, TOO_MANY } from "../../../../../cloudflare-lib/ratelimit.js";
+import { filledByBot } from "../../../../../cloudflare-lib/honeypot.js";
 
 export async function onRequestPost(context) {
   const { request, env } = context;
   try {
     if (!env.PUBLISHED_HTML) return json({ error: "Reporting isn't available right now." }, 500);
     const body = await request.json().catch(() => ({}));
+    if (filledByBot(body)) return json({ ok: true, duplicate: false });
     const kind = body.kind === "game" ? "game" : "site";
     const name = String(body.name || "").toLowerCase().slice(0, 100);
     const reason = String(body.reason || "");

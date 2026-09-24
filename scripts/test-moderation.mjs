@@ -48,6 +48,14 @@ assert(!b.duplicate && writes === 2, "second IP counted");
 assert(s === 404, "unknown site 404");
 [s, b] = await j(report.onRequestPost({ request: req({ name: "nova", reason: "bogus" }), env }));
 assert(s === 400, "bad reason 400");
+{
+  const before = writes;
+  [s, b] = await j(report.onRequestPost({ request: req({ name: "nova", reason: "scam", website: "http://spam.example" }, null, "9.9.9.9"), env }));
+  assert(s === 200 && b.ok && writes === before, "a report with the hidden spam-trap field filled is answered but not saved");
+  const contact = await import(F + "contact.js");
+  [s, b] = await j(contact.onRequestPost({ request: req({ action: "send", topic: "other", message: "buy cheap stuff now", email: "bot@spam.example", website: "x" }, null, "9.9.9.9"), env }));
+  assert(s === 200 && b.ok && writes === before, "a contact message with the spam-trap field filled isn't saved");
+}
 
 [s, b] = await j(admin.onRequestPost({ request: req({ action: "list" }, "usertok"), env }));
 assert(s === 403, "non-admin blocked");

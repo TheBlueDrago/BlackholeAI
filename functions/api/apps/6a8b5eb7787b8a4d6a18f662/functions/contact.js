@@ -5,6 +5,7 @@
 import { json } from "../../../../../cloudflare-lib/published.js";
 import { currentUser } from "../../../../../cloudflare-lib/credits.js";
 import { allow, TOO_MANY } from "../../../../../cloudflare-lib/ratelimit.js";
+import { filledByBot } from "../../../../../cloudflare-lib/honeypot.js";
 import { TOPICS, addMessage, listMessages, removeMessage } from "../../../../../cloudflare-lib/contact.js";
 
 export async function onRequestPost(context) {
@@ -22,6 +23,7 @@ export async function onRequestPost(context) {
       return json({ messages: await listMessages(kv) });
     }
 
+    if (filledByBot(body)) return json({ ok: true });
     const topic = TOPICS[body.topic] ? body.topic : "other";
     const message = String(body.message || "").trim();
     const email = String(body.email || (user && user.email) || "").trim();

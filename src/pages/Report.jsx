@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Flag, Loader2, CheckCircle2 } from "lucide-react";
+import Honeypot from "@/components/Honeypot";
 import { base44 } from "@/api/base44Client";
 
 // Keys must match REASONS in cloudflare-lib/reports.js.
@@ -23,6 +24,7 @@ export default function Report() {
   const [name, setName] = useState((params.get("name") || "").toLowerCase());
   const [reason, setReason] = useState("");
   const [details, setDetails] = useState("");
+  const [website, setWebsite] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [sent, setSent] = useState(false);
@@ -36,7 +38,7 @@ export default function Report() {
     setBusy(true);
     setError("");
     try {
-      const res = await base44.functions.invoke("report-site", { kind, name: name.trim(), reason, details });
+      const res = await base44.functions.invoke("report-site", { kind, name: name.trim(), reason, details, website });
       if (res.data?.error) setError(res.data.error);
       else setSent(true);
     } catch (err) {
@@ -59,7 +61,8 @@ export default function Report() {
             <a href="/" className="inline-block text-sm text-indigo-300 underline">Go to Blackhole AI</a>
           </div>
         ) : (
-          <form onSubmit={submit} className="space-y-4">
+          <form onSubmit={submit} className="relative space-y-4">
+            <Honeypot value={website} onChange={setWebsite} />
             <div className="flex items-center gap-2">
               <Flag className="w-5 h-5 text-red-400" />
               <h1 className="text-xl font-semibold text-white">Report a {kind}</h1>

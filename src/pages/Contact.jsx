@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Mail, Phone, Loader2, CheckCircle2, Briefcase, Handshake } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import PublicLayout from "@/components/PublicLayout";
+import Honeypot from "@/components/Honeypot";
 import { CONTACT_EMAIL, CONTACT_PHONE, CONTACT_PHONE_LINK } from "@/lib/company";
 
 // Keys must match TOPICS in cloudflare-lib/contact.js.
@@ -27,6 +28,7 @@ export default function Contact() {
   });
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [website, setWebsite] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [sent, setSent] = useState(false);
@@ -40,7 +42,7 @@ export default function Contact() {
     setBusy(true);
     setError("");
     try {
-      const res = await base44.functions.invoke("contact", { action: "send", topic, message, email: signedInEmail || email });
+      const res = await base44.functions.invoke("contact", { action: "send", topic, message, email: signedInEmail || email, website });
       if (res.data?.error) setError(res.data.error);
       else setSent(true);
     } catch (err) {
@@ -97,7 +99,8 @@ export default function Contact() {
               <p className="text-sm text-slate-400">Thanks — we'll reply to {signedInEmail || email}.</p>
             </div>
           ) : (
-            <form onSubmit={submit} className="space-y-4">
+            <form onSubmit={submit} className="relative space-y-4">
+              <Honeypot value={website} onChange={setWebsite} />
               <h2 className="text-xl font-semibold text-white">Send us a message</h2>
               <label className="block text-sm">
                 <span className="text-slate-400">What's it about?</span>
