@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Sparkles, Smartphone, Globe, ShieldCheck, Gamepad2, Play, Check, ChevronDown, Mail, Phone } from "lucide-react";
+import { ArrowRight, Sparkles, Smartphone, Globe, ShieldCheck, Gamepad2, Play, Check, ChevronDown, Mail, Phone, MessageCircle, GraduationCap, PenLine, Code2, Image, Mic, Search, Layers } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import SiteThumb from "@/components/SiteThumb";
 import PublicLayout, { START_FREE } from "@/components/PublicLayout";
@@ -17,6 +17,18 @@ const FACTS = [
   { icon: Smartphone, title: "Phone or computer", text: "Works everywhere" },
   { icon: Globe, title: "Free web address", text: "Your own link to share" },
   { icon: ShieldCheck, title: "Safety checked", text: "Before anything goes live" },
+];
+
+// What the AI itself does (all real features of the chat, Code and Browser pages).
+const AI_SKILLS = [
+  { icon: MessageCircle, title: "Ask anything", text: "Clear answers in seconds, in your own words, about any topic." },
+  { icon: GraduationCap, title: "Homework help", text: "Explains things simply, step by step, and makes quizzes to practise with." },
+  { icon: PenLine, title: "Writing", text: "Stories, essays, emails and posts: drafts it, fixes it, makes it shorter." },
+  { icon: Code2, title: "Code", text: "Blackhole Code writes, explains and fixes code in any language." },
+  { icon: Image, title: "Pictures", text: "Send up to 3 photos or screenshots and ask about them." },
+  { icon: Mic, title: "Talk to it", text: "Tap the microphone and speak instead of typing." },
+  { icon: Search, title: "Search the web", text: "The Blackhole Browser finds pages and answers without leaving the app." },
+  { icon: Layers, title: "Four AI models", text: "Blackhole AI for everyday help, plus Code, Galaxy and Space on Pro." },
 ];
 
 const FEATURES = [
@@ -175,7 +187,7 @@ export default function Landing() {
   }, []);
 
   return (
-    <PublicLayout title="Make websites and games with AI">
+    <PublicLayout title="Your AI for answers, writing, code and more">
       {/* Hero */}
       <section className="grid lg:grid-cols-2 gap-12 items-center pt-10 sm:pt-16 pb-12">
         <div
@@ -189,11 +201,11 @@ export default function Landing() {
           )}
           <h1 className="text-4xl sm:text-6xl font-bold tracking-tight leading-[1.05]">
             <span className="bg-gradient-to-r from-[#ffffff] via-indigo-200 to-fuchsia-200 bg-clip-text text-transparent">
-              Make websites and games just by describing them
+              Your AI for answers, writing, code and more
             </span>
           </h1>
           <p className="mt-5 text-slate-400 text-lg max-w-xl mx-auto lg:mx-0">
-            Blackhole AI is an AI helper that chats, builds websites and makes games for you. Share what you make with a link. Free to start.
+            Ask Blackhole AI anything, send it a picture or just talk to it. And when you want to make something, it builds websites and games for you too. Free to start.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3">
             <Link
@@ -227,6 +239,33 @@ export default function Landing() {
             </span>
           </div>
         ))}
+      </section>
+
+      {/* The AI itself */}
+      <section className="mt-24 sm:mt-32">
+        <Reveal className="text-center max-w-2xl mx-auto">
+          <h2 className="text-3xl sm:text-5xl font-bold text-white">Meet your AI</h2>
+          <p className="mt-4 text-slate-400 text-lg">One helper for school, work and everything you're curious about.</p>
+        </Reveal>
+        <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {AI_SKILLS.map(({ icon: Icon, title, text }) => (
+            <div key={title} className="rounded-2xl bg-slate-900/50 border border-slate-800 p-5">
+              <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500/25 to-fuchsia-500/25 border border-indigo-400/20 flex items-center justify-center">
+                <Icon className="w-5 h-5 text-indigo-200" />
+              </span>
+              <p className="mt-3 font-semibold text-white">{title}</p>
+              <p className="mt-1 text-sm text-slate-400">{text}</p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-8 text-center">
+          <Link
+            to={START_FREE}
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-white font-semibold hover:opacity-90"
+          >
+            Start chatting free <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
       </section>
 
       {/* What it can do */}
