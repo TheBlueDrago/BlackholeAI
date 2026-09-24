@@ -17,6 +17,7 @@ import { streamChat } from "@/lib/aiStream";
 import { shrinkImage } from "@/lib/siteImages";
 import EffortPicker from "@/components/chat/EffortPicker";
 import { useAppShell } from "@/components/AppShellContext";
+import useStickToBottom from "@/hooks/useStickToBottom";
 
 const CODE_SYS = "You are Blackhole Code Assistant. Help with programming. Give clear, correct code with brief explanations.";
 const FABLE_SYS = "You are Space, Blackhole AI's premium creative model. Be imaginative and high-quality.";
@@ -126,9 +127,8 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
 
   const q = useMessageQueue({ run: runPrompt, remaining, names: AI_NAMES, selectedAi, onChangeAi: setSelectedAi });
 
-  useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [messages, loading, live, q.queue.length]);
+  const sentCount = messages.filter((m) => m.role === "user").length;
+  useStickToBottom(scrollRef, [messages, loading, live, q.queue.length], `${conversation?.id}:${sentCount}`);
 
   useEffect(() => {
     convIdRef.current = conversation?.id || null;
@@ -198,8 +198,10 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
 
   return (
     <div className="w-full max-w-3xl px-3 sm:px-4">
-      <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-3xl overflow-hidden shadow-2xl">
-        <div ref={scrollRef} className="h-[55vh] sm:h-96 overflow-y-auto p-4 sm:p-6 space-y-4 scroll-smooth">
+      {/* No backdrop blur, smooth scrolling or scroll trapping here: on phones (iPhones especially)
+          they got in the way of scrolling the messages. At either end, a swipe scrolls the page. */}
+      <div className="bg-slate-900/80 border border-slate-700/50 rounded-3xl overflow-hidden shadow-2xl">
+        <div ref={scrollRef} className="h-[55vh] sm:h-96 overflow-y-auto overscroll-y-auto p-4 sm:p-6 space-y-4">
           {messages.length === 0 && !loading && (
             <div className="h-full flex flex-col items-center justify-center text-center">
               <div className="keep-color w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center mb-3">

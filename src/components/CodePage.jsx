@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import Markdown, { CopyButton } from "@/components/chat/Markdown";
 import { Terminal, RotateCcw } from "lucide-react";
 import { OUT_OF_CREDITS_NOTE } from "@/lib/creditCost";
@@ -12,6 +12,7 @@ import SendOrStopButton from "@/components/chat/SendOrStopButton";
 import useMessageQueue from "@/hooks/useMessageQueue";
 import useBuildMode, { BUILD_NOTE, ANSWER_NOTE, resolveIntent } from "@/hooks/useBuildMode";
 import ModeToggle from "@/components/chat/ModeToggle";
+import useStickToBottom from "@/hooks/useStickToBottom";
 
 export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICode, userInitial }) {
   const buildMode = useBuildMode("code");
@@ -65,9 +66,7 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
 
   const q = useMessageQueue({ run: runPrompt, remaining: { code: aiCodeRemaining ?? (aiCodeExhausted ? 0 : Infinity) }, names: { code: "Blackhole Code" }, selectedAi: "code" });
 
-  useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [messages, loading, live, q.queue.length]);
+  useStickToBottom(scrollRef, [messages, loading, live, q.queue.length], messages.filter((m) => m.role === "user").length);
 
   const stop = () => {
     reqIdRef.current++;
@@ -117,8 +116,9 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
 
   return (
     <div className="w-full max-w-3xl px-3 sm:px-4">
-      <div className="bg-slate-900/60 backdrop-blur-xl border border-emerald-700/40 rounded-3xl overflow-hidden shadow-2xl">
-        <div ref={scrollRef} className="h-[55vh] sm:h-96 overflow-y-auto p-4 sm:p-6 space-y-4 scroll-smooth">
+      {/* Same as the home chat: no blur, smooth scrolling or scroll trapping, for phones. */}
+      <div className="bg-slate-900/80 border border-emerald-700/40 rounded-3xl overflow-hidden shadow-2xl">
+        <div ref={scrollRef} className="h-[55vh] sm:h-96 overflow-y-auto overscroll-y-auto p-4 sm:p-6 space-y-4">
           {messages.length === 0 && !loading && (
             <div className="h-full flex flex-col items-center justify-center text-center">
               <div className="keep-color w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center mb-3 shadow-lg shadow-emerald-500/20">
