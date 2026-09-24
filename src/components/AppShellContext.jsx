@@ -57,9 +57,12 @@ export function AppShellProvider({ children }) {
   }, [currentUser?.id]);
 
   const isAdmin = currentUser?.role === "admin";
-  const isBanned = currentUser?.banned === true;
-  const blockedUntil = currentUser?.blockedUntil ? new Date(currentUser.blockedUntil) : null;
+  // Bans show from the User row and from the credit server, whose answer (from admin-only
+  // records) clearing your own row can't change. A block with an end date is "blocked until".
+  const untilRaw = currentUser?.blockedUntil || credits.blockedUntil;
+  const blockedUntil = untilRaw ? new Date(untilRaw) : null;
   const isBlocked = !!(blockedUntil && blockedUntil > new Date());
+  const isBanned = currentUser?.banned === true || (credits.blocked === true && !isBlocked);
   // Single source of truth for the effective plan (handles admin, secret, team membership and Pro expiry).
   const effPlan = credits.plan;
   const avatarInitial = (currentUser?.full_name || currentUser?.email || "U").trim().charAt(0).toUpperCase();

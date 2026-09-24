@@ -28,6 +28,7 @@ import { CREDIT_PACKS } from "./creditPacks.js";
 // Plan allowances live in planTotals.js so the app can show them too (out-of-credits card).
 export { TIERS, TIER_OF_MODEL, TIER_NAMES, PLAN_TOTALS } from "./planTotals.js";
 import { TIERS, PLAN_TOTALS } from "./planTotals.js";
+import { blockedBy } from "./bans.js";
 const RANK = { free: 0, pro: 1, team: 2, secret: 3, enterprise: 4, admin: 5 };
 
 // Whole credits: 1 per started 10,000 characters of reply, times the effort level.
@@ -187,10 +188,11 @@ export async function entitlement(kv, request, user, { other = false } = {}) {
     details.endsAt = null;
   }
   const now = new Date();
-  const blocked =
-    user.banned === true ||
-    !!(grant && (grant.banned || (grant.blockedUntil && new Date(grant.blockedUntil) > now))) ||
-    !!(user.blockedUntil && new Date(user.blockedUntil) > now);
+  const blocked = blockedBy(user, grant, now);
+  // For the ban screen: when a timed block ends (the later one, if both set one); null = banned.
+  const blockedUntil = blocked
+    ? [grant && grant.blockedUntil, user.blockedUntil].filter((v) => v && new Date(v) > now).sort().pop() || null
+    : null;
   // Enterprise: everyone in the organization draws every kind of credit from one pool.
   const orgId = team && plan === "enterprise" ? team.teamId : null;
   return {
@@ -201,6 +203,7 @@ export async function entitlement(kv, request, user, { other = false } = {}) {
     seats: orgId ? await seatsOf(kv, orgId) : null,
     bonus,
     blocked,
+    blockedUntil,
     // Where the plan comes from ("free", "paid", "trial", "grant", "member", "admin"), when it
     // ends if it does, and the new-account offer (for the Subscriptions screen).
     planSource: details.source,
@@ -229,6 +232,7 @@ export async function creditStatus(kv, ent) {
     plan: ent.plan,
     month,
     blocked: ent.blocked,
+    ...(ent.blocked ? { blockedUntil: ent.blockedUntil || null } : {}),
     tiers,
     planSource: ent.planSource || "free",
     planEndsAt: ent.planEndsAt || null,

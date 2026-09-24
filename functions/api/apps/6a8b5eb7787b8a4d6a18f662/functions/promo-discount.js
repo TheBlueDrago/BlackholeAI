@@ -6,6 +6,7 @@ import { json } from "../../../../../cloudflare-lib/published.js";
 import { currentUser } from "../../../../../cloudflare-lib/credits.js";
 import { checkDiscount } from "../../../../../cloudflare-lib/promos.js";
 import { allow, hits, bump, TOO_MANY } from "../../../../../cloudflare-lib/ratelimit.js";
+import { accountBlocked, BLOCKED_MESSAGE } from "../../../../../cloudflare-lib/bans.js";
 
 // Wrong codes tried per network per hour, across all its accounts, so one person with many
 // accounts can't keep guessing. Checkout's own claim comes from Base44's servers (one shared
@@ -19,6 +20,7 @@ export async function onRequestPost(context) {
   try {
     const user = await currentUser(request);
     if (!user) return json({ error: "Please sign in to use a promo code." }, 401);
+    if (await accountBlocked(env.PUBLISHED_HTML, user)) return json({ error: BLOCKED_MESSAGE }, 403);
     // Guessing codes: a limited number of tries per hour.
     if (!(await allow(`promo-discount:${user.id}`, 30, 3600))) return json({ error: TOO_MANY }, 429);
     const body = await request.json().catch(() => ({}));

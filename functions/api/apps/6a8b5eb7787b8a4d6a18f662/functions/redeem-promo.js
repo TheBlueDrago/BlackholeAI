@@ -4,6 +4,7 @@ import { json } from "../../../../../cloudflare-lib/published.js";
 import { currentUser } from "../../../../../cloudflare-lib/credits.js";
 import { redeemPromo } from "../../../../../cloudflare-lib/promos.js";
 import { allow, hits, bump, TOO_MANY } from "../../../../../cloudflare-lib/ratelimit.js";
+import { accountBlocked, BLOCKED_MESSAGE } from "../../../../../cloudflare-lib/bans.js";
 
 // Wrong codes allowed per network per hour, across all its accounts (so one person with many
 // accounts can't keep guessing). Only wrong ones count: a class all typing the code their
@@ -15,6 +16,7 @@ export async function onRequestPost(context) {
   try {
     const user = await currentUser(request);
     if (!user) return json({ error: "Please sign in to redeem a promo code." }, 401);
+    if (await accountBlocked(env.PUBLISHED_HTML, user)) return json({ error: BLOCKED_MESSAGE }, 403);
     // Guessing codes: a few tries per hour.
     if (!(await allow(`promo:${user.id}`, 10, 3600))) return json({ error: TOO_MANY }, 429);
     const miss = `promo-miss:${request.headers.get("cf-connecting-ip") || "unknown"}`;

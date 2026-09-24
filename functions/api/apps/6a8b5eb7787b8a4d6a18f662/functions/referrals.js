@@ -7,6 +7,7 @@ import { json } from "../../../../../cloudflare-lib/published.js";
 import { currentUser, entitlement, creditStatus } from "../../../../../cloudflare-lib/credits.js";
 import { allow, TOO_MANY } from "../../../../../cloudflare-lib/ratelimit.js";
 import { REWARDS, referralCode, referralLink, listReferrals, joinWithCode, claimReward, getWelcome, claimWelcome, networkId, publicReferrals } from "../../../../../cloudflare-lib/referrals.js";
+import { accountBlocked, BLOCKED_MESSAGE } from "../../../../../cloudflare-lib/bans.js";
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -19,6 +20,7 @@ export async function onRequestPost(context) {
     // Joining and claiming hand out credits (which can be bought, so they're worth money):
     // a limited number of tries per hour.
     if (body.action && !(await allow(`referral:${user.id}`, 20, 3600))) return json({ error: TOO_MANY }, 429);
+    if (body.action && (await accountBlocked(kv, user))) return json({ error: BLOCKED_MESSAGE }, 403);
 
     if (body.action === "join") {
       const r = await joinWithCode(kv, user, body.code, await networkId(request.headers.get("cf-connecting-ip")));

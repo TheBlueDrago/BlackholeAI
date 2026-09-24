@@ -76,6 +76,9 @@ export function useCredits() {
     seats: status?.seats || null,
     shared: !!status?.shared,
     tiers: status?.tiers || null,
+    // Banned or blocked by an admin, as the server sees it (the ban screen uses this too).
+    blocked: status?.blocked === true,
+    blockedUntil: status?.blockedUntil || null,
     team,
     refresh,
     sync,
