@@ -32,3 +32,12 @@ export function resolveAddress(q, sites = [], games = []) {
   if (game) return { kind: "game", item: game };
   return null;
 }
+// A published site's real address, or "" if the name isn't a valid site name (letters,
+// digits and hyphens). Names can come from a link or from a record anyone could write, and
+// one like "evil.com#" would otherwise make https://evil.com#.blackhole-ai-tech.com, which is
+// really evil.com dressed up as one of ours.
+export const SITE_NAME = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
+export const siteUrl = (name) => {
+  const n = String(name || "").toLowerCase();
+  return SITE_NAME.test(n) ? `https://${n}.blackhole-ai-tech.com` : "";
+};

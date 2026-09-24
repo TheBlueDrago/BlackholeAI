@@ -1,4 +1,5 @@
 import React from "react";
+import { siteUrl } from "@/lib/blackholeDomain";
 
 // Published sites live at their own real subdomain (nova.blackhole-ai-tech.com,
 // served by the blackhole-site-router Cloudflare Worker) rather than being
@@ -8,7 +9,8 @@ import React from "react";
 // from blackhole-ai-tech.com, so allow-same-origin here only grants the site
 // access to its own isolated storage, not the parent app's.
 export default function BrowserSiteFrame({ name, title, reloadKey }) {
-  const src = `https://${(name || "").toLowerCase()}.blackhole-ai-tech.com`;
+  const src = siteUrl(name);
+  if (!src) return <div className="flex-1 flex items-center justify-center text-slate-400 text-sm">There's no site at that address.</div>;
   return (
     <iframe
       key={reloadKey}

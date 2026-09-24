@@ -5,6 +5,7 @@ import SiteThumb from "@/components/SiteThumb";
 import { Link } from "react-router-dom";
 import PublicLayout, { START_FREE } from "@/components/PublicLayout";
 import { SITE_TEMPLATES } from "@/lib/siteTemplates";
+import { siteUrl } from "@/lib/blackholeDomain";
 
 // Public gallery of sites people built with Blackhole AI (owners opt in from the
 // Website Designer). Doubles as a landing page for visitors who aren't signed up.
@@ -56,7 +57,7 @@ export default function Showcase() {
           {sites.map((s) => (
             <a
               key={s.name}
-              href={`https://${s.name}.blackhole-ai-tech.com`}
+              href={siteUrl(s.name) || "/showcase"}
               target="_blank"
               rel="noopener noreferrer"
               className="group rounded-2xl bg-slate-900/60 border border-slate-700/50 p-3 hover:border-indigo-500/50 transition-colors"

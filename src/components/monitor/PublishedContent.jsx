@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Loader2, Globe, Gamepad2, Sparkles, EyeOff, Eye, ExternalLink, ArrowLeft, ChevronRight } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { siteUrl } from "@/lib/blackholeDomain";
 
 const FLAGS = {
   red: { dot: "bg-red-500", chip: "bg-red-600/25 text-red-200 border-red-500/50", label: "Red flag" },
@@ -13,7 +14,7 @@ const KINDS = {
   game: { label: "Games", icon: Gamepad2, color: "text-fuchsia-300" },
 };
 
-const urlOf = (it) => (it.kind === "site" ? `https://${it.name}.blackhole-ai-tech.com` : `/chat/game/${encodeURIComponent(it.name)}`);
+const urlOf = (it) => (it.kind === "site" ? siteUrl(it.name) || "#" : `/chat/game/${encodeURIComponent(it.name)}`);
 const countFlags = (list) => {
   const c = { red: 0, yellow: 0, green: 0 };
   for (const it of list) c[it.flag] += 1;

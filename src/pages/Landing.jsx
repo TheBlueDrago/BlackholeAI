@@ -8,6 +8,7 @@ import PublicLayout, { START_FREE } from "@/components/PublicLayout";
 import PricingCards from "@/components/landing/PricingCards";
 import { HeroCollage, ChatShot, SiteShot, GameShot, ShopShot, TeamShot, SafetyShot, EnterpriseShot } from "@/components/landing/ProductShots";
 import { CONTACT_EMAIL, CONTACT_PHONE, CONTACT_PHONE_LINK } from "@/lib/company";
+import { siteUrl } from "@/lib/blackholeDomain";
 
 const FACTS = [
   { icon: Sparkles, title: "No coding", text: "Just describe it" },
@@ -287,7 +288,7 @@ export default function Landing() {
             {sites.map((s) => (
               <a
                 key={s.name}
-                href={`https://${s.name}.blackhole-ai-tech.com`}
+                href={siteUrl(s.name) || "/showcase"}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-2xl bg-slate-900/60 border border-slate-700/50 p-3 hover:border-indigo-500/50 transition-colors"

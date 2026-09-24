@@ -71,6 +71,24 @@ export async function findByName(request, kind, name) {
   return Array.isArray(rows) ? rows : [];
 }
 
+// Names are checked here, not just in the app, since anyone can call this directly. Site
+// names become web addresses (name.blackhole-ai-tech.com), so they're letters, digits and
+// hyphens only: "evil.com#" would otherwise make an address that's really evil.com. Games live
+// inside the app, and their names may also have dots ("shooter.io"). Same reserved words as the
+// designer. -> an error message, or "".
+const SITE_NAME = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
+const GAME_NAME = /^[a-z0-9](?:[a-z0-9.-]{0,61}[a-z0-9])?$/;
+const RESERVED = ["home", "www", "admin", "api", "mail", "infinity", "ai", "app", "login", "register", "support", "blog"];
+export function badName(kind, name) {
+  if (!(kind === "site" ? SITE_NAME : GAME_NAME).test(name)) {
+    return kind === "site"
+      ? "Website names can only use letters, numbers and hyphens (like my-site)."
+      : "Game names can only use letters, numbers, dots and hyphens.";
+  }
+  if (kind === "site" && RESERVED.includes(name)) return "That name is taken. Try another.";
+  return "";
+}
+
 // Who owns a published name. Anyone signed in can write their own PublishedSite/PublishedGame
 // rows straight into Base44, so "there's a row of mine with this name" proves nothing. The
 // owner is whoever publish() recorded with the stored page, while they still have a row for
@@ -106,6 +124,8 @@ export async function publish(context, kind, { name, html: rawHtml, extra }) {
     if (!user || !user.id) return json({ error: "Please sign in to publish." }, 401);
     if (user.role !== "admin" && !(await allow(`publish:${user.id}`, 30, 3600))) return json({ error: TOO_MANY }, 429);
     if (!name || !html) return json({ error: "name and html required" }, 400);
+    const nameError = badName(kind, name);
+    if (nameError) return json({ error: nameError }, 400);
     if (new TextEncoder().encode(html).length > MAX_BYTES) {
       return json({ error: `${label} is too large (over 5 MB). Make it smaller.` }, 413);
     }

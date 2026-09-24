@@ -331,3 +331,18 @@ const stored = JSON.parse(store.get("contact")).messages.filter((m) => m.email =
 assert(stored === 3, "at most 3 stored messages per sender per day (" + stored + ")");
 [s, b] = await j(contact.onRequestPost({ request: req({ action: "count" }, "admintok"), env }));
 assert(s === 200 && b.open === JSON.parse(store.get("contact")).messages.length, "message count for the Monitor badge");
+
+// ---- names are checked on the server too ----
+{
+  const { badName } = await import(R + "cloudflare-lib/published.js");
+  assert(badName("site", "evil.com#") && badName("site", "a/b") && badName("site", "-x") && badName("site", "admin"), "odd or reserved site names are refused");
+  assert(!badName("site", "my-site-2") && !badName("site", "nova"), "normal site names are fine");
+  assert(!badName("game", "shooter.io") && badName("game", "evil.com/#"), "game names may have dots, nothing stranger");
+  delete globalThis.caches;
+  const [st, bd] = await j(pub.onRequestPost({ request: req({ name: "evil.com#", html: "<p>x</p>" }, "usertok"), env }));
+  assert(st === 400 && /letters, numbers and hyphens/.test(bd.error), "publishing refuses a site name that isn't a plain address");
+}
+{
+  const { siteUrl } = await import(R + "src/lib/blackholeDomain.js");
+  assert(siteUrl("nova") === "https://nova.blackhole-ai-tech.com" && siteUrl("evil.com#") === "" && siteUrl("x/y") === "", "site links are only built for valid names");
+}

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Flag, Loader2, EyeOff, Eye, Check, ExternalLink } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { siteUrl } from "@/lib/blackholeDomain";
 
 const pageUrl = (p) =>
-  p.kind === "site" ? `https://${p.name}.blackhole-ai-tech.com` : `/chat/game/${encodeURIComponent(p.name)}`;
+  p.kind === "site" ? siteUrl(p.name) || "#" : `/chat/game/${encodeURIComponent(p.name)}`;
 
 // Monitor → pages visitors reported (from the Report link on published sites), with
 // one-click take-down. Hidden pages show a "removed" notice and their owner can't
