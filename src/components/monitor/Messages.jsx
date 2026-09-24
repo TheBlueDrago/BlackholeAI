@@ -15,7 +15,9 @@ export default function Messages() {
     try {
       const r = await base44.functions.invoke("contact", body);
       if (r.data?.error) throw new Error(r.data.error);
-      setMessages(r.data?.messages || []);
+      // Security reports first, so a report of a scam or a hole in the app is seen right away.
+      const list = r.data?.messages || [];
+      setMessages([...list.filter((m) => m.topic === "security"), ...list.filter((m) => m.topic !== "security")]);
     } catch (e) {
       setError(e?.response?.data?.error || e?.message || "Could not load messages.");
     }
@@ -45,7 +47,10 @@ export default function Messages() {
       ) : (
         <div className="space-y-2">
           {messages.map((m) => (
-            <div key={m.id} className="bg-slate-800/60 border border-slate-700/50 rounded-xl px-3 py-2.5">
+            <div
+              key={m.id}
+              className={`rounded-xl px-3 py-2.5 border ${m.topic === "security" ? "bg-rose-500/10 border-rose-400/40" : "bg-slate-800/60 border-slate-700/50"}`}
+            >
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-[11px] bg-slate-700/60 text-slate-300 rounded px-1.5 py-0.5">{TOPIC[m.topic] || m.topic}</span>
                 {m.email ? (
