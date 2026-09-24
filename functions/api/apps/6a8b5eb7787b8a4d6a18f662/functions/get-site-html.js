@@ -7,21 +7,10 @@
 // straight into the record (skipping publish-site) avoided the phishing check, the
 // Report link, and even an admin take-down. Here every page goes through the same
 // checks, wherever its HTML is kept (KV, inline in the record, or an older file URL).
-import { json, findByName, kvKey, MAX_BYTES } from "../../../../../cloudflare-lib/published.js";
+import { json } from "../../../../../cloudflare-lib/published.js";
 import { isBlocked } from "../../../../../cloudflare-lib/reports.js";
-import { findCredentialForm } from "../../../../../cloudflare-lib/phishing.js";
+import { pageFor } from "../../../../../cloudflare-lib/pagesource.js";
 import { removedPage, preparePage } from "../../../../../cloudflare-lib/pageserve.js";
-
-async function sourceHtml(kv, site, name) {
-  const ref = String(site.html || "");
-  if (!/^https?:\/\//.test(ref)) return ref; // inline (older sites, or written directly)
-  if (ref.includes("/published/site/")) return (kv && (await kv.get(kvKey("site", name)))) || "";
-  if (!ref.startsWith("https://")) return "";
-  const res = await fetch(ref);
-  if (!res.ok) return "";
-  const text = await res.text();
-  return text.length > MAX_BYTES ? "" : text;
-}
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -30,17 +19,15 @@ export async function onRequestPost(context) {
     const body = await request.json().catch(() => ({}));
     const name = String(body.name || "").toLowerCase();
     if (!name) return json({ error: "name required" }, 400);
-    const site = (await findByName(request, "site", name))[0];
-    if (!site) return json({ error: "not found" }, 404);
+    // The right copy and record for this name (copycat records are ignored; see pagesource.js).
+    const page = await pageFor(request, kv, "site", name);
+    if (!page) return json({ error: "not found" }, 404);
+    const site = page.rec;
     const reply = (html) => json({ html, id: site.id, name: site.name, ownerName: site.ownerName });
 
     if (kv && (await isBlocked(kv, "site", name))) return reply(removedPage("site"));
-    const html = await sourceHtml(kv, site, name);
-    if (!html) return json({ error: "not found" }, 404);
-    if (findCredentialForm(html)) {
-      return reply(removedPage("site", "It asks for passwords or card numbers and sends them to another website, which isn't allowed here."));
-    }
-    return reply(preparePage(html, "site", name));
+    if (page.removed) return reply(removedPage("site", page.removed));
+    return reply(preparePage(page.html, "site", name));
   } catch (err) {
     return json({ error: (err && err.message) || "Could not load the site." }, 500);
   }

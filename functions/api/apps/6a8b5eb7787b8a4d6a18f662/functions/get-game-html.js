@@ -2,23 +2,12 @@
 // once the Base44 integration allowance ran out). Same contract:
 // { name } -> { html, id, title, genre, plays }. Runs the same checks as get-site-html
 // (admin take-down, forms that send passwords/cards elsewhere) and counts the play.
-import { json, findByName, kvKey, MAX_BYTES } from "../../../../../cloudflare-lib/published.js";
+import { json } from "../../../../../cloudflare-lib/published.js";
 import { isBlocked } from "../../../../../cloudflare-lib/reports.js";
-import { findCredentialForm } from "../../../../../cloudflare-lib/phishing.js";
+import { pageFor } from "../../../../../cloudflare-lib/pagesource.js";
 import { removedPage } from "../../../../../cloudflare-lib/pageserve.js";
 import { currentUser } from "../../../../../cloudflare-lib/credits.js";
 import { countPlay, readPlays } from "../../../../../cloudflare-lib/plays.js";
-
-async function sourceHtml(kv, game, name) {
-  const ref = String(game.html || "");
-  if (!/^https?:\/\//.test(ref)) return ref;
-  if (ref.includes("/published/game/")) return (kv && (await kv.get(kvKey("game", name)))) || "";
-  if (!ref.startsWith("https://")) return "";
-  const res = await fetch(ref);
-  if (!res.ok) return "";
-  const text = await res.text();
-  return text.length > MAX_BYTES ? "" : text;
-}
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -27,16 +16,17 @@ export async function onRequestPost(context) {
     const body = await request.json().catch(() => ({}));
     const name = String(body.name || "");
     if (!name) return json({ error: "name required" }, 400);
-    const game = (await findByName(request, "game", name))[0];
-    if (!game) return json({ error: "not found" }, 404);
+    // The right copy and record for this name (copycat records are ignored; see pagesource.js).
+    const page = await pageFor(request, kv, "game", name);
+    if (!page) return json({ error: "not found" }, 404);
+    const game = page.rec;
     const extra = (await readPlays(kv))[name];
     const reply = (html) =>
       json({ html, id: game.id, title: game.title || game.name, genre: game.genre, plays: (game.plays || 0) + ((extra && extra.count) || 0) });
 
     if (kv && (await isBlocked(kv, "game", name))) return reply(removedPage("game"));
-    let html = await sourceHtml(kv, game, name);
-    if (!html) return json({ error: "not found" }, 404);
-    if (findCredentialForm(html)) return reply(removedPage("game", "It asks for passwords or card numbers and sends them to another website, which isn't allowed here."));
+    if (page.removed) return reply(removedPage("game", page.removed));
+    let html = page.html;
     // Fix kept from the Base44 version: the player's 3D mesh was never moved in this game's loop.
     if (name === "shooting-io") {
       html = html.replace(

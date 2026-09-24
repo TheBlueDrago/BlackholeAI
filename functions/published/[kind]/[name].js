@@ -11,10 +11,17 @@ export async function onRequestGet(context) {
   const name = String(params.name || "").toLowerCase();
   if (!ENTITY[kind] || !name || !env.PUBLISHED_HTML) return new Response("Not found", { status: 404 });
 
+  const kv = env.PUBLISHED_HTML;
+  const stored = kv.getWithMetadata
+    ? await kv.getWithMetadata(kvKey(kind, name)).catch(() => ({ value: null, metadata: null }))
+    : { value: await kv.get(kvKey(kind, name)), metadata: null };
   try {
     // Only serve pages whose record still exists, so deleting a site/game takes it offline.
+    // When publish() recorded the owner, it must be the owner's record: someone else's
+    // record with the same name (written straight into Base44) doesn't keep it online.
     const rows = await findByName(null, kind, name);
-    if (!rows.length) return new Response("Not found", { status: 404 });
+    const owner = stored && stored.metadata && stored.metadata.owner;
+    if (!rows.length || (owner && !rows.some((r) => r.created_by_id === owner))) return new Response("Not found", { status: 404 });
   } catch {
     // If Base44 is unreachable, still serve what's stored rather than failing the page.
   }
@@ -25,7 +32,7 @@ export async function onRequestGet(context) {
     return new Response(removedPage(kind), { headers: HEADERS });
   }
 
-  const html = await env.PUBLISHED_HTML.get(kvKey(kind, name));
+  const html = stored && stored.value;
   if (html == null) return new Response("Not found", { status: 404 });
   return new Response(preparePage(html, kind, name), { headers: HEADERS });
 }
