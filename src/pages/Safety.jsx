@@ -56,7 +56,7 @@ const SECTIONS = [
     icon: Baby,
     title: "Safe for young makers",
     points: [
-      "Our AI is set up on our server to keep what it writes suitable for kids, and it won't build scam or password-stealing pages.",
+      "Our AI is instructed, from our server, to keep what it writes suitable for kids and not to build scam or password-stealing pages. Publishing checks catch what gets through.",
       "Pages are checked for adult content, scams, hidden code and other harmful things before they go live.",
       "The Blackhole Browser is family-friendly: adult, gambling and piracy sites are left out of search and can't be opened in it.",
       "Every published page has a Report link, and reports are reviewed by a person.",
