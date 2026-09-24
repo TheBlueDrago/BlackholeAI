@@ -5,7 +5,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useIsMobile } from "@/hooks/use-mobile";
 
 // A native <select> replacement: bottom-sheet on mobile, popover on desktop.
-export default function SheetSelect({ value, onChange, options, className = "", placeholder = "Select" }) {
+// `name` says what's being picked ("Genre"), for screen readers: they hear "Genre: Racing".
+export default function SheetSelect({ value, onChange, options, className = "", placeholder = "Select", name }) {
   const isMobile = useIsMobile();
   const [openDesk, setOpenDesk] = useState(false);
   const [openMob, setOpenMob] = useState(false);
@@ -21,6 +22,7 @@ export default function SheetSelect({ value, onChange, options, className = "", 
   const trigger = (
     <button
       type="button"
+      aria-label={name ? `${name}: ${label}` : undefined}
       className={`flex items-center gap-2 w-full min-w-0 ${className}`}
     >
       <span className="flex-1 text-left truncate font-mono">{label}</span>

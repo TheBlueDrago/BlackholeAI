@@ -569,6 +569,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
             <SheetSelect
               value={genre}
               onChange={setGenre}
+              name="Genre"
               options={GENRES.map((g) => ({ value: g.id, label: g.label }))}
               className="flex-1 bg-transparent outline-none text-slate-200 px-2 py-1.5 text-sm min-w-0"
             />
@@ -800,21 +801,24 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
                   {sanitize(gameName || "my-game")}<span className="text-fuchsia-300">.{GAME_TLDS[genre] || "game"}</span>
                 </span>
               </div>
-              <p className="text-slate-500 text-xs mt-2">The ending comes from the genre you pick.</p>
+              <p className="text-slate-400 text-xs mt-2">The ending comes from the genre you pick.</p>
+              <p className="text-slate-400 text-xs mt-2">Anyone can play it, so leave out private things like your full name, home address or school.</p>
 
-              <label className="block mt-4 text-xs text-slate-400 mb-1">Game title</label>
+              <label htmlFor="publish-game-title" className="block mt-4 text-xs text-slate-400 mb-1">Game title</label>
               <input
+                id="publish-game-title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="My Awesome Game"
                 className="w-full bg-slate-800/70 border border-slate-700/50 rounded-xl px-3 py-2.5 text-sm text-white outline-none focus:border-fuchsia-500/50"
               />
 
-              <label className="block mt-3 text-xs text-slate-400 mb-1">Genre</label>
+              <p className="block mt-3 text-xs text-slate-400 mb-1">Genre</p>
               <div className="w-full bg-slate-800/70 border border-slate-700/50 rounded-xl px-3 py-2.5">
                 <SheetSelect
                   value={genre}
                   onChange={setGenre}
+                  name="Genre"
                   options={GENRES.map((g) => ({ value: g.id, label: g.label }))}
                   className="w-full bg-transparent outline-none text-slate-200 text-sm"
                 />

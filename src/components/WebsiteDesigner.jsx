@@ -40,6 +40,7 @@ import { useAppShell } from "@/components/AppShellContext";
 import useEscape from "@/hooks/useEscape";
 import useDialogFocus from "@/hooks/useDialogFocus";
 import { isNetworkError, OFFLINE_NOTE } from "@/lib/netError";
+import { privateInfoOnPage } from "@/lib/privateInfo";
 
 const STORE_KEY = DESIGNER_STORE_KEY;
 const TAKEN_KEY = "infinity-ai-taken-sites";
@@ -228,6 +229,8 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [lastAi, imagesVersion]
   );
+  // Checked only while the publish window is open (it parses the whole page).
+  const pageSecret = useMemo(() => (showPublish ? privateInfoOnPage(previewHtml) : ""), [showPublish, previewHtml]);
 
   // HTML that arrives with images embedded (a published site/game opened for editing,
   // a saved draft) gets placeholders instead, so they aren't sent to the AI every time.
@@ -643,6 +646,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
             <SheetSelect
               value={currentSection}
               onChange={goToSection}
+              name="Go to section"
               options={sections.map((s) => ({ value: s, label: s ? `#${s}` : "Top of page" }))}
               className="flex-1 bg-transparent outline-none text-slate-200 px-2 py-1.5 text-sm min-w-0"
             />
@@ -978,7 +982,15 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
                   {sanitizeSite(siteName || "your-site")}<span className="text-sky-300">.blackhole-ai-tech.com</span>
                 </span>
               </div>
-              <p className="text-slate-500 text-xs mt-2">You pick the name — the .blackhole-ai-tech.com ending always stays.</p>
+              <p className="text-slate-400 text-xs mt-2">You pick the name — the .blackhole-ai-tech.com ending always stays.</p>
+              <p className="text-slate-400 text-xs mt-2">
+                Anyone on the internet can see it, so leave out private things like your home address, passwords or card numbers.
+              </p>
+              {pageSecret && (
+                <p role="alert" className="mt-2 text-xs text-amber-300">
+                  Your page seems to show {pageSecret}. Take it out before you publish (ask the AI to remove it).
+                </p>
+              )}
 
               {taken && (
                 <div className="mt-3">

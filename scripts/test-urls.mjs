@@ -147,3 +147,19 @@ for (const ok of ["https://en.wikipedia.org/wiki/Essex", "https://www.sussex.ac.
   assert(!isNetworkError({ response: { status: 402, data: { error: "Out of credits" } }, message: "Request failed" }, false), "an answer from the server is never called a connection problem");
   assert(!isNetworkError(new Error("Unexpected token"), true) && !isNetworkError(Object.assign(new Error("aborted"), { name: "AbortError" }), true), "other errors (and pressing Stop) aren't");
 }
+
+// Publishing a website: a card number or written-out password on the page is pointed out; a
+// business's phone number, and numbers inside scripts, aren't.
+{
+  const { privateInfoOnPage } = await import(R + "src/lib/privateInfo.js");
+  // A tiny stand-in for the browser's DOMParser: body text without <script>/<style>.
+  const parse = (html) => {
+    const body = html.replace(/<(script|style|noscript|template)\b[\s\S]*?<\/\1>/gi, "").replace(/<[^>]+>/g, " ");
+    return { querySelectorAll: () => [], body: { textContent: body } };
+  };
+  assert(privateInfoOnPage("<h1>Pay me</h1><p>Card: 4111 1111 1111 1111</p>", parse) === "a card number", "a card number on the page is pointed out");
+  assert(privateInfoOnPage("<p>My password is Sunshine2012!</p>", parse) === "a password", "so is a written-out password");
+  assert(privateInfoOnPage("<p>Call us: (555) 123-4567</p>", parse) === "", "a business phone number isn't");
+  assert(privateInfoOnPage("<script>const seed = 4111111111111111;</script><h1>Game</h1>", parse) === "", "numbers inside scripts aren't");
+  assert(privateInfoOnPage("<h1>x</h1>", () => { throw new Error("no DOM"); }) === "", "a page that can't be read is never blocked");
+}

@@ -1,8 +1,7 @@
 // Before a message goes to the AI from the main chat: does it look like something people
 // (often young ones) shouldn't share with an AI or anyone online? A card number (checked with
 // the Luhn sum, so random long numbers don't count), a password written out, or a phone number.
-// -> what was found ("a card number", …) or "". Not used in the designers, where a business's
-// phone number on its own website is normal.
+// -> what was found ("a card number", …) or "". The designers use privateInfoOnPage below.
 const luhn = (digits) => {
   let sum = 0;
   for (let i = 0; i < digits.length; i++) {
@@ -25,4 +24,18 @@ export function privateInfoIn(text) {
   if (/\b(?:my\s+)?(?:password|passcode|pin\s*code|login)\s*(?:is|:|=)\s*\S{4,}/i.test(t)) return "a password";
   if (/(?:^|[^\d])(?:\+\d{1,3}[\s.-]?)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}(?!\d)/.test(t)) return "a phone number";
   return "";
+}
+
+// Publishing a website: its visible words (not scripts or styles), checked for the things that
+// never belong on a public page, a card number or a written-out password. A phone number isn't
+// flagged there: a business showing its own is normal. -> what was found, or "".
+export function privateInfoOnPage(html, parse = (h) => new DOMParser().parseFromString(h, "text/html")) {
+  try {
+    const doc = parse(String(html || ""));
+    for (const el of doc.querySelectorAll("script, style, noscript, template")) el.remove();
+    const found = privateInfoIn(doc.body ? doc.body.textContent : "");
+    return found === "a phone number" ? "" : found;
+  } catch {
+    return "";
+  }
 }
