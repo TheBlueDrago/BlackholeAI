@@ -63,7 +63,7 @@ export async function pageFor(request, kv, kind, name) {
   }
   // Only the clear-cut refusals: the looser ones (swearing, a "harmful code" score that
   // compressed older games can trip) stay as Monitor flags for a person to judge.
-  const serious = scanPage(html).block.filter((b) => b === "a crypto-mining script" || b === "adult content");
+  const serious = scanPage(html).block.filter((b) => b === "a crypto-mining script" || b === "adult content" || /recovery phrase/.test(b));
   if (serious.length) return { rec, removed: `It has ${serious.join(" and ")}, which isn't allowed here.` };
   return { rec, html };
 }

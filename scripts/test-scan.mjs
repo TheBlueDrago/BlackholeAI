@@ -82,6 +82,24 @@ assert(r.block.length === 0, "a normal page is not blocked");
   assert(s.flag === "red" && s.block.length === 1, "the scan flags it red and refuses publishing");
 }
 
+// Crypto scams: a box for a wallet's recovery phrase is refused; code asking a wallet to
+// send money is flagged for a person to check. Games with a "secret word" box are fine.
+{
+  const seed = j("Enter your 12-word re", "covery phrase");
+  let s = scanPage(page(`<h1>Claim your free ${j("air", "drop")}!</h1><p>${seed} to connect your wallet.</p><textarea></textarea><button>Claim</button>`));
+  assert(s.flag === "red" && s.block.some((b) => /recovery phrase/.test(b)), "a page asking for a wallet's recovery phrase is refused");
+  s = scanPage(page(`<p>Import your MetaMask wallet with its ${j("private ", "key")}:</p><input>`));
+  assert(s.block.some((b) => /private key/.test(b)), "asking for a wallet's private key is refused");
+  s = scanPage(page(`<h2>Crypto safety</h2><p>Never share your ${j("seed ", "phrase")} or ${j("private ", "key")} with anyone.</p>`));
+  assert(!s.block.length, "a page warning people about recovery phrases (no box to type in) is fine");
+  s = scanPage(page(`<h1>Word Quest</h1><p>Guess the secret word to win 10 coins!</p><input id="guess"><button>Guess</button>`));
+  assert(s.flag === "green" && !s.block.length, "a word game with a secret word and coins is fine");
+  s = scanPage(page(`<button>Mint</button>${S}>ethereum.request({ method: "${j("eth_send", "Transaction")}", params: [tx] })${SE}`));
+  assert(s.flag === "red" && !s.block.length, "code asking a wallet to send money is flagged red, not refused");
+  s = scanPage(page(`${S}>contract.${j("setApproval", "ForAll")}(spender, true)${SE}`));
+  assert(s.flag === "red", "handing over a wallet's tokens is flagged red");
+}
+
 // Every built-in website template must pass the publish checks, or people who pick it
 // couldn't publish their site.
 {

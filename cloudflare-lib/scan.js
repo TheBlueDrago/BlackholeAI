@@ -1,6 +1,6 @@
 // Content check for Monitor → Published sites & games. Reads a page's HTML and flags it:
 //   red    — inappropriate for kids / adult content, copyright clone, phishing, crypto
-//            miner, or a malware score of 50% or more
+//            miner or wallet scam, or a malware score of 50% or more
 //   yellow — might be harmful: hidden/scrambled code, outside scripts, redirects, hacking
 //            or cheat talk, gambling/drugs, a brand name (possible copyright)
 //   green  — nothing suspicious found
@@ -19,6 +19,12 @@ const VIOLENCE = /\b(gore|behead\w*|suicide|self[- ]harm|massacre|terroris\w+)\b
 const HACKING = /\b(hack(?:s|ed|er|ing)?|cheats?|aimbot|wallhack|keylogger|free robux|free v-?bucks|robux generator|account generator|crack(?:ed)? (?:version|software)|ddos|token grabber|password stealer)\b/gi;
 const EXECUTABLE = /href\s*=\s*["'][^"']+\.(exe|apk|msi|bat|scr|dmg|jar|vbs|ps1)["']/gi;
 const MINER = /\b(coinhive|coin-hive|cryptonight|crypto-?loot|webminer|coinimp|jsecoin|minero\.cc|deepminer|webmine\.pro)\b/i;
+// Crypto scams: "type your wallet's recovery phrase to claim free coins" (whoever has the
+// phrase or private key owns the wallet), and code asking a wallet to send money or hand
+// over control of its tokens (a "wallet drainer").
+const SEED_ASK = /\b(?:seed|recovery|mnemonic|wallet|backup)\s+phrases?\b|\bprivate\s+keys?\b/i;
+const CRYPTO = /\b(?:wallets?|crypto\w*|bitcoin|btc|ethereum|eth|metamask|trust ?wallet|phantom|coinbase|binance|nfts?|tokens?|airdrops?|solana|usdt|coins?)\b/i;
+const WALLET_SPEND = /\b(?:eth_sendTransaction|eth_signTypedData(?:_v\d)?|personal_sign|setApprovalForAll|increaseAllowance|signAllTransactions|signAndSendTransaction)\b/;
 const BRANDS = /\b(nintendo|pok[eé]mon|disney|pixar|marvel|star wars|netflix|spotify|youtube|tiktok|instagram|facebook|roblox|minecraft|fortnite|apple|google|microsoft|amazon|paypal|playstation|xbox|mario|sonic)\b/gi;
 
 function count(re, text) {
@@ -86,6 +92,18 @@ export function scanPage(html) {
     malware += 70;
     reasons.push("Contains a crypto-mining script");
     block.push("a crypto-mining script");
+  }
+
+  if (SEED_ASK.test(text) && CRYPTO.test(text) && /<(?:input|textarea)\b/i.test(src)) {
+    red = true;
+    malware += 60;
+    reasons.push("Asks for a crypto wallet's recovery phrase or private key (a common scam)");
+    block.push("a box asking for a crypto wallet's recovery phrase or private key");
+  }
+  if (WALLET_SPEND.test(src)) {
+    red = true;
+    malware += 40;
+    reasons.push("Asks a crypto wallet to send money or give up control of its coins (check it isn't a scam)");
   }
 
   const evalUse = count(/\beval\s*\(|new\s+Function\s*\(|setTimeout\s*\(\s*["'`]/g, src);
