@@ -6,6 +6,8 @@
 // PUBLIC on purpose: storefront buyers usually have no Blackhole account. Never 401 here.
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 
+const PAGE_STATUS_URL = 'https://nebuluxai.pages.dev/api/apps/6a8b5eb7787b8a4d6a18f662/functions/page-status';
+
 const CONSTRUCT_URL = 'https://www.wixapis.com/payments/platform/v1/checkout-sessions/construct';
 const PLATFORM_FEE_RATE = 0.05; // 5% of the price kept by the platform (tax is kept on top).
 
@@ -54,6 +56,21 @@ export default async function (req) {
     const site = sites[0];
     if (!site || site.hidden || !site.created_by_id) {
       return Response.json({ error: 'This site is not selling anything right now' }, { status: 400 });
+    }
+    // A site an admin took down can't take payments. Take-downs live in the Cloudflare app,
+    // which answers through its public page-status function. If that can't be reached the
+    // checkout goes ahead: the payout checks hold a taken-down site's sales anyway.
+    try {
+      const r = await fetch(PAGE_STATUS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kind: 'site', name: siteName }),
+      });
+      if (r.ok && (await r.json().catch(() => ({}))).blocked) {
+        return Response.json({ error: 'This site is not selling anything right now' }, { status: 400 });
+      }
+    } catch (_) {
+      // Unreachable: go ahead (see above).
     }
     // Price comes from the owner's stored product — never from the buyer's request.
     const rows = await base44.asServiceRole.entities.SiteProduct.filter({ siteName, productId });
