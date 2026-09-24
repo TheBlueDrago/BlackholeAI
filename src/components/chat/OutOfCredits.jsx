@@ -4,6 +4,7 @@ import { useAppShell } from "@/components/AppShellContext";
 import { outOfCreditsOptions, nextRefresh, waitText } from "@/lib/creditRefresh";
 
 const price = (n) => `$${n}`;
+const money = (n) => (Number.isInteger(n) ? `$${n}` : `$${n.toFixed(2)}`);
 
 // Shown above the message box once the chosen AI is out of credits, like Base44: upgrade now
 // for a price, buy a one-time pack of credits, or wait for the monthly refresh (with a live
@@ -32,7 +33,7 @@ export default function OutOfCredits({ tier, canSwitch = true }) {
 
   const choices = [
     upgrade && `upgrade to ${upgrade.name} for ${cost}/month`,
-    pack && `buy ${pack.credits} credits for ${price(pack.price)}`,
+    pack && `buy ${pack.min}–${pack.max} credits from ${money(pack.from)}`,
     refresh && `wait ${wait} for your credits to refresh`,
   ].filter(Boolean);
   const list = choices.length > 1 ? `${choices.slice(0, -1).join(", ")}${choices.length > 2 ? "," : ""} or ${choices[choices.length - 1]}` : choices[0] || "";
@@ -66,9 +67,9 @@ export default function OutOfCredits({ tier, canSwitch = true }) {
             className="flex-1 text-left rounded-xl border border-amber-400/40 bg-amber-500/10 hover:bg-amber-500/20 transition-colors px-3 py-2"
           >
             <span className="flex items-center gap-1.5 text-sm font-semibold text-amber-200">
-              <Coins className="w-4 h-4 shrink-0" /> Buy {pack.credits} credits · {price(pack.price)}
+              <Coins className="w-4 h-4 shrink-0" /> Buy {pack.min}–{pack.max} credits
             </span>
-            <span className="block text-xs text-slate-400 mt-0.5">One-time, no plan. They don't reset.</span>
+            <span className="block text-xs text-slate-400 mt-0.5">From {money(pack.from)}, one-time, any plan. They don't reset.</span>
           </button>
         )}
         {refresh && (

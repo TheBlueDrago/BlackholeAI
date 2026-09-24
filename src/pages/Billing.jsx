@@ -4,8 +4,12 @@ import { ArrowLeft, Loader2, ShieldCheck, Users, Zap } from "lucide-react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { paymentError } from "@/lib/paymentError";
-import { CREDIT_PACKS } from "../../cloudflare-lib/creditPacks.js";
-import { TIER_NAMES } from "../../cloudflare-lib/planTotals.js";
+import { CREDIT_PACKS, PACK_SIZES, packsForTier } from "../../cloudflare-lib/creditPacks.js";
+import { TIER_NAMES, TIERS } from "../../cloudflare-lib/planTotals.js";
+
+const money = (n) => (Number.isInteger(n) ? `$${n}` : `$${n.toFixed(2)}`);
+// The pack of `size` credits for another AI.
+const packId = (tier, size) => packsForTier(tier).find(([, p]) => p.credits === size)?.[0];
 
 // A one-time credit pack laid out like a plan (prices are checked again by create-checkout).
 function packPlan(id) {
@@ -14,7 +18,7 @@ function packPlan(id) {
   return {
     name: `${p.credits} ${TIER_NAMES[p.tier]} credits`,
     amount,
-    price: `$${amount} one-time`,
+    price: `${money(amount)} one-time`,
     gradient: "from-amber-500 to-orange-500",
     glow: "bg-amber-600/15",
     features: [
@@ -23,7 +27,7 @@ function packPlan(id) {
       "They don't reset at the end of the month: they stay until you use them",
       "Used before your monthly credits",
     ],
-    button: `Buy — $${amount}`,
+    button: `Buy — ${money(amount)}`,
     icon: Zap,
     pack: true,
   };
@@ -33,6 +37,8 @@ export default function Billing() {
   const navigate = useNavigate();
   const location = useLocation();
   const requested = location.state?.productId ?? "pro";
+  // Credit packs: which AI and size, switchable here.
+  const [chosenPack, setChosenPack] = useState(CREDIT_PACKS[requested] ? requested : null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [agreed, setAgreed] = useState(false);
@@ -72,7 +78,7 @@ export default function Billing() {
     },
   };
   // Only plans and credit packs can be bought here; anything else (e.g. the old Secret) is Pro.
-  const productId = PLANS[requested] || CREDIT_PACKS[requested] ? requested : "pro";
+  const productId = chosenPack || (PLANS[requested] ? requested : "pro");
   const plan = PLANS[productId] || packPlan(productId);
 
   const startCheckout = async () => {
@@ -132,6 +138,45 @@ export default function Billing() {
             </p>
           </div>
         </div>
+
+        {plan.pack && (
+          <div className="mt-5 space-y-3">
+            <div className="flex flex-wrap gap-1.5">
+              {TIERS.map((t) => {
+                const on = CREDIT_PACKS[productId].tier === t;
+                return (
+                  <button
+                    key={t}
+                    onClick={() => setChosenPack(packId(t, CREDIT_PACKS[productId].credits))}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
+                      on ? "bg-amber-500/20 border-amber-400/60 text-amber-200" : "border-slate-700 text-slate-300 hover:bg-slate-800"
+                    }`}
+                  >
+                    {TIER_NAMES[t]}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="grid grid-cols-4 gap-2">
+              {PACK_SIZES.map((n) => {
+                const id = packId(CREDIT_PACKS[productId].tier, n);
+                const on = id === productId;
+                return (
+                  <button
+                    key={n}
+                    onClick={() => setChosenPack(id)}
+                    className={`rounded-xl border px-2 py-2 text-center transition-colors ${
+                      on ? "bg-amber-500/20 border-amber-400/60" : "border-slate-700 hover:bg-slate-800"
+                    }`}
+                  >
+                    <span className="block text-lg font-bold text-white">{n}</span>
+                    <span className="block text-xs text-slate-400">{money(Number(CREDIT_PACKS[id].price))}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         <ul className="mt-5 space-y-2.5 text-slate-200 text-sm">
           {plan.features.map((f) => (

@@ -109,14 +109,21 @@ Deno.serve(async (req: Request) => {
         },
       },
     };
-    // One-time credit packs: bought instead of a plan, no subscription, added to the buyer's
-    // bonus credits by the credit server (keep in step with cloudflare-lib/creditPacks.js).
-    const CREDIT_PACKS = {
-      "credits-ai": { name: "50 Blackhole AI credits", price: "1.00", currency: "USD" },
-      "credits-code": { name: "25 Blackhole Code credits", price: "1.00", currency: "USD" },
-      "credits-galaxy": { name: "25 Galaxy credits", price: "1.00", currency: "USD" },
-      "credits-space": { name: "25 Space credits", price: "1.00", currency: "USD" },
+    // One-time credit packs of 5-50 credits for each AI: bought instead of a plan, no
+    // subscription, added to the buyer's bonus credits by the credit server. Ids are
+    // credits-<ai>-<size>. Keep the prices in step with cloudflare-lib/creditPacks.js.
+    const PACK_PRICES: Record<string, { name: string; prices: Record<number, string> }> = {
+      ai: { name: "Blackhole AI", prices: { 5: "0.50", 10: "0.60", 25: "0.80", 50: "1.00" } },
+      code: { name: "Blackhole Code", prices: { 5: "0.50", 10: "0.75", 25: "1.00", 50: "1.75" } },
+      galaxy: { name: "Galaxy", prices: { 5: "0.50", 10: "0.75", 25: "1.00", 50: "1.75" } },
+      space: { name: "Space", prices: { 5: "0.50", 10: "0.75", 25: "1.00", 50: "1.75" } },
     };
+    const CREDIT_PACKS: Record<string, { name: string; price: string; currency: string }> = {};
+    for (const [slug, p] of Object.entries(PACK_PRICES)) {
+      for (const [size, price] of Object.entries(p.prices)) {
+        CREDIT_PACKS[`credits-${slug}-${size}`] = { name: `${size} ${p.name} credits`, price, currency: "USD" };
+      }
+    }
     const isPack = Object.prototype.hasOwnProperty.call(CREDIT_PACKS, productId);
     // Packs go to an account, so the buyer must be signed in (the credit server finds them by appUserId).
     if (isPack && !appUser?.id) {

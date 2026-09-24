@@ -3,7 +3,7 @@
 // test (scripts/test-refresh.mjs) can load it with plain node.
 import { PLAN_TOTALS, TIER_NAMES } from "../../cloudflare-lib/planTotals.js";
 import { discounted } from "../../cloudflare-lib/offers.js";
-import { packForTier } from "../../cloudflare-lib/creditPacks.js";
+import { packsForTier, DEFAULT_PACK_SIZE } from "../../cloudflare-lib/creditPacks.js";
 
 // The plans a person can buy themselves, cheapest first (prices as in create-checkout).
 const UPGRADES = [
@@ -34,7 +34,8 @@ export function waitText(ms) {
 }
 
 // `tier` is "ai", "aiCode", "galaxy5" or "space5"; `credits` is the useCredits() status.
-// -> { name, upgrade: { id, name, price, salePrice, extra } | null, pack: { id, credits, price } | null,
+// -> { name, upgrade: { id, name, price, salePrice, extra } | null,
+//      pack: { id, min, max, from } | null (id = the pack a picker starts on, from = lowest price),
 //      refresh: { at, amount } | null }
 export function outOfCreditsOptions(tier, credits, now = Date.now()) {
   const plan = PLAN_TOTALS[credits?.plan] ? credits.plan : "free";
@@ -57,9 +58,18 @@ export function outOfCreditsOptions(tier, credits, now = Date.now()) {
   const amount = (PLAN_TOTALS[endsFirst ? "free" : plan][tier] || 0) * seats;
   const refresh = amount > 0 ? { at, amount } : null;
 
-  // A pack of just these credits, for anyone who'd rather not subscribe (or has no plan to go up to).
-  const found = packForTier(tier);
-  const pack = found ? { id: found[0], credits: found[1].credits, price: Number(found[1].price) } : null;
+  // Packs of just these credits (5-50), for any plan: for anyone who'd rather not subscribe,
+  // whose plan doesn't include this AI, or who has no plan to go up to.
+  const packs = packsForTier(tier);
+  const start = packs.find(([, p]) => p.credits === DEFAULT_PACK_SIZE) || packs[0];
+  const pack = start
+    ? {
+        id: start[0],
+        min: packs[0][1].credits,
+        max: packs[packs.length - 1][1].credits,
+        from: Math.min(...packs.map(([, p]) => Number(p.price))),
+      }
+    : null;
 
   return { name: TIER_NAMES[tier] || "Blackhole AI", upgrade, pack, refresh };
 }

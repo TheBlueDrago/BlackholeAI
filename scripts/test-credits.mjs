@@ -141,8 +141,8 @@ assert(C.creditsFor("x".repeat(10000), "low") === 1 && C.creditsFor("x".repeat(1
 // One-time credit packs: a paid pack adds to the bonus balance exactly once
 fresh();
 db.purchases = [
-  { id: "b1", appUserId: "u9", productId: "credits-galaxy", status: "paid", quantity: 2 },
-  { id: "b2", appUserId: "u9", productId: "credits-ai", status: "pending", quantity: 1 },
+  { id: "b1", appUserId: "u9", productId: "credits-galaxy-25", status: "paid", quantity: 2 },
+  { id: "b2", appUserId: "u9", productId: "credits-ai-50", status: "pending", quantity: 1 },
 ];
 s = await status({ id: "u9" });
 assert(s.plan === "free" && s.tiers.galaxy5.remaining === 50 && s.tiers.ai.remaining === 50, "2 paid Galaxy packs add 50 Galaxy credits; a pending pack adds nothing; plan stays Free");
