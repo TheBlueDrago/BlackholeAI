@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Check, ArrowRight, Loader2, Gift } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Check, ArrowRight, Loader2, Gift, Lock } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import CreditPacks from "@/components/shop/CreditPacks";
 import { savedDiscount, saveDiscount, promoPctFor } from "@/lib/promoDiscount";
@@ -28,7 +28,7 @@ function FreeCard({ onFree }) {
       </ul>
       <div className="mt-4 pt-4 border-t border-slate-700/40">
         <p className="text-xs text-slate-400 leading-relaxed">
-          Credits are the units Blackhole AI uses when you interact with Blackhole AI's. Credit usage adjusts dynamically based on how much work the builder needs to do behind the scenes.
+          Each AI reply uses credits: 1 for every 10,000 characters it writes (a normal answer is 1), times the effort level you pick. Longer builds and higher effort use more.
         </p>
       </div>
       <button
@@ -73,7 +73,7 @@ function Plan2Card({ onPro, pct }) {
       </ul>
       <div className="mt-4 pt-4 border-t border-slate-700/40">
         <p className="text-xs text-slate-400 leading-relaxed">
-          Credits are the units Blackhole AI uses when you interact with Blackhole AI's. Credit usage adjusts dynamically based on how much work the builder needs to do behind the scenes.
+          Each AI reply uses credits: 1 for every 10,000 characters it writes (a normal answer is 1), times the effort level you pick. Longer builds and higher effort use more.
         </p>
       </div>
       <button
@@ -230,6 +230,14 @@ export default function Subscriptions({ onFree, onPro, onTeam, onBuyPack, offer 
         <span className="bh-wordmark bg-gradient-to-r from-white via-indigo-200 to-fuchsia-200 bg-clip-text text-transparent">Shop</span>
       </h1>
       <p className="text-slate-400 mt-3 text-center">Plans, credits and promo codes</p>
+      <p className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-slate-400">
+        <span className="inline-flex items-center gap-1.5">
+          <Lock className="w-3.5 h-3.5 text-emerald-400" /> Secure checkout, we never see your card
+        </span>
+        <span>Plans are monthly</span>
+        <span>Credit packs are one-time</span>
+        <Link to="/safety" className="underline hover:text-slate-200">Trust &amp; safety</Link>
+      </p>
 
       <div className="mt-10">
         <SectionTitle title="Plans" sub="Monthly credits for every AI, plus more features" />

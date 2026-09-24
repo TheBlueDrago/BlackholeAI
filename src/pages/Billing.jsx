@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Loader2, ShieldCheck, Users, Zap, Gift } from "lucide-react";
+import { ArrowLeft, Loader2, ShieldCheck, Users, Zap, Gift, Lock, CalendarClock } from "lucide-react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { paymentError } from "@/lib/paymentError";
@@ -260,7 +260,7 @@ export default function Billing() {
         </div>
 
         <p className="mt-5 pt-4 border-t border-slate-700/40 text-xs text-slate-400 leading-relaxed">
-          Credits are the units Blackhole AI uses when you interact with Blackhole AI or connect your app to external tools. Credit usage adjusts dynamically based on how much work the builder needs to do behind the scenes.
+          Each AI reply uses credits: 1 for every 10,000 characters it writes (a normal answer is 1), times the effort level you pick. Longer builds and higher effort use more.
         </p>
 
         {error && <p className="mt-4 text-sm text-red-400 text-center">{error}</p>}
@@ -273,8 +273,9 @@ export default function Billing() {
             className="mt-0.5 w-5 h-5 rounded border-slate-600 bg-slate-800 accent-indigo-500 shrink-0"
           />
           <span className="text-xs text-slate-300 leading-relaxed">
-            I agree and acknowledge that I am responsible for this purchase. If I get into trouble for
-            buying this {plan.pack ? "credit pack" : "subscription"}, I take full responsibility for my decision.
+            I agree to the <Link to="/terms" className="underline hover:text-white">Terms</Link> and understand that{" "}
+            {plan.pack ? "this is a one-time payment" : "this plan is billed every month until I stop it"}. I'm allowed to make this
+            purchase (if I'm under 18, a parent or guardian said yes).
           </span>
         </label>
 
@@ -285,8 +286,25 @@ export default function Billing() {
         >
           {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : !pct ? plan.button : plan.pack ? `Buy — ${finalPrice}` : `Subscribe — ${finalPrice}/mo`}
         </button>
+        {/* Why paying here is safe (everything here is what the payment code does; see /safety). */}
+        <ul className="mt-4 space-y-1.5 text-xs text-slate-400">
+          <li className="flex items-start gap-2">
+            <Lock className="w-3.5 h-3.5 mt-0.5 shrink-0 text-emerald-400" />
+            You pay on Base44 Payments' secure page. We never see or store your card number.
+          </li>
+          <li className="flex items-start gap-2">
+            <CalendarClock className="w-3.5 h-3.5 mt-0.5 shrink-0 text-emerald-400" />
+            {plan.pack
+              ? "One payment, no subscription. The credits don't reset at the end of the month."
+              : "Billed monthly. If you stop paying you go back to the Free plan and keep your account."}
+          </li>
+          <li className="flex items-start gap-2">
+            <ShieldCheck className="w-3.5 h-3.5 mt-0.5 shrink-0 text-emerald-400" />
+            The price is set on our server, and you see the final amount before you pay.
+          </li>
+        </ul>
         <p className="mt-3 text-center text-xs text-slate-500">
-          Secure checkout via Base44 Payments ·{" "}
+          <Link to="/safety" className="underline hover:text-slate-300">How we keep payments safe</Link> ·{" "}
           <Link to="/terms" className="underline hover:text-slate-300">Terms</Link> ·{" "}
           <Link to="/privacy" className="underline hover:text-slate-300">Privacy</Link>
         </p>
