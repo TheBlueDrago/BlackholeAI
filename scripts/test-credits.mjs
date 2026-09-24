@@ -153,3 +153,24 @@ await C.charge(kv, ent, "galaxy5", 10);
 db.purchases[1].status = "paid";
 s = await status({ id: "u9" });
 assert(s.tiers.galaxy5.remaining === 40 && s.tiers.ai.remaining === 100, "spending uses bought credits; a pack that gets paid later is added then");
+
+// Settings → Download my data asks for this month's activity record: your own, and only yours.
+{
+  const month = new Date().toISOString().slice(0, 7);
+  const key = Object.keys(Object.fromEntries(store)).find((k) => k.startsWith("usage:u9:")) || `usage:u9:${month}`;
+  const rec = JSON.parse(store.get(key) || "{}");
+  rec.activity = { prompts: 2, recent: [{ prompt: "make a cat game", at: "x" }] };
+  store.set(key, JSON.stringify(rec));
+  store.set(key.replace("u9", "someone"), JSON.stringify({ activity: { prompts: 9, recent: [{ prompt: "secret" }] } }));
+  const baseFetch = globalThis.fetch;
+  globalThis.fetch = async (url, init) => (String(url).endsWith("/entities/User/me") ? new Response(JSON.stringify({ id: "u9", role: "user" })) : baseFetch(url, init));
+  const { onRequest } = await import(R + "functions/api/apps/6a8b5eb7787b8a4d6a18f662/functions/credits.js");
+  const request = new Request("https://x/", { method: "POST", headers: { authorization: "Bearer t", "content-type": "application/json" }, body: JSON.stringify({ action: "my-activity" }) });
+  const res = await onRequest({ request, env: { PUBLISHED_HTML: kv } });
+  const data = await res.json();
+  assert(res.status === 200 && data.activity && data.activity.prompts === 2 && data.activity.recent[0].prompt === "make a cat game", "your own activity record can be downloaded");
+  assert(!JSON.stringify(data).includes("secret"), "and nobody else's");
+  const plain = await onRequest({ request: new Request("https://x/", { method: "POST", headers: { authorization: "Bearer t", "content-type": "application/json" }, body: "{}" }), env: { PUBLISHED_HTML: kv } });
+  assert((await plain.json()).tiers, "a normal credits call still returns the credit status");
+  globalThis.fetch = baseFetch;
+}

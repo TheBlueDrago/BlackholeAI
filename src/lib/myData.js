@@ -2,9 +2,10 @@ import { base44 } from "@/api/base44Client";
 import { siteUrl } from "@/lib/blackholeDomain";
 
 // Settings → Security → Download my data: a copy of what Blackhole AI keeps about this
-// account, as one JSON file. Each part is loaded on its own, so one that fails is noted in
-// the file instead of stopping the rest. Chats aren't in it: they're kept in this browser
-// and have their own backup (src/lib/chatBackup.js).
+// account (including the AI activity record the Privacy Policy describes), as one JSON file.
+// Each part is loaded on its own, so one that fails is noted in the file instead of stopping
+// the rest. Chats aren't in it: they're kept in this browser and have their own backup
+// (src/lib/chatBackup.js).
 export const pick = (o, keys) => Object.fromEntries(keys.filter((k) => o && o[k] !== undefined && o[k] !== null).map((k) => [k, o[k]]));
 
 const PURCHASE_FIELDS = ["productName", "productId", "quantity", "amount", "currency", "status", "created_date", "paidAt", "canceledAt"];
@@ -30,6 +31,8 @@ export async function collectMyData(user) {
       const d = (await base44.functions.invoke("credits")).data || {};
       return pick(d, ["plan", "planSource", "tiers", "bonus", "resetsAt"]);
     }),
+    // What's kept about your AI use this month: counts, and the start of your latest questions.
+    part("aiActivityThisMonth", async () => (await base44.functions.invoke("credits", { action: "my-activity" })).data?.activity || null),
     part("purchases", async () => {
       const rows = await base44.entities.Base44Purchase.filter({ appUserId: user.id }, "-created_date", 200);
       return (rows || []).filter((p) => p.status === "paid" || p.status === "canceled").map((p) => pick(p, PURCHASE_FIELDS));
