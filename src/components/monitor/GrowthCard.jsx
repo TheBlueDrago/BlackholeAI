@@ -1,5 +1,6 @@
 import React from "react";
 import { TrendingUp } from "lucide-react";
+import { OFFER_START, TRIAL_DAYS, DISCOUNT_HOURS } from "../../../cloudflare-lib/offers.js";
 
 const DAY = 86400000;
 // Base44 dates can lack a time zone; they're UTC.
@@ -19,6 +20,11 @@ export default function GrowthCard({ users, complete }) {
     return { from, count: times.filter((t) => t >= from && t < from + DAY).length };
   });
   const max = Math.max(1, ...days.map((d) => d.count));
+  // New-member offer (cloudflare-lib/offers.js): who is on the free Pro week, and who is in the
+  // 48 hours of 30% off after it, i.e. about to decide whether to pay.
+  const offerFrom = Date.parse(OFFER_START);
+  const onTrial = times.filter((t) => t >= offerFrom && now < t + TRIAL_DAYS * DAY).length;
+  const inWindow = times.filter((t) => t >= offerFrom && now >= t + TRIAL_DAYS * DAY && now < t + TRIAL_DAYS * DAY + DISCOUNT_HOURS * 3600000).length;
   const stats = [
     ["Today", times.filter((t) => t >= startOfToday.getTime()).length],
     ["Last 7 days", since(7)],
@@ -39,6 +45,9 @@ export default function GrowthCard({ users, complete }) {
           </div>
         ))}
       </div>
+      <p className="mt-2 text-xs text-slate-400">
+        On their free Pro week: <b className="text-white">{onTrial}</b> · In the 48-hour 30% offer: <b className="text-white">{inWindow}</b>
+      </p>
       <p className="mt-4 text-[11px] text-slate-400">New accounts per day, last 14 days</p>
       <div className="mt-2 flex items-end gap-1 h-24" role="img" aria-label={`New accounts per day: ${days.map((d) => d.count).join(", ")}`}>
         {days.map((d) => (

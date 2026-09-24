@@ -53,7 +53,7 @@ export default function Arcade() {
   const make = isAuthenticated ? "/chat/games" : "/register?returnTo=" + encodeURIComponent("/chat/game-designer");
 
   return (
-    <PublicLayout title="Free online games">
+    <PublicLayout title="Free games made with AI">
       <section className="text-center pt-8 pb-8">
         <h1 className="text-3xl sm:text-5xl font-bold text-white">Free games, made with AI</h1>
         <p className="mt-3 text-slate-400 max-w-xl mx-auto">
