@@ -3,6 +3,8 @@
 // the browser, so a session cookie (no expiry date: browsers drop it when they close) marks
 // the browser session. If the flag is set and that cookie is gone, the browser was closed in
 // between, so the saved sign-in is removed before the app reads it (src/lib/app-params.js).
+import { STASH_PREFIX } from "./chatStash.js";
+
 export const FLAG = "bh-forget-on-close";
 export const COOKIE = "bh_session";
 const TOKEN_KEYS = ["base44_access_token", "token"];
@@ -25,9 +27,17 @@ export function markSessionOnly(sessionOnly, storage = globalThis.localStorage, 
 
 // Everything this browser keeps for the person using it: chats, designer projects, drafts,
 // settings (all of localStorage) and the designers' database. Used on a shared computer.
+// Chats other accounts put aside when they signed out here (src/lib/chatStash.js) aren't this
+// person's, so they stay.
 export function clearThisBrowser(storage = globalThis.localStorage, idb = globalThis.indexedDB) {
   try {
+    const others = [];
+    for (let i = 0; i < storage.length; i++) {
+      const k = storage.key(i);
+      if (k && k.startsWith(STASH_PREFIX)) others.push([k, storage.getItem(k)]);
+    }
     storage.clear();
+    for (const [k, v] of others) storage.setItem(k, v);
   } catch {
     // storage blocked: nothing saved
   }

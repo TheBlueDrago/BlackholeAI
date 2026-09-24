@@ -6,6 +6,7 @@ import { useCredits } from "@/hooks/useCredits";
 import { claimPendingReferral, hasWelcomePending } from "@/lib/referral";
 import WelcomeReward from "@/components/WelcomeReward";
 import { applyThemeClass, readUserTheme, writeUserTheme, prefersLight } from "@/lib/theme";
+import { restoreChats } from "@/lib/chatStash";
 
 const AppShellContext = createContext(null);
 
@@ -22,7 +23,13 @@ export function AppShellProvider({ children }) {
 
   useEffect(() => {
     base44.functions.invoke("record-email").catch(() => {});
-    base44.auth.me().then(setCurrentUser).catch(() => setCurrentUser(null));
+    base44.auth
+      .me()
+      .then((u) => {
+        setCurrentUser(u);
+        restoreChats(u?.id); // chats this account put aside when it last signed out here
+      })
+      .catch(() => setCurrentUser(null));
   }, []);
 
   // A new user who arrived through a friend's invite link: count the referral once,

@@ -99,8 +99,8 @@ export default function SecurityPanel({ user, email, onBack, onChangePassword, b
   );
 }
 
-// Signing out on a shared computer: chats and projects are kept in the browser, so the next
-// person to use it would see them. This removes them as well.
+// Signing out on a shared computer: a normal sign-out puts chats aside (src/lib/chatStash.js),
+// but projects and settings are kept in the browser. This removes them as well.
 function SharedComputer() {
   const leave = () => {
     if (!window.confirm("Sign out and remove your chats, projects and settings from this browser? Download anything you want to keep first.")) return;
@@ -111,7 +111,7 @@ function SharedComputer() {
     <div className="mt-5 pt-4 border-t border-slate-700/50">
       <p className="text-slate-300 text-sm font-medium">On a shared computer?</p>
       <p className="text-[11px] text-slate-500 mt-0.5 mb-2">
-        Your chats and projects are saved in this browser. Sign out this way and they're removed, so the next person can't see them.
+        Signing out puts your chats away until you sign in here again, but your projects stay in this browser. Sign out this way to remove everything, so the next person can't see any of it.
       </p>
       <button onClick={leave} className="w-full px-3 py-2 rounded-xl bg-slate-800 text-slate-200 text-sm hover:bg-slate-700 transition-colors">
         Sign out and clear this browser

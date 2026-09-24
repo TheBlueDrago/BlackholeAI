@@ -37,7 +37,7 @@ for (const ok of ["https://en.wikipedia.org/wiki/Essex", "https://www.sussex.ac.
   const { markSessionOnly, forgetIfBrowserWasClosed, FLAG } = await import(R + "src/lib/sessionOnly.js");
   const mem = () => {
     const m = new Map();
-    return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), removeItem: (k) => m.delete(k), clear: () => m.clear(), m };
+    return { getItem: (k) => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), removeItem: (k) => m.delete(k), clear: () => m.clear(), key: (i) => [...m.keys()][i] ?? null, get length() { return m.size; }, m };
   };
   const doc = { cookie: "" };
   let s = mem();
@@ -56,6 +56,28 @@ for (const ok of ["https://en.wikipedia.org/wiki/Essex", "https://www.sussex.ac.
   s.setItem("infinity-ai-conversations", "[]");
   assert(!forgetIfBrowserWasClosed(s, "") && s.getItem("base44_access_token") === "tok" && s.getItem("infinity-ai-conversations") === "[]", "with Remember me ticked you stay signed in and keep your chats");
   assert(!forgetIfBrowserWasClosed({ getItem: () => { throw new Error("blocked"); } }, ""), "blocked storage doesn't break start-up");
+
+  // Signing out puts your chats aside under your account; the next person starts with none.
+  const { stashChats, restoreChats } = await import(R + "src/lib/chatStash.js");
+  const { clearThisBrowser } = await import(R + "src/lib/sessionOnly.js");
+  const chats = (s) => JSON.parse(s.getItem("infinity-ai-conversations") || "[]").map((c) => c.title).join();
+  s = mem();
+  s.setItem("infinity-ai-conversations", JSON.stringify([{ id: "a1", title: "A's secret" }]));
+  stashChats("A", s);
+  assert(chats(s) === "" && s.getItem("bh-chats-stash:A"), "signing out puts your chats aside, so the next person sees none");
+  assert(!restoreChats("B", s) && chats(s) === "", "another account signing in doesn't get them");
+  s.setItem("infinity-ai-conversations", JSON.stringify([{ id: "b1", title: "B's chat" }]));
+  stashChats("B", s);
+  assert(restoreChats("A", s) && chats(s) === "A's secret" && s.getItem("bh-chats-stash:A") === null, "signing back in brings back only your own chats");
+  s.setItem("infinity-ai-conversations", JSON.stringify([{ id: "new", title: "made before signing in" }, { id: "a1", title: "A's secret" }]));
+  s.setItem("bh-chats-stash:A", JSON.stringify([{ id: "a1", title: "A's secret" }, { id: "a2", title: "A's other" }]));
+  restoreChats("A", s);
+  assert(chats(s) === "made before signing in,A's secret,A's other", "chats already here are kept, without doubles");
+  stashChats(undefined, s);
+  assert(chats(s) !== "", "without a known account nothing is moved");
+  clearThisBrowser(s, null);
+  assert(chats(s) === "" && s.getItem("bh-chats-stash:B"), "clearing the browser removes your chats but keeps the ones other accounts put aside");
+  assert(!restoreChats("A", { getItem: () => { throw new Error("blocked"); } }), "blocked storage is fine");
 }
 
 // The contact form's topics match the ones the server accepts (cloudflare-lib/contact.js).
