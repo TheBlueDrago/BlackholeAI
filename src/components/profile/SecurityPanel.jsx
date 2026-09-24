@@ -7,7 +7,7 @@ const TIPS = [
   "We'll never ask for your password, by email, phone or chat.",
   "Only sign in on blackhole-ai-tech.com. Check the address first.",
   "Use a password you don't use for anything else.",
-  "Sign out on shared or school computers when you're done.",
+  "On a shared or school computer, untick \"Remember me\" when you sign in, and sign out when you're done.",
   "Never type a password or card number into a site someone made. Report it instead.",
 ];
 
