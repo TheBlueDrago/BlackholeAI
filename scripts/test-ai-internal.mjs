@@ -95,3 +95,14 @@ u0 = usageBefore();
 await streamCall(3);
 const stoppedCost = usageBefore() - u0;
 assert(chunksSent < 20 && stoppedCost >= 1 && stoppedCost < 5, `pressing Stop ends generation early (${chunksSent}/50 chunks) and charges only what was written (${stoppedCost} credit)`);
+
+// Message size cap and the per-minute limit on new replies.
+{
+  const [st, bd] = await call({ prompt: "x".repeat(800001), model: "automatic" });
+  assert(st === 413 && /too long/.test(bd.error), "a message over 800,000 characters is refused");
+  cache.clear();
+  const statuses = [];
+  for (let i = 0; i < 16; i++) statuses.push((await call({ prompt: "hi", model: "automatic" }))[0]);
+  assert(statuses.slice(0, 15).every((x) => x !== 429) && statuses[15] === 429, "the 16th reply started within a minute is refused: " + statuses.join(","));
+  cache.clear();
+}
