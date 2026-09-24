@@ -47,7 +47,7 @@ export default function OutOfCredits({ tier, canSwitch = true }) {
         {upgrade && (
           <button
             onClick={() => shell?.goBilling(upgrade.id)}
-            className="flex-1 text-left rounded-xl bg-indigo-600 hover:bg-indigo-500 transition-colors px-3 py-2"
+            className="flex-1 text-left rounded-xl bg-indigo-600 hover:bg-indigo-700 transition-colors px-3 py-2"
           >
             {/* A fixed white (not text-white, which the light theme turns dark) on the indigo button. */}
             <span className="flex items-center gap-1.5 text-sm font-semibold text-[#fff]">

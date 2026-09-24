@@ -695,7 +695,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
           <DownloadZip html={previewHtml} name={siteName} plan={plan} onUpgrade={onUpgrade} />
           <button
             onClick={() => setShowPublish(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 text-[#fff] text-sm font-medium hover:bg-indigo-500 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 text-[#fff] text-sm font-medium hover:bg-indigo-700 transition-colors"
           >
             <Rocket className="w-4 h-4" /> Publish
           </button>
@@ -732,7 +732,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
               />
               <button
                 onClick={addMember}
-                className="px-3 py-2 rounded-lg bg-indigo-600 text-[#fff] text-sm font-medium hover:bg-indigo-500 transition-colors"
+                className="px-3 py-2 rounded-lg bg-indigo-600 text-[#fff] text-sm font-medium hover:bg-indigo-700 transition-colors"
               >
                 Add
               </button>
@@ -1009,7 +1009,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
                 <button
                   onClick={confirmPublish}
                   disabled={!siteName || publishing || !previewHtml || taken}
-                  className="flex-1 py-2.5 rounded-xl bg-indigo-600 text-[#fff] font-medium hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  className="flex-1 py-2.5 rounded-xl bg-indigo-600 text-[#fff] font-medium hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   {publishing ? (isRepublish ? "Re-publishing…" : "Publishing…") : isRepublish ? "Re-publish" : "Publish"}
                 </button>

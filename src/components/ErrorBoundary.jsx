@@ -23,7 +23,7 @@ export default class ErrorBoundary extends React.Component {
         <p className="text-sm text-slate-400 max-w-sm">Reloading usually fixes it — especially right after Blackhole AI was updated.</p>
         <button
           onClick={() => window.location.reload()}
-          className="mt-2 px-5 py-2 rounded-xl bg-indigo-600 text-[#fff] text-sm font-medium hover:bg-indigo-500"
+          className="mt-2 px-5 py-2 rounded-xl bg-indigo-600 text-[#fff] text-sm font-medium hover:bg-indigo-700"
         >
           Reload
         </button>

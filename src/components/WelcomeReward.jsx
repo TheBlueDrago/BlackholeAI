@@ -89,7 +89,7 @@ export default function WelcomeReward({ open, onClose, onClaimed }) {
             )}
             {error && <p className="text-sm text-red-400 mt-3">{error}</p>}
             {done && (
-              <button onClick={onClose} className="mt-4 w-full py-2 rounded-xl bg-indigo-600 text-[#fff] text-sm font-medium hover:bg-indigo-500">
+              <button onClick={onClose} className="mt-4 w-full py-2 rounded-xl bg-indigo-600 text-[#fff] text-sm font-medium hover:bg-indigo-700">
                 Start building
               </button>
             )}

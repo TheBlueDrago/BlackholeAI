@@ -98,7 +98,7 @@ export default function ReferFriends({ onBack }) {
         <>
           <div className="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-xl p-2">
             <input readOnly value={data.link} onFocus={(e) => e.target.select()} className="flex-1 min-w-0 bg-transparent text-sm text-slate-200 outline-none px-1" />
-            <button onClick={copy} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-indigo-600 text-[#fff] text-xs font-medium hover:bg-indigo-500">
+            <button onClick={copy} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-indigo-600 text-[#fff] text-xs font-medium hover:bg-indigo-700">
               {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
               {copied ? "Copied" : "Copy"}
             </button>

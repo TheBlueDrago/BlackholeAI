@@ -90,7 +90,7 @@ export default function ReportReply({ question, reply }) {
               type="button"
               onClick={send}
               disabled={state === "sending"}
-              className="inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium bg-indigo-600 text-[#fff] hover:bg-indigo-500 disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium bg-indigo-600 text-[#fff] hover:bg-indigo-700 disabled:opacity-60"
             >
               {state === "sending" && <Loader2 className="w-3.5 h-3.5 animate-spin" />} Send report
             </button>

@@ -107,7 +107,7 @@ export default function UserActions({ user, onApply }) {
         <button
           onClick={applyPlan}
           disabled={busy}
-          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-600 text-[#fff] text-xs font-medium hover:bg-indigo-500 disabled:opacity-50"
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-600 text-[#fff] text-xs font-medium hover:bg-indigo-700 disabled:opacity-50"
         >
           <Crown className="w-3.5 h-3.5" /> Set membership
         </button>

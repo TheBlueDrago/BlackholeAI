@@ -198,7 +198,7 @@ export default function PublishedContent() {
           <button
             onClick={() => aiCheck(it)}
             disabled={!!busy}
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-500/80 text-white text-xs hover:bg-indigo-500 disabled:opacity-50"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-600 text-white text-xs hover:bg-indigo-700 disabled:opacity-50"
           >
             {busy === `ai:${key}` ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />} AI check
           </button>
@@ -293,7 +293,7 @@ export default function PublishedContent() {
             <button
               key={kind}
               onClick={() => openList(kind)}
-              className="text-left rounded-xl bg-slate-800/60 border border-slate-700/60 p-4 hover:border-indigo-500/50 hover:bg-slate-800 transition-colors"
+              className="text-left rounded-xl bg-slate-800/60 border border-slate-700/60 p-4 hover:border-indigo-500/50 hover:bg-slate-800/80 transition-colors"
             >
               <span className="flex items-center justify-between gap-2">
                 <span className="flex items-center gap-2 text-white font-semibold">
