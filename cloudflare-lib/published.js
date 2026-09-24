@@ -71,6 +71,23 @@ export async function findByName(request, kind, name) {
   return Array.isArray(rows) ? rows : [];
 }
 
+// Who owns a published name. Anyone signed in can write their own PublishedSite/PublishedGame
+// rows straight into Base44, so "there's a row of mine with this name" proves nothing. The
+// owner is whoever publish() recorded with the stored page, while they still have a row for
+// it; otherwise the creator of the oldest row (a copycat's row always comes later).
+// `rows` can be passed when the caller already has them. -> a user id, or null if unused.
+export async function ownerOf(request, kv, kind, name, rows) {
+  const all = (rows || (await findByName(request, kind, name))).slice();
+  let recorded = null;
+  if (kv && kv.getWithMetadata) {
+    const r = await kv.getWithMetadata(kvKey(kind, name)).catch(() => null);
+    recorded = (r && r.value != null && r.metadata && r.metadata.owner) || null;
+  }
+  if (recorded && all.some((r) => r.created_by_id === recorded)) return recorded;
+  all.sort((a, b) => String(a.created_date || "").localeCompare(String(b.created_date || "")));
+  return all.length ? all[0].created_by_id || null : null;
+}
+
 // The whole publish flow for both kinds; `extra` holds the kind-specific entity fields.
 export async function publish(context, kind, { name, html: rawHtml, extra }) {
   const { request, env } = context;
@@ -122,7 +139,10 @@ export async function publish(context, kind, { name, html: rawHtml, extra }) {
 
     const rows = await findByName(request, kind, name);
     const mine = rows.find((r) => r.created_by_id === user.id);
-    if (rows.length && !mine && user.role !== "admin") {
+    // Having a row with this name isn't enough (rows can be written straight into Base44):
+    // the name must be free or yours (see ownerOf).
+    const owner = await ownerOf(request, env.PUBLISHED_HTML, kind, name, rows);
+    if (owner && owner !== user.id && user.role !== "admin") {
       return json({ error: "That name is taken. Try another." }, 409);
     }
 

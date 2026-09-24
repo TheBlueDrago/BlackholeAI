@@ -4,7 +4,7 @@
 // draft. Pages an admin took down keep their stored HTML as a record of the take-down.
 // Credit, purchase and referral records stay (payments and fraud prevention).
 // -> { ok, sites, games }
-import { json, base44, kvKey, ENTITY } from "../../../../../cloudflare-lib/published.js";
+import { json, base44, kvKey, ENTITY, ownerOf } from "../../../../../cloudflare-lib/published.js";
 import { currentUser } from "../../../../../cloudflare-lib/credits.js";
 import { isBlocked } from "../../../../../cloudflare-lib/reports.js";
 import { setShowcase } from "../../../../../cloudflare-lib/showcase.js";
@@ -24,10 +24,13 @@ export async function onRequestPost(context) {
     const done = { site: 0, game: 0 };
     for (const kind of ["site", "game"]) {
       for (const rec of await mine(request, kind, user.id)) {
-        await base44(request, "DELETE", `entities/${ENTITY[kind]}/${rec.id}`);
         const name = String(rec.name || "").toLowerCase();
-        if (kv && name && !(await isBlocked(kv, kind, name))) await kv.delete(kvKey(kind, name));
-        if (kv && kind === "site" && name) await setShowcase(kv, name, null);
+        // Only remove the stored page (and gallery spot) if the name is really theirs: a row
+        // written straight into Base44 with someone else's site name mustn't erase that site.
+        const owned = kv && name && (await ownerOf(request, kv, kind, name)) === user.id;
+        await base44(request, "DELETE", `entities/${ENTITY[kind]}/${rec.id}`);
+        if (owned && !(await isBlocked(kv, kind, name))) await kv.delete(kvKey(kind, name));
+        if (owned && kind === "site") await setShowcase(kv, name, null);
         done[kind]++;
       }
     }

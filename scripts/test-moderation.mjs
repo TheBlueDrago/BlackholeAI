@@ -255,6 +255,34 @@ assert(s === 404, "unknown site 404");
   entities.PublishedSite.push({ id: "d2", name: "miner", html: '<html><body><script src="https://coinhive.com/lib/coinhive.min.js"></script></body></html>', created_by_id: "u666" });
   [s, b] = await get2("miner");
   assert(b.html.includes("has been removed") && !b.html.includes("coinhive"), "a page that would be refused at publish isn't served from a record either");
+
+  // Taking over a name by writing a row first, then publishing / deleting through the app.
+  users.badtok = { id: "u666", role: "user" };
+  await kv2.put("site:bakery", "<html><body><h1>Real bakery</h1></body></html>", { metadata: { owner: "u1" } });
+  entities.PublishedSite.push(
+    { id: "b1", name: "bakery", html: "https://nebuluxai.pages.dev/published/site/bakery", created_by_id: "u1", created_date: "2026-01-01" },
+    { id: "b2", name: "bakery", html: "x", created_by_id: "u666", created_date: "2026-02-01" },
+  );
+  [s, b] = await j(pub.onRequestPost({ request: req({ name: "bakery", html: "<h1>Fake bakery</h1>" }, "badtok"), env: env2 }));
+  assert(s === 409 && store.get("site:bakery").includes("Real bakery"), "a copycat row doesn't let someone publish over another person's site");
+  [s, b] = await j(pub.onRequestPost({ request: req({ name: "bakery", html: "<h1>Real bakery v2</h1>" }, "usertok"), env: env2 }));
+  assert(s === 200 && store.get("site:bakery").includes("Real bakery v2"), "the real owner can still republish");
+  const realFetch2 = globalThis.fetch;
+  globalThis.fetch = async (url, opts = {}) => {
+    const u = new URL(url);
+    if (opts.method === "DELETE") return new Response("{}", { status: 200 });
+    if (u.pathname.includes("/entities/Published") && u.searchParams.get("q")?.includes("created_by_id")) {
+      const ent = u.pathname.split("/entities/")[1];
+      const q = JSON.parse(u.searchParams.get("q"));
+      return new Response(JSON.stringify((entities[ent] || []).filter((x) => x.created_by_id === q.created_by_id)));
+    }
+    return realFetch2(url, opts);
+  };
+  [s, b] = await j(del.onRequestPost({ request: req({}, "badtok"), env: env2 }));
+  globalThis.fetch = realFetch2;
+  assert(s === 200 && store.get("site:bakery")?.includes("Real bakery"), "deleting a copycat's content doesn't erase the real owner's site");
+}
+{
 }
 
 // ---- link-preview tags ----

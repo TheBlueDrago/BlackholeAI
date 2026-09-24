@@ -1,7 +1,7 @@
 // The public site gallery (see cloudflare-lib/showcase.js).
 // Body: { action: "list" }                     -> { sites: [{ name, title, added }] }  (anyone)
 //       { action: "set", name, on, title? }    -> { ok, sites }  (the site's owner or an admin)
-import { json, findByName } from "../../../../../cloudflare-lib/published.js";
+import { json, findByName, ownerOf } from "../../../../../cloudflare-lib/published.js";
 import { currentUser } from "../../../../../cloudflare-lib/credits.js";
 import { isBlocked } from "../../../../../cloudflare-lib/reports.js";
 import { readShowcase, setShowcase, MAX_SHOWCASE } from "../../../../../cloudflare-lib/showcase.js";
@@ -25,9 +25,11 @@ export async function onRequest(context) {
     if (!(await allow(`showcase:${user.id}`, 30, 3600))) return json({ error: TOO_MANY }, 429);
     const name = String(body.name || "").toLowerCase();
     const rows = await findByName(request, "site", name);
-    const site = rows[0];
-    if (!site) return json({ error: "Site not found." }, 404);
-    if (site.created_by_id !== user.id && user.role !== "admin") return json({ error: "Only the site's owner can do that." }, 403);
+    if (!rows.length) return json({ error: "Site not found." }, 404);
+    // The real owner's row (see ownerOf): a copycat row with the same name doesn't count.
+    const owner = await ownerOf(request, kv, "site", name, rows);
+    const site = rows.find((r) => r.created_by_id === owner) || rows[0];
+    if (owner !== user.id && user.role !== "admin") return json({ error: "Only the site's owner can do that." }, 403);
 
     if (body.on) {
       if (site.hidden || (await isBlocked(kv, "site", name))) {
