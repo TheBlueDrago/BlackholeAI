@@ -14,6 +14,7 @@ import { hasPendingReferral } from "@/lib/referral";
 import { passwordProblem } from "@/lib/passwordCheck";
 import PasswordHint from "@/components/PasswordHint";
 import ShowPasswordButton from "@/components/ShowPasswordButton";
+import { markSessionOnly } from "@/lib/sessionOnly";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -67,6 +68,7 @@ export default function Register() {
       const result = await base44.auth.verifyOtp({ email, otpCode });
       if (result?.access_token) {
         base44.auth.setToken(result.access_token);
+        markSessionOnly(false); // a new account stays signed in, like "Remember me"
       }
       window.location.href = safeReturnTo();
     } catch (err) {

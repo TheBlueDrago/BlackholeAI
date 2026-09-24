@@ -12,6 +12,7 @@ import { notifyGamesChanged } from "@/lib/gameEvents";
 import { downloadChats, importChats } from "@/lib/chatBackup";
 import { useInstallApp } from "@/lib/installPrompt";
 import useEscape from "@/hooks/useEscape";
+import { markSessionOnly } from "@/lib/sessionOnly";
 
 export default function Profile({ open, onClose, initialView = "main", onMonitor, onPromos }) {
   const [user, setUser] = useState(null);
@@ -71,6 +72,7 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
   };
 
   const handleLogout = () => {
+    markSessionOnly(false); // the next person to sign in here chooses for themselves
     base44.auth.logout();
   };
 

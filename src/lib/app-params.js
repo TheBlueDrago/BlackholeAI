@@ -1,3 +1,4 @@
+import { forgetIfBrowserWasClosed } from "./sessionOnly.js";
 const isNode = typeof window === 'undefined';
 const windowObj = isNode ? { localStorage: new Map() } : window;
 const storage = windowObj.localStorage;
@@ -48,6 +49,8 @@ const builtIn = (paramName, value) => {
 
 const getAppParams = () => {
 	// Only acts on the page load it's in: remembering it logged the browser out on every visit.
+	// Signed in without "Remember me" and the browser has been closed since: sign out first.
+	if (!isNode) forgetIfBrowserWasClosed(storage, document.cookie);
 	if (!isNode && new URLSearchParams(window.location.search).get("clear_access_token") === 'true') {
 		storage.removeItem('base44_access_token');
 		storage.removeItem('token');

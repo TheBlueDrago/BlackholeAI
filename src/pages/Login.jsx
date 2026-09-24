@@ -6,6 +6,7 @@ import GoogleIcon from "@/components/GoogleIcon";
 import BlackholeIcon from "@/components/BlackholeIcon";
 import { safeReturnTo } from "@/lib/authReturnTo";
 import ShowPasswordButton from "@/components/ShowPasswordButton";
+import { markSessionOnly } from "@/lib/sessionOnly";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -23,6 +24,7 @@ export default function Login() {
     setLoading(true);
     try {
       await base44.auth.loginViaEmailPassword(email, password);
+      markSessionOnly(!remember);
       window.location.href = returnTo;
     } catch (err) {
       setError(err.message || "Invalid email or password");
@@ -32,6 +34,8 @@ export default function Login() {
   };
 
   const handleGoogle = () => {
+    // Set before leaving for Google: the session cookie lasts through the round trip.
+    markSessionOnly(!remember);
     base44.auth.loginWithProvider("google", returnTo);
   };
 
