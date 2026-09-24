@@ -30,6 +30,6 @@ setTimeout(clearStartBackground, 1500)
 // (public/sw.js). Registered after the page has loaded so it never slows the first visit.
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => { /* not available: works as before */ })
+    navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).catch(() => { /* not available: works as before */ })
   })
 }
