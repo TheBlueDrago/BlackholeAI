@@ -779,7 +779,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
               exit={{ scale: 0.95, opacity: 0, y: 10 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-md bg-slate-900 border border-slate-700/60 rounded-2xl shadow-2xl p-6"
+              className="w-full max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain max-w-md bg-slate-900 border border-slate-700/60 rounded-2xl shadow-2xl p-6"
             >
               <h3 className="text-lg font-semibold text-white">{isRepublish ? "Re-publish your game" : "Publish your game"}</h3>
               <p className="text-slate-400 text-sm mt-1">Your game will go live on the Games front page and in Blackhole Browser at:</p>

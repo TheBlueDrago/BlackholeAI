@@ -45,7 +45,7 @@ export default function PromoExpiredPopup() {
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
-            className="w-full max-w-sm bg-slate-900 border border-slate-700/60 rounded-2xl p-6 text-center"
+            className="w-full max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain max-w-sm bg-slate-900 border border-slate-700/60 rounded-2xl p-6 text-center"
           >
             <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto mb-4">
               <AlertTriangle className="w-6 h-6 text-amber-300" />

@@ -55,7 +55,7 @@ export default function WelcomeReward({ open, onClose, onClaimed }) {
           <motion.div
             initial={{ scale: 0.95, y: 10 }}
             animate={{ scale: 1, y: 0 }}
-            className="w-full max-w-sm bg-slate-900 border border-amber-400/40 rounded-2xl p-5 shadow-2xl"
+            className="w-full max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain max-w-sm bg-slate-900 border border-amber-400/40 rounded-2xl p-5 shadow-2xl"
           >
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-2">
