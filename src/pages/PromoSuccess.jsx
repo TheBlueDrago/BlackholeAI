@@ -32,7 +32,7 @@ export default function PromoSuccess() {
       </p>
       <Link
         to="/chat"
-        className="mt-8 inline-flex items-center gap-2 px-8 py-3 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white font-medium shadow-lg shadow-emerald-500/30 hover:opacity-90 transition-opacity"
+        className="mt-8 inline-flex items-center gap-2 px-8 py-3 rounded-2xl bg-gradient-to-br from-emerald-700 to-teal-700 text-[#fff] font-medium shadow-lg shadow-emerald-500/30 hover:opacity-90 transition-opacity"
       >
         Start chatting
       </Link>

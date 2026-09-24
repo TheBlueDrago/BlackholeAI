@@ -86,7 +86,8 @@ export default async function (req) {
           ...(buyer?.email ? { customerInfo: { email: buyer.email } } : {}),
         },
         callbackUrls: {
-          thankYouPageUrl: `${appUrl}/ThankYou`,
+          // ?site= lets the thank-you page talk about this seller rather than plans and credits.
+          thankYouPageUrl: `${appUrl}/ThankYou?site=${encodeURIComponent(siteName)}`,
           postFlowUrl: `https://${siteName}.blackhole-ai-tech.com`,
         },
       }),
