@@ -23,4 +23,22 @@ export async function allow(key, max, windowSec) {
   }
 }
 
+// For counting only some calls (say, wrong guesses): `hits` reads the count for `key` in
+// the current window without adding to it, and `bump` adds one. Same storage as allow().
+export async function hits(key, windowSec) {
+  const cache = typeof caches !== "undefined" && caches.default;
+  if (!cache) return 0;
+  try {
+    const slot = Math.floor(Date.now() / 1000 / windowSec);
+    const hit = await cache.match(new Request(`${ORIGIN}${encodeURIComponent(key)}/${slot}`));
+    return hit ? Number(await hit.text()) || 0 : 0;
+  } catch {
+    return 0;
+  }
+}
+
+export async function bump(key, windowSec) {
+  await allow(key, Infinity, windowSec);
+}
+
 export const TOO_MANY = "You're doing that too often. Please wait a few minutes and try again.";

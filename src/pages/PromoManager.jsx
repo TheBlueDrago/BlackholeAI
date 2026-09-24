@@ -196,6 +196,11 @@ function NewCard({ onCreate, busy }) {
           <input type="text" value={f.label} onChange={(e) => set("label", e.target.value)} placeholder="optional" className={inputCls} />
         </Field>
       </div>
+      {f.code && f.code.trim().length < 8 && (
+        <p className="mt-2 text-[11px] text-amber-300">
+          Short codes are easy to guess. For a big discount or lots of credits, use a longer, unusual code{discount ? " and a use limit" : ""}.
+        </p>
+      )}
       <button
         onClick={() => onCreate(f)}
         disabled={busy || !f.code.trim()}

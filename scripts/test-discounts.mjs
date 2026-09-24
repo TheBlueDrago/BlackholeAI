@@ -73,3 +73,56 @@ assert((await P.readPromos(kv)).find((p) => p.code === "SAVE20").pct === 30, "ad
 assert(await fails(P.checkDiscount(kv, req, c, "FREE10", "pro"), "not valid"), "a free-credit code isn't a discount");
 const free = await P.redeemPromo(kv, req, c, "FREE10");
 assert(free.credits === 10 && free.aiModel === "ai", "free-credit codes still redeem as before");
+
+// Guessing codes with many accounts from one network: only wrong codes count, per network.
+{
+  const cache = new Map();
+  globalThis.caches = { default: { match: async (r) => (cache.has(r.url) ? new Response(cache.get(r.url)) : undefined), put: async (r, res) => cache.set(r.url, await res.text()) } };
+  const baseFetch = globalThis.fetch;
+  let me = 0;
+  globalThis.fetch = async (url, init) => {
+    if (String(url).endsWith("/entities/User/me")) return new Response(JSON.stringify({ id: `guesser${me}`, role: "user" }));
+    return baseFetch(url, init);
+  };
+  const F = R + "functions/api/apps/6a8b5eb7787b8a4d6a18f662/functions/";
+  const endpoint = async (name, body, ip = "7.7.7.7") => {
+    const { onRequestPost } = await import(F + name + ".js");
+    const request = new Request("https://x/", { method: "POST", headers: { authorization: "Bearer t", "content-type": "application/json", "cf-connecting-ip": ip }, body: JSON.stringify(body) });
+    const res = await onRequestPost({ request, env: { PUBLISHED_HTML: kv } });
+    return res.status;
+  };
+  let last;
+  for (let i = 0; i < 30; i++) {
+    me = Math.floor(i / 5); // a new account every 5 guesses, under the per-account limit
+    last = await endpoint("redeem-promo", { code: `GUESS${i}` });
+  }
+  assert(last === 400, "30 wrong codes from one network are answered normally");
+  me = 99;
+  assert((await endpoint("redeem-promo", { code: "GUESS31" })) === 429, "the 31st wrong code from that network is refused, even on a new account");
+  assert((await endpoint("redeem-promo", { code: "GUESS32" }, "8.8.8.8")) === 400, "another network isn't affected");
+
+  cache.clear();
+  // Credit codes are single-use, so a class shares a discount code.
+  await P.createPromo(kv, req, { code: "CLASS10", kind: "discount", pct: 10, target: "all" });
+  let ok = 0;
+  for (let i = 0; i < 40; i++) {
+    me = 200 + i;
+    if ((await endpoint("redeem-promo", { code: "CLASS10" })) === 200) ok++;
+  }
+  assert(ok === 40, "a whole class redeeming the right code from one network isn't limited");
+
+  cache.clear();
+  for (let i = 0; i < 30; i++) {
+    me = 300 + Math.floor(i / 5);
+    await endpoint("promo-discount", { code: `NOPE${i}`, productId: "pro" });
+  }
+  me = 399;
+  assert((await endpoint("promo-discount", { code: "NOPE31", productId: "pro" })) === 429, "the Shop's code check has the same per-network cap");
+  let claimStatus = 0;
+  for (let i = 0; i < 25; i++) {
+    me = 400 + i;
+    claimStatus = await endpoint("promo-discount", { code: `CLAIM${i}`, productId: "pro", claim: true });
+  }
+  assert(claimStatus === 400, "checkout's claims are counted apart, with a higher cap (Base44's servers share one network)");
+  globalThis.fetch = baseFetch;
+}
