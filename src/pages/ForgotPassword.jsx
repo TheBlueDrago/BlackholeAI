@@ -6,9 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Mail, ArrowLeft, Loader2 } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
+import EmailTypoHint, { useEmailTypo } from "@/components/EmailTypoHint";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
+  const typo = useEmailTypo(email);
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
@@ -16,6 +18,7 @@ export default function ForgotPassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    if (typo.pauseForTypo()) return; // a reset link sent to gmial.com never arrives
     setLoading(true);
     try {
       await base44.auth.resetPasswordRequest(email);
@@ -61,10 +64,12 @@ export default function ForgotPassword() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                {...typo.fieldProps}
                 className="pl-10 h-12"
                 required
               />
             </div>
+            <EmailTypoHint suggestion={typo.suggestion} onPick={setEmail} />
           </div>
           <Button type="submit" className="w-full h-12 font-medium" disabled={loading}>
             {loading ? (

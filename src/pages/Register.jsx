@@ -15,7 +15,7 @@ import { passwordProblem } from "@/lib/passwordCheck";
 import PasswordHint from "@/components/PasswordHint";
 import ShowPasswordButton from "@/components/ShowPasswordButton";
 import { markSessionOnly } from "@/lib/sessionOnly";
-import { emailSuggestion } from "@/lib/emailTypo";
+import EmailTypoHint, { useEmailTypo } from "@/components/EmailTypoHint";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -27,9 +27,7 @@ export default function Register() {
   const [showOtp, setShowOtp] = useState(false);
   const [otpCode, setOtpCode] = useState("");
   const [invited] = useState(() => hasPendingReferral());
-  // "Did you mean …@gmail.com?", once the email field is left (not while typing).
-  const [emailDone, setEmailDone] = useState(false);
-  const suggestion = emailDone ? emailSuggestion(email) : "";
+  const typo = useEmailTypo(email);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,6 +41,7 @@ export default function Register() {
       setError("Passwords do not match");
       return;
     }
+    if (typo.pauseForTypo()) return; // the sign-up code would go to the misspelled address
     setLoading(true);
     try {
       // A failed check must never block sign-up (Base44's register refuses existing accounts anyway).
@@ -207,22 +206,12 @@ export default function Register() {
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              onFocus={() => setEmailDone(false)}
-              onBlur={() => setEmailDone(true)}
-              aria-describedby={suggestion ? "email-suggestion" : undefined}
+              {...typo.fieldProps}
               className="pl-10 h-12"
               required
             />
           </div>
-          {suggestion && (
-            <p id="email-suggestion" role="status" className="text-sm text-muted-foreground">
-              Did you mean{" "}
-              <button type="button" onClick={() => setEmail(suggestion)} className="font-medium text-foreground underline underline-offset-2">
-                {suggestion}
-              </button>
-              ?
-            </p>
-          )}
+          <EmailTypoHint suggestion={typo.suggestion} onPick={setEmail} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="password">Password</Label>

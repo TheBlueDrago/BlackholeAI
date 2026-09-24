@@ -6,6 +6,7 @@ import GoogleIcon from "@/components/GoogleIcon";
 import BlackholeIcon from "@/components/BlackholeIcon";
 import { safeReturnTo } from "@/lib/authReturnTo";
 import ShowPasswordButton from "@/components/ShowPasswordButton";
+import EmailTypoHint, { useEmailTypo } from "@/components/EmailTypoHint";
 import { markSessionOnly, signedOutNote, forgetSignedOutNote } from "@/lib/sessionOnly";
 
 // Why you were just signed out (set by the sign-out buttons and at start-up).
@@ -17,6 +18,7 @@ const SIGNED_OUT_NOTES = {
 
 export default function Login() {
   const [email, setEmail] = useState("");
+  const typo = useEmailTypo(email);
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
@@ -105,10 +107,12 @@ export default function Login() {
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  {...typo.fieldProps}
                   className="w-full h-11 pl-10 pr-3 rounded-xl bg-slate-800/70 border border-slate-700/50 text-slate-100 placeholder:text-slate-500 outline-none focus:border-indigo-500/60 text-sm"
                   required
                 />
               </div>
+              <EmailTypoHint suggestion={typo.suggestion} onPick={setEmail} className="text-xs text-slate-400" linkClassName="text-slate-200" />
             </div>
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
