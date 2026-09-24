@@ -76,6 +76,10 @@ assert(free.credits === 10 && free.aiModel === "ai", "free-credit codes still re
 
 // Guessing codes with many accounts from one network: only wrong codes count, per network.
 {
+  // Counted per clock hour: pin the clock just after the hour so the run stays in one.
+  const realNow = Date.now;
+  const pinned = Math.floor(realNow() / 3600000) * 3600000 + 60000;
+  Date.now = () => pinned;
   const cache = new Map();
   globalThis.caches = { default: { match: async (r) => (cache.has(r.url) ? new Response(cache.get(r.url)) : undefined), put: async (r, res) => cache.set(r.url, await res.text()) } };
   const baseFetch = globalThis.fetch;
@@ -125,4 +129,5 @@ assert(free.credits === 10 && free.aiModel === "ai", "free-credit codes still re
   }
   assert(claimStatus === 400, "checkout's claims are counted apart, with a higher cap (Base44's servers share one network)");
   globalThis.fetch = baseFetch;
+  Date.now = realNow;
 }

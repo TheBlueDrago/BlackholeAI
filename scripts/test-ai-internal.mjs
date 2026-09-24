@@ -2,6 +2,10 @@
 // short prompt and a per-user rate; normal calls are still charged. Run: node scripts/test-ai-internal.mjs
 const F = new URL("../functions/api/apps/6a8b5eb7787b8a4d6a18f662/functions/", import.meta.url).pathname;
 const assert = (c, m) => { if (!c) { console.error("FAIL", m); process.exitCode = 1; } else console.log("ok", m); };
+// Rate limits count per clock minute or hour: pin the clock 30 seconds past an hour so a run
+// can't straddle two windows (which made the per-minute check fail now and then).
+const pinnedNow = Math.floor(Date.now() / 3600000) * 3600000 + 30000;
+Date.now = () => pinnedNow;
 const models = [];
 const bodies = [];
 globalThis.fetch = async (url, opts = {}) => {

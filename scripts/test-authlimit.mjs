@@ -27,6 +27,11 @@ globalThis.fetch = async (url, init) => {
   return new Response('{"ok":true}', { status: 200, headers: { "content-type": "application/json" } });
 };
 
+// Limits count per clock window (15 minutes or an hour): pin the clock just after the hour
+// so a run can't straddle two windows.
+const pinnedNow = Math.floor(Date.now() / 3600000) * 3600000 + 60000;
+Date.now = () => pinnedNow;
+
 const { onRequest } = await import(new URL("../functions/api/[[path]].js", import.meta.url).href);
 const { tooManyMessage } = await import(new URL("../cloudflare-lib/authlimit.js", import.meta.url).href);
 
