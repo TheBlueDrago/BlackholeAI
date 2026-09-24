@@ -21,13 +21,13 @@ export default function CreditPacks({ onBuy, discount }) {
       {TIERS.map((tier) => {
         const { icon: Icon, color, border } = LOOK[tier];
         return (
-          <div key={tier} className={`bg-slate-900/80 backdrop-blur-xl border-2 ${border} rounded-3xl p-6 shadow-2xl flex flex-col`}>
+          <div key={tier} className={`bg-slate-900/80 backdrop-blur-xl border-2 ${border} rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col`}>
             <div className="flex items-center gap-2">
               <Icon className={`w-5 h-5 ${color}`} />
               <h3 className="text-xl font-bold text-white">{TIER_NAMES[tier]} credits</h3>
             </div>
             <p className="text-xs text-slate-400 mt-1">One-time, any plan. They don't reset at the end of the month.</p>
-            <div className="grid grid-cols-4 gap-2 mt-4">
+            <div className="grid grid-cols-2 min-[380px]:grid-cols-4 gap-2 mt-4">
               {packsForTier(tier).map(([id, p]) => {
                 const off = promoPctFor(discount, id);
                 return (
@@ -38,8 +38,8 @@ export default function CreditPacks({ onBuy, discount }) {
                   >
                     <span className="block text-lg font-bold text-white">{p.credits}</span>
                     {off ? (
-                      <span className="block text-xs text-slate-300">
-                        <s className="opacity-60 mr-1">{money(Number(p.price))}</s>
+                      <span className="block text-xs text-slate-300 leading-tight">
+                        <s className="block opacity-60">{money(Number(p.price))}</s>
                         <span className="text-emerald-300">{money(discountedPrice(p.price, off))}</span>
                       </span>
                     ) : (

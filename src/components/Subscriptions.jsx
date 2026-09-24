@@ -287,12 +287,12 @@ export default function Subscriptions({ onFree, onPro, onTeam, onBuyPack, offer 
               if (e.key === "Enter") redeem();
             }}
             placeholder="Enter promo code"
-            className="flex-1 bg-slate-800/70 border border-slate-700/50 focus:border-emerald-500/50 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none transition-colors uppercase tracking-wide"
+            className="flex-1 min-w-0 bg-slate-800/70 border border-slate-700/50 focus:border-emerald-500/50 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none transition-colors uppercase tracking-wide"
           />
           <button
             onClick={redeem}
             disabled={promoBusy || !promoInput.trim()}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
+            className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
           >
             {promoBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Gift className="w-4 h-4" />}
             Redeem
