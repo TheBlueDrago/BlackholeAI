@@ -79,6 +79,8 @@ export function useCredits() {
     // Banned or blocked by an admin, as the server sees it (the ban screen uses this too).
     blocked: status?.blocked === true,
     blockedUntil: status?.blockedUntil || null,
+    // Signed up but hasn't entered the emailed code yet (Chat shows the confirm screen).
+    unverified: status?.unverified === true,
     team,
     refresh,
     sync,

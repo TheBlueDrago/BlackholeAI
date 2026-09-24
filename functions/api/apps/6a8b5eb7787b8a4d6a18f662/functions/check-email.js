@@ -4,6 +4,7 @@
 //   "available" — otherwise; Base44's own register step still refuses an existing account.
 import { json } from "../../../../../cloudflare-lib/published.js";
 import { allow, TOO_MANY } from "../../../../../cloudflare-lib/ratelimit.js";
+import { removedEmailKey } from "../../../../../cloudflare-lib/bans.js";
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -15,7 +16,10 @@ export async function onRequestPost(context) {
     const email = String(body.email || "").trim().toLowerCase();
     if (!email) return json({ status: "invalid" }, 400);
     const deleted = await env.PUBLISHED_HTML.get(`deleted:${email}`);
-    return json({ status: deleted ? "deleted" : "available" });
+    if (deleted) return json({ status: "deleted" });
+    // An admin removed an account with this email: it can't sign up again.
+    const removed = await env.PUBLISHED_HTML.get(removedEmailKey(email));
+    return json({ status: removed ? "removed" : "available" });
   } catch {
     return json({ status: "available" });
   }

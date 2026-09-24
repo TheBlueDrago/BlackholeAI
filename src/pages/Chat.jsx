@@ -5,6 +5,7 @@ import Profile from "@/components/Profile";
 import PromoExpiredPopup from "@/components/PromoExpiredPopup";
 import TeamWelcomePopup from "@/components/TeamWelcomePopup";
 import BanScreen from "@/components/BanScreen";
+import VerifyEmailScreen from "@/components/VerifyEmailScreen";
 import MobileTabBar from "@/components/MobileTabBar";
 import MotionPrefs from "@/components/MotionPrefs";
 import usePageTitle, { appTitleFor } from "@/hooks/usePageTitle";
@@ -17,7 +18,7 @@ const PageSpinner = () => (
 
 function ChatLayout() {
   const shell = useAppShell();
-  const { isBanned, isBlocked, blockedUntil, openProfile, closeProfile } = shell;
+  const { isBanned, isBlocked, isUnverified, blockedUntil, openProfile, closeProfile } = shell;
   const loc = useLocation();
   const navigate = useNavigate();
   usePageTitle(appTitleFor(loc.pathname));
@@ -25,7 +26,7 @@ function ChatLayout() {
   // The profile opens over whatever page is showing (see openProfile), so that page stays put behind it.
   const profileView = loc.state?.profile;
   const profileOpen = !!profileView;
-  const showTabbar = ["/chat", "/chat/code", "/chat/designer", "/chat/designer/build"].includes(loc.pathname) && !isBanned && !isBlocked;
+  const showTabbar = ["/chat", "/chat/code", "/chat/designer", "/chat/designer/build"].includes(loc.pathname) && !isBanned && !isBlocked && !isUnverified;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-black overflow-hidden relative">
@@ -36,6 +37,8 @@ function ChatLayout() {
           profile popup below mounted, so it can close when a button in it opens a page. */}
       {isBanned || isBlocked ? (
         <BanScreen banned={isBanned} until={blockedUntil} />
+      ) : isUnverified ? (
+        <VerifyEmailScreen email={shell.currentUser?.email || ""} />
       ) : (
         <Suspense fallback={<PageSpinner />}>
           <Outlet />

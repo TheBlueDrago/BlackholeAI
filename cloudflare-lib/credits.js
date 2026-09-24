@@ -28,7 +28,7 @@ import { CREDIT_PACKS } from "./creditPacks.js";
 // Plan allowances live in planTotals.js so the app can show them too (out-of-credits card).
 export { TIERS, TIER_OF_MODEL, TIER_NAMES, PLAN_TOTALS } from "./planTotals.js";
 import { TIERS, PLAN_TOTALS } from "./planTotals.js";
-import { blockedBy } from "./bans.js";
+import { blockedBy, unverified, emailRemoved, removedEmailKey } from "./bans.js";
 const RANK = { free: 0, pro: 1, team: 2, secret: 3, enterprise: 4, admin: 5 };
 
 // Whole credits: 1 per started 10,000 characters of reply, times the effort level.
@@ -188,7 +188,9 @@ export async function entitlement(kv, request, user, { other = false } = {}) {
     details.endsAt = null;
   }
   const now = new Date();
-  const blocked = blockedBy(user, grant, now);
+  // Not confirmed by email yet: nothing works until the code is entered (the app asks for it).
+  const notVerified = unverified(user);
+  const blocked = blockedBy(user, grant, now) || notVerified || (user.role !== "admin" && (await emailRemoved(kv, user.email)));
   // For the ban screen: when a timed block ends (the later one, if both set one); null = banned.
   const blockedUntil = blocked
     ? [grant && grant.blockedUntil, user.blockedUntil].filter((v) => v && new Date(v) > now).sort().pop() || null
@@ -204,6 +206,7 @@ export async function entitlement(kv, request, user, { other = false } = {}) {
     bonus,
     blocked,
     blockedUntil,
+    unverified: notVerified,
     // Where the plan comes from ("free", "paid", "trial", "grant", "member", "admin"), when it
     // ends if it does, and the new-account offer (for the Subscriptions screen).
     planSource: details.source,
@@ -232,6 +235,7 @@ export async function creditStatus(kv, ent) {
     plan: ent.plan,
     month,
     blocked: ent.blocked,
+    ...(ent.unverified ? { unverified: true } : {}),
     ...(ent.blocked ? { blockedUntil: ent.blockedUntil || null } : {}),
     tiers,
     planSource: ent.planSource || "free",
@@ -325,7 +329,19 @@ export async function adjustBonus(kv, request, user, tier, delta, once) {
 export async function applyGrant(kv, userId, patch) {
   const key = `grant:${userId}`;
   const grant = await getJSON(kv, key, {});
-  for (const f of ["plan", "planExpiresAt", "banned", "blockedUntil"]) if (f in patch) grant[f] = patch[f];
+  for (const f of ["plan", "planExpiresAt", "banned", "blockedUntil", "removed"]) if (f in patch) grant[f] = patch[f];
+  // Removed: new accounts with the same email are blocked as well (bans.js emailRemoved).
+  if ("removed" in patch && patch.email) {
+    const k = removedEmailKey(patch.email);
+    if (patch.removed) await kv.put(k, JSON.stringify({ userId, at: new Date().toISOString() }));
+    else await kv.delete(k);
+  }
+  // The list Monitor hides removed accounts by (and shows under "Removed accounts").
+  if ("removed" in patch) {
+    const list = (await getJSON(kv, "removed-users", [])).filter((r) => r.userId !== userId);
+    if (patch.removed) list.unshift({ userId, email: String(patch.email || ""), at: new Date().toISOString() });
+    await putJSON(kv, "removed-users", list.slice(0, 5000));
+  }
   // Enterprise: how many people the organization pays for (the owner counts as one).
   if ("seats" in patch) grant.seats = Math.max(1, Math.min(10000, Math.trunc(Number(patch.seats)) || 1));
   if (patch.bonus && typeof patch.bonus === "object") {

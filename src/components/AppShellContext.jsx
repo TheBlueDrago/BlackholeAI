@@ -69,7 +69,9 @@ export function AppShellProvider({ children }) {
   const untilRaw = currentUser?.blockedUntil || credits.blockedUntil;
   const blockedUntil = untilRaw ? new Date(untilRaw) : null;
   const isBlocked = !!(blockedUntil && blockedUntil > new Date());
-  const isBanned = currentUser?.banned === true || (credits.blocked === true && !isBlocked);
+  // Hasn't confirmed their email: the server refuses everything, and the app asks for the code.
+  const isUnverified = credits.unverified === true || (currentUser?.is_verified === false && currentUser?.role !== "admin");
+  const isBanned = currentUser?.banned === true || (credits.blocked === true && !isBlocked && !isUnverified);
   // Single source of truth for the effective plan (handles admin, secret, team membership and Pro expiry).
   const effPlan = credits.plan;
   const avatarInitial = (currentUser?.full_name || currentUser?.email || "U").trim().charAt(0).toUpperCase();
@@ -111,7 +113,7 @@ export function AppShellProvider({ children }) {
 
   const value = {
     currentUser, conv, credits, lightMode, toggleLight,
-    isAdmin, isBanned, isBlocked, blockedUntil, effPlan, avatarInitial,
+    isAdmin, isBanned, isBlocked, isUnverified, blockedUntil, effPlan, avatarInitial,
     sidebarOpen, setSidebarOpen,
     navigate, goHome, goCode, goDesigner, goBrowser, goGames, goGameDesigner, goPlans, goMonitor, goPromos, newChat, goBilling, openProfile, closeProfile, goBack,
   };

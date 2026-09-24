@@ -53,6 +53,10 @@ export default function Register() {
         setError("This AI email account has been deleted.");
         return;
       }
+      if (status === "removed") {
+        setError("This email can't be used to sign up for Blackhole AI.");
+        return;
+      }
       if (status === "exists") {
         setError("An account with this email already exists. Try logging in.");
         return;

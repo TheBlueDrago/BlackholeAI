@@ -18,6 +18,9 @@ export default function Monitor({ onBack }) {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [detailUser, setDetailUser] = useState(null);
+  // Accounts an admin removed (banned forever, email blocked): hidden from the lists below.
+  const [removed, setRemoved] = useState([]);
+  const [showRemoved, setShowRemoved] = useState(false);
   // The first page (newest 200) loads right away; searching loads everyone else, 500 at a
   // time, so older accounts can be found too.
   const [allLoaded, setAllLoaded] = useState(false);
@@ -38,15 +41,30 @@ export default function Monitor({ onBack }) {
 
   useEffect(() => {
     load();
+    base44.functions
+      .invoke("admin-grant", { action: "removed" })
+      .then((r) => setRemoved(r.data?.removed || []))
+      .catch(() => {});
   }, []);
 
   const apply = async (id, patch) => {
-    await base44.entities.User.update(id, patch);
-    // The credit system doesn't trust User.plan/banned (users can edit their own row),
-    // so admin grants and bans are also recorded server-side where only admins can write.
+    // The server record first: it's what actually bans (the credit system doesn't trust
+    // User.plan/banned, which people can edit on their own row). If it fails, the error shows
+    // on the card instead of nothing happening.
     await base44.functions.invoke("admin-grant", { grants: [{ userId: id, ...patch }] });
-    setUsers((us) => us.map((u) => (u.id === id ? { ...u, ...patch } : u)));
+    const { email, ...row } = patch;
+    // Mirror it on the User row so it shows everywhere; the server record is enough if this fails.
+    await base44.entities.User.update(id, row).catch((e) => console.warn("Monitor: User row not updated", e));
+    setUsers((us) => us.map((u) => (u.id === id ? { ...u, ...row } : u)));
+    if ("removed" in patch) {
+      setRemoved((list) => [
+        ...(patch.removed ? [{ userId: id, email: email || "", at: new Date().toISOString() }] : []),
+        ...list.filter((r) => r.userId !== id),
+      ]);
+    }
   };
+  const removedIds = new Set(removed.map((r) => r.userId));
+  const visible = users.filter((u) => !removedIds.has(u.id) && u.removed !== true);
 
   const q = query.trim().toLowerCase();
 
@@ -79,13 +97,14 @@ export default function Monitor({ onBack }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searching, allLoaded, loading]);
   const filtered = q
-    ? users.filter(
+    ? visible.filter(
         (u) =>
           `${u.full_name ?? ""}`.toLowerCase().includes(q) ||
           `${u.email ?? ""}`.toLowerCase().includes(q)
       )
     : [];
-  const recent = users.slice(0, 12);
+  const recent = visible.slice(0, 12);
+  const removedUsers = removed.map((r) => users.find((u) => u.id === r.userId) || { id: r.userId, email: r.email });
 
   return (
     <motion.div
@@ -142,6 +161,21 @@ export default function Monitor({ onBack }) {
           {recent.map((u) => (
             <UserCard key={u.id} user={u} onApply={apply} onOpenDetail={setDetailUser} />
           ))}
+        </div>
+      )}
+
+      {!loading && removed.length > 0 && (
+        <div className="w-full max-w-3xl mt-6">
+          <button onClick={() => setShowRemoved((v) => !v)} className="text-slate-400 text-sm hover:text-slate-200">
+            {showRemoved ? "Hide" : "Show"} removed accounts ({removed.length})
+          </button>
+          {showRemoved && (
+            <div className="mt-3 space-y-3">
+              {removedUsers.map((u) => (
+                <UserCard key={u.id} user={{ ...u, removed: true }} onApply={apply} onOpenDetail={setDetailUser} />
+              ))}
+            </div>
+          )}
         </div>
       )}
 

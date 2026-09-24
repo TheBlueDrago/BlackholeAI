@@ -23,6 +23,8 @@ export async function onRequestPost(context) {
     } catch {
       return json({ error: "Invalid request body" }, 400);
     }
+    // Monitor asks which accounts were removed, to hide them.
+    if (body.action === "removed") return json({ removed: (await env.PUBLISHED_HTML.get("removed-users", "json")) || [] });
     const grants = Array.isArray(body.grants) ? body.grants : [];
     const saved = [];
     for (const g of grants) {
@@ -31,8 +33,9 @@ export async function onRequestPost(context) {
       await applyGrant(env.PUBLISHED_HTML, g.userId, g);
       saved.push(g.userId);
       const changed = {};
-      for (const f of ["plan", "planExpiresAt", "banned", "blockedUntil", "seats", "bonus"]) if (f in g) changed[f] = g[f];
-      await logAdmin(env.PUBLISHED_HTML, user, "grant", { userId: g.userId, ...changed }, request);
+      for (const f of ["plan", "planExpiresAt", "banned", "blockedUntil", "seats", "bonus", "removed", "email"]) if (f in g) changed[f] = g[f];
+      const action = "removed" in g ? (g.removed ? "remove-account" : "restore-account") : "grant";
+      await logAdmin(env.PUBLISHED_HTML, user, action,{ userId: g.userId, ...changed }, request);
     }
     return json({ ok: true, saved: saved.length });
   } catch (err) {

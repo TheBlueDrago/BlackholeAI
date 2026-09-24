@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { askConfirm } from "@/lib/dialogs";
-import { Crown, Ban, Clock, ShieldCheck, EyeOff } from "lucide-react";
+import { Crown, Ban, Clock, ShieldCheck, EyeOff, UserX, RotateCcw, MailWarning } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 const UNIT_MS = { days: 86400000, months: 30 * 86400000, years: 365 * 86400000 };
@@ -17,14 +17,25 @@ export default function UserActions({ user, onApply }) {
   const isBanned = user.banned === true;
   const isBlocked = user.blockedUntil && new Date(user.blockedUntil) > new Date();
 
+  const [err, setErr] = useState("");
   const run = async (patch) => {
     setBusy(true);
+    setErr("");
     try {
       await onApply(user.id, patch);
+    } catch (e) {
+      setErr(e?.response?.data?.error || e?.message || "That didn't save. Try again.");
     } finally {
       setBusy(false);
     }
   };
+  // Remove: banned forever, the email can never sign up again, and the account is hidden from
+  // Monitor (listed under "Removed accounts", where Restore undoes it).
+  const removeAccount = async () => {
+    if (!(await askConfirm(`Remove ${who}? They're banned forever, ${user.email ? "this email can't be used to sign up again, " : ""}and the account is hidden from Monitor. You can restore it from "Removed accounts".`, { confirmLabel: "Remove", danger: true }))) return;
+    run({ banned: true, blockedUntil: null, removed: true, email: user.email || "" });
+  };
+  const restoreAccount = () => run({ banned: false, blockedUntil: null, removed: false, email: user.email || "" });
 
   const who = user.email || "this account";
   const applyPlan = async () => {
@@ -38,7 +49,7 @@ export default function UserActions({ user, onApply }) {
   };
 
   const ban = async () => {
-    if (!await askConfirm(`Ban ${who} forever? They can't use Blackhole AI until you unban them.`)) return;
+    if (!(await askConfirm(`Ban ${who} forever? They can't use Blackhole AI until you unban them.`, { confirmLabel: "Ban", danger: true }))) return;
     run({ banned: true, blockedUntil: null });
   };
   const block = () =>
@@ -61,8 +72,30 @@ export default function UserActions({ user, onApply }) {
     }
   };
 
+  if (user.removed) {
+    return (
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs text-red-300">Removed: banned forever{user.email ? ", email blocked from signing up" : ""}.</span>
+        <button
+          onClick={restoreAccount}
+          disabled={busy}
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-700 text-[#fff] text-xs font-medium hover:bg-emerald-600 disabled:opacity-50"
+        >
+          <RotateCcw className="w-3.5 h-3.5" /> Restore
+        </button>
+        {err && <span className="text-xs text-red-300" aria-live="polite">{err}</span>}
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-3">
+      {user.is_verified === false && (
+        <p className="inline-flex items-center gap-1.5 text-xs text-amber-300">
+          <MailWarning className="w-3.5 h-3.5" /> Email not confirmed: they can't use anything until they enter the code we email them.
+        </p>
+      )}
+      {err && <p className="text-xs text-red-300" aria-live="polite">{err}</p>}
       <div className="flex flex-wrap items-center gap-2">
         <select
           aria-label="Plan"
@@ -156,6 +189,13 @@ export default function UserActions({ user, onApply }) {
             <ShieldCheck className="w-3.5 h-3.5" /> Unblock / unban
           </button>
         )}
+        <button
+          onClick={removeAccount}
+          disabled={busy}
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-950 border border-red-700/60 text-red-200 text-xs font-medium hover:bg-red-900 disabled:opacity-50"
+        >
+          <UserX className="w-3.5 h-3.5" /> Remove account
+        </button>
       </div>
       <p className="text-[11px] text-slate-500">
         A ban or block stops them using the AI, publishing, promo codes, referral credits and team invites. Pages they already published stay up until you
