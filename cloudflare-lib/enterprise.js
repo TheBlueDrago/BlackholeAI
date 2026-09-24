@@ -7,6 +7,7 @@
 //
 // status: "new" (waiting for review) → "approved" / "rejected" → "active" (plan on).
 import { PLAN_TOTALS, TIERS } from "./credits.js";
+import { offerFor, DISCOUNT_PCT } from "./offers.js";
 
 const KEY = "enterprise:apps";
 const MAX_APPS = 300;
@@ -61,10 +62,12 @@ export function validateApplication(body) {
 
 // What an admin sees next to an application: the monthly price and the shared pool of credits it gives,
 // plus hints worth a closer look.
-export function quoteFor(seats) {
+// discountPct: the new-member discount, when the application was sent in its 48 hours.
+export function quoteFor(seats, discountPct = 0) {
   const credits = {};
   for (const t of TIERS) credits[t] = PLAN_TOTALS.enterprise[t] * seats;
-  return { seats, pricePerSeat: PRICE_PER_SEAT, monthly: seats * PRICE_PER_SEAT, credits };
+  const perSeat = Math.round(PRICE_PER_SEAT * (100 - discountPct)) / 100;
+  return { seats, pricePerSeat: perSeat, monthly: Math.round(seats * perSeat * 100) / 100, credits, discountPct };
 }
 export function warningsFor(app) {
   const w = [];
@@ -96,6 +99,9 @@ export async function submitApplication(kv, user, app) {
     throw new Error("Your organization is already approved. We'll be in touch by email.");
   }
   const now = new Date().toISOString();
+  // Sent during the account's 48-hour new-member offer: quoted with its discount.
+  const offer = offerFor(user);
+  if (offer && offer.discountActive) app.discountPct = DISCOUNT_PCT;
   const rec = { ...(mine || {}), ...app, id: (mine && mine.id) || crypto.randomUUID(), userId: user.id, accountEmail: String(user.email || ""), status: "new", at: (mine && mine.at) || now, updatedAt: now };
   await saveApps(kv, [rec, ...apps.filter((a) => a.userId !== user.id)]);
   return rec;

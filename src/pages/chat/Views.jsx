@@ -11,6 +11,7 @@ export function PlansView() {
   return (
     <Subscriptions
       onFree={shell.goBack}
+      offer={shell.credits.offer}
       onPro={() => shell.goBilling("pro")}
       onTeam={() => shell.goBilling("team")}
     />

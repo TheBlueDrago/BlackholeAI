@@ -68,6 +68,14 @@ export function useCredits() {
     galaxy5Exhausted: galaxy5Remaining <= 0,
     space5Exhausted: space5Remaining <= 0,
     plan: status?.plan || "free",
+    // Where the plan comes from ("free", "paid", "trial", "grant", "member", "admin"), when it
+    // ends, the new-account offer, and (Enterprise) the seats in the shared pool.
+    planSource: status?.planSource || "free",
+    planEndsAt: status?.planEndsAt || null,
+    offer: status?.offer || null,
+    seats: status?.seats || null,
+    shared: !!status?.shared,
+    tiers: status?.tiers || null,
     team,
     refresh,
     sync,

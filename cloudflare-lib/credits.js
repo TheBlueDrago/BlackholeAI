@@ -22,6 +22,7 @@
 // under their own key prefixes.
 import { base44 } from "./published.js";
 import { teamFor, seatsOf } from "./teams.js";
+import { offerFor, OFFER_TAG } from "./offers.js";
 
 export const TIERS = ["ai", "aiCode", "galaxy5", "space5"];
 export const TIER_OF_MODEL = { automatic: "ai", claude_sonnet_4_6: "aiCode", claude_opus_4_8: "galaxy5", "claude-sonnet-5": "space5" };
@@ -80,14 +81,20 @@ export async function currentUser(request) {
   }
 }
 
+// The best plan the user has paid for, and whether they've already bought something with the
+// one-time new-member discount (checkout tags those purchases, see create-checkout).
 async function paidPlan(request, user) {
   try {
     const rows = await base44(request, "GET", `entities/Base44Purchase?q=${q({ appUserId: user.id })}`);
     let best = "free";
-    for (const p of rows || []) if (p.status === "paid" && RANK[p.productId] > RANK[best]) best = p.productId;
-    return best;
+    let discountUsed = false;
+    for (const p of rows || []) {
+      if (p.status === "paid" && RANK[p.productId] > RANK[best]) best = p.productId;
+      if ((p.status === "paid" || p.status === "canceled") && String(p.productName || "").includes(OFFER_TAG)) discountUsed = true;
+    }
+    return { plan: best, discountUsed };
   } catch {
-    return "free";
+    return { plan: "free", discountUsed: false };
   }
 }
 
@@ -125,16 +132,29 @@ async function syncBonus(kv, request, user, grant) {
   return b;
 }
 
-// The user's own plan, before team membership: admin role, an admin grant, or a payment.
-export async function basePlanOf(kv, request, user, grant) {
+// The user's own plan, before team membership: admin role, an admin grant, a payment, or
+// the new-account free week of Pro (offers.js). Pass `details` to learn where it came from.
+export async function basePlanOf(kv, request, user, grant, details) {
   if (grant === undefined) grant = await getJSON(kv, `grant:${user.id}`, null);
   let plan = "free";
-  const consider = (p) => {
-    if (p && RANK[p] > RANK[plan]) plan = p;
+  let source = "free";
+  let endsAt = null;
+  const consider = (p, from, until = null) => {
+    if (p && RANK[p] > RANK[plan]) {
+      plan = p;
+      source = from;
+      endsAt = until;
+    }
   };
-  if (user.role === "admin") consider("admin");
-  if (grant && grant.plan && !(grant.planExpiresAt && new Date(grant.planExpiresAt) < new Date())) consider(grant.plan);
-  consider(await paidPlan(request, user));
+  if (user.role === "admin") consider("admin", "admin");
+  if (grant && grant.plan && !(grant.planExpiresAt && new Date(grant.planExpiresAt) < new Date())) consider(grant.plan, "grant", grant.planExpiresAt || null);
+  const paid = await paidPlan(request, user);
+  consider(paid.plan, "paid");
+  const offer = offerFor(user);
+  if (offer && offer.trialActive) consider("pro", "trial", offer.trialEndsAt);
+  // The discount can be used once.
+  if (offer) offer.discountAvailable = offer.discountActive && !paid.discountUsed;
+  if (details) Object.assign(details, { source, endsAt, offer });
   return plan;
 }
 
@@ -144,10 +164,15 @@ export async function basePlanOf(kv, request, user, grant) {
 // eslint-disable-next-line no-unused-vars
 export async function entitlement(kv, request, user, { other = false } = {}) {
   const grant = await getJSON(kv, `grant:${user.id}`, null);
-  const [base, bonus] = await Promise.all([basePlanOf(kv, request, user, grant), syncBonus(kv, request, user, grant)]);
+  const details = {};
+  const [base, bonus] = await Promise.all([basePlanOf(kv, request, user, grant, details), syncBonus(kv, request, user, grant)]);
   const team = await teamFor(kv, user, base);
   let plan = base;
-  if (team && RANK[team.plan] > RANK[plan]) plan = team.plan;
+  if (team && RANK[team.plan] > RANK[plan]) {
+    plan = team.plan;
+    details.source = "member";
+    details.endsAt = null;
+  }
   const now = new Date();
   const blocked =
     user.banned === true ||
@@ -163,6 +188,11 @@ export async function entitlement(kv, request, user, { other = false } = {}) {
     seats: orgId ? await seatsOf(kv, orgId) : null,
     bonus,
     blocked,
+    // Where the plan comes from ("free", "paid", "trial", "grant", "member", "admin"), when it
+    // ends if it does, and the new-account offer (for the Subscriptions screen).
+    planSource: details.source,
+    planEndsAt: details.endsAt,
+    offer: details.offer || null,
   };
 }
 
@@ -182,7 +212,16 @@ export async function creditStatus(kv, ent) {
     // Same display rule the app always used: bonus credits add to the total.
     tiers[t] = { total: totals[t] + bonus, used, remaining: Math.max(0, totals[t] - used) + bonus };
   }
-  return { plan: ent.plan, month, blocked: ent.blocked, tiers, ...(ent.orgId ? { seats: ent.seats, shared: true } : {}) };
+  return {
+    plan: ent.plan,
+    month,
+    blocked: ent.blocked,
+    tiers,
+    planSource: ent.planSource || "free",
+    planEndsAt: ent.planEndsAt || null,
+    offer: ent.offer || null,
+    ...(ent.orgId ? { seats: ent.seats, shared: true } : {}),
+  };
 }
 
 // Takes whole credits from the bonus balance first, then the monthly allowance (or the

@@ -39,14 +39,24 @@ function FreeCard({ onFree }) {
   );
 }
 
-function Plan2Card({ onPro }) {
+// A price chip, with the new-member discount when it applies ("$1/mo" -> "$1 $0.70/mo").
+function PriceTag({ amount, pct }) {
+  if (!pct) return <>${amount}/mo</>;
+  return (
+    <>
+      <s className="opacity-60 mr-1">${amount}</s>${(Math.round(amount * (100 - pct)) / 100).toFixed(2)}/mo
+    </>
+  );
+}
+
+function Plan2Card({ onPro, pct }) {
   const features = ["4 AI's (incl. Galaxy and Space in Website Designer)", "50 Blackhole Code credits", "100 Blackhole AI credits", "50 Galaxy credits", "50 Space credits", "Push to GitHub (no 2-way sync)", "Download a ZIP of your website or game in the designers"];
   return (
     <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-emerald-500/60 rounded-3xl p-6 shadow-2xl shadow-emerald-500/10 flex flex-col">
       <div className="flex items-center justify-between">
         <h3 className="text-xl font-bold text-white">Pro</h3>
         <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-          $1/mo
+          <PriceTag amount={1} pct={pct} />
         </span>
       </div>
       <div className="h-px bg-slate-700/60 my-4" />
@@ -74,7 +84,7 @@ function Plan2Card({ onPro }) {
   );
 }
 
-function TeamCard({ onTeam }) {
+function TeamCard({ onTeam, pct }) {
   const features = [
     "4 AI's (incl. Galaxy and Space in Website Designer)",
     "100 Blackhole Code credits",
@@ -90,7 +100,7 @@ function TeamCard({ onTeam }) {
       <div className="flex items-center justify-between">
         <h3 className="text-xl font-bold text-white">Team</h3>
         <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/40">
-          $5/mo
+          <PriceTag amount={5} pct={pct} />
         </span>
       </div>
       <div className="h-px bg-slate-700/60 my-4" />
@@ -156,7 +166,9 @@ function EnterpriseCard({ onEnterprise }) {
   );
 }
 
-export default function Subscriptions({ onFree, onPro, onTeam }) {
+// offer: the signed-in user's new-member offer (from the credit status), if any.
+export default function Subscriptions({ onFree, onPro, onTeam, offer }) {
+  const pct = offer?.discountAvailable ? offer.discountPct : 0;
   const navigate = useNavigate();
   const [promoInput, setPromoInput] = useState("");
   const [promoBusy, setPromoBusy] = useState(false);
@@ -193,11 +205,16 @@ export default function Subscriptions({ onFree, onPro, onTeam }) {
         <span className="bh-wordmark bg-gradient-to-r from-white via-indigo-200 to-fuchsia-200 bg-clip-text text-transparent">Subscriptions</span>
       </h1>
       <p className="text-slate-400 mt-3 text-center">Choose the plan that fits you</p>
+      {pct > 0 && (
+        <p className="mt-4 px-4 py-2 rounded-full bg-amber-500/15 border border-amber-400/40 text-amber-100 text-sm text-center">
+          New-member offer: {pct}% off any plan, and you keep that price as long as you stay subscribed.
+        </p>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mt-10 max-w-7xl w-full">
         <FreeCard onFree={onFree} />
-        <Plan2Card onPro={onPro} />
-        <TeamCard onTeam={onTeam} />
+        <Plan2Card onPro={onPro} pct={pct} />
+        <TeamCard onTeam={onTeam} pct={pct} />
         <EnterpriseCard onEnterprise={() => navigate("/enterprise")} />
       </div>
 

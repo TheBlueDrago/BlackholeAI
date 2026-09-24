@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Loader2, ShieldCheck, Users } from "lucide-react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
@@ -12,10 +12,22 @@ export default function Billing() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [agreed, setAgreed] = useState(false);
+  // The new-member discount, if this account has it right now (checkout applies it itself).
+  const [pct, setPct] = useState(0);
+  useEffect(() => {
+    base44.functions
+      .invoke("credits")
+      .then((r) => {
+        const o = r.data?.offer;
+        setPct(o?.discountAvailable ? o.discountPct : 0);
+      })
+      .catch(() => {});
+  }, []);
 
   const PLANS = {
     team: {
       name: "Team Plan",
+      amount: 5,
       price: "$5 / month",
       gradient: "from-sky-500 to-indigo-500",
       glow: "bg-sky-600/15",
@@ -25,6 +37,7 @@ export default function Billing() {
     },
     pro: {
       name: "Pro Plan",
+      amount: 1,
       price: "$1 / month",
       gradient: "from-emerald-500 to-teal-500",
       glow: "bg-emerald-600/15",
@@ -83,7 +96,15 @@ export default function Billing() {
           </div>
           <div>
             <h3 className="text-lg font-semibold text-white">{plan.name}</h3>
-            <p className="text-slate-400 text-sm">{plan.price}</p>
+            <p className="text-slate-400 text-sm">
+              {pct ? (
+                <>
+                  <s className="opacity-60">{plan.price}</s> ${(Math.round(plan.amount * (100 - pct)) / 100).toFixed(2)} / month · {pct}% off, yours for as long as you stay subscribed
+                </>
+              ) : (
+                plan.price
+              )}
+            </p>
           </div>
         </div>
 
@@ -117,7 +138,7 @@ export default function Billing() {
           disabled={loading || !agreed}
           className={`mt-5 w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-br ${plan.gradient} text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed`}
         >
-          {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : plan.button}
+          {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : pct ? `Subscribe — $${(Math.round(plan.amount * (100 - pct)) / 100).toFixed(2)}/mo` : plan.button}
         </button>
         <p className="mt-3 text-center text-xs text-slate-500">
           Secure checkout via Base44 Payments ·{" "}

@@ -14,7 +14,7 @@ import {
 } from "../../../../../cloudflare-lib/enterprise.js";
 
 const forAdmin = (apps) =>
-  apps.map((a) => ({ ...a, entityLabel: ENTITY_TYPES[a.entityType] || a.entityType, quote: quoteFor(a.seats), warnings: warningsFor(a) }));
+  apps.map((a) => ({ ...a, entityLabel: ENTITY_TYPES[a.entityType] || a.entityType, quote: quoteFor(a.seats, a.discountPct || 0), warnings: warningsFor(a) }));
 
 export async function onRequestPost(context) {
   const { request, env } = context;

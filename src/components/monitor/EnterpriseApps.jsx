@@ -86,7 +86,10 @@ export default function EnterpriseApps() {
               {a.useCase && <p className="mt-1 text-xs text-slate-400">“{a.useCase}”</p>}
               <div className="mt-3 rounded-lg bg-slate-900/60 border border-slate-700/50 p-3 grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
                 <span className="text-slate-400">Seats <b className="block text-white text-base">{a.seats}</b></span>
-                <span className="text-slate-400">Quote <b className="block text-white text-base">${q.monthly}/month</b></span>
+                <span className="text-slate-400">
+                  Quote <b className="block text-white text-base">${q.monthly}/month</b>
+                  {q.discountPct > 0 && <span className="text-emerald-300">new-member {q.discountPct}% off (${q.pricePerSeat}/seat)</span>}
+                </span>
                 <span className="text-slate-400 col-span-2 sm:col-span-1">
                   Shared credits a month
                   <b className="block text-slate-200 font-medium">

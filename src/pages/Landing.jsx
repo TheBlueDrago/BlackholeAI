@@ -80,7 +80,7 @@ const GAMES = [
 ];
 
 const FAQ = [
-  ["Is Blackhole AI free?", "Yes. The Free plan gives you 50 AI credits every month and lets you publish a website and a game. Pro is $1 a month and Team is $5 a month when you want more."],
+  ["Is Blackhole AI free?", "Yes. The Free plan gives you 50 AI credits every month and lets you publish a website and a game, and new accounts get a free week of Pro. Pro is $1 a month and Team is $5 a month when you want more."],
   ["Do I need to know how to code?", "No. You describe what you want in your own words. If you do know code, you can edit it by hand, and on Pro you can download it or push it to GitHub."],
   ["Does it work on my phone?", "Yes. Everything works on phones, tablets and computers, and you can install it like an app from your profile."],
   ["What are credits?", "Credits are what the AI uses up when it works for you. Bigger jobs use more. Your plan gives you a fresh allowance every month."],
@@ -197,7 +197,7 @@ export default function Landing() {
               See how it works <ChevronDown className="w-4 h-4" />
             </a>
           </div>
-          <p className="mt-4 text-xs text-slate-500">No credit card needed · Works on phones and computers</p>
+          <p className="mt-4 text-xs text-slate-500">New accounts get a free week of Pro · No credit card needed</p>
         </motion.div>
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }}>
           <HeroCollage />

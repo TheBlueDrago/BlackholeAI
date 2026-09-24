@@ -113,10 +113,33 @@ Deno.serve(async (req: Request) => {
     if (!product) {
       return new Response(JSON.stringify({ error: "Unknown product" }), { status: 400 });
     }
-    const productName = product.name;
-    const price = product.price;
+    // New-account offer (numbers kept in step with cloudflare-lib/offers.js): accounts created
+    // from OFFER_START get 30% off any plan in the 48 hours after their free week of Pro, and
+    // keep that price for as long as they stay subscribed. It can be used once: after any
+    // purchase at the lower price (still paid or since canceled), plans are full price again,
+    // even inside the 48 hours.
+    const OFFER_START = Date.parse("2026-09-24T00:00:00Z");
+    const TRIAL_MS = 7 * 86400000;
+    const DISCOUNT_MS = 48 * 3600000;
+    const DISCOUNT_PCT = 30;
+    const OFFER_TAG = "new member 30% off";
+    let discountPct = 0;
+    if (appUser?.id && appUser.created_date) {
+      const raw = String(appUser.created_date);
+      const created = Date.parse(/Z|[+-]\d\d:?\d\d$/.test(raw) ? raw : raw + "Z");
+      const now = Date.now();
+      if (created >= OFFER_START && now >= created + TRIAL_MS && now < created + TRIAL_MS + DISCOUNT_MS) {
+        const past = await base44.asServiceRole.entities.Base44Purchase.filter({ appUserId: appUser.id });
+        const used = (past || []).some((p: any) => (p.status === "paid" || p.status === "canceled") && String(p.productName || "").includes(OFFER_TAG));
+        if (!used) discountPct = DISCOUNT_PCT;
+      }
+    }
+    const productName = discountPct ? `${product.name} (${OFFER_TAG})` : product.name;
+    const price = discountPct ? (Math.round(parseFloat(product.price) * (100 - discountPct)) / 100).toFixed(2) : product.price;
     const currency = product.currency;
-    const subscriptionInfo = product.subscriptionInfo;
+    const subscriptionInfo = discountPct
+      ? { ...product.subscriptionInfo, title: `${product.subscriptionInfo.title} (${OFFER_TAG})` }
+      : product.subscriptionInfo;
     // Where Wix returns the buyer. Both MUST be real, PUBLICLY reachable routes.
     const thankYouPath = "/ThankYou";
     const postFlowPath = "/plans";
