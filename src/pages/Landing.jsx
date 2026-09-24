@@ -9,6 +9,9 @@ import PricingCards from "@/components/landing/PricingCards";
 import { HeroCollage, ChatShot, SiteShot, GameShot, ShopShot, TeamShot, SafetyShot, EnterpriseShot } from "@/components/landing/ProductShots";
 import { CONTACT_EMAIL, CONTACT_PHONE, CONTACT_PHONE_LINK } from "@/lib/company";
 import { siteUrl } from "@/lib/blackholeDomain";
+import { SITE_TEMPLATES } from "@/lib/siteTemplates";
+
+const HOME_TEMPLATES = ["business", "event", "restaurant", "resume"].map((id) => SITE_TEMPLATES.find((t) => t.id === id)).filter(Boolean);
 
 const FACTS = [
   { icon: Sparkles, title: "No coding", text: "Just describe it" },
@@ -273,6 +276,32 @@ export default function Landing() {
                 <span className="block text-sm text-slate-400">{g.text}</span>
               </span>
               <Play className="w-5 h-5 text-slate-500 group-hover:text-white shrink-0" />
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Templates: each opens a working preview on the Templates page */}
+      <section className="mt-20">
+        <div className="flex items-end justify-between gap-3">
+          <div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white">Start from a template</h2>
+            <p className="mt-2 text-slate-400">Try one right now, then make it yours by chatting with the AI.</p>
+          </div>
+          <Link to="/templates" className="shrink-0 text-sm text-indigo-300 hover:text-indigo-200">All templates</Link>
+        </div>
+        <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+          {HOME_TEMPLATES.map((t) => (
+            <Link
+              key={t.id}
+              to={`/templates?preview=${t.id}`}
+              className="rounded-2xl bg-slate-900/60 border border-slate-700/50 p-2.5 hover:border-indigo-500/50 transition-colors"
+            >
+              <div className="relative aspect-[16/10] rounded-xl overflow-hidden bg-slate-800">
+                <SiteThumb html={t.html} />
+              </div>
+              <p className="mt-2.5 px-1 text-sm font-medium text-white truncate">{t.title}</p>
+              <p className="px-1 text-xs text-slate-400 truncate">{t.blurb}</p>
             </Link>
           ))}
         </div>
