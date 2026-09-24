@@ -86,6 +86,7 @@ export function Terms() {
         <li>You keep ownership of what you create. By publishing a site or game you let us host, show and copy it as needed to run Blackhole AI.</li>
         <li>Published sites and games are public: anyone with the address can see them.</li>
         <li>If you sell things on your site, you are the seller and are responsible for delivering what you sell, for refunds to your buyers and for following the law. Blackhole AI keeps a platform fee from each sale, as shown when you set up selling.</li>
+        <li>Payouts for your sales are sent after a waiting period, so that card disputes can come in first, and a payout can be held while we check a sale that looks like fraud (for example, buying from your own site). A sale that turns out to be fraudulent or is charged back isn't paid out.</li>
       </ul>
 
       <h2>Not allowed</h2>
