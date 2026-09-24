@@ -37,7 +37,7 @@ export default function UserDetail({ user, onClose }) {
             <h3 className="text-white font-semibold truncate">{user.full_name || "Unnamed"}</h3>
             <p className="text-slate-400 text-sm truncate">{user.email}</p>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:bg-white/10">
+          <button onClick={onClose} aria-label="Close" className="p-1.5 rounded-lg text-slate-400 hover:bg-white/10">
             <X className="w-4 h-4" />
           </button>
         </div>
