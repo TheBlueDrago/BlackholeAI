@@ -16,7 +16,9 @@ async function legacyDraft(request, user) {
     const d = (Array.isArray(rows) ? rows : []).find((r) => r.created_by_id === user.id);
     if (!d) return null;
     let html = d.htmlUrl || "";
-    if (/^https?:\/\//.test(html)) html = await fetch(html).then((r) => r.text());
+    // Only https addresses (the record can be written by its owner), and never a huge file.
+    if (/^https:\/\//.test(html)) html = await fetch(html).then((r) => r.text()).then((t) => (t.length > MAX_BYTES ? "" : t));
+    else if (/^[a-z]+:\/\//i.test(html)) html = "";
     return { gameName: d.gameName, title: d.title || "", genre: d.genre || "io", html, userTurns: d.userTurns || [], projectId: d.projectId || "" };
   } catch {
     return null;
@@ -41,13 +43,14 @@ export async function onRequestPost(context) {
     }
 
     if (action === "save") {
+      // Every field is capped, so one account can't fill the shared storage.
       const draft = {
-        gameName: String(body.gameName || "my-game"),
-        title: String(body.title || ""),
-        genre: String(body.genre || "io"),
+        gameName: String(body.gameName || "my-game").slice(0, 100),
+        title: String(body.title || "").slice(0, 200),
+        genre: String(body.genre || "io").slice(0, 30),
         html: String(body.html || ""),
-        userTurns: Array.isArray(body.userTurns) ? body.userTurns.map(String).slice(-50) : [],
-        projectId: String(body.projectId || ""),
+        userTurns: Array.isArray(body.userTurns) ? body.userTurns.slice(-50).map((t) => String(t).slice(0, 4000)) : [],
+        projectId: String(body.projectId || "").slice(0, 100),
       };
       if (draft.html.length > MAX_BYTES) return json({ error: "Draft is too large to autosave." }, 413);
       // Skip identical saves: KV's free tier allows 1,000 writes a day.
