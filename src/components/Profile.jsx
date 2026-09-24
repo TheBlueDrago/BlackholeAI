@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Download, Upload, LogOut, Mail, Shield, KeyRound, ArrowLeft, Loader2, Crown, Settings, Users, Lock, ShieldCheck, Ticket, Trash2, Gamepad2, Pencil, Eye, EyeOff, Globe, Gift, Smartphone, Building2, CreditCard } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import TeamMembership from "@/components/TeamMembership";
+import SecurityPanel from "@/components/profile/SecurityPanel";
 import PublishedSites from "@/components/profile/PublishedSites";
 import ReferFriends from "@/components/profile/ReferFriends";
 import SubscriptionPanel from "@/components/profile/SubscriptionPanel";
@@ -289,6 +290,8 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                   Delete account
                 </button>
               </div>
+            ) : view === "security" ? (
+              <SecurityPanel email={user?.email} onBack={() => setView("settings")} onChangePassword={startReset} busy={pwBusy} />
             ) : view === "subscription" ? (
               <SubscriptionPanel onBack={() => setView("settings")} onManagePeople={() => setView("membership")} />
             ) : view === "refer" ? (
@@ -389,6 +392,16 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                   <span className="flex items-center gap-2 font-medium">
                     <Globe className="w-4 h-4 text-sky-300" />
                     Published Websites
+                  </span>
+                  <ArrowLeft className="w-4 h-4 rotate-180 text-slate-500" />
+                </button>
+                <button
+                  onClick={() => setView("security")}
+                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 transition-colors"
+                >
+                  <span className="flex items-center gap-2 font-medium">
+                    <ShieldCheck className="w-4 h-4 text-emerald-300" />
+                    Security
                   </span>
                   <ArrowLeft className="w-4 h-4 rotate-180 text-slate-500" />
                 </button>
