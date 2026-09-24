@@ -76,6 +76,19 @@ const PARENTS = [
   "Chats are saved on the device; our servers keep only the start of the last few questions, to spot misuse. You can download a copy of an account's data, or delete the account and everything in it, from Settings.",
 ];
 
+// Safety work people can see, newest first. Only list what's live.
+const RECENT = {
+  month: "September 2026",
+  items: [
+    "Sign-in is protected against password guessing: after too many wrong tries, that account pauses for a few minutes.",
+    "New passwords that are easy to guess can't be used, and you can show your password while typing it.",
+    "Pages asking for a crypto wallet's secret recovery phrase can't be published.",
+    "The Blackhole Browser leaves out adult, gambling and piracy sites.",
+    "You can report a page for bullying someone or sharing their private information.",
+    "You can download a copy of your account's data from Settings.",
+  ],
+};
+
 const TIPS = [
   "We will never ask for your password, by email, phone or chat.",
   "Only type your password on blackhole-ai-tech.com. Check the address first.",
@@ -144,6 +157,19 @@ export default function Safety() {
           {TIPS.map((t) => (
             <li key={t} className="flex items-start gap-2 text-slate-200 text-sm">
               <Check className="w-4 h-4 mt-0.5 shrink-0 text-amber-300" />
+              <span>{t}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="mt-12">
+        <h2 className="text-xl font-semibold text-white">Recently added</h2>
+        <p className="mt-1 text-sm text-slate-400">{RECENT.month}</p>
+        <ul className="mt-4 grid sm:grid-cols-2 gap-3">
+          {RECENT.items.map((t) => (
+            <li key={t} className="flex items-start gap-2 text-slate-300 text-sm">
+              <Check className="w-4 h-4 mt-0.5 shrink-0 text-emerald-400" />
               <span>{t}</span>
             </li>
           ))}
