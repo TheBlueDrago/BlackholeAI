@@ -353,7 +353,7 @@ export default function TeamMembership({ onBack }) {
           <span className="text-slate-200">{planName}</span>
         </div>
         {isEnterprise ? (
-          <p className="text-xs text-slate-400">Everyone gets 100 Blackhole AI, 75 Code, 50 Galaxy and 25 Space credits a month.</p>
+          <p className="text-xs text-slate-400">Everyone shares one pool of credits: each seat adds 100 Blackhole AI, 75 Code, 50 Galaxy and 25 Space a month.</p>
         ) : (
           <div className="flex justify-between">
             <span className="text-slate-400">Shared Blackhole Code credits</span>

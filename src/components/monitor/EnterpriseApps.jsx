@@ -88,7 +88,7 @@ export default function EnterpriseApps() {
                 <span className="text-slate-400">Seats <b className="block text-white text-base">{a.seats}</b></span>
                 <span className="text-slate-400">Quote <b className="block text-white text-base">${q.monthly}/month</b></span>
                 <span className="text-slate-400 col-span-2 sm:col-span-1">
-                  Credits a month
+                  Shared credits a month
                   <b className="block text-slate-200 font-medium">
                     {q.credits?.ai} AI · {q.credits?.aiCode} Code · {q.credits?.galaxy5} Galaxy · {q.credits?.space5} Space
                   </b>

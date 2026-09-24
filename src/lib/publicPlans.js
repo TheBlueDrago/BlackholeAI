@@ -48,7 +48,7 @@ export const PUBLIC_PLANS = [
     blurb: "For registered businesses and organizations of any size.",
     features: [
       "As many seats as you need",
-      "Every seat: 100 AI, 75 Code, 50 Galaxy and 25 Space credits a month",
+      "One shared pool: each seat adds 100 AI, 75 Code, 50 Galaxy and 25 Space credits a month",
       "Add and remove people yourself",
       "10 published websites, 10 new games a month",
       "Price based on your number of seats",

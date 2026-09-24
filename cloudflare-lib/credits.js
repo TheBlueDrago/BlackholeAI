@@ -15,19 +15,21 @@
 //   (User.plan / User.bonus / User.banned are NOT trusted — a user can set their own.)
 // - Promo bonus credits: PromoRedemption rows (service-only writes), folded into
 //   the server-owned "bonus:<userId>" balance once each.
-// - Monthly usage: "usage:<userId>:<YYYY-MM>" and, for a team's shared Blackhole Code
-//   pool, "teamusage:<teamId>:<YYYY-MM>".
+// - Monthly usage: "usage:<userId>:<YYYY-MM>"; for a team's shared Blackhole Code pool,
+//   "teamusage:<teamId>:<YYYY-MM>"; and for an Enterprise organization, which shares all of
+//   its credits, "orgusage:<ownerId>:<YYYY-MM>" ({ ai, aiCode, galaxy5, space5 }).
 // Stored in the PUBLISHED_HTML KV namespace (already bound to this Pages project)
 // under their own key prefixes.
 import { base44 } from "./published.js";
-import { teamFor } from "./teams.js";
+import { teamFor, seatsOf } from "./teams.js";
 
 export const TIERS = ["ai", "aiCode", "galaxy5", "space5"];
 export const TIER_OF_MODEL = { automatic: "ai", claude_sonnet_4_6: "aiCode", claude_opus_4_8: "galaxy5", "claude-sonnet-5": "space5" };
 export const TIER_NAMES = { ai: "Blackhole AI", aiCode: "Blackhole Code", galaxy5: "Galaxy", space5: "Space" };
 
 // Monthly allowance per plan (same numbers the app has always shown). Enterprise is per
-// seat: every person in the organization gets these, and the org pays $12 a seat a month.
+// seat: each seat adds these to one pool the whole organization shares, and the org pays
+// $12 a seat a month.
 // Secret can no longer be bought; accounts that already have it keep it.
 export const PLAN_TOTALS = {
   free: { ai: 50, aiCode: 0, galaxy5: 0, space5: 0 },
@@ -151,13 +153,27 @@ export async function entitlement(kv, request, user, { other = false } = {}) {
     user.banned === true ||
     !!(grant && (grant.banned || (grant.blockedUntil && new Date(grant.blockedUntil) > now))) ||
     !!(user.blockedUntil && new Date(user.blockedUntil) > now);
-  return { user, plan, teamId: team && (plan === "team" || plan === "secret") ? team.teamId : null, bonus, blocked };
+  // Enterprise: everyone in the organization draws every kind of credit from one pool.
+  const orgId = team && plan === "enterprise" ? team.teamId : null;
+  return {
+    user,
+    plan,
+    teamId: team && (plan === "team" || plan === "secret") ? team.teamId : null,
+    orgId,
+    seats: orgId ? await seatsOf(kv, orgId) : null,
+    bonus,
+    blocked,
+  };
 }
 
 export async function creditStatus(kv, ent) {
   const month = monthKey();
-  const totals = PLAN_TOTALS[ent.plan] || PLAN_TOTALS.free;
-  const usage = await getJSON(kv, `usage:${ent.user.id}:${month}`, {});
+  const base = PLAN_TOTALS[ent.plan] || PLAN_TOTALS.free;
+  const totals = {};
+  for (const t of TIERS) totals[t] = ent.orgId ? base[t] * ent.seats : base[t];
+  const usage = ent.orgId
+    ? await getJSON(kv, `orgusage:${ent.orgId}:${month}`, {})
+    : await getJSON(kv, `usage:${ent.user.id}:${month}`, {});
   const teamUsed = ent.teamId ? Number(await kv.get(`teamusage:${ent.teamId}:${month}`).catch(() => 0)) || 0 : null;
   const tiers = {};
   for (const t of TIERS) {
@@ -166,11 +182,12 @@ export async function creditStatus(kv, ent) {
     // Same display rule the app always used: bonus credits add to the total.
     tiers[t] = { total: totals[t] + bonus, used, remaining: Math.max(0, totals[t] - used) + bonus };
   }
-  return { plan: ent.plan, month, blocked: ent.blocked, tiers };
+  return { plan: ent.plan, month, blocked: ent.blocked, tiers, ...(ent.orgId ? { seats: ent.seats, shared: true } : {}) };
 }
 
-// Takes whole credits from the bonus balance first, then the monthly allowance
-// (or the team's shared pool for Blackhole Code on a team plan).
+// Takes whole credits from the bonus balance first, then the monthly allowance (or the
+// team's shared pool for Blackhole Code on a team plan, or the organization's shared pool
+// for everything on Enterprise).
 // Monitor's per-user activity (questions asked, time on the AI, latest questions) rides
 // along in the same monthly usage record, so logging it costs no extra KV write when
 // the charge already writes that record. (Base44's AiActivity table was written by a
@@ -197,6 +214,13 @@ export async function charge(kv, ent, tier, amount, prompt) {
     ent.bonus[tier] -= fromBonus;
     left -= fromBonus;
     await putJSON(kv, `bonus:${ent.user.id}`, ent.bonus);
+  }
+  if (left > 0 && ent.orgId) {
+    const key = `orgusage:${ent.orgId}:${month}`;
+    const pool = await getJSON(kv, key, {});
+    pool[tier] = (Number(pool[tier]) || 0) + left;
+    await putJSON(kv, key, pool);
+    left = 0;
   }
   if (left > 0 && tier === "aiCode" && ent.teamId) {
     const key = `teamusage:${ent.teamId}:${month}`;

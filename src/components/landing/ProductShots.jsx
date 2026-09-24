@@ -192,7 +192,7 @@ export function EnterpriseShot({ className = "" }) {
           <span className="flex items-center gap-1.5 text-sm font-semibold text-white">
             Northside Dental LLC <BadgeCheck className="w-4 h-4 text-sky-400" />
           </span>
-          <span className="block text-xs text-slate-500">Verified organization · 24 seats</span>
+          <span className="block text-xs text-slate-500">Verified organization · 24 seats · shared credits</span>
         </span>
       </div>
       <div className="mt-4 flex -space-x-2">

@@ -60,8 +60,8 @@ const FEATURES = [
   {
     eyebrow: "Enterprise",
     title: "Bring your whole organization.",
-    text: "For registered businesses and organizations: a seat for everyone, with credits for each person every month. The price depends on how many people you have.",
-    bullets: ["Verified organizations only (LLC, corporation, nonprofit…)", "Every seat: 100 AI, 75 Code, 50 Galaxy and 25 Space credits a month", "Add and remove people yourself"],
+    text: "For registered businesses and organizations: a seat for everyone and one shared pool of credits that grows with every seat. The price depends on how many people you have.",
+    bullets: ["Verified organizations only (LLC, corporation, nonprofit…)", "Each seat adds 100 AI, 75 Code, 50 Galaxy and 25 Space credits a month to the shared pool", "Add and remove people yourself"],
     cta: { to: "/enterprise", label: "Apply for Enterprise" },
     Picture: EnterpriseShot,
   },

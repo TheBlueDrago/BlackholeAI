@@ -123,7 +123,7 @@ function EnterpriseCard({ onEnterprise }) {
   const features = [
     "For registered organizations (LLC, corporation, nonprofit…)",
     "As many seats as you need",
-    "Every seat gets 100 Blackhole AI, 75 Code, 50 Galaxy and 25 Space credits a month",
+    "Everyone shares one pool of credits: each seat adds 100 Blackhole AI, 75 Code, 50 Galaxy and 25 Space a month",
     "All 4 AI's, ZIP download and GitHub push",
     "10 published websites and 10 new games a month",
   ];

@@ -110,6 +110,22 @@ const stale = await T.readTeam(kv, "own");
 stale.ownerPlan = "free";
 await T.saveTeam(kv, stale);
 assert((await C.entitlement(kv, req, member)).plan === "free", "no team access once the owner's plan is gone");
+assert((await T.myTeam(kv, owner, "team", 0)).cap === 2, "Team: the owner can add 2 people (3 in total)");
+
+// Enterprise: seats set by an admin; every kind of credit comes from one shared pool
+fresh();
+const boss = { id: "boss", email: "boss@acme.com" };
+const staff = { id: "staff", email: "staff@acme.com" };
+await C.applyGrant(kv, "boss", { plan: "enterprise", seats: 3 });
+await T.invite(kv, boss, "enterprise", ["staff@acme.com", "b@acme.com", "c@acme.com"]);
+assert((await T.readTeam(kv, "boss")).memberEmails.length === 2, "Enterprise: people added up to the seats (owner takes one)");
+s = await status(boss);
+assert(s.plan === "enterprise" && s.shared && s.seats === 3 && s.tiers.ai.total === 300 && s.tiers.aiCode.total === 225 && s.tiers.galaxy5.total === 150 && s.tiers.space5.total === 75, "Enterprise pool: 100/75/50/25 per seat");
+await C.charge(kv, await C.entitlement(kv, req, staff), "ai", 40);
+await C.charge(kv, await C.entitlement(kv, req, boss), "space5", 5);
+s = await status(boss);
+const s2 = await status(staff);
+assert(s.tiers.ai.used === 40 && s.tiers.ai.remaining === 260 && s2.tiers.ai.remaining === 260 && s2.tiers.space5.used === 5, "Enterprise: everyone draws from and sees the same pool");
 
 // Activity for Monitor rides along in the usage record
 fresh();

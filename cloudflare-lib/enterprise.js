@@ -59,7 +59,7 @@ export function validateApplication(body) {
   return { app };
 }
 
-// What an admin sees next to an application: the monthly price and the credits it gives,
+// What an admin sees next to an application: the monthly price and the shared pool of credits it gives,
 // plus hints worth a closer look.
 export function quoteFor(seats) {
   const credits = {};
