@@ -257,6 +257,12 @@ export async function onRequestPost(context) {
 
     let left = Infinity;
     if (!internal) {
+      // Replies started at the same moment all see the same balance and their charges can
+      // overwrite each other (KV has no locks), so a script firing many at once could get
+      // free credits. Nobody types faster than this; it caps what that could ever gain.
+      if (!(await allow(`chat:${user.id}`, 15, 60))) {
+        return json({ error: "You're sending messages very fast. Wait a moment and try again." }, 429);
+      }
       const before = await creditStatus(kv, ent);
       left = before.tiers[tier].remaining;
       if (before.tiers[tier].total <= 0) {
