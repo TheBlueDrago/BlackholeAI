@@ -138,6 +138,10 @@ Deno.serve(async (req: Request) => {
     if (isPack && quantity > 10) {
       return new Response(JSON.stringify({ error: "Invalid quantity" }), { status: 400 });
     }
+    // A plan is one subscription: more than 1 would charge several times for the same plan.
+    if (!isPack && quantity !== 1) {
+      return new Response(JSON.stringify({ error: "Invalid quantity" }), { status: 400 });
+    }
     const product = isPack ? CREDIT_PACKS[productId] : PRODUCTS[productId];
     if (!product) {
       return new Response(JSON.stringify({ error: "Unknown product" }), { status: 400 });
