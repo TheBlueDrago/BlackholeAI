@@ -7,6 +7,7 @@ import Sidebar from "@/components/Sidebar";
 import ThemeToggle from "@/components/ThemeToggle";
 import ChatBox from "@/components/ChatBox";
 import CodePage from "@/components/CodePage";
+import PlanNotice from "@/components/chat/PlanNotice";
 
 export function WorkspaceShell() {
   const shell = useAppShell();
@@ -84,7 +85,10 @@ export function ChatWorkspace() {
   const shell = useAppShell();
   const { conv, credits, effPlan, avatarInitial } = shell;
   return (
-    <ChatBox
+    // Stacked: the chat sits in a row next to the sidebar, and the note goes above the chat.
+    <div className="w-full max-w-3xl flex flex-col items-center">
+      <PlanNotice />
+      <ChatBox
       conversation={conv.activeConversation}
       createConversation={conv.createConversation}
       addMessage={conv.addMessage}
@@ -95,7 +99,8 @@ export function ChatWorkspace() {
       remaining={{ ai: credits.aiRemaining, code: credits.aiCodeRemaining, opus5: credits.galaxy5Remaining, fable: credits.space5Remaining }}
       spend={{ ai: credits.spendAI, code: credits.spendAICode, opus5: credits.spendGalaxy5, fable: credits.spendSpace5 }}
       userInitial={avatarInitial}
-    />
+      />
+    </div>
   );
 }
 
