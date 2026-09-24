@@ -6,12 +6,14 @@
 # - No plugins (<object>/<embed>), and no <base> tag pointing links somewhere else.
 # - Browsers never guess a file's type (a file can't be passed off as a script).
 # - Other websites aren't told which page of the app someone came from.
-# - The app, and anything shown inside it, can't use the camera, microphone, USB devices or
-#   the browser's payment sheet (it doesn't need them; the location stays allowed for previews).
+# - The app, and anything shown inside it, can't use the camera, USB devices or the browser's
+#   payment sheet (it doesn't need them; the location stays allowed for previews). The
+#   microphone is allowed for the app itself only (the talk-instead-of-typing button), not for
+#   previews or pages people make shown inside it.
 /*
   X-Frame-Options: SAMEORIGIN
   Strict-Transport-Security: max-age=31536000
   Content-Security-Policy: frame-ancestors 'self'; object-src 'none'; base-uri 'self'
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(), microphone=(), usb=(), payment=()
+  Permissions-Policy: camera=(), microphone=(self), usb=(), payment=()

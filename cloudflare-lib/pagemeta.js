@@ -25,7 +25,7 @@ export const APP_HEADERS = {
   "content-security-policy": "frame-ancestors 'self'; object-src 'none'; base-uri 'self'",
   "x-content-type-options": "nosniff",
   "referrer-policy": "strict-origin-when-cross-origin",
-  "permissions-policy": "camera=(), microphone=(), usb=(), payment=()",
+  "permissions-policy": "camera=(), microphone=(self), usb=(), payment=()",
 };
 export function withAppHeaders(from) {
   const headers = new Headers(from);
