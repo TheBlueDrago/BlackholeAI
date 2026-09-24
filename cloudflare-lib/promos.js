@@ -171,7 +171,7 @@ export async function redeemPromo(kv, request, user, rawCode) {
   rec.redeemedBy = user.id;
   rec.redeemedAt = new Date().toISOString();
   await savePromos(kv, list);
-  await adjustBonus(kv, request, user, rec.aiModel, rec.credits);
+  await adjustBonus(kv, request, user, rec.aiModel, rec.credits, `promo:${rec.id}`);
   return { code, aiModel: rec.aiModel, credits: rec.credits };
 }
 

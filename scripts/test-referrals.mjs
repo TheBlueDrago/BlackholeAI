@@ -73,3 +73,17 @@ const [refT, newT] = [await bonusAi("ref"), await bonusAi("new1")];
 assert(refT.ai.total === 50 && newT.aiCode.total === 0, "taking a referral back removes both rewards");
 [, b] = await call(referrer, { action: "get" });
 assert(b.referrals[0].revoked === true && !("net" in b.referrals[0]), "referrer sees it as taken back (and no network fingerprint)");
+
+// Claiming the same bonus many times at once still pays it once (adjustBonus "once" keys).
+{
+  const C = await import(R + "cloudflare-lib/credits.js");
+  const u = { id: "race1" };
+  await Promise.all(Array.from({ length: 10 }, () => C.adjustBonus(kv, req, u, "ai", 25, "welcome")));
+  await C.adjustBonus(kv, req, u, "ai", 25, "welcome");
+  const b = JSON.parse(store.get("bonus:race1"));
+  assert(b.ai === 25, "the same one-time grant lands once, even when sent many times at once: " + b.ai);
+  await C.adjustBonus(kv, req, u, "ai", 5, "referral:x");
+  await C.adjustBonus(kv, req, u, "ai", 5);
+  await C.adjustBonus(kv, req, u, "ai", 5);
+  assert(JSON.parse(store.get("bonus:race1")).ai === 40, "different grants and plain admin changes still add up");
+}

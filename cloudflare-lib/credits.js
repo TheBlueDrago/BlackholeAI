@@ -299,11 +299,19 @@ export async function activityOf(kv, userId) {
 }
 
 // Adds (or with a negative delta, removes) bonus credits for one AI. Balances never go
-// below zero. Used by referral rewards and by admins in the Monitor page.
-export async function adjustBonus(kv, request, user, tier, delta) {
+// below zero. Used by referral rewards, promo codes and by admins in the Monitor page.
+// `once` (e.g. "welcome", "referral:<id>") makes it a one-time grant: it's remembered in the
+// balance record itself, so the same grant can't land twice, even from requests sent at the
+// same moment that all saw "not claimed yet" (KV has no locks).
+export async function adjustBonus(kv, request, user, tier, delta, once) {
   if (!TIERS.includes(tier)) throw new Error("Unknown AI");
   const grant = await getJSON(kv, `grant:${user.id}`, null);
   const b = await syncBonus(kv, request, user, grant);
+  if (once) {
+    const key = `once:${once}`;
+    if (b.applied.includes(key)) return b;
+    b.applied.push(key);
+  }
   b[tier] = Math.max(0, (Number(b[tier]) || 0) + Math.trunc(Number(delta) || 0));
   await putJSON(kv, `bonus:${user.id}`, b);
   return b;

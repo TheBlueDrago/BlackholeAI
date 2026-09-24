@@ -113,7 +113,7 @@ export async function claimWelcome(kv, request, user, tier) {
   if (w.reward) throw new Error("You already claimed your welcome bonus.");
   w.reward = { tier, amount: REWARDS[tier], at: new Date().toISOString() };
   await kv.put(`welcome:${user.id}`, JSON.stringify(w));
-  await adjustBonus(kv, request, user, tier, REWARDS[tier]);
+  await adjustBonus(kv, request, user, tier, REWARDS[tier], "welcome");
   return w;
 }
 
@@ -127,7 +127,7 @@ export async function claimReward(kv, request, referrer, referredId, tier) {
   if (r.reward) throw new Error("You already claimed this reward.");
   r.reward = { tier, amount: REWARDS[tier], at: new Date().toISOString() };
   await kv.put(`referrals:${referrer.id}`, JSON.stringify(list));
-  await adjustBonus(kv, request, referrer, tier, REWARDS[tier]);
+  await adjustBonus(kv, request, referrer, tier, REWARDS[tier], `referral:${referredId}`);
   return list;
 }
 
@@ -141,12 +141,12 @@ export async function revokeReferral(kv, request, referrer, referredId) {
   r.revoked = true;
   r.revokedAt = new Date().toISOString();
   await kv.put(`referrals:${referrer.id}`, JSON.stringify(list));
-  if (r.reward) await adjustBonus(kv, request, referrer, r.reward.tier, -r.reward.amount);
+  if (r.reward) await adjustBonus(kv, request, referrer, r.reward.tier, -r.reward.amount, `revoke-referral:${referredId}`);
   const w = await getWelcome(kv, referredId);
   if (w && !w.revoked) {
     w.revoked = true;
     await kv.put(`welcome:${referredId}`, JSON.stringify(w));
-    if (w.reward) await adjustBonus(kv, request, { id: referredId }, w.reward.tier, -w.reward.amount);
+    if (w.reward) await adjustBonus(kv, request, { id: referredId }, w.reward.tier, -w.reward.amount, "revoke-welcome");
   }
   return list;
 }
