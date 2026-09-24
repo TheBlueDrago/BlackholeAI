@@ -229,6 +229,9 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
             onClick={(e) => e.stopPropagation()}
             // Never taller than the screen: on small phones the longer views (Security,
             // Subscriptions) scroll inside the window instead of being cut off.
+            role="dialog"
+            aria-modal="true"
+            aria-label="Account and settings"
             className="w-full max-w-sm max-h-[calc(100dvh-2rem)] bg-slate-900 border border-slate-700/60 rounded-2xl shadow-2xl overflow-y-auto overscroll-contain"
           >
             {pwStep === "sent" ? (

@@ -32,6 +32,9 @@ export default function UserDetail({ user, onClose }) {
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="User details"
         className="w-full max-w-lg max-h-[85vh] overflow-y-auto sidebar-scroll bg-slate-900 border border-slate-700/60 rounded-2xl p-5"
       >
         <div className="flex items-start justify-between gap-3">

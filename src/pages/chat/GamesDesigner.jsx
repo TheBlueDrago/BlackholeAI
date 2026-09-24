@@ -781,6 +781,9 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
               exit={{ scale: 0.95, opacity: 0, y: 10 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
               onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Publish your game"
               className="w-full max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain max-w-md bg-slate-900 border border-slate-700/60 rounded-2xl shadow-2xl p-6"
             >
               <h3 className="text-lg font-semibold text-white">{isRepublish ? "Re-publish your game" : "Publish your game"}</h3>

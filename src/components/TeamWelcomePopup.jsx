@@ -59,6 +59,9 @@ export default function TeamWelcomePopup({ onAddPeople }) {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Welcome to your team"
             className="w-full max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain max-w-sm bg-slate-900 border border-sky-500/40 rounded-2xl p-6 text-center"
           >
             <div className="w-12 h-12 rounded-full bg-sky-500/20 flex items-center justify-center mx-auto mb-4">
