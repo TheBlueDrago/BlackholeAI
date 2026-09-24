@@ -5,6 +5,7 @@
 //   "revoke" -> { referredId }        take a referral back, removing its reward credits
 import { json, base44 } from "../../../../../cloudflare-lib/published.js";
 import { currentUser, entitlement, creditStatus, adjustBonus } from "../../../../../cloudflare-lib/credits.js";
+import { logAdmin } from "../../../../../cloudflare-lib/audit.js";
 import { listReferrals, revokeReferral } from "../../../../../cloudflare-lib/referrals.js";
 
 export async function onRequestPost(context) {
@@ -25,8 +26,10 @@ export async function onRequestPost(context) {
       const delta = Math.trunc(Number(body.delta) || 0);
       if (!delta) return json({ error: "Enter a number of credits." }, 400);
       await adjustBonus(kv, request, target, String(body.tier || ""), delta);
+      await logAdmin(kv, admin, "credits", { userId: target.id, email: target.email || "", tier: String(body.tier || ""), delta });
     } else if (body.action === "revoke") {
       await revokeReferral(kv, request, target, String(body.referredId || ""));
+      await logAdmin(kv, admin, "referral-revoke", { userId: target.id, email: target.email || "", referredId: String(body.referredId || "") });
     }
 
     const ent = await entitlement(kv, request, target, { other: true });

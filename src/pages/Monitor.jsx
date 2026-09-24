@@ -10,6 +10,7 @@ import Messages from "@/components/monitor/Messages";
 import EnterpriseApps from "@/components/monitor/EnterpriseApps";
 import GrowthCard from "@/components/monitor/GrowthCard";
 import PublishedContent from "@/components/monitor/PublishedContent";
+import AdminLog from "@/components/monitor/AdminLog";
 
 export default function Monitor({ onBack }) {
   const [users, setUsers] = useState([]);
@@ -145,6 +146,7 @@ export default function Monitor({ onBack }) {
       {!loading && !q && <EnterpriseApps />}
       {!loading && !q && <Messages />}
       {!loading && !q && <RevenueAnalytics />}
+      {!loading && !q && <AdminLog />}
 
       {detailUser && <UserDetail user={detailUser} onClose={() => setDetailUser(null)} />}
     </motion.div>

@@ -7,6 +7,7 @@
 //   "dismiss" -> clear its reports without hiding it
 import { json, findByName } from "../../../../../cloudflare-lib/published.js";
 import { currentUser } from "../../../../../cloudflare-lib/credits.js";
+import { logAdmin } from "../../../../../cloudflare-lib/audit.js";
 import { KINDS, REASONS, readReports, dismissReports, setBlocked } from "../../../../../cloudflare-lib/reports.js";
 
 export async function onRequestPost(context) {
@@ -30,8 +31,10 @@ export async function onRequestPost(context) {
         if (!(await findByName(request, kind, name)).length) return json({ error: `No ${kind} is called "${name}".` }, 404);
         await setBlocked(kv, request, kind, name, true);
         await dismissReports(kv, kind, name);
+        await logAdmin(kv, admin, "take-down", { kind, name });
       } else if (body.action === "unhide") {
         await setBlocked(kv, request, kind, name, false);
+        await logAdmin(kv, admin, "restore", { kind, name });
       } else if (body.action === "dismiss") {
         await dismissReports(kv, kind, name);
       } else {

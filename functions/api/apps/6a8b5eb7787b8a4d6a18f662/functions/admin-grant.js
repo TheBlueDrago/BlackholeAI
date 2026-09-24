@@ -6,6 +6,7 @@
 // (Secret can't be granted any more; Enterprise takes the number of seats.)
 import { json } from "../../../../../cloudflare-lib/published.js";
 import { currentUser, applyGrant } from "../../../../../cloudflare-lib/credits.js";
+import { logAdmin } from "../../../../../cloudflare-lib/audit.js";
 
 const PLANS = ["free", "pro", "team", "enterprise"];
 
@@ -29,6 +30,9 @@ export async function onRequestPost(context) {
       if ("plan" in g && !PLANS.includes(g.plan)) continue;
       await applyGrant(env.PUBLISHED_HTML, g.userId, g);
       saved.push(g.userId);
+      const changed = {};
+      for (const f of ["plan", "planExpiresAt", "banned", "blockedUntil", "seats", "bonus"]) if (f in g) changed[f] = g[f];
+      await logAdmin(env.PUBLISHED_HTML, user, "grant", { userId: g.userId, ...changed });
     }
     return json({ ok: true, saved: saved.length });
   } catch (err) {
