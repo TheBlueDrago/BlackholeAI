@@ -16,6 +16,7 @@ import ModeToggle from "@/components/chat/ModeToggle";
 import useStickToBottom from "@/hooks/useStickToBottom";
 import { isNetworkError, OFFLINE_NOTE } from "@/lib/netError";
 import { secretKeyIn } from "@/lib/privateInfo";
+import useReplyAnnouncer from "@/hooks/useReplyAnnouncer";
 
 export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICode, userInitial }) {
   const buildMode = useBuildMode("code");
@@ -119,8 +120,11 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
   const queued = loading || q.paused;
   const canSend = input.trim().length > 0 && (queued || !aiCodeExhausted);
 
+  const announce = useReplyAnnouncer(messages, loading, "code");
+
   return (
     <div className="w-full max-w-3xl px-3 sm:px-4">
+      <p className="sr-only" role="status" aria-live="polite">{announce}</p>
       {/* Same as the home chat: no blur, smooth scrolling or scroll trapping, for phones. */}
       <div className="bg-slate-900/80 border border-emerald-700/40 rounded-3xl overflow-hidden shadow-2xl">
         <div ref={scrollRef} className="h-[55vh] sm:h-96 overflow-y-auto overscroll-y-auto p-4 sm:p-6 space-y-4">

@@ -163,3 +163,11 @@ for (const ok of ["https://en.wikipedia.org/wiki/Essex", "https://www.sussex.ac.
   assert(privateInfoOnPage("<script>const seed = 4111111111111111;</script><h1>Game</h1>", parse) === "", "numbers inside scripts aren't");
   assert(privateInfoOnPage("<h1>x</h1>", () => { throw new Error("no DOM"); }) === "", "a page that can't be read is never blocked");
 }
+
+// Screen readers hear a finished reply in plain words.
+{
+  const { spokenReply } = await import(R + "src/hooks/useReplyAnnouncer.js");
+  assert(spokenReply("## Hi\n**Bold** and [a link](https://x.y) here") === "Hi Bold and a link here", "markdown is read as plain words");
+  assert(spokenReply("Try this:\n```js\nconsole.log(1)\n```\nDone.") === "Try this: (code) Done.", "code blocks are called (code)");
+  assert(spokenReply("word ".repeat(200)).length <= 301, "long replies are cut short");
+}

@@ -22,6 +22,7 @@ import { useAppShell } from "@/components/AppShellContext";
 import useStickToBottom from "@/hooks/useStickToBottom";
 import { privateInfoIn } from "@/lib/privateInfo";
 import { isNetworkError, OFFLINE_NOTE } from "@/lib/netError";
+import useReplyAnnouncer from "@/hooks/useReplyAnnouncer";
 
 const CODE_SYS = "You are Blackhole Code Assistant. Help with programming. Give clear, correct code with brief explanations.";
 const FABLE_SYS = "You are Space, Blackhole AI's premium creative model. Be imaginative and high-quality.";
@@ -203,8 +204,11 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
   const queued = loading || q.paused;
   const canSend = input.trim().length > 0 && (queued || !isExhausted);
 
+  const announce = useReplyAnnouncer(messages, loading, conversation?.id);
+
   return (
     <div className="w-full max-w-3xl px-3 sm:px-4">
+      <p className="sr-only" role="status" aria-live="polite">{announce}</p>
       {/* No backdrop blur, smooth scrolling or scroll trapping here: on phones (iPhones especially)
           they got in the way of scrolling the messages. At either end, a swipe scrolls the page. */}
       <div className="bg-slate-900/80 border border-slate-700/50 rounded-3xl overflow-hidden shadow-2xl">
