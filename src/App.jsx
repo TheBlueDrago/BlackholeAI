@@ -73,13 +73,10 @@ const PageSpinner = () => (
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
 
-  // Show loading spinner while checking app public settings or auth
+  // Show loading spinner while checking app public settings or auth (the app's own dark
+  // screen: a white one here flashed on every launch of the home-screen app).
   if (isLoadingPublicSettings || isLoadingAuth) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
-      </div>
-    );
+    return <PageSpinner />;
   }
 
   // Handle authentication errors

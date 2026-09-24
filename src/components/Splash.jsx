@@ -6,9 +6,12 @@ const SEEN_KEY = "bh-splash-seen";
 // game), or on the public pages new visitors land on, which should show up right away.
 const SKIP = /^\/($|buy|report|site\/|play\/|terms|privacy|contact|ThankYou|promo-success|arcade|templates|pricing|business|about|showcase|enterprise|guides|safety)/;
 
-// The intro plays once per tab, not again on every reload.
+// The intro plays once per browser tab, not again on every reload.
 function shouldShow() {
   if (SKIP.test(window.location.pathname)) return false;
+  // Not in the installed app (home screen): the phone starts it fresh on almost every launch,
+  // so it would play the 2.6-second intro every time someone opens it.
+  if (window.matchMedia?.("(display-mode: standalone)").matches || window.navigator.standalone === true) return false;
   // Devices set to reduce motion skip the animated intro altogether.
   if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return false;
   try {

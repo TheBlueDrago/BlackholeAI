@@ -33,14 +33,18 @@ export const AuthProvider = ({ children }) => {
         token: appParams.token, // Include token if available
         interceptResponses: true
       });
-      
+
+      // Ask who's signed in at the same time as the settings instead of after them, so the
+      // app appears one network round trip sooner (it matters most on phones).
+      const signedIn = appParams.token ? base44.auth.me().then((u) => ({ u }), (e) => ({ e })) : null;
+
       try {
         const publicSettings = await appClient.get(`/prod/public-settings/by-id/${appParams.appId}`);
         setAppPublicSettings(publicSettings);
-        
+
         // If we got the app public settings successfully, check if user is authenticated
-        if (appParams.token) {
-          await checkUserAuth();
+        if (signedIn) {
+          await checkUserAuth(signedIn);
         } else {
           setIsLoadingAuth(false);
           setIsAuthenticated(false);
@@ -89,11 +93,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const checkUserAuth = async () => {
+  // `pending`: an answer already on its way from checkAppState ({ u } or { e }).
+  const checkUserAuth = async (pending) => {
     try {
       // Now check if the user is authenticated
       setIsLoadingAuth(true);
-      const currentUser = await base44.auth.me();
+      const answer = pending && typeof pending.then === "function" ? await pending : { u: await base44.auth.me() };
+      if (answer.e) throw answer.e;
+      const currentUser = answer.u;
       setUser(currentUser);
       setIsAuthenticated(true);
       setIsLoadingAuth(false);
