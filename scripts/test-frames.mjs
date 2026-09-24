@@ -4,9 +4,11 @@
 // chat replies are never rendered as raw HTML.
 // Run: node scripts/test-frames.mjs
 import { readFileSync, readdirSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
+import { join, relative, sep } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
-const R = new URL("../", import.meta.url).pathname;
+// File paths that work on Windows too (a URL pathname there is /C:/…).
+const R = fileURLToPath(new URL("../", import.meta.url));
 const assert = (c, m) => {
   if (!c) {
     console.error("FAIL", m);
@@ -23,7 +25,7 @@ const files = [];
   }
 })(join(R, "src"));
 
-const { PREVIEW_SANDBOX } = await import(R + "src/lib/previewShim.js");
+const { PREVIEW_SANDBOX } = await import(pathToFileURL(join(R, "src/lib/previewShim.js")).href);
 assert(!PREVIEW_SANDBOX.includes("allow-same-origin"), "previews can't reach the app's origin");
 assert(!PREVIEW_SANDBOX.includes("allow-top-navigation"), "previews can't move the app's tab to another page");
 
@@ -48,7 +50,7 @@ function sandboxOf(tag, src) {
 let frames = 0;
 for (const file of files) {
   const src = readFileSync(file, "utf8");
-  const rel = relative(R, file);
+  const rel = relative(R, file).split(sep).join("/");
   for (const m of src.matchAll(/<iframe\b[\s\S]*?\/?>/g)) {
     frames++;
     const tag = m[0];
