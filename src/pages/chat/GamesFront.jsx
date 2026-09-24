@@ -233,10 +233,12 @@ export default function GamesFront() {
           <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 h-9">
             <Search className="w-4 h-4 text-slate-400" />
             <input
+              type="search"
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search games"
-              className="bg-transparent outline-none text-sm flex-1 text-slate-100 placeholder:text-slate-500"
+              placeholder="Search"
+              aria-label="Search games"
+              className="bg-transparent outline-none text-sm flex-1 min-w-0 h-full text-slate-100 placeholder:text-slate-500"
             />
           </div>
         </div>
