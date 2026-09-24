@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Gift } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, Navigate, useLocation } from "react-router-dom";
 
 const AI_LABELS = { ai: "Blackhole AI", aiCode: "Blackhole Code", galaxy5: "Galaxy", space5: "Space" };
 
@@ -10,6 +10,9 @@ export default function PromoSuccess() {
   const aiModel = location.state?.aiModel ?? "ai";
   const credits = location.state?.credits ?? 0;
   const label = AI_LABELS[aiModel] ?? "Blackhole AI";
+  // Opened directly (not right after redeeming a code): there's nothing to celebrate, so
+  // don't show "+0 credits".
+  if (!(credits > 0)) return <Navigate to="/chat" replace />;
 
   return (
     <motion.div
