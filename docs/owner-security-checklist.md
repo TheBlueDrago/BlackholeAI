@@ -54,7 +54,9 @@ Also:
 - [ ] Make webhook handling **idempotent**: the same event twice must not give credits twice
       (the Wix webhook's `status === "paid"` check is the model).
 - [ ] Handle **refunds and disputes**: take back credits or hold payouts. The Wix webhook
-      doesn't do this yet either (see its TODO in the overnight notes).
+      doesn't do this yet either: for Wix it means also handling its "Payment Status Updated"
+      event (`wix.ecom.v1.order_payment_status_updated`, refunded statuses) in
+      `payments-webhook`. Until then, check orders in the Wix dashboard before paying creators.
 - [ ] Try everything in the **PayPal sandbox** first.
 - [ ] In PayPal, turn on notifications for every payment and for any change to where money is
       sent, so you'd see a change you didn't make.
