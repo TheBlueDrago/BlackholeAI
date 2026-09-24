@@ -11,6 +11,11 @@ page, please tell us privately first so it can be fixed before anyone else finds
 Please don't test against other people's accounts or pages, and don't publish details until
 it's fixed. The same contact is in https://blackhole-ai-tech.com/.well-known/security.txt.
 
+## For the owner
+
+What only the owner can do (account 2FA, deploys, connecting PayPal safely, a weekly check):
+`docs/owner-security-checklist.md`.
+
 ## How the app protects money and accounts
 
 A short map for anyone changing this code. Keep these rules when you touch the files named.
