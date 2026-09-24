@@ -36,8 +36,15 @@ const getAppParamValue = (paramName, { defaultValue = undefined, removeFromUrl =
 
 // Which Base44 app and server the site talks to is fixed at build time (Cloudflare env).
 // Links used to be able to change it (?app_id=… or ?app_base_url=… was read from the address
-// and remembered), which could send a visitor's login to another server later.
-const builtIn = (paramName, value) => value || getAppParamValue(paramName);
+// and remembered), which could send a visitor's login to another server later. When a build
+// setting is missing it now falls back to this app's own id, or to nothing (same-origin
+// addresses through the /api proxy), never to a value from a link or one saved from a link.
+const APP_ID = "6a8b5eb7787b8a4d6a18f662";
+const FALLBACK = { app_id: APP_ID };
+const builtIn = (paramName, value) => {
+	if (!isNode) storage.removeItem(`base44_${paramName}`); // forget anything saved from an old link
+	return value || FALLBACK[paramName] || null;
+};
 
 const getAppParams = () => {
 	// Only acts on the page load it's in: remembering it logged the browser out on every visit.
