@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ShieldCheck, Flag, ScrollText, AlertTriangle } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { adminCountries } from "../../../cloudflare-lib/audit.js";
 
 const DAY = 86400000;
 
@@ -19,6 +20,9 @@ export default function SecurityGlance() {
   const recent = (log || []).filter((e) => Date.now() - Date.parse(e.at) < DAY);
   const last = (log || [])[0];
   const busy = recent.length >= 20;
+  // Admin actions from more than one country (or through Tor) in the last 30 days.
+  const countries = adminCountries(log);
+  const elsewhere = countries.length > 1 || countries.includes("T1");
 
   return (
     <div className="w-full max-w-3xl mt-6 rounded-2xl border border-slate-700/50 bg-slate-800/50 p-4">
@@ -37,9 +41,23 @@ export default function SecurityGlance() {
         <div className="rounded-xl bg-slate-900/60 border border-slate-700/50 p-3 min-w-0">
           <p className="text-xs text-slate-400">Latest admin action</p>
           <p className="text-xs text-slate-200 mt-1 break-all">{last ? `${last.what} by ${last.by}` : log ? "None yet" : "…"}</p>
-          {last && <p className="text-[11px] text-slate-500">{new Date(last.at).toLocaleString()}</p>}
+          {last && (
+            <p className="text-[11px] text-slate-500">
+              {new Date(last.at).toLocaleString()}
+              {last.from ? ` · ${last.from}` : ""}
+            </p>
+          )}
         </div>
       </div>
+      {elsewhere && (
+        <p className="mt-3 text-xs text-amber-300 flex items-start gap-1.5">
+          <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+          <span>
+            Admin actions in the last 30 days came from {countries.length > 1 ? `${countries.length} countries (${countries.join(", ")})` : "the Tor network"}. If you
+            weren't travelling or using a VPN, someone else may be signed in as an admin: change your password now and check the Admin log.
+          </span>
+        </p>
+      )}
       {busy && (
         <p className="mt-3 text-xs text-amber-300 inline-flex items-start gap-1.5">
           <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" /> A lot of admin actions today. If they weren't all you, change your password now and check the Admin log.

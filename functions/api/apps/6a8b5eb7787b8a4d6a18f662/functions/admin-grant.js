@@ -32,7 +32,7 @@ export async function onRequestPost(context) {
       saved.push(g.userId);
       const changed = {};
       for (const f of ["plan", "planExpiresAt", "banned", "blockedUntil", "seats", "bonus"]) if (f in g) changed[f] = g[f];
-      await logAdmin(env.PUBLISHED_HTML, user, "grant", { userId: g.userId, ...changed });
+      await logAdmin(env.PUBLISHED_HTML, user, "grant", { userId: g.userId, ...changed }, request);
     }
     return json({ ok: true, saved: saved.length });
   } catch (err) {

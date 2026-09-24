@@ -41,7 +41,7 @@ export async function onRequestPost(context) {
       const status = String(body.status || "");
       if (!["new", "approved", "rejected"].includes(status)) return json({ error: "Unknown status." }, 400);
       await updateApplication(kv, String(body.id || ""), { status, note: String(body.note || "").slice(0, 500) });
-      await logAdmin(kv, user, "enterprise-status", { id: String(body.id || ""), status });
+      await logAdmin(kv, user, "enterprise-status", { id: String(body.id || ""), status }, request);
     } else if (body.action === "activate") {
       const app = (await readApps(kv)).find((a) => a.id === String(body.id || ""));
       if (!app) return json({ error: "Application not found." }, 404);
@@ -50,7 +50,7 @@ export async function onRequestPost(context) {
       // Mirrors the plan on the User row for the app's badges, as Monitor's plan buttons do.
       await base44(request, "PUT", `entities/User/${app.userId}`, { plan: "enterprise", planExpiresAt: null }).catch(() => {});
       await updateApplication(kv, app.id, { status: "active", activatedAt: new Date().toISOString() });
-      await logAdmin(kv, user, "enterprise-activate", { userId: app.userId, seats: app.seats });
+      await logAdmin(kv, user, "enterprise-activate", { userId: app.userId, seats: app.seats }, request);
     } else if (body.action !== "list") {
       return json({ error: "Unknown action." }, 400);
     }

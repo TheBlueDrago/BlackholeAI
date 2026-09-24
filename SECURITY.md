@@ -42,8 +42,9 @@ A short map for anyone changing this code. Keep these rules when you touch the f
 - **Guessing is limited.** Sign-in, sign-up codes, sign-up and reset emails pass through the
   `/api` proxy (`functions/api/[[path]].js`), which refuses too many tries per account and per
   network with a 429 (`cloudflare-lib/authlimit.js`).
-- **Admin actions are logged** (`cloudflare-lib/audit.js`, Monitor → Admin log) and every admin
-  endpoint checks the admin role on the server.
+- **Admin actions are logged** (`cloudflare-lib/audit.js`, Monitor → Admin log) with where they
+  came from, and Monitor warns when they came from more than one country in 30 days. Every
+  admin endpoint checks the admin role on the server.
 - **Phishing checks at publish** (`cloudflare-lib/phishing.js`, `scan.js`): forms or scripts
   that send passwords or card numbers to another website, and fake Blackhole AI sign-in pages.
 

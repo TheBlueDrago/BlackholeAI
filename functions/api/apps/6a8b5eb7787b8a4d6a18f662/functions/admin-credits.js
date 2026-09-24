@@ -26,10 +26,10 @@ export async function onRequestPost(context) {
       const delta = Math.trunc(Number(body.delta) || 0);
       if (!delta) return json({ error: "Enter a number of credits." }, 400);
       await adjustBonus(kv, request, target, String(body.tier || ""), delta);
-      await logAdmin(kv, admin, "credits", { userId: target.id, email: target.email || "", tier: String(body.tier || ""), delta });
+      await logAdmin(kv, admin, "credits", { userId: target.id, email: target.email || "", tier: String(body.tier || ""), delta }, request);
     } else if (body.action === "revoke") {
       await revokeReferral(kv, request, target, String(body.referredId || ""));
-      await logAdmin(kv, admin, "referral-revoke", { userId: target.id, email: target.email || "", referredId: String(body.referredId || "") });
+      await logAdmin(kv, admin, "referral-revoke", { userId: target.id, email: target.email || "", referredId: String(body.referredId || "") }, request);
     }
 
     const ent = await entitlement(kv, request, target, { other: true });

@@ -21,18 +21,18 @@ export async function onRequestPost(context) {
         : { code: c.code, credits: c.credits, aiModel: c.aiModel, active: c.active };
     if (action === "create") {
       const code = await createPromo(kv, request, body);
-      await logAdmin(kv, user, "promo-create", summary(code));
+      await logAdmin(kv, user, "promo-create", summary(code), request);
       return json({ ok: true, code });
     }
     if (action === "update") {
       const code = await updatePromo(kv, request, body);
-      await logAdmin(kv, user, "promo-update", summary(code));
+      await logAdmin(kv, user, "promo-update", summary(code), request);
       return json({ ok: true, code });
     }
     if (action === "delete") {
       const gone = (await listPromos(kv, request)).find((p) => p.id === String(body.id || ""));
       await deletePromo(kv, request, body.id);
-      await logAdmin(kv, user, "promo-delete", { code: gone ? gone.code : String(body.id || "") });
+      await logAdmin(kv, user, "promo-delete", { code: gone ? gone.code : String(body.id || "") }, request);
       return json({ ok: true });
     }
     return json({ error: "Unknown action." }, 400);

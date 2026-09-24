@@ -88,6 +88,7 @@ export default function AdminLog() {
               <p className="text-slate-200 break-words">{describe(e)}</p>
               <p className="text-[11px] text-slate-500 mt-0.5 break-all">
                 {new Date(e.at).toLocaleString()} · by {e.by}
+                {e.from ? ` · from ${e.from}` : ""}
               </p>
             </div>
           ))}
