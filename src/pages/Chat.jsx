@@ -36,7 +36,7 @@ function ChatLayout() {
       {/* Pages load on demand. Waiting for one here, instead of at the app's top level, keeps the
           profile popup below mounted, so it can close when a button in it opens a page. */}
       {isBanned || isBlocked ? (
-        <BanScreen banned={isBanned} until={blockedUntil} />
+        <BanScreen banned={isBanned} until={blockedUntil} reason={shell.credits?.blockReason} />
       ) : isUnverified ? (
         <VerifyEmailScreen email={shell.currentUser?.email || ""} />
       ) : (

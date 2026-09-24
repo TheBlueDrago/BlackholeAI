@@ -81,6 +81,7 @@ export function useCredits() {
     blockedUntil: status?.blockedUntil || null,
     // Signed up but hasn't entered the emailed code yet (Chat shows the confirm screen).
     unverified: status?.unverified === true,
+    blockReason: status?.blockReason || null,
     team,
     refresh,
     sync,

@@ -53,6 +53,10 @@ export default function Register() {
         setError("This AI email account has been deleted.");
         return;
       }
+      if (status === "network-limit") {
+        setError("Too many accounts have been made on this network recently. Try again later, or contact us if you need an account.");
+        return;
+      }
       if (status === "removed") {
         setError("This email can't be used to sign up for Blackhole AI.");
         return;

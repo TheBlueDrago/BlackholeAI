@@ -7,7 +7,7 @@ export function blockedBy(user, grant, now = new Date()) {
   return (
     user.banned === true ||
     until(user.blockedUntil) ||
-    !!(grant && (grant.banned === true || grant.removed === true || until(grant.blockedUntil)))
+    !!(grant && (grant.banned === true || grant.removed === true || grant.networkLimit === true || until(grant.blockedUntil)))
   );
 }
 

@@ -207,6 +207,8 @@ export async function entitlement(kv, request, user, { other = false } = {}) {
     blocked,
     blockedUntil,
     unverified: notVerified,
+    // Why, when it's the accounts-per-network limit (the ban screen explains it).
+    blockReason: grant && grant.networkLimit && !grant.banned && !user.banned ? "network" : null,
     // Where the plan comes from ("free", "paid", "trial", "grant", "member", "admin"), when it
     // ends if it does, and the new-account offer (for the Subscriptions screen).
     planSource: details.source,
@@ -236,6 +238,7 @@ export async function creditStatus(kv, ent) {
     month,
     blocked: ent.blocked,
     ...(ent.unverified ? { unverified: true } : {}),
+    ...(ent.blocked && ent.blockReason ? { blockReason: ent.blockReason } : {}),
     ...(ent.blocked ? { blockedUntil: ent.blockedUntil || null } : {}),
     tiers,
     planSource: ent.planSource || "free",
@@ -329,7 +332,9 @@ export async function adjustBonus(kv, request, user, tier, delta, once) {
 export async function applyGrant(kv, userId, patch) {
   const key = `grant:${userId}`;
   const grant = await getJSON(kv, key, {});
-  for (const f of ["plan", "planExpiresAt", "banned", "blockedUntil", "removed"]) if (f in patch) grant[f] = patch[f];
+  for (const f of ["plan", "planExpiresAt", "banned", "blockedUntil", "removed", "networkLimit"]) if (f in patch) grant[f] = patch[f];
+  // Unblock / unban in Monitor also lets in an account the accounts-per-network limit stopped.
+  if (patch.banned === false && !("networkLimit" in patch)) delete grant.networkLimit;
   // Removed: new accounts with the same email are blocked as well (bans.js emailRemoved).
   if ("removed" in patch && patch.email) {
     const k = removedEmailKey(patch.email);

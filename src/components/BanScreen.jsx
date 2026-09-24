@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import { ShieldX, LogOut } from "lucide-react";
 import { signOut } from "@/lib/signOut";
 
-export default function BanScreen({ banned, until }) {
+export default function BanScreen({ banned, until, reason }) {
+  const network = reason === "network";
   return (
     <div className="relative z-10 min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-slate-900/80 border border-slate-700/60 rounded-3xl p-8 text-center shadow-2xl">
@@ -11,10 +12,12 @@ export default function BanScreen({ banned, until }) {
           <ShieldX className="w-8 h-8 text-red-400" />
         </div>
         <h1 className="text-2xl font-bold text-white">
-          {banned ? "You are banned" : "You are temporarily blocked"}
+          {network ? "Too many accounts on this network" : banned ? "You are banned" : "You are temporarily blocked"}
         </h1>
         <p className="text-slate-400 mt-3 text-sm leading-relaxed">
-          {banned
+          {network
+            ? "More accounts have been made on this network lately than we allow, so this one is on hold. If it's a school or shared network, contact us and we'll let you in."
+            : banned
             ? "Your account has been permanently banned by an administrator."
             : `Your access is restricted until ${until ? new Date(until).toLocaleString() : "later"}.`}
         </p>

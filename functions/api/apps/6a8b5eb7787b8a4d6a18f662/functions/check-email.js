@@ -5,6 +5,7 @@
 import { json } from "../../../../../cloudflare-lib/published.js";
 import { allow, TOO_MANY } from "../../../../../cloudflare-lib/ratelimit.js";
 import { removedEmailKey } from "../../../../../cloudflare-lib/bans.js";
+import { networkFull } from "../../../../../cloudflare-lib/networks.js";
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -19,7 +20,10 @@ export async function onRequestPost(context) {
     if (deleted) return json({ status: "deleted" });
     // An admin removed an account with this email: it can't sign up again.
     const removed = await env.PUBLISHED_HTML.get(removedEmailKey(email));
-    return json({ status: removed ? "removed" : "available" });
+    if (removed) return json({ status: "removed" });
+    // Too many accounts made on this network lately (cloudflare-lib/networks.js).
+    if (await networkFull(env.PUBLISHED_HTML, request)) return json({ status: "network-limit" });
+    return json({ status: "available" });
   } catch {
     return json({ status: "available" });
   }
