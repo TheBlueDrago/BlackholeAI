@@ -126,6 +126,12 @@ export default function SubscriptionPanel({ onBack, onManagePeople }) {
             <Users className="w-4 h-4" /> Manage people
           </button>
         )}
+        {/* Settings has no Membership button any more: members see their team (and can leave it) here. */}
+        {source === "member" && (
+          <button onClick={onManagePeople} className="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-800 text-slate-200 font-medium hover:bg-slate-700">
+            <Users className="w-4 h-4" /> Your team
+          </button>
+        )}
       </div>
     </div>
   );

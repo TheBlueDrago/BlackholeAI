@@ -244,7 +244,7 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                 </div>
               </div>
             ) : view === "membership" ? (
-              <TeamMembership onBack={() => setView("settings")} />
+              <TeamMembership onBack={() => setView("subscription")} />
             ) : view === "delete" ? (
               <div className="p-6">
                 <button
@@ -369,16 +369,6 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                   <span className="flex items-center gap-2 font-medium">
                     <CreditCard className="w-4 h-4 text-indigo-300" />
                     Subscriptions
-                  </span>
-                  <ArrowLeft className="w-4 h-4 rotate-180 text-slate-500" />
-                </button>
-                <button
-                  onClick={() => setView("membership")}
-                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-slate-800 text-slate-200 hover:bg-slate-700 transition-colors"
-                >
-                  <span className="flex items-center gap-2 font-medium">
-                    <Users className="w-4 h-4 text-sky-300" />
-                    Membership
                   </span>
                   <ArrowLeft className="w-4 h-4 rotate-180 text-slate-500" />
                 </button>
