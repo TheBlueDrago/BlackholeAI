@@ -5,6 +5,7 @@ import { base44 } from "@/api/base44Client";
 import PublicLayout from "@/components/PublicLayout";
 import Honeypot from "@/components/Honeypot";
 import { CONTACT_EMAIL, CONTACT_PHONE, CONTACT_PHONE_LINK } from "@/lib/company";
+import EmailTypoHint, { useEmailTypo } from "@/components/EmailTypoHint";
 
 // Keys must match TOPICS in cloudflare-lib/contact.js.
 const TOPICS = [
@@ -35,6 +36,7 @@ export default function Contact() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [sent, setSent] = useState(false);
+  const typo = useEmailTypo(email);
 
   useEffect(() => {
     base44.auth.me().then((u) => setSignedInEmail(u?.email || "")).catch(() => {});
@@ -42,6 +44,7 @@ export default function Contact() {
 
   const submit = async (e) => {
     e.preventDefault();
+    if (!signedInEmail && typo.pauseForTypo()) return; // our reply would go to the misspelled address
     setBusy(true);
     setError("");
     try {
@@ -116,10 +119,13 @@ export default function Contact() {
               {signedInEmail ? (
                 <p className="text-sm text-slate-400">We'll reply to <span className="text-slate-200">{signedInEmail}</span>.</p>
               ) : (
-                <label className="block text-sm">
-                  <span className="text-slate-400">Your email (so we can reply)</span>
-                  <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" className={field} />
-                </label>
+                <>
+                  <label className="block text-sm">
+                    <span className="text-slate-400">Your email (so we can reply)</span>
+                    <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} {...typo.fieldProps} autoComplete="email" className={field} />
+                  </label>
+                  <EmailTypoHint suggestion={typo.suggestion} onPick={setEmail} className="-mt-3 text-xs text-slate-400" linkClassName="text-slate-200" />
+                </>
               )}
               <label className="block text-sm">
                 <span className="text-slate-400">Message</span>
@@ -129,12 +135,13 @@ export default function Contact() {
               <button
                 type="submit"
                 disabled={busy || message.trim().length < 5}
-                className="w-full inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white font-medium rounded-lg py-2.5"
+                className="w-full inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-medium rounded-lg py-2.5"
               >
                 {busy && <Loader2 className="w-4 h-4 animate-spin" />} Send
               </button>
               <p className="text-[11px] text-slate-400 text-center">
-                To report a published site or game, use the Report link on it. See our <Link to="/privacy" className="underline">Privacy Policy</Link>.
+                We'll never ask for your password or card number. To report a published site or game, use the Report link on it. See our{" "}
+                <Link to="/privacy" className="underline">Privacy Policy</Link>.
               </p>
             </form>
           )}
