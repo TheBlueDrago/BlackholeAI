@@ -9,6 +9,13 @@ import { allow, TOO_MANY } from "../../../../../cloudflare-lib/ratelimit.js";
 
 const MODELS = ["gemini-3.5-flash", "gemini-3.6-flash", "gemini-3.7-flash"];
 
+// Blackhole Browser is used by kids, so results are family-friendly, like SafeSearch: the
+// prompt asks for that, and any adult, gambling or piracy result that still comes back is
+// dropped here.
+const NOT_FAMILY =
+  /\b(porn\w*|xxx|nsfw|hentai|onlyfans|nudes?|camgirls?|escorts?|erotic\w*|xvideos|xhamster|xnxx|redtube|youporn|chaturbate|stripchat|casinos?|sportsbook|betting|torrents?|pirate ?bay|warez|123movies|fmovies|putlocker)\b/i;
+export const familySafe = (r) => !NOT_FAMILY.test(`${r.url} ${r.title} ${r.site || ""} ${r.description || ""}`);
+
 function extractJson(text) {
   const t = String(text || "");
   const fence = t.match(/```(?:json)?\s*([\s\S]*?)```/i);
@@ -56,9 +63,10 @@ export async function onRequestPost(context) {
       `Query: ${query}`,
       "",
       "Reply with ONLY a JSON object: {\"answer\": string, \"answerLabel\": string, \"results\": [{\"title\", \"url\", \"site\", \"description\"}]}",
-      "- answer: a direct, correct, concise answer (1-3 sentences). Compute math; answer definitions, conversions and how-tos directly. Never refuse.",
+      "- answer: a direct, correct, concise answer (1-3 sentences). Compute math; answer definitions, conversions and how-tos directly. Never refuse ordinary questions.",
       "- answerLabel: 2-4 words, e.g. \"Calculator\", \"Quick answer\", \"Definition\".",
       "- results: 6 to 10 real pages from your search. url must be a real https URL; site is the display domain; description is a 1-2 sentence snippet. Never invent domains.",
+      "- Blackhole Browser is used by kids, so keep everything family-friendly, like SafeSearch: no adult, gambling, piracy or scam sites. If the query asks for those, say in the answer that Blackhole Browser keeps results family-friendly, and give only safe results for the rest of the query (or none).",
     ].join("\n");
 
     let data = null;
@@ -76,7 +84,7 @@ export async function onRequestPost(context) {
     }
     if (!data) return json({ error: "Search is busy right now. Please try again in a minute.", detail: lastErr }, 503);
     const results = Array.isArray(data.results)
-      ? data.results.filter((r) => r && typeof r.url === "string" && /^https:\/\//.test(r.url) && r.title).slice(0, 10)
+      ? data.results.filter((r) => r && typeof r.url === "string" && /^https:\/\//.test(r.url) && r.title && familySafe(r)).slice(0, 10)
       : [];
     return json({
       answer: typeof data.answer === "string" ? data.answer : "",
