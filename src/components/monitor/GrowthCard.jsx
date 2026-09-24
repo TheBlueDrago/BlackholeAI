@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { TrendingUp } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 import { OFFER_START, TRIAL_DAYS, DISCOUNT_HOURS } from "../../../cloudflare-lib/offers.js";
 
 const DAY = 86400000;
@@ -11,15 +12,38 @@ const when = (d) => Date.parse(/Z|[+-]\d\d:?\d\d$/.test(String(d || "")) ? d : `
 // there are more).
 export default function GrowthCard({ users, complete }) {
   const now = Date.now();
+  // AI messages across all accounts (functions/monitor-activity.js): per-day counts, and the
+  // start of each account's latest questions.
+  const [activity, setActivity] = useState(null);
+  const [openDay, setOpenDay] = useState(null);
+  useEffect(() => {
+    base44.functions
+      .invoke("monitor-activity", {})
+      .then((r) => setActivity(r.data || null))
+      .catch(() => setActivity(null));
+  }, []);
+  const emailOf = (id) => users.find((u) => u.id === id)?.email || "an account";
+  const msgsOn = (from) => (activity?.days || {})[new Date(from + DAY / 2).toISOString().slice(0, 10)] || 0;
   const times = users.map((u) => when(u.created_date)).filter(Number.isFinite);
   const since = (days) => times.filter((t) => now - t < days * DAY).length;
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
   const days = Array.from({ length: 14 }, (_, i) => {
     const from = startOfToday.getTime() - (13 - i) * DAY;
-    return { from, count: times.filter((t) => t >= from && t < from + DAY).length };
+    const joined = users.filter((u) => {
+      const t = when(u.created_date);
+      return t >= from && t < from + DAY;
+    });
+    const said = (activity?.recent || []).filter((r) => {
+      const t = Date.parse(r.at);
+      return t >= from && t < from + DAY;
+    });
+    return { from, count: joined.length, joined, msgs: msgsOn(from), said };
   });
   const max = Math.max(1, ...days.map((d) => d.count));
+  const maxMsgs = Math.max(1, ...days.map((d) => d.msgs));
+  const msgsToday = days[days.length - 1].msgs;
+  const msgsWeek = days.slice(-7).reduce((n, d) => n + d.msgs, 0);
   // New-member offer (cloudflare-lib/offers.js): who is on the free Pro week, and who is in the
   // 48 hours of 30% off after it, i.e. about to decide whether to pay.
   const offerFrom = Date.parse(OFFER_START);
@@ -48,14 +72,58 @@ export default function GrowthCard({ users, complete }) {
       <p className="mt-2 text-xs text-slate-400">
         On their free Pro week: <b className="text-white">{onTrial}</b> · In the 48-hour 30% offer: <b className="text-white">{inWindow}</b>
       </p>
-      <p className="mt-4 text-[11px] text-slate-400">New accounts per day, last 14 days</p>
-      <div className="mt-2 flex items-end gap-1 h-24" role="img" aria-label={`New accounts per day: ${days.map((d) => d.count).join(", ")}`}>
-        {days.map((d) => (
-          <div key={d.from} className="flex-1 flex flex-col items-center justify-end h-full" title={`${new Date(d.from).toLocaleDateString()}: ${d.count}`}>
-            {d.count > 0 && <span className="text-[10px] text-slate-400 mb-0.5">{d.count}</span>}
-            <div className="w-full rounded-t bg-gradient-to-t from-indigo-500 to-fuchsia-400" style={{ height: `${Math.max(d.count ? 6 : 2, (d.count / max) * 100)}%`, opacity: d.count ? 1 : 0.25 }} />
-          </div>
+      <p className="mt-2 text-xs text-slate-400">
+        AI messages today: <b className="text-white">{activity ? msgsToday : "…"}</b> · Last 7 days: <b className="text-white">{activity ? msgsWeek : "…"}</b>
+      </p>
+      <p className="mt-4 text-[11px] text-slate-400 flex items-center gap-3">
+        <span>Last 14 days (point at or tap a day for details)</span>
+        <span className="inline-flex items-center gap-1"><i className="w-2.5 h-2.5 rounded-sm bg-fuchsia-400 inline-block" /> new accounts</span>
+        <span className="inline-flex items-center gap-1"><i className="w-2.5 h-2.5 rounded-sm bg-sky-400 inline-block" /> AI messages</span>
+      </p>
+      <div className="relative mt-2 flex items-end gap-1 h-24" role="img" aria-label={`New accounts per day: ${days.map((d) => d.count).join(", ")}. AI messages per day: ${days.map((d) => d.msgs).join(", ")}`} onMouseLeave={() => setOpenDay(null)}>
+        {days.map((d, i) => (
+          <button
+            type="button"
+            key={d.from}
+            onMouseEnter={() => setOpenDay(i)}
+            onFocus={() => setOpenDay(i)}
+            onClick={() => setOpenDay((o) => (o === i ? null : i))}
+            aria-label={`${new Date(d.from).toLocaleDateString()}: ${d.count} new accounts, ${d.msgs} AI messages`}
+            className={`flex-1 flex items-end justify-center gap-px h-full rounded ${openDay === i ? "bg-slate-700/40" : ""}`}
+          >
+            <div className="w-1/2 rounded-t bg-gradient-to-t from-indigo-500 to-fuchsia-400" style={{ height: `${Math.max(d.count ? 6 : 2, (d.count / max) * 100)}%`, opacity: d.count ? 1 : 0.25 }} />
+            <div className="w-1/2 rounded-t bg-gradient-to-t from-sky-600 to-sky-400" style={{ height: `${Math.max(d.msgs ? 6 : 2, (d.msgs / maxMsgs) * 100)}%`, opacity: d.msgs ? 1 : 0.25 }} />
+          </button>
         ))}
+        {openDay !== null && (
+          <div
+            className={`absolute bottom-full mb-2 z-20 w-72 max-w-[85vw] max-h-72 overflow-y-auto rounded-xl bg-slate-950 border border-slate-700 shadow-2xl p-3 text-left ${openDay > 6 ? "right-0" : "left-0"}`}
+            onMouseEnter={() => setOpenDay(openDay)}
+          >
+            <p className="text-xs font-semibold text-white">{new Date(days[openDay].from).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}</p>
+            <p className="mt-2 text-[11px] text-fuchsia-300">New accounts ({days[openDay].count})</p>
+            {days[openDay].joined.length ? (
+              days[openDay].joined.map((u) => (
+                <p key={u.id} className="text-[11px] text-slate-300 truncate">{u.email || u.full_name || u.id}</p>
+              ))
+            ) : (
+              <p className="text-[11px] text-slate-500">None</p>
+            )}
+            <p className="mt-2 text-[11px] text-sky-300">AI messages ({days[openDay].msgs})</p>
+            {days[openDay].said.length ? (
+              days[openDay].said.slice(0, 30).map((r, k) => (
+                <p key={k} className="text-[11px] text-slate-300 mt-1 break-words">
+                  <span className="text-slate-500">{emailOf(r.userId)}:</span> {r.prompt || "(picture or empty)"}
+                </p>
+              ))
+            ) : (
+              <p className="text-[11px] text-slate-500">{days[openDay].msgs ? "Only each account's 5 latest questions are kept." : "None"}</p>
+            )}
+            {days[openDay].said.length > 0 && days[openDay].msgs > days[openDay].said.length && (
+              <p className="mt-1 text-[10px] text-slate-500">Showing the latest questions kept for each account (up to 5 each).</p>
+            )}
+          </div>
+        )}
       </div>
       <div className="mt-1 flex justify-between text-[10px] text-slate-500">
         <span>{new Date(days[0].from).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>

@@ -266,6 +266,9 @@ function noteActivity(usage, tier, prompt) {
   a.first = a.first || new Date(now).toISOString();
   a.last = new Date(now).toISOString();
   a.recent = [{ prompt: String(prompt || "").slice(0, 300), bucket: tier, at: a.last }, ...(a.recent || [])].slice(0, 5);
+  // Messages per day (UTC), for Monitor's Growth chart.
+  const day = a.last.slice(0, 10);
+  a.days = { ...(a.days || {}), [day]: ((a.days && a.days[day]) || 0) + 1 };
   usage.activity = a;
 }
 
