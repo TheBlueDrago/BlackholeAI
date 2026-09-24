@@ -33,6 +33,7 @@ import { EXPLAIN_NOTE, splitBuildReply, introBeforeCode } from "@/lib/buildReply
 import { GAME_DESIGNER_STORE_KEY } from "@/lib/gameDesignerStore";
 import { notifyGamesChanged } from "@/lib/gameEvents";
 import { hasProFeatures, hasSpace } from "@/lib/plans";
+import { useAppShell } from "@/components/AppShellContext";
 
 const STORE_KEY = GAME_DESIGNER_STORE_KEY;
 const TAKEN_KEY = "infinity-ai-taken-games";
@@ -133,6 +134,7 @@ function sanitize(s) {
 }
 
 export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrade, aiExhausted, onSpendAI, aiCodeExhausted, onSpendAICode, galaxy5Exhausted, onSpendGalaxy5, space5Exhausted, onSpendSpace5, remaining, plan, lightMode, onToggleLight }) {
+  const shell = useAppShell();
   const location = useLocation();
   const startFresh = !!location.state?.fresh;
   // "Remix" on a built-in game starts a new project from a copy of it.
@@ -852,7 +854,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="fixed top-20 right-6 z-50 bg-emerald-500 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 text-sm font-medium"
+            className="fixed top-20 right-4 left-4 sm:left-auto sm:right-6 z-50 bg-emerald-500 text-white px-4 py-2.5 rounded-xl shadow-2xl flex flex-wrap items-center gap-2 text-sm font-medium"
           >
             <Rocket className="w-4 h-4" /> {isRepublish ? "Game updated!" : "Game published!"}
             {publishUrl && (
@@ -861,6 +863,14 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
               </a>
             )}
             {publishUrl && <ShareLink url={publishUrl} title={(title || "").trim() || "my game"} />}
+            {/* Right after publishing is when people most want to share: invite friends too. */}
+            <button
+              type="button"
+              onClick={() => shell?.openProfile("refer")}
+              className="inline-flex items-center gap-1 rounded-lg bg-white/20 hover:bg-white/30 px-2 py-1 text-xs font-semibold"
+            >
+              🎁 Invite friends
+            </button>
           </motion.div>
         )}
       </AnimatePresence>

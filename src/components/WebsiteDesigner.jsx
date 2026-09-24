@@ -32,6 +32,7 @@ import { DESIGNER_STORE_KEY } from "@/lib/designerStore";
 import { saveBuilds, loadBuilds } from "@/lib/buildHistory";
 import { loadImages, onImagesChange, addImageFile, expandImages, packImages } from "@/lib/siteImages";
 import { hasProFeatures, hasSpace } from "@/lib/plans";
+import { useAppShell } from "@/components/AppShellContext";
 
 const STORE_KEY = DESIGNER_STORE_KEY;
 const TAKEN_KEY = "infinity-ai-taken-sites";
@@ -164,6 +165,7 @@ function initialOf(s) {
 }
 
 export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgrade, aiExhausted, onSpendAI, aiCodeExhausted, onSpendAICode, galaxy5Exhausted, onSpendGalaxy5, space5Exhausted, onSpendSpace5, remaining, plan, lightMode, onToggleLight }) {
+  const shell = useAppShell();
   const initial = loadState();
   const [projectId, setProjectId] = useState(initial.projectId);
   const [siteName, setSiteName] = useState(initial.siteName);
@@ -1011,7 +1013,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="fixed top-20 right-6 z-50 bg-emerald-500 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 text-sm font-medium"
+            className="fixed top-20 right-4 left-4 sm:left-auto sm:right-6 z-50 bg-emerald-500 text-white px-4 py-2.5 rounded-xl shadow-2xl flex flex-wrap items-center gap-2 text-sm font-medium"
           >
             <Rocket className="w-4 h-4" /> {isRepublish ? "Website updated!" : "Website published!"}
             {publishUrl && (
@@ -1020,6 +1022,14 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
               </a>
             )}
             {publishUrl && <ShareLink url={publishUrl} title={publishUrl.replace(/^https:\/\//, "")} />}
+            {/* Right after publishing is when people most want to share: invite friends too. */}
+            <button
+              type="button"
+              onClick={() => shell?.openProfile("refer")}
+              className="inline-flex items-center gap-1 rounded-lg bg-white/20 hover:bg-white/30 px-2 py-1 text-xs font-semibold"
+            >
+              🎁 Invite friends
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
