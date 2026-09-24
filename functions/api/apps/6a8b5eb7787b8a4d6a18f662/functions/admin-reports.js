@@ -10,7 +10,7 @@
 import { json, findByName, base44, ownerOf } from "../../../../../cloudflare-lib/published.js";
 import { currentUser } from "../../../../../cloudflare-lib/credits.js";
 import { logAdmin } from "../../../../../cloudflare-lib/audit.js";
-import { KINDS, REASONS, readReports, dismissReports, setBlocked } from "../../../../../cloudflare-lib/reports.js";
+import { KINDS, REASONS, readReports, dismissReports, setBlocked, syncTakenDown } from "../../../../../cloudflare-lib/reports.js";
 
 // Pages taken down in one "hide-owner" call, per kind (a safety cap).
 const MAX_TAKE_DOWN = 100;
@@ -76,6 +76,7 @@ export async function onRequestPost(context) {
       const [, pageKind, ...rest] = k.name.split(":");
       return { kind: pageKind, name: rest.join(":") };
     });
+    await syncTakenDown(kv, hidden).catch(() => {});
     return json({ reports, hidden });
   } catch (err) {
     return json({ error: (err && err.message) || "Could not load reports." }, 400);

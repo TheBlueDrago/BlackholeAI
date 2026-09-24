@@ -152,7 +152,7 @@ export default function GamesFront() {
         // ignores the plays field owners can edit on their own game's record.
         base44.functions.invoke("game-plays").then((r) => r.data || {}).catch(() => ({})),
       ]);
-      const real = (list || []).filter((g) => !g.hidden).map((g) => ({ ...g, plays: counts.totals ? counts.totals[g.name] || 0 : (g.plays || 0) + ((counts.plays || {})[g.name] || 0) }));
+      const real = (list || []).filter((g) => !g.hidden && !(counts.takenDown || []).includes(g.name)).map((g) => ({ ...g, plays: counts.totals ? counts.totals[g.name] || 0 : (g.plays || 0) + ((counts.plays || {})[g.name] || 0) }));
       const realNames = new Set(real.map((g) => g.name));
       setGames([...builtIns.filter((g) => !realNames.has(g.name)), ...real]);
     } catch {

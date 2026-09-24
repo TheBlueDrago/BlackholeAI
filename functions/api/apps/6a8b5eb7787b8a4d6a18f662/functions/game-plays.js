@@ -4,6 +4,7 @@
 // totalPlays); the games' own plays field isn't trusted any more.
 import { json, base44 } from "../../../../../cloudflare-lib/published.js";
 import { readPlays, totalPlays } from "../../../../../cloudflare-lib/plays.js";
+import { readTakenDown } from "../../../../../cloudflare-lib/reports.js";
 
 export async function onRequest(context) {
   const { request, env } = context;
@@ -12,5 +13,7 @@ export async function onRequest(context) {
   const plays = {};
   for (const [name, g] of Object.entries(all)) plays[name] = (g && g.count) || 0;
   const totals = await totalPlays(kv, () => base44(request, "GET", "entities/PublishedGame?limit=1000"));
-  return json({ plays, totals });
+  // Games an admin took down, for the lists to leave out.
+  const takenDown = (await readTakenDown(kv)).game || [];
+  return json({ plays, totals, takenDown });
 }

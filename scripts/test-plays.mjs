@@ -57,3 +57,25 @@ assert(data.totals["old-hit"] === 121 && data.totals["new-one"] === 2 && data.pl
   assert(BUILT_IN_GAME_NAMES.every((n) => badName("game", n)), "and nobody can publish a game with one of them");
   assert(badName("game", "games") && !badName("game", "my-veck-game"), "'games' is reserved; names merely containing a built-in's are fine");
 }
+
+// Taken-down games are left out of the lists, even if the owner clears the hidden flag.
+{
+  const { setBlocked, syncTakenDown, readTakenDown } = await import(R("cloudflare-lib/reports.js"));
+  globalThis.fetch = async (url) => (String(url).includes("/entities/PublishedGame") ? new Response(JSON.stringify([{ id: "g1", name: "scam-game", created_by_id: "x" }])) : new Response("{}"));
+  const kv3store = new Map();
+  const kv3 = {
+    get: async (k, t) => (kv3store.has(k) ? (t === "json" ? JSON.parse(kv3store.get(k)) : kv3store.get(k)) : null),
+    put: async (k, v) => kv3store.set(k, String(v)),
+    delete: async (k) => kv3store.delete(k),
+  };
+  await setBlocked(kv3, new Request("https://x/"), "game", "scam-game", true);
+  const { onRequest } = await import(R("functions/api/apps/6a8b5eb7787b8a4d6a18f662/functions/game-plays.js"));
+  let data = await (await onRequest({ request: new Request("https://x/"), env: { PUBLISHED_HTML: kv3 } })).json();
+  assert((data.takenDown || []).includes("scam-game"), "a taken-down game is in the list the game pages leave out");
+  await setBlocked(kv3, new Request("https://x/"), "game", "scam-game", false);
+  data = await (await onRequest({ request: new Request("https://x/"), env: { PUBLISHED_HTML: kv3 } })).json();
+  assert(!(data.takenDown || []).includes("scam-game"), "and back in the lists when an admin restores it");
+  await syncTakenDown(kv3, [{ kind: "game", name: "older-scam" }, { kind: "site", name: "old-site" }]);
+  const t = await readTakenDown(kv3);
+  assert(t.game.includes("older-scam") && t.site.includes("old-site"), "pages taken down before the list existed are added when Monitor lists them");
+}

@@ -94,6 +94,35 @@ export async function dismissReports(kv, kind, name) {
   await kv.put(REPORTS_KEY, JSON.stringify(all));
 }
 
+// Names of taken-down pages in one key, so public lists can leave them out with a single read
+// (owners can clear the hidden flag on their own record, and KV list calls are limited).
+const TAKEN_DOWN_KEY = "takendown";
+export async function readTakenDown(kv) {
+  try {
+    return (kv && (await kv.get(TAKEN_DOWN_KEY, "json"))) || { site: [], game: [] };
+  } catch {
+    return { site: [], game: [] };
+  }
+}
+// Rebuilds the list from the blocked:<kind>:<name> keys (Monitor's report list reads those
+// anyway), so pages taken down before the list existed are in it too. Writes only on a change.
+export async function syncTakenDown(kv, hidden) {
+  const want = { site: [], game: [] };
+  for (const h of hidden || []) if (want[h.kind] && h.name) want[h.kind].push(h.name);
+  const have = await readTakenDown(kv);
+  const same = (a, b) => [...(a || [])].sort().join() === [...(b || [])].sort().join();
+  if (same(want.site, have.site) && same(want.game, have.game)) return;
+  await kv.put(TAKEN_DOWN_KEY, JSON.stringify(want));
+}
+async function noteTakenDown(kv, kind, name, blocked) {
+  const all = await readTakenDown(kv);
+  const list = new Set(all[kind] || []);
+  if (blocked) list.add(name);
+  else list.delete(name);
+  all[kind] = [...list].slice(-5000);
+  await kv.put(TAKEN_DOWN_KEY, JSON.stringify(all));
+}
+
 export async function isBlocked(kv, kind, name) {
   try {
     return (await kv.get(blockedKey(kind, name))) != null;
@@ -126,6 +155,7 @@ export async function setBlocked(kv, request, kind, name, blocked) {
   } else {
     await kv.delete(blockedKey(kind, name));
   }
+  await noteTakenDown(kv, kind, name, blocked);
   if (rec) await base44(request, "PUT", `entities/${ENTITY[kind]}/${rec.id}`, { hidden: !!blocked });
   return !!rec;
 }

@@ -36,7 +36,7 @@ export default function Arcade() {
       base44.entities.PublishedGame.list("-plays", 500).catch(() => []),
       base44.functions.invoke("game-plays").then((r) => r.data || {}).catch(() => ({})),
     ]).then(([list, counts]) => {
-      const real = (list || []).filter((g) => !g.hidden).map((g) => ({ ...g, plays: counts.totals ? counts.totals[g.name] || 0 : (g.plays || 0) + ((counts.plays || {})[g.name] || 0) }));
+      const real = (list || []).filter((g) => !g.hidden && !(counts.takenDown || []).includes(g.name)).map((g) => ({ ...g, plays: counts.totals ? counts.totals[g.name] || 0 : (g.plays || 0) + ((counts.plays || {})[g.name] || 0) }));
       const names = new Set(real.map((g) => g.name));
       setGames([...builtIns.filter((g) => !names.has(g.name)), ...real].sort((a, b) => (b.plays || 0) - (a.plays || 0)));
     });
