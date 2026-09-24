@@ -45,8 +45,13 @@ export default async function (req) {
     // Only the site's owner can sell on it. Product ids are visible in the page and anyone can
     // save a SiteProduct row, so a row from anyone else for this site name is ignored — otherwise
     // a stranger could set the price, or have the payout recorded to their own account.
-    const sites = await base44.asServiceRole.entities.PublishedSite.filter({ name: siteName });
-    const site = sites && sites[0];
+    // Anyone can write a PublishedSite row with someone else's site name straight into the
+    // database, so the first row isn't necessarily the owner's: the oldest row is (a copycat's
+    // always comes later). Same rule as ownerOf in cloudflare-lib/published.js.
+    const sites = ((await base44.asServiceRole.entities.PublishedSite.filter({ name: siteName })) || [])
+      .slice()
+      .sort((a: any, b: any) => String(a.created_date || '').localeCompare(String(b.created_date || '')));
+    const site = sites[0];
     if (!site || site.hidden || !site.created_by_id) {
       return Response.json({ error: 'This site is not selling anything right now' }, { status: 400 });
     }
