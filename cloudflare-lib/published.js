@@ -179,12 +179,16 @@ export async function publish(context, kind, { name, html: rawHtml, extra }) {
       return json({ error: "That name is taken. Try another." }, 409);
     }
 
+    // An admin publishing over someone else's page (say, to restore it) keeps them as the
+    // owner and updates their record, so the page stays theirs and stays online.
+    const keeper = owner && owner !== user.id ? owner : user.id;
     await env.PUBLISHED_HTML.put(kvKey(kind, name), html, {
-      metadata: { owner: user.id, updated: new Date().toISOString() },
+      metadata: { owner: keeper, updated: new Date().toISOString() },
     });
 
-    const data = { ...extra, ownerName: publicName(user), html: publishedUrl(kind, name), hidden: false };
-    const target = mine || rows[0];
+    const ownersRow = rows.find((r) => r.created_by_id === keeper);
+    const data = { ...extra, ownerName: keeper === user.id ? publicName(user) : (ownersRow && ownersRow.ownerName) || "", html: publishedUrl(kind, name), hidden: false };
+    const target = ownersRow || mine || rows[0];
     const rec = target
       ? await base44(request, "PUT", `entities/${ENTITY[kind]}/${target.id}`, data)
       : await base44(request, "POST", `entities/${ENTITY[kind]}`, { ...data, name });

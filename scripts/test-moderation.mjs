@@ -366,3 +366,23 @@ assert(s === 200 && b.open === JSON.parse(store.get("contact")).messages.length,
   const [st, bd] = await j(pub.onRequestPost({ request: req({ name: "blackhole-login", html: "<p>x</p>" }, "usertok"), env }));
   assert(st === 400 && /own pages/.test(bd.error), "publishing refuses a new official-looking site name");
 }
+
+// ---- an admin publishing over someone's page keeps them as the owner ----
+{
+  const meta = new Map();
+  const kv3 = {
+    ...kv,
+    async put(k, v, o) { writes++; store.set(k, String(v)); meta.set(k, (o && o.metadata) || null); },
+    async getWithMetadata(k) { return { value: store.get(k) ?? null, metadata: meta.get(k) ?? null }; },
+  };
+  const env3 = { PUBLISHED_HTML: kv3 };
+  await kv3.put("site:garden", "<h1>Mine</h1>", { metadata: { owner: "u1" } });
+  entities.PublishedSite.push({ id: "gd1", name: "garden", html: "https://nebuluxai.pages.dev/published/site/garden", created_by_id: "u1", created_date: "2026-01-01", ownerName: "Maya" });
+  puts.length = 0;
+  delete globalThis.caches;
+  const [st] = await j(pub.onRequestPost({ request: req({ name: "garden", html: "<h1>Restored</h1>" }, "admintok"), env: env3 }));
+  assert(st === 200 && meta.get("site:garden").owner === "u1", "an admin republishing someone's page keeps them as its owner");
+  assert(puts.some(([id, d]) => id === "gd1" && d.ownerName === "Maya"), "the owner's record is the one updated, with their name");
+  const [s2, b2] = await j(gsh.onRequestPost({ request: req({ name: "garden" }), env: env3 }));
+  assert(s2 === 200 && b2.html.includes("Restored"), "and the page stays online");
+}
