@@ -35,10 +35,11 @@ import { captureReferral } from '@/lib/referral';
 
 // Remember an invite code (?ref=) from whatever page the link opened.
 captureReferral();
-import Login from '@/pages/Login';
-import Register from '@/pages/Register';
-import ForgotPassword from '@/pages/ForgotPassword';
-import ResetPassword from '@/pages/ResetPassword';
+// Sign-in pages load on demand too: signed-in people (most visits) never need them.
+const Login = lazy(() => import('@/pages/Login'));
+const Register = lazy(() => import('@/pages/Register'));
+const ForgotPassword = lazy(() => import('@/pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('@/pages/ResetPassword'));
 import ProtectedRoute from '@/components/ProtectedRoute';
 const WorkspaceShell = lazy(() => import('@/components/WorkspaceShell').then((m) => ({ default: m.WorkspaceShell })));
 const ChatWorkspace = lazy(() => import('@/components/WorkspaceShell').then((m) => ({ default: m.ChatWorkspace })));

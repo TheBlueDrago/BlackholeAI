@@ -190,3 +190,19 @@
 /* Headings drawn as a white-to-pastel gradient (Browser wordmark, Subscriptions, Promo
    Codes) need darker stops on the light theme's pale background to stay readable. */
 .light .bh-wordmark { background-image: linear-gradient(to right, #1e1b4b, #4338ca, #a21caf); }
+
+/* Opening splash (src/components/Intro.jsx): CSS instead of an animation library, so the
+   first page loads faster. Skipped for people who ask their device for less motion. */
+@keyframes bh-rise {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes bh-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.bh-rise { animation: bh-rise 1s ease-out both; }
+.bh-fade-in { animation: bh-fade-in 1s ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .bh-rise, .bh-fade-in { animation: none; }
+}

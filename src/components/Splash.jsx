@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import Intro from "@/components/Intro";
 
 const SEEN_KEY = "bh-splash-seen";
@@ -19,25 +18,24 @@ function shouldShow() {
   return true;
 }
 
+// Shows for 2 seconds, then fades out over 0.6s (a CSS transition, no animation library).
 export default function Splash() {
-  const [show, setShow] = useState(shouldShow);
+  const [phase, setPhase] = useState(() => (shouldShow() ? "show" : "gone"));
+  // Both timers start once, on mount (re-running on each phase change would cancel the second).
   useEffect(() => {
-    if (!show) return;
-    const t = setTimeout(() => setShow(false), 2000);
-    return () => clearTimeout(t);
-  }, [show]);
+    if (phase !== "show") return;
+    const fade = setTimeout(() => setPhase("leaving"), 2000);
+    const done = setTimeout(() => setPhase("gone"), 2600);
+    return () => {
+      clearTimeout(fade);
+      clearTimeout(done);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  if (phase === "gone") return null;
   return (
-    <AnimatePresence>
-      {show && (
-        <motion.div
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.6, ease: "easeInOut" }}
-          className="fixed inset-0 z-[100]"
-        >
-          <Intro />
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <div className={`fixed inset-0 z-[100] transition-opacity duration-[600ms] ease-in-out ${phase === "leaving" ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
+      <Intro />
+    </div>
   );
 }
