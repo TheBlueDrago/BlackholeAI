@@ -91,6 +91,14 @@ export function badName(kind, name) {
   return "";
 }
 
+// New site names that would look like one of our own pages at name.blackhole-ai-tech.com
+// ("blackhole-login", "secure-billing", "verify-account") are refused: those are what a fake
+// sign-in or payment page would use. Only for names nobody has yet, so existing sites keep
+// working and their owners can still republish.
+const OFFICIAL_WORDS = "login|log-in|signin|sign-in|signup|sign-up|verify|verification|secure|billing|payment|payments|support|official|admin|account|password|wallet|paypal";
+const LOOKS_OFFICIAL = new RegExp(`blackhole|^(${OFFICIAL_WORDS})(-|$)|-(${OFFICIAL_WORDS})$`);
+export const looksOfficial = (name) => LOOKS_OFFICIAL.test(String(name || ""));
+
 // Who owns a published name. Anyone signed in can write their own PublishedSite/PublishedGame
 // rows straight into Base44, so "there's a row of mine with this name" proves nothing. The
 // owner is whoever publish() recorded with the stored page, while they still have a row for
@@ -163,6 +171,9 @@ export async function publish(context, kind, { name, html: rawHtml, extra }) {
     const mine = rows.find((r) => r.created_by_id === user.id);
     // Having a row with this name isn't enough (rows can be written straight into Base44):
     // the name must be free or yours (see ownerOf).
+    if (kind === "site" && !rows.length && user.role !== "admin" && looksOfficial(name)) {
+      return json({ error: "That name looks like one of Blackhole AI's own pages, so it isn't allowed. Try another." }, 400);
+    }
     const owner = await ownerOf(request, env.PUBLISHED_HTML, kind, name, rows);
     if (owner && owner !== user.id && user.role !== "admin") {
       return json({ error: "That name is taken. Try another." }, 409);

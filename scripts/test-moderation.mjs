@@ -356,3 +356,13 @@ assert(s === 200 && b.open === JSON.parse(store.get("contact")).messages.length,
   assert(makerName("Blackhole AI Official") === "" && makerName("Support Team") === "" && makerName("a@b.com") === "", "records can't show an official-looking maker");
   assert(makerName("Maya") === "Maya", "normal maker names still show");
 }
+
+// ---- new site names that look official are refused ----
+{
+  const { looksOfficial } = await import(R + "cloudflare-lib/published.js");
+  assert(["blackhole-login", "myblackhole", "secure-billing", "verify-account", "login", "paypal-support"].every(looksOfficial), "official-looking site names are caught");
+  assert(!["bakery", "maya-portfolio", "help-desk-game", "my-account-book", "loginator", "secure"].some((n) => looksOfficial(n) && n !== "secure"), "ordinary names pass");
+  delete globalThis.caches;
+  const [st, bd] = await j(pub.onRequestPost({ request: req({ name: "blackhole-login", html: "<p>x</p>" }, "usertok"), env }));
+  assert(st === 400 && /own pages/.test(bd.error), "publishing refuses a new official-looking site name");
+}
