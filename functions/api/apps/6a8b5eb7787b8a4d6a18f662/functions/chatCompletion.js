@@ -364,7 +364,7 @@ export async function onRequestPost(context) {
         }
       })()
     );
-    return new Response(readable, { headers: { "content-type": "application/x-ndjson", "cache-control": "no-store" } });
+    return new Response(readable, { headers: { "content-type": "application/x-ndjson", "cache-control": "no-store", "x-content-type-options": "nosniff" } });
   } catch (err) {
     return json({ error: "Unhandled error", detail: String((err && err.stack) || err) }, 500);
   }

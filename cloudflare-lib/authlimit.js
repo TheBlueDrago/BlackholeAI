@@ -60,7 +60,7 @@ export async function authLimit(request, path) {
         const message = tooManyMessage(sec);
         return new Response(JSON.stringify({ message, detail: message }), {
           status: 429,
-          headers: { "content-type": "application/json", "retry-after": String(sec) },
+          headers: { "content-type": "application/json", "retry-after": String(sec), "x-content-type-options": "nosniff" },
         });
       }
     }

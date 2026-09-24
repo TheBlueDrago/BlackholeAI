@@ -38,3 +38,11 @@ for (const f of files) {
   if (ADMIN.includes(name)) assert(/role !== "admin"|role === "admin"/.test(src), `${name} checks the admin role on the server`);
 }
 for (const name of [...Object.keys(PUBLIC), ...ADMIN]) assert(files.includes(`${name}.js`), `${name} still exists (keep these lists current)`);
+
+// Function answers can't be taken as a page or a script by the browser (_headers doesn't
+// cover them): the shared json() helper sets nosniff.
+{
+  const { json } = await import(new URL("../cloudflare-lib/published.js", import.meta.url).href);
+  const r = json({ ok: true }, 201);
+  assert(r.status === 201 && r.headers.get("content-type") === "application/json" && r.headers.get("x-content-type-options") === "nosniff", "function answers are JSON with nosniff");
+}

@@ -23,10 +23,12 @@ export const MAX_BYTES = 5 * 1024 * 1024;
 
 export const ENTITY = { site: "PublishedSite", game: "PublishedGame" };
 
+// Every function answer: JSON the browser must never take as a page or a script (_headers
+// doesn't cover function answers).
 export function json(obj, status) {
   return new Response(JSON.stringify(obj), {
     status: status || 200,
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", "x-content-type-options": "nosniff" },
   });
 }
 
