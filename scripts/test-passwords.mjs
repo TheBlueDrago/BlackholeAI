@@ -1,7 +1,7 @@
 // Offline test for the password rules at sign-up and password reset (src/lib/passwordCheck.js).
 // Run: node scripts/test-passwords.mjs
-const R = new URL("../", import.meta.url).pathname;
-const { passwordProblem, passwordStrength } = await import(R + "src/lib/passwordCheck.js");
+// A file URL, so the import works on Windows too.
+const { passwordProblem, passwordStrength } = await import(new URL("../src/lib/passwordCheck.js", import.meta.url).href);
 const assert = (c, m) => {
   if (!c) {
     console.error("FAIL", m);
