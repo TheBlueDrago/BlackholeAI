@@ -323,9 +323,15 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
             <EffortPicker value={effort} onChange={setEffort} />
             {buildMode.visible && <ModeToggle mode={buildMode.mode} onChange={buildMode.setMode} />}
             {isExhausted && (
-              <p className="text-xs text-red-400 ml-auto">
-                You're out of {AI_NAMES[selectedAi]} credits. Switch AI or upgrade.
-              </p>
+              <div className="ml-auto flex flex-wrap items-center justify-end gap-1.5 text-xs">
+                <span className="text-red-400">Out of {AI_NAMES[selectedAi]} credits.</span>
+                <button onClick={() => shell?.goPlans()} className="px-2 py-1 rounded-lg bg-indigo-500 text-white font-medium hover:bg-indigo-400">
+                  Get more
+                </button>
+                <button onClick={() => shell?.openProfile("refer")} className="px-2 py-1 rounded-lg bg-slate-700 text-slate-100 font-medium hover:bg-slate-600">
+                  🎁 Free credits
+                </button>
+              </div>
             )}
           </div>
           <input

@@ -270,7 +270,7 @@ export async function onRequestPost(context) {
           {
             error: left > 0
               ? `You have ${left} ${TIER_NAMES[tier]} credit${left === 1 ? "" : "s"} left — not enough for ${effort} effort (costs at least ${mult}). Lower the effort level.`
-              : `You've run out of ${TIER_NAMES[tier]} credits. Refer friends (Account → Refer friends) to earn more.`,
+              : `You've run out of ${TIER_NAMES[tier]} credits. Get more on the Plans page, or invite a friend and you both get free credits (Settings → Refer friends).`,
             outOfCredits: true,
             credits: before,
           },
