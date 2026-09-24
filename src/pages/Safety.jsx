@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { CreditCard, Lock, ShieldCheck, Flag, Baby, KeyRound, Mail, ArrowRight, Check, Store } from "lucide-react";
+import { CreditCard, Lock, ShieldCheck, Flag, Baby, KeyRound, Mail, ArrowRight, Check, Store, Users } from "lucide-react";
 import PublicLayout from "@/components/PublicLayout";
 import { CONTACT_EMAIL } from "@/lib/company";
 
@@ -65,6 +65,17 @@ const SECTIONS = [
   },
 ];
 
+// For a parent or teacher deciding whether a young person can use Blackhole AI. Each point
+// matches the app: the 13+ rule (Terms, sign-up), paying (create-checkout; plans are $1 and
+// $5 a month), the purchase list and data download (Settings), deletion, and the filters.
+const PARENTS = [
+  "Blackhole AI is for ages 13 and up. Anyone under 18 needs a parent or guardian's permission, especially before buying anything.",
+  "It's free to use. Paid plans are monthly and credit packs are one-time, and every purchase goes through a secure checkout that shows the price first.",
+  "Every purchase is listed in Settings → Subscriptions. To cancel a plan or ask about a charge, contact us and pick \"Plans, credits or payments\".",
+  "The AI is told to keep what it writes suitable for young people, published pages are checked before they go live, and Blackhole Browser searches are filtered.",
+  "Chats are saved on the device; our servers keep only the start of the last few questions, to spot misuse. You can download a copy of an account's data, or delete the account and everything in it, from Settings.",
+];
+
 const TIPS = [
   "We will never ask for your password, by email, phone or chat.",
   "Only type your password on blackhole-ai-tech.com. Check the address first.",
@@ -99,6 +110,29 @@ export default function Safety() {
             </ul>
           </div>
         ))}
+      </section>
+
+      <section id="parents" className="mt-12 rounded-3xl bg-slate-900/50 border border-slate-800 p-6 sm:p-8 scroll-mt-20">
+        <div className="flex items-center gap-2">
+          <Users className="w-6 h-6 text-sky-300" />
+          <h2 className="text-xl font-semibold text-white">For parents and teachers</h2>
+        </div>
+        <ul className="mt-4 space-y-3">
+          {PARENTS.map((t) => (
+            <li key={t} className="flex items-start gap-2 text-slate-300 text-sm">
+              <Check className="w-4 h-4 mt-0.5 shrink-0 text-sky-300" />
+              <span>{t}</span>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+          <Link to="/contact?topic=billing" className="inline-flex items-center gap-1.5 font-semibold text-white hover:text-sky-200">
+            Ask about a payment <ArrowRight className="w-4 h-4 shrink-0" />
+          </Link>
+          <Link to="/contact?topic=account" className="inline-flex items-center gap-1.5 font-semibold text-white hover:text-sky-200">
+            Get help with an account <ArrowRight className="w-4 h-4 shrink-0" />
+          </Link>
+        </div>
       </section>
 
       <section className="mt-12 rounded-3xl bg-amber-500/10 border border-amber-400/30 p-6 sm:p-8">
