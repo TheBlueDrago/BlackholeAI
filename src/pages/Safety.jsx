@@ -1,5 +1,5 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { CreditCard, Lock, ShieldCheck, Flag, Baby, KeyRound, Mail, ArrowRight, Check, Store, Users } from "lucide-react";
 import PublicLayout from "@/components/PublicLayout";
 import { CONTACT_EMAIL } from "@/lib/company";
@@ -97,6 +97,13 @@ const TIPS = [
 ];
 
 export default function Safety() {
+  // Links like /safety#parents: open at that section, also when arriving from inside the app.
+  const { hash } = useLocation();
+  useEffect(() => {
+    if (!hash) return;
+    const t = setTimeout(() => document.getElementById(hash.slice(1))?.scrollIntoView(), 50);
+    return () => clearTimeout(t);
+  }, [hash]);
   return (
     <PublicLayout title="Trust & safety">
       <section className="pt-10 sm:pt-16 max-w-3xl">

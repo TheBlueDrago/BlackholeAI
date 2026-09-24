@@ -88,8 +88,8 @@ const FAQ = [
   ["Do I need to know how to code?", "No. You describe what you want in your own words. If you do know code, you can edit it by hand, and on Pro you can download it or push it to GitHub."],
   ["Does it work on my phone?", "Yes. Everything works on phones, tablets and computers, and you can install it like an app from your profile."],
   ["What are credits?", "Credits are what the AI uses up when it works for you. Bigger jobs use more. Your plan gives you a fresh allowance every month."],
-  ["Is it safe for kids?", "Every site and game is checked before it's published: adult content, scams, fake login forms and harmful code are blocked. Anyone can report a page, and makers' emails are never shown."],
-  ["Is paying safe?", "Yes. You pay on Base44 Payments' secure checkout page, so we never see or store your card number, and prices are set on our server. Plans are monthly and credit packs are one-time. See Trust & safety for more."],
+  ["Is it safe for kids?", "Every site and game is checked before it's published: adult content, scams, fake login forms and harmful code are blocked. Anyone can report a page, and makers' emails are never shown.", ["/safety#parents", "For parents and teachers"]],
+  ["Is paying safe?", "Yes. You pay on Base44 Payments' secure checkout page, so we never see or store your card number, and prices are set on our server. Plans are monthly and credit packs are one-time. See Trust & safety for more.", ["/safety", "Trust & safety"]],
   ["Can I take my site down?", "Yes. You can unpublish or delete your websites and games at any time from your profile."],
 ];
 
@@ -367,9 +367,14 @@ export default function Landing() {
       <section id="faq" className="mt-28 sm:mt-36 max-w-3xl mx-auto scroll-mt-24">
         <h2 className="text-center text-3xl sm:text-4xl font-bold text-white">Questions</h2>
         <div className="mt-8 divide-y divide-slate-800 border-y border-slate-800">
-          {FAQ.map(([q, a]) => (
+          {FAQ.map(([q, a, link]) => (
             <Question key={q} q={q}>
               <p>{a}</p>
+              {link && (
+                <Link to={link[0]} className="mt-2 inline-block text-indigo-300 hover:text-indigo-200">
+                  {link[1]} →
+                </Link>
+              )}
             </Question>
           ))}
           <Question q="How do I contact you?">
