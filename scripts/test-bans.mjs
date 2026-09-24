@@ -93,3 +93,54 @@ assert(r.status === 400 && !/blocked/.test(r.data.error || ""), "after the ban i
   const fine = await pageFor(req, kv, "site", "fine");
   assert(fine && fine.html && fine.html.includes("Hello"), "someone else's is");
 }
+
+// Monitor's "Take down all their pages": every page the account really owns goes offline, but
+// not someone else's site it only wrote a copycat row for.
+{
+  const store2 = new Map();
+  const kv2 = {
+    get: async (k, t) => (store2.has(k) ? (t === "json" ? JSON.parse(store2.get(k).v) : store2.get(k).v) : null),
+    getWithMetadata: async (k) => (store2.has(k) ? { value: store2.get(k).v, metadata: store2.get(k).m || null } : { value: null, metadata: null }),
+    put: async (k, v, o) => store2.set(k, { v: String(v), m: o && o.metadata }),
+    delete: async (k) => store2.delete(k),
+    list: async () => ({ keys: [] }),
+  };
+  store2.set("site:scam1", { v: "<html>scam</html>", m: { owner: "bad1" } });
+  store2.set("game:scamgame", { v: "<html>game</html>", m: { owner: "bad1" } });
+  store2.set("site:legit", { v: "<html>legit</html>", m: { owner: "good1" } });
+  const rows2 = {
+    PublishedSite: [
+      { id: "a", name: "scam1", created_by_id: "bad1", created_date: "2026-09-01" },
+      { id: "b", name: "legit", created_by_id: "good1", created_date: "2026-08-01" },
+      { id: "c", name: "legit", created_by_id: "bad1", created_date: "2026-09-02" },
+    ],
+    PublishedGame: [{ id: "d", name: "scamgame", created_by_id: "bad1", created_date: "2026-09-01" }],
+  };
+  let who = { id: "boss", role: "admin", email: "boss@example.com" };
+  globalThis.fetch = async (url, opts = {}) => {
+    const u = new URL(String(url));
+    if (u.pathname.endsWith("/entities/User/me")) return new Response(JSON.stringify(who));
+    const m = u.pathname.match(/\/entities\/(PublishedSite|PublishedGame)(?:\/(\w+))?$/);
+    if (m) {
+      if (opts.method === "PUT") return new Response(JSON.stringify({ id: m[2] }));
+      const q = JSON.parse(u.searchParams.get("q") || "{}");
+      return new Response(JSON.stringify(rows2[m[1]].filter((r) => Object.entries(q).every(([k, v]) => r[k] === v))));
+    }
+    return new Response("[]");
+  };
+  const admin = await import(R("functions/api/apps/6a8b5eb7787b8a4d6a18f662/functions/admin-reports.js"));
+  const go = async () => {
+    const request = new Request("https://x/", { method: "POST", headers: { authorization: "Bearer t", "content-type": "application/json" }, body: JSON.stringify({ action: "hide-owner", userId: "bad1" }) });
+    const res = await admin.onRequestPost({ request, env: { PUBLISHED_HTML: kv2 } });
+    return { status: res.status, data: await res.json() };
+  };
+  const r = await go();
+  const names = (r.data.taken || []).map((t) => `${t.kind}:${t.name}`).sort().join(",");
+  assert(r.status === 200 && names === "game:scamgame,site:scam1", `all of the account's own pages are taken down (${names})`);
+  assert(store2.has("blocked:site:scam1") && store2.has("blocked:game:scamgame"), "and they're offline");
+  assert(!store2.has("blocked:site:legit"), "someone else's site it wrote a copycat row for stays up");
+  const log = JSON.parse(store2.get("adminlog").v);
+  assert(log[0].what === "take-down-all" && log[0].details.count === 2, "it's in the admin log");
+  who = { id: "u5", role: "user" };
+  assert((await go()).status === 403, "only admins can do it");
+}

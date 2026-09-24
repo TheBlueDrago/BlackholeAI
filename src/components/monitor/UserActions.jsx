@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Crown, Ban, Clock, ShieldCheck } from "lucide-react";
+import { Crown, Ban, Clock, ShieldCheck, EyeOff } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 
 const UNIT_MS = { days: 86400000, months: 30 * 86400000, years: 365 * 86400000 };
 
@@ -36,6 +37,22 @@ export default function UserActions({ user, onApply }) {
   const block = () =>
     run({ banned: false, blockedUntil: new Date(Date.now() + bN * UNIT_MS[bUnit]).toISOString() });
   const unblock = () => run({ banned: false, blockedUntil: null });
+  // Take down every site and game this account owns (admin-reports "hide-owner").
+  const [takeNote, setTakeNote] = useState("");
+  const takeDownAll = async () => {
+    if (!window.confirm(`Take down every site and game ${user.email || "this account"} owns? They go offline for everyone. You can put each back from Published sites & games.`)) return;
+    setBusy(true);
+    setTakeNote("");
+    try {
+      const r = await base44.functions.invoke("admin-reports", { action: "hide-owner", userId: user.id });
+      const n = (r.data?.taken || []).length;
+      setTakeNote(n ? `Took down ${n} page${n === 1 ? "" : "s"}.` : "They don't own any published pages.");
+    } catch (e) {
+      setTakeNote(e?.response?.data?.error || "Couldn't take their pages down.");
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-3">
@@ -129,9 +146,19 @@ export default function UserActions({ user, onApply }) {
         )}
       </div>
       <p className="text-[11px] text-slate-500">
-        A ban or block stops them using the AI, publishing, promo codes, referral credits and team invites. Pages they already published stay up: take
-        those down in Published sites &amp; games.
+        A ban or block stops them using the AI, publishing, promo codes, referral credits and team invites. Pages they already published stay up until you
+        take them down.
       </p>
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          onClick={takeDownAll}
+          disabled={busy}
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-700 text-slate-100 text-xs font-medium hover:bg-slate-600 disabled:opacity-50"
+        >
+          <EyeOff className="w-3.5 h-3.5" /> Take down all their pages
+        </button>
+        {takeNote && <span className="text-[11px] text-slate-400">{takeNote}</span>}
+      </div>
     </div>
   );
 }

@@ -30,6 +30,8 @@ function describe({ what, details: d = {} }) {
       return `Deleted promo code ${d.code}`;
     case "take-down":
       return `Took down ${d.kind} "${d.name}"`;
+    case "take-down-all":
+      return `Took down all ${d.count} page${d.count === 1 ? "" : "s"} of ${d.userId}`;
     case "restore":
       return `Put back ${d.kind} "${d.name}"`;
     case "enterprise-status":
