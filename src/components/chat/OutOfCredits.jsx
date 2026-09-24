@@ -49,7 +49,8 @@ export default function OutOfCredits({ tier, canSwitch = true }) {
             onClick={() => shell?.goBilling(upgrade.id)}
             className="flex-1 text-left rounded-xl bg-indigo-500 hover:bg-indigo-400 transition-colors px-3 py-2"
           >
-            <span className="flex items-center gap-1.5 text-sm font-semibold text-white">
+            {/* A fixed white (not text-white, which the light theme turns dark) on the indigo button. */}
+            <span className="flex items-center gap-1.5 text-sm font-semibold text-[#fff]">
               <Zap className="w-4 h-4 shrink-0" />
               <span>
                 Upgrade to {upgrade.name} · {upgrade.salePrice && <s className="opacity-70 mr-1">{price(upgrade.price)}</s>}
