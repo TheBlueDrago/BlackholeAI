@@ -55,7 +55,7 @@ export function WorkspaceShell() {
         )}
       </AnimatePresence>
 
-      <div className="flex items-center justify-center gap-5 w-full min-h-[60vh] sm:min-h-[524px]">
+      <div className="flex items-center justify-center w-full min-h-[60vh] sm:min-h-[524px]">
         <AnimatePresence>
           {sidebarOpen && (
             <Sidebar
@@ -75,6 +75,7 @@ export function WorkspaceShell() {
               onGoMonitor={shell.goMonitor}
               isAdmin={isAdmin}
               credits={credits}
+              gapAfter={20}
             />
           )}
         </AnimatePresence>

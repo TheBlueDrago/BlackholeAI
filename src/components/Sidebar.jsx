@@ -29,7 +29,7 @@ function CreditBar({ icon, label, used, total, gradient }) {
   );
 }
 
-export default function Sidebar({ conversations, activeId, onSelect, onRename, onDelete, onRefresh, onGoHome, onGoCode, onNewChat, onGoSubscriptions, onGoDesigner, onGoBrowser, onGoGames, onGoMonitor, isAdmin, credits = {} }) {
+export default function Sidebar({ conversations, activeId, onSelect, onRename, onDelete, onRefresh, onGoHome, onGoCode, onNewChat, onGoSubscriptions, onGoDesigner, onGoBrowser, onGoGames, onGoMonitor, isAdmin, credits = {}, gapAfter = 0 }) {
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState("");
   const [confirmId, setConfirmId] = useState(null);
@@ -81,10 +81,12 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
   return (
     <>
       <motion.div
-        initial={{ width: 0, opacity: 0 }}
-        animate={{ width: targetWidth, opacity: 1 }}
-        exit={{ width: 0, opacity: 0 }}
-        transition={{ type: "spring", stiffness: 240, damping: 28 }}
+        // A plain ease, not a spring: a spring overshoots, and the chat beside it wobbled left and
+        // right. The space after it (gapAfter) grows with it, so the chat slides instead of jumping.
+        initial={{ width: 0, opacity: 0, marginRight: 0 }}
+        animate={{ width: targetWidth, opacity: 1, marginRight: isMobile ? 0 : gapAfter }}
+        exit={{ width: 0, opacity: 0, marginRight: 0 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
         className={`shrink-0 overflow-hidden ${isMobile ? "fixed left-0 top-0 z-40 h-[100dvh]" : "h-[524px]"}`}
       >
         <PullToRefresh
