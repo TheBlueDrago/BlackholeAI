@@ -81,3 +81,15 @@ assert(r.block.length === 0, "a normal page is not blocked");
   const s = scanPage(`<input type="password"><script>fetch("https://evil.com/x")</script>`);
   assert(s.flag === "red" && s.block.length === 1, "the scan flags it red and refuses publishing");
 }
+
+// Every built-in website template must pass the publish checks, or people who pick it
+// couldn't publish their site.
+{
+  const P = await import(R + "cloudflare-lib/phishing.js");
+  const { SITE_TEMPLATES } = await import(R + "src/lib/siteTemplates.js");
+  const failing = SITE_TEMPLATES.filter((t) => {
+    const h = t.html || "";
+    return P.findCredentialForm(h) || P.findCredentialLeak(h) || scanPage(h).block.length;
+  }).map((t) => t.id);
+  assert(SITE_TEMPLATES.length > 0 && failing.length === 0, `all ${SITE_TEMPLATES.length} templates can be published` + (failing.length ? ` (failing: ${failing})` : ""));
+}
