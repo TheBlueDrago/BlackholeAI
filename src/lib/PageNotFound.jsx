@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Home, Gamepad2, LayoutTemplate, Mail } from "lucide-react";
 import PublicLayout from "@/components/PublicLayout";
@@ -13,6 +13,14 @@ const LINKS = [
 // Any address the app doesn't know: say so plainly and offer the main places to go.
 export default function PageNotFound() {
   const { pathname } = useLocation();
+  // The server answers every address with the app, so tell search engines this one isn't a page.
+  useEffect(() => {
+    const meta = document.createElement("meta");
+    meta.name = "robots";
+    meta.content = "noindex";
+    document.head.appendChild(meta);
+    return () => meta.remove();
+  }, []);
   return (
     <PublicLayout title="Page not found">
       <section className="text-center py-20 sm:py-28">
