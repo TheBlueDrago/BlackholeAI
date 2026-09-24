@@ -107,7 +107,7 @@ function ownerOf(n) {
 }
 
 function isTakenFor(n, projectId) {
-  if (!n || RESERVED.includes(n)) return true;
+  if (!n || RESERVED.includes(n) || findBuiltInGame(n)) return true;
   const o = ownerOf(n);
   return !!o && o !== projectId;
 }
@@ -279,7 +279,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
       setIsRepublish(false);
       return;
     }
-    if (RESERVED.includes(n)) {
+    if (RESERVED.includes(n) || findBuiltInGame(n)) {
       setNameTaken(true);
       setIsRepublish(false);
       return;

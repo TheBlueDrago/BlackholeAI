@@ -179,7 +179,9 @@ export default function GamesFront() {
   }, [games, cat, q]);
 
   const ranked = useMemo(() => [...games].sort((a, b) => (b.plays || 0) - (a.plays || 0)), [games]);
-  const featured = useMemo(() => games.find((g) => g.featured) || ranked[0] || null, [games, ranked]);
+  // The top game by plays. (A record's own "featured" field isn't used: owners can set it on
+  // their own games.)
+  const featured = useMemo(() => ranked[0] || null, [ranked]);
   const mediumTop = useMemo(() => ranked.filter((g) => g.id !== (featured && featured.id)).slice(0, 5), [ranked, featured]);
   const showTop = cat === "home";
   const play = (name) => navigate(`/chat/game/${name}`);

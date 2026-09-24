@@ -45,3 +45,15 @@ const { onRequest } = await import(R("functions/api/apps/6a8b5eb7787b8a4d6a18f66
 const res = await onRequest({ request: new Request("https://x/"), env: { PUBLISHED_HTML: kv } });
 const data = await res.json();
 assert(data.totals["old-hit"] === 121 && data.totals["new-one"] === 2 && data.plays["new-one"] === 2, "game-plays gives the totals to show and rank by");
+
+// Built-in games can't be replaced by a published game with the same name.
+{
+  const { readFileSync } = await import("node:fs");
+  const { badName, BUILT_IN_GAME_NAMES } = await import(R("cloudflare-lib/published.js"));
+  const shipped = ["src/lib/veckShooterGame.js", "src/lib/pulseJumpGame.js"].map((f) => (readFileSync(new URL("../" + f, import.meta.url), "utf8").match(/_META = \{ name: "([^"]+)"/) || [])[1]);
+  const list = readFileSync(new URL("../src/lib/builtInGames.js", import.meta.url), "utf8");
+  const metas = (list.match(/\.\.\.[A-Z_]+_META/g) || []).length;
+  assert(metas === shipped.length && shipped.every((n) => BUILT_IN_GAME_NAMES.includes(n)), `the server knows every built-in game's name (${shipped.join(", ")})`);
+  assert(BUILT_IN_GAME_NAMES.every((n) => badName("game", n)), "and nobody can publish a game with one of them");
+  assert(badName("game", "games") && !badName("game", "my-veck-game"), "'games' is reserved; names merely containing a built-in's are fine");
+}

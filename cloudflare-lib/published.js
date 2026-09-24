@@ -82,6 +82,9 @@ export async function findByName(request, kind, name) {
 const SITE_NAME = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
 const GAME_NAME = /^[a-z0-9](?:[a-z0-9.-]{0,61}[a-z0-9])?$/;
 const RESERVED = ["home", "www", "admin", "api", "mail", "infinity", "ai", "app", "login", "register", "support", "blog"];
+// Keep BUILT_IN_GAME_NAMES in step with src/lib/builtInGames.js (scripts/test-plays.mjs checks).
+export const BUILT_IN_GAME_NAMES = ["veck", "pulse"];
+const GAME_RESERVED = ["game", "games", ...BUILT_IN_GAME_NAMES];
 export function badName(kind, name) {
   if (!(kind === "site" ? SITE_NAME : GAME_NAME).test(name)) {
     return kind === "site"
@@ -89,6 +92,9 @@ export function badName(kind, name) {
       : "Game names can only use letters, numbers, dots and hyphens.";
   }
   if (kind === "site" && RESERVED.includes(name)) return "That name is taken. Try another.";
+  // Games: the same words, and the names of the games built into the app, so nobody can publish
+  // a game that takes a built-in one's place in the lists.
+  if (kind === "game" && (RESERVED.includes(name) || GAME_RESERVED.includes(name))) return "That name is taken. Try another.";
   return "";
 }
 
