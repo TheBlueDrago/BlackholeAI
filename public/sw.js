@@ -2,13 +2,16 @@
 // and repeat visits open fast by keeping the app's own files on the device.
 // - /assets/* files have a content hash in their names, so a saved copy is always the right
 //   one: downloaded once, then served from the device.
-// - The app page for app screens (/, /chat…, sign-in) opens from the device right away and is
-//   refreshed in the background, so the next launch has the newest version.
+// - The app page for app screens (/, /chat…, sign-in) comes from the network, so it always
+//   matches the code that's live (new versions go out many times a day and the old code files
+//   are then gone). The saved copy is only used offline or when the network takes over 4s.
 // - Everything else goes to the network untouched: /api (sign-in, data, AI, payments),
 //   published sites, the public pages built by the server, and other websites.
 // To switch this off for everyone, replace this file with one that calls
 // self.registration.unregister() and deletes the caches.
-const SHELL = "bh-shell-v1";
+// v2: v1 served its saved page first, which after a new version pointed at code that was gone.
+const SHELL = "bh-shell-v2";
+const NETWORK_WAIT_MS = 4000;
 const ASSETS = "bh-assets-v1";
 const MAX_ASSETS = 250;
 const APP_ROUTES = /^\/(chat(\/.*)?|login|register|forgot-password|reset-password|plans|billing|promo-success|ThankYou)?$/;
@@ -29,12 +32,13 @@ self.addEventListener("activate", (event) => {
 
 // Downloads the app page and the code it starts with, and saves the page only once its code
 // is saved, so a saved page never points at code that isn't there.
+// `given`: an app page just downloaded for a launch (saves downloading it twice).
 let refreshing = null;
-function refreshShell() {
+function refreshShell(given) {
   if (refreshing) return refreshing;
   refreshing = (async () => {
-    const res = await fetch("/", { cache: "no-store" });
-    if (!res.ok || !/text\/html/i.test(res.headers.get("content-type") || "")) return;
+    const res = given || (await fetch("/", { cache: "no-store" }));
+    if (!res.ok || res.redirected || !/text\/html/i.test(res.headers.get("content-type") || "")) return;
     const html = await res.clone().text();
     const assets = await caches.open(ASSETS);
     const urls = [...new Set(html.match(/\/assets\/[\w.-]+\.(?:js|css)/g) || [])];
@@ -70,9 +74,18 @@ self.addEventListener("fetch", (event) => {
   if (req.mode === "navigate" && req.destination === "document" && APP_ROUTES.test(url.pathname)) {
     event.respondWith(
       (async () => {
+        const network = fetch(req);
+        let timer;
+        const slow = new Promise((resolve) => (timer = setTimeout(resolve, NETWORK_WAIT_MS, "slow")));
+        const first = await Promise.race([network.catch(() => "offline"), slow]);
+        clearTimeout(timer);
+        if (first !== "slow" && first !== "offline" && first.ok) {
+          event.waitUntil(refreshShell(first.clone()).catch(() => {}));
+          return first;
+        }
         const cached = await (await caches.open(SHELL)).match("/");
-        event.waitUntil(refreshShell().catch(() => {}));
-        return cached || fetch(req);
+        if (cached) return cached;
+        return network;
       })()
     );
     return;

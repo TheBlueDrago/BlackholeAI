@@ -12,7 +12,9 @@ window.addEventListener('vite:preloadError', (event) => {
   try { last = Number(sessionStorage.getItem('bh-reloaded-at')) || 0 } catch { /* storage blocked */ }
   if (Date.now() - last < 10000) return
   try { sessionStorage.setItem('bh-reloaded-at', String(Date.now())) } catch { /* storage blocked */ }
-  event.preventDefault()
+  // No event.preventDefault(): that made the failed import "succeed" with nothing, and the
+  // page crashed ("reading 'default'") before the reload. The error reaches lib/lazyRetry.js,
+  // which keeps the spinner up while the page reloads.
   window.location.reload()
 })
 

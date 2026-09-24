@@ -4,7 +4,10 @@ import { lazy } from "react";
 // who had the app open during a deploy asks for the OLD file names, which no longer
 // exist, and the page failed to load (the whole app went blank). When that happens,
 // reload once to pick up the new version; if it still fails, let the error show.
+// "Once" means once in 30 seconds: a flag kept for the whole session meant a second deploy
+// later the same day showed the crash screen instead of reloading.
 const KEY = "blackhole-chunk-reload";
+const RETRY_AFTER_MS = 30000;
 
 export function lazyRetry(factory) {
   return lazy(async () => {
@@ -17,8 +20,8 @@ export function lazyRetry(factory) {
     } catch (err) {
       let reloaded = false;
       try {
-        reloaded = sessionStorage.getItem(KEY) === "1";
-        if (!reloaded) sessionStorage.setItem(KEY, "1");
+        reloaded = Date.now() - (Number(sessionStorage.getItem(KEY)) || 0) < RETRY_AFTER_MS;
+        if (!reloaded) sessionStorage.setItem(KEY, String(Date.now()));
       } catch {}
       if (!reloaded) {
         window.location.reload();
