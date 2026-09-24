@@ -12,9 +12,12 @@ const when = (iso) => {
   return Number.isFinite(t) ? t : 0;
 };
 
-// -> the reasons to hold this sale's payout (empty = fine to pay).
-export function payoutWarnings(sale, sales, now = Date.now()) {
+// -> the reasons to hold this sale's payout (empty = fine to pay). `takenDown` is the set of
+// site names an admin has taken down (admin-reports' hidden list): checkout runs on Base44,
+// which can't see take-downs, so a scam site's sales are held here instead.
+export function payoutWarnings(sale, sales, now = Date.now(), takenDown = null) {
   const out = [];
+  if (takenDown && takenDown.has(sale.siteName)) out.push("The site was taken down");
   const buyer = clean(sale.buyerEmail);
   if (buyer && buyer === clean(sale.creatorEmail)) out.push("The buyer is the site's owner");
   const paid = when(sale.paidAt);
@@ -28,12 +31,12 @@ export function payoutWarnings(sale, sales, now = Date.now()) {
 }
 
 // Per creator: what's fine to pay now and what to hold. -> [{ creatorEmail, ready, hold, sales }]
-export function payoutSummary(sales, now = Date.now()) {
+export function payoutSummary(sales, now = Date.now(), takenDown = null) {
   const by = new Map();
   for (const s of sales) {
     const key = clean(s.creatorEmail) || "(no email)";
     const row = by.get(key) || { creatorEmail: key, ready: 0, hold: 0, sales: 0 };
-    if (payoutWarnings(s, sales, now).length) row.hold += num(s.creatorPayout);
+    if (payoutWarnings(s, sales, now, takenDown).length) row.hold += num(s.creatorPayout);
     else row.ready += num(s.creatorPayout);
     row.sales += 1;
     by.set(key, row);

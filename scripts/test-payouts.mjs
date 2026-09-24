@@ -19,3 +19,12 @@ assert(payoutWarnings(burst[0], burst, now).some((w) => w.includes("3 orders")),
 assert(payoutWarnings(sale({ gross: "250.00" }), [], now).some((w) => w.includes("large")), "a big order is flagged");
 const sum = payoutSummary([sale(), sale({ buyerEmail: "maker@x.com" })], now);
 assert(sum.length === 1 && sum[0].ready === 9.5 && sum[0].hold === 9.5, "the summary splits ready and held amounts per creator");
+
+// Sales from a site an admin took down are held, whatever else is true.
+{
+  const down = new Set(["scamshop"]);
+  assert(payoutWarnings(sale({ siteName: "scamshop" }), [], now, down).includes("The site was taken down"), "a taken-down site's sale is held");
+  assert(payoutWarnings(sale(), [sale()], now, down).length === 0, "other sites' sales aren't affected");
+  const sum = payoutSummary([sale({ siteName: "scamshop", creatorPayout: "9.00" })], now, down);
+  assert(sum[0].hold === 9 && sum[0].ready === 0, "and its payout counts as held, not ready");
+}

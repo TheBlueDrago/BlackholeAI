@@ -7,11 +7,17 @@ const money = (n) => `$${(Math.round(n * 100) / 100).toFixed(2)}`;
 
 export default function RevenueAnalytics() {
   const [sales, setSales] = useState(null);
+  // Sites an admin took down: their sales are held (see payoutWarnings).
+  const [takenDown, setTakenDown] = useState(() => new Set());
 
   useEffect(() => {
     base44.entities.SiteSale.filter({ status: "paid" }, "-paidAt", 500)
       .then((rows) => setSales(rows || []))
       .catch(() => setSales([]));
+    base44.functions
+      .invoke("admin-reports", { action: "list" })
+      .then((r) => setTakenDown(new Set((r.data?.hidden || []).filter((h) => h.kind === "site").map((h) => h.name))))
+      .catch(() => {});
   }, []);
 
   if (!sales) {
@@ -38,8 +44,8 @@ export default function RevenueAnalytics() {
   const top = Object.entries(bySite).sort((a, b) => b[1].gross - a[1].gross);
   const max = top[0]?.[1].gross || 1;
   // Before paying creators by hand: what's fine to pay, what to hold, and why.
-  const summary = payoutSummary(sales);
-  const flagged = sales.map((r) => ({ r, why: payoutWarnings(r, sales).filter((w) => !w.startsWith("Paid less than")) })).filter((x) => x.why.length);
+  const summary = payoutSummary(sales, Date.now(), takenDown);
+  const flagged = sales.map((r) => ({ r, why: payoutWarnings(r, sales, Date.now(), takenDown).filter((w) => !w.startsWith("Paid less than")) })).filter((x) => x.why.length);
 
   return (
     <div className="w-full max-w-3xl mt-8">
