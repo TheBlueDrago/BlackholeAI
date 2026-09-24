@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 
 // Public /terms and /privacy pages, linked from sign-up, log-in, billing and the
 // report page. Plain language on purpose; keep them in step with what the app does.
-const UPDATED = "September 23, 2026";
+const UPDATED = "September 24, 2026";
 // Optional: a support address to show instead of the contact form (/contact).
 const CONTACT_EMAIL = "";
 
@@ -47,7 +47,7 @@ export function Terms() {
       <ul>
         <li>You must be at least 13 years old. If you're under 18, you need a parent or guardian's permission, especially before buying anything.</li>
         <li>Keep your login to yourself. You're responsible for what happens on your account.</li>
-        <li>One account per person. Creating extra accounts to collect free or referral credits isn't allowed.</li>
+        <li>One account per person. Creating extra accounts to collect free credits, free trials, discounts or referral rewards isn't allowed.</li>
       </ul>
 
       <h2>Plans and credits</h2>
@@ -56,6 +56,20 @@ export function Terms() {
         <li>Credits have no cash value, can't be sold or transferred, and may expire as described in the app.</li>
         <li>Paid plans are charged through our payment provider (Base44 Payments) at the price shown before you pay. We never see or store your full card number.</li>
         <li>Credits or rewards gained by cheating — fake sign-ups, abusing referrals, exploiting bugs — can be removed, and the account can be suspended.</li>
+      </ul>
+
+      <h2>New-member offer</h2>
+      <ul>
+        <li>Accounts created on or after September 24, 2026 get the Pro plan free for 7 days. When the week ends the account goes back to the Free plan unless you choose a paid plan. We don't ask for payment details to start the free week.</li>
+        <li>For the 48 hours after the free week, one plan purchase gets 30% off. That lower price continues for as long as that subscription stays active. It can be used once: after a purchase at the lower price, later purchases are at the normal price, even within the 48 hours.</li>
+        <li>We may change or end this offer for new accounts at any time.</li>
+      </ul>
+
+      <h2>Enterprise</h2>
+      <ul>
+        <li>The Enterprise plan is only for legally registered organizations. You apply with your organization's details, we check them, and we may decline an application.</li>
+        <li>Enterprise is priced per seat. We send a quote before anything is charged, and turn the plan on once it's paid.</li>
+        <li>The organization's credits are shared by everyone on it. The person who applied manages who is on it and is responsible for how those people use Blackhole AI.</li>
       </ul>
 
       <h2>AI answers</h2>
@@ -123,6 +137,7 @@ export function Privacy() {
         <li><strong>Usage:</strong> how many credits you use on each AI, your plan, promo codes you redeem, and who invited you or whom you invited. When you join through an invite link we keep a scrambled (hashed) form of your IP address with it, to spot one person creating many accounts.</li>
         <li><strong>Payments:</strong> what you bought and when. Card details go straight to the payment provider; we never see your full card number.</li>
         <li><strong>Messages:</strong> what you send through the contact form, with your email address so we can reply.</li>
+        <li><strong>Enterprise applications:</strong> your organization's legal name, type, where it's registered, registration number or EIN, website, and your name, role, work email and phone. Only the Blackhole AI team sees them, to check the organization is real and send a quote.</li>
         <li><strong>Reports:</strong> when you report a site we keep your reason and note, plus a scrambled (hashed) form of your IP address so the same person can't report one page many times.</li>
         <li><strong>Technical data:</strong> like any website, our hosting provider handles IP addresses and basic request logs to deliver pages and block attacks.</li>
       </ul>
@@ -132,6 +147,7 @@ export function Privacy() {
         <li>To run your account and the features you use, and to count and enforce credits.</li>
         <li>To keep Blackhole AI safe: stopping abuse, reviewing reported content and preventing fraud.</li>
         <li>To handle payments and pay site owners for their sales.</li>
+        <li>To give new accounts their free week and one-time discount, and to check Enterprise applications.</li>
       </ul>
       <p>We don't sell your personal information and we don't show you ads.</p>
 
