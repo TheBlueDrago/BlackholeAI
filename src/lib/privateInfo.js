@@ -1,7 +1,7 @@
 // Before a message goes to the AI from the main chat: does it look like something people
 // (often young ones) shouldn't share with an AI or anyone online? A card number (checked with
-// the Luhn sum, so random long numbers don't count), a secret key, a password written out, or a
-// phone number.
+// the Luhn sum, so random long numbers don't count), a secret key, a password written out, a
+// phone number, or a home address.
 // -> what was found ("a card number", …) or "". The designers use privateInfoOnPage below.
 const luhn = (digits) => {
   let sum = 0;
@@ -52,6 +52,9 @@ export function privateInfoIn(text) {
   if (secretKeyIn(t)) return "a secret key";
   if (/\b(?:my\s+)?(?:password|passcode|pin\s*code|login)\s*(?:is|:|=)\s*\S{4,}/i.test(t)) return "a password";
   if (/(?:^|[^\d])(?:\+\d{1,3}[\s.-]?)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}(?!\d)/.test(t)) return "a phone number";
+  // "I live at 42 Maple Street", "my address is …": a house number and street, or saying so.
+  if (/\b(?:i live at\s+\d|my (?:home )?address is\b|my house is at\s+\d)/i.test(t)) return "a home address";
+  if (/\b\d{1,5}\s+(?:[A-Z][a-z]+\s+){1,3}(?:Street|St|Avenue|Ave|Road|Rd|Lane|Ln|Drive|Dr|Boulevard|Blvd|Court|Ct|Way|Place|Pl|Terrace|Crescent|Close)\b\.?/.test(t)) return "a home address";
   return "";
 }
 

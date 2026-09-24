@@ -16,6 +16,10 @@ for (const [text, what] of [
   ["Password: hunter22", "a password"],
   ["call me at (555) 123-4567", "a phone number"],
   ["my number is +1 555-123-4567", "a phone number"],
+  ["I live at 5 oak lane", "a home address"],
+  ["My address is on the letter", "a home address"],
+  ["come to 42 Maple Street after school", "a home address"],
+  ["it's 1600 Pennsylvania Ave", "a home address"],
 ]) assert(privateInfoIn(text) === what, `spots ${what} in ${JSON.stringify(text)}`);
 
 for (const text of [
@@ -25,6 +29,11 @@ for (const text of [
   "The password field should be 8 characters",
   "The year 2026 had 365 days",
   "make my site show 555 visitors",
+  "Write a story about 3 Little Pigs",
+  "I have 2 dogs and 3 cats on my street",
+  "make a website for a bakery on Main Street",
+  "What does the address bar do?",
+  "I live at home with my mom",
   "",
 ]) assert(privateInfoIn(text) === "", `leaves ${JSON.stringify(text)} alone`);
 

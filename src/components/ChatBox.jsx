@@ -159,7 +159,8 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
   const send = () => {
     const text = input.trim();
     if (!text) return;
-    // A card number, password or phone number: check first (the text stays in the box if not).
+    // A card number, secret key, password, phone number or home address: check first (the text
+    // stays in the box if not).
     const risky = privateInfoIn(text);
     if (risky && !window.confirm(`This looks like it has ${risky} in it. It's safer not to share that with the AI (or anyone online). Send it anyway?`)) return;
     if (q.shouldQueue(loading)) {
