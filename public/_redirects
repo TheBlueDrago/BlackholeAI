@@ -1,0 +1,4 @@
+# Cloudflare Pages redirects.
+# Password managers send people who want to change a password here (the W3C "well-known
+# change password" address); signing in and resetting both start from Forgot password.
+/.well-known/change-password /forgot-password 302
