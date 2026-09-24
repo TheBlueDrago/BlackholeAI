@@ -80,6 +80,7 @@ const PARENTS = [
 const RECENT = {
   month: "September 2026",
   items: [
+    "Paste code with an API key or access token in it, and the chat asks first, so your accounts stay yours.",
     "You can report an AI reply that's harmful or wrong with the flag under it.",
     "Signing out puts your chats away: the next person on that computer starts with none, and yours come back when you sign in again.",
     "Sign-in is protected against password guessing: after too many wrong tries, that account pauses for a few minutes.",
