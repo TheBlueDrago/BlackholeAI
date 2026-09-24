@@ -198,7 +198,7 @@ export default function PublishedContent() {
           <button
             onClick={() => aiCheck(it)}
             disabled={!!busy}
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-600 text-white text-xs hover:bg-indigo-700 disabled:opacity-50"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-600 text-[#fff] text-xs hover:bg-indigo-700 disabled:opacity-50"
           >
             {busy === `ai:${key}` ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />} AI check
           </button>
