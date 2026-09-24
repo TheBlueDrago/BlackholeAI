@@ -1,0 +1,39 @@
+// Link previews for the public pages. They're all the same app page (index.html), so chat
+// apps and search engines would show the home page's title and text for every link; these
+// small functions (functions/<page>.js) serve it with the page's own title, description and
+// address instead. Game pages do the same with the game's name (playmeta.js).
+const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const ORIGIN = "https://blackhole-ai-tech.com";
+
+export function withMeta(html, { title, description, path }) {
+  const full = `${title} · Blackhole AI`;
+  const setMeta = (out, attr, key, value) =>
+    out.replace(new RegExp(`(<meta\\s+${attr}="${key}"\\s+content=")[^"]*(")`, "i"), `$1${esc(value)}$2`);
+  let out = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${esc(full)}</title>`);
+  out = setMeta(out, "property", "og:title", full);
+  out = setMeta(out, "property", "og:description", description);
+  out = setMeta(out, "name", "description", description);
+  if (path) out = setMeta(out, "property", "og:url", ORIGIN + path);
+  return out;
+}
+
+// A Pages Function handler that serves the app page with this page's preview details.
+export const servePage = (meta) =>
+  async function onRequestGet({ request, env }) {
+    const page = await env.ASSETS.fetch(new URL("/", request.url));
+    if (!page.ok) return page;
+    const headers = new Headers(page.headers);
+    headers.delete("content-length");
+    return new Response(withMeta(await page.text(), meta), { status: 200, headers });
+  };
+
+export const PAGES = {
+  arcade: { title: "Free games made with AI", description: "Play free games in your browser on any phone or computer. No download, no account. Every one was made by describing it to Blackhole AI.", path: "/arcade" },
+  templates: { title: "Free website templates", description: "Pick a free template and change anything by telling the AI what you want. Publish it free at yourname.blackhole-ai-tech.com.", path: "/templates" },
+  pricing: { title: "Pricing", description: "Free to start. Pro is $1 a month, Team is $5 a month for up to 3 people, and Enterprise is priced per seat.", path: "/pricing" },
+  business: { title: "Websites for your business", description: "Describe your business and get a website in minutes. Sell from your site, work as a team and keep your code.", path: "/business" },
+  enterprise: { title: "Enterprise", description: "Blackhole AI for your whole organization: a seat for everyone and one shared pool of credits. For registered businesses.", path: "/enterprise" },
+  about: { title: "About us", description: "We help people make websites and games just by describing them, on any phone or computer.", path: "/about" },
+  contact: { title: "Contact us", description: "Questions, ideas, business or partnerships: email us, call us or send a message.", path: "/contact" },
+  showcase: { title: "Gallery", description: "Real websites people made with Blackhole AI by describing them in a sentence.", path: "/showcase" },
+};
