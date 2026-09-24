@@ -15,6 +15,7 @@ import { passwordProblem } from "@/lib/passwordCheck";
 import PasswordHint from "@/components/PasswordHint";
 import ShowPasswordButton from "@/components/ShowPasswordButton";
 import { markSessionOnly } from "@/lib/sessionOnly";
+import { emailSuggestion } from "@/lib/emailTypo";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -26,6 +27,9 @@ export default function Register() {
   const [showOtp, setShowOtp] = useState(false);
   const [otpCode, setOtpCode] = useState("");
   const [invited] = useState(() => hasPendingReferral());
+  // "Did you mean …@gmail.com?", once the email field is left (not while typing).
+  const [emailDone, setEmailDone] = useState(false);
+  const suggestion = emailDone ? emailSuggestion(email) : "";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -203,10 +207,22 @@ export default function Register() {
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onFocus={() => setEmailDone(false)}
+              onBlur={() => setEmailDone(true)}
+              aria-describedby={suggestion ? "email-suggestion" : undefined}
               className="pl-10 h-12"
               required
             />
           </div>
+          {suggestion && (
+            <p id="email-suggestion" role="status" className="text-sm text-muted-foreground">
+              Did you mean{" "}
+              <button type="button" onClick={() => setEmail(suggestion)} className="font-medium text-foreground underline underline-offset-2">
+                {suggestion}
+              </button>
+              ?
+            </p>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="password">Password</Label>
