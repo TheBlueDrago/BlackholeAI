@@ -223,7 +223,9 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
             exit={{ scale: 0.95, opacity: 0, y: 10 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-sm bg-slate-900 border border-slate-700/60 rounded-2xl shadow-2xl overflow-hidden"
+            // Never taller than the screen: on small phones the longer views (Security,
+            // Subscriptions) scroll inside the window instead of being cut off.
+            className="w-full max-w-sm max-h-[calc(100dvh-2rem)] bg-slate-900 border border-slate-700/60 rounded-2xl shadow-2xl overflow-y-auto overscroll-contain"
           >
             {pwStep === "sent" ? (
               <div className="p-6">
@@ -296,7 +298,7 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                 </button>
               </div>
             ) : view === "security" ? (
-              <SecurityPanel email={user?.email} onBack={() => setView("settings")} onChangePassword={startReset} busy={pwBusy} />
+              <SecurityPanel user={user} email={user?.email} onBack={() => setView("settings")} onChangePassword={startReset} busy={pwBusy} />
             ) : view === "subscription" ? (
               <SubscriptionPanel onBack={() => setView("settings")} onManagePeople={() => setView("membership")} />
             ) : view === "refer" ? (

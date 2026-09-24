@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, ShieldCheck, KeyRound, Loader2, Check, Flag, ExternalLink } from "lucide-react";
+import { ArrowLeft, ShieldCheck, KeyRound, Loader2, Check, Flag, ExternalLink, Download } from "lucide-react";
+import { collectMyData, downloadJson } from "@/lib/myData";
 
 const TIPS = [
   "We'll never ask for your password, by email, phone or chat.",
@@ -10,8 +11,46 @@ const TIPS = [
   "Never type a password or card number into a site someone made. Report it instead.",
 ];
 
-// Settings → Security: change password (by email link) and simple ways to stay safe.
-export default function SecurityPanel({ email, onBack, onChangePassword, busy }) {
+// "Your data": a copy of what we keep about the account (src/lib/myData.js).
+function MyData({ user }) {
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState("");
+  const download = async () => {
+    setBusy(true);
+    setNote("");
+    try {
+      const data = await collectMyData(user);
+      downloadJson(data, `blackhole-my-data-${new Date().toISOString().slice(0, 10)}.json`);
+      const missing = ["credits", "purchases", "sites", "games"].filter((k) => data[k] && data[k].error);
+      setNote(missing.length ? `Downloaded, but ${missing.join(" and ")} couldn't be loaded. Try again later for those.` : "Downloaded.");
+    } catch {
+      setNote("Couldn't make the file. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="mt-5 pt-4 border-t border-slate-700/50">
+      <p className="text-slate-300 text-sm font-medium">Your data</p>
+      <p className="text-[11px] text-slate-500 mt-0.5 mb-2">
+        Download a copy of what we keep about your account: your details, plan and credits, purchases, and your published sites and games. Your chats have their
+        own backup in Settings.
+      </p>
+      <button
+        onClick={download}
+        disabled={busy || !user?.id}
+        className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 text-slate-200 text-sm hover:bg-slate-700 transition-colors disabled:opacity-60"
+      >
+        {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />} Download my data
+      </button>
+      {note && <p className="text-[11px] text-slate-400 mt-1.5 text-center" aria-live="polite">{note}</p>}
+    </div>
+  );
+}
+
+// Settings → Security: change password (by email link), simple ways to stay safe, and a copy
+// of your data.
+export default function SecurityPanel({ user, email, onBack, onChangePassword, busy }) {
   return (
     <div className="p-6">
       <button onClick={onBack} className="flex items-center gap-1.5 text-slate-400 text-sm hover:text-slate-200 transition-colors mb-4">
@@ -52,6 +91,7 @@ export default function SecurityPanel({ email, onBack, onChangePassword, busy })
           <Flag className="w-4 h-4" /> Report a page
         </Link>
       </div>
+      <MyData user={user} />
     </div>
   );
 }

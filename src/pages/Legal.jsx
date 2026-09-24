@@ -184,7 +184,8 @@ export function Privacy() {
 
       <h2>Keeping and deleting</h2>
       <p>
-        We keep your data while your account is open. You can delete your account at any time from your profile;
+        We keep your data while your account is open. You can download a copy of it at any time (Settings → Security →
+        Download my data). You can delete your account at any time from your profile;
         that also deletes your published sites and games, your game draft, and the chats and projects saved in that
         browser. We keep records we need for payments, fraud prevention (such as who invited whom) or the law, and a
         copy of any page we took down for breaking the rules.
