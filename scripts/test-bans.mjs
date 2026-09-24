@@ -71,3 +71,25 @@ assert(contact.status === 200, "a banned account can still contact us");
 store.set("grant:bad1", JSON.stringify({ banned: false }));
 const r = await call("redeem-promo", { code: "ANYTHING" });
 assert(r.status === 400 && !/blocked/.test(r.data.error || ""), "after the ban is lifted, a wrong code gets the normal answer");
+
+// A page written straight into the database (not published through the app) by a banned
+// account isn't served; the same kind of page from anyone else still is.
+{
+  const { pageFor } = await import(R("cloudflare-lib/pagesource.js"));
+  const rows = { spam: [{ id: "r1", name: "spam", html: "<!DOCTYPE html><html><body><h1>Hello</h1></body></html>", created_by_id: "bad1", created_date: "2026-09-01" }],
+    fine: [{ id: "r2", name: "fine", html: "<!DOCTYPE html><html><body><h1>Hello</h1></body></html>", created_by_id: "good1", created_date: "2026-09-01" }] };
+  globalThis.fetch = async (url) => {
+    const u = new URL(String(url));
+    if (u.pathname.includes("/entities/PublishedSite")) {
+      const q = JSON.parse(u.searchParams.get("q") || "{}");
+      return new Response(JSON.stringify(rows[q.name] || []));
+    }
+    return new Response("[]");
+  };
+  store.set("grant:bad1", JSON.stringify({ banned: true }));
+  const req = new Request("https://x/");
+  const banned = await pageFor(req, kv, "site", "spam");
+  assert(banned && banned.removed && !banned.html, "a banned owner's direct-write page isn't served");
+  const fine = await pageFor(req, kv, "site", "fine");
+  assert(fine && fine.html && fine.html.includes("Hello"), "someone else's is");
+}

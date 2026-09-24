@@ -11,6 +11,7 @@
 import { findByName, kvKey, MAX_BYTES } from "./published.js";
 import { findCredentialForm, findCredentialLeak } from "./phishing.js";
 import { scanPage } from "./scan.js";
+import { blockedBy } from "./bans.js";
 
 const byAge = (a, b) => String(a.created_date || "").localeCompare(String(b.created_date || ""));
 
@@ -56,6 +57,10 @@ export async function pageFor(request, kv, kind, name) {
     return { rec, html: kvPage.html };
   }
   const rec = rows[0];
+  // Written straight into the database rather than published through the app: don't serve it
+  // if its owner is banned or blocked (a publish would have been refused).
+  const ownerGrant = rec.created_by_id && kv ? await kv.get(`grant:${rec.created_by_id}`, "json").catch(() => null) : null;
+  if (blockedBy({ id: rec.created_by_id }, ownerGrant)) return { rec, removed: "Its owner's account has been blocked." };
   const html = await fromRecord(rec);
   if (!html) return null;
   if (findCredentialForm(html) || findCredentialLeak(html)) {

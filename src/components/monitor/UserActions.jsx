@@ -128,6 +128,10 @@ export default function UserActions({ user, onApply }) {
           </button>
         )}
       </div>
+      <p className="text-[11px] text-slate-500">
+        A ban or block stops them using the AI, publishing, promo codes, referral credits and team invites. Pages they already published stay up: take
+        those down in Published sites &amp; games.
+      </p>
     </div>
   );
 }
