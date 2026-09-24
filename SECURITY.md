@@ -37,6 +37,8 @@ A short map for anyone changing this code. Keep these rules when you touch the f
 - **Nothing dangerous is taken from a link.** App settings (`src/lib/app-params.js`), sign-in
   returns (`src/lib/authReturnTo.js`), site addresses (`siteUrl`) and the Blackhole Browser
   (`safeWebUrl`, both in `src/lib/blackholeDomain.js`) are all validated.
+- **Easy-to-guess passwords are refused** at sign-up and password reset
+  (`src/lib/passwordCheck.js`, before the password is sent to Base44).
 - **Admin actions are logged** (`cloudflare-lib/audit.js`, Monitor → Admin log) and every admin
   endpoint checks the admin role on the server.
 - **Phishing checks at publish** (`cloudflare-lib/phishing.js`, `scan.js`): forms or scripts

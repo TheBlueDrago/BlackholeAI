@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Lock, Loader2, AlertTriangle } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
+import { passwordProblem } from "@/lib/passwordCheck";
+import PasswordHint from "@/components/PasswordHint";
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
@@ -19,6 +21,11 @@ export default function ResetPassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    const weak = passwordProblem(newPassword);
+    if (weak) {
+      setError(weak);
+      return;
+    }
     if (newPassword !== confirmPassword) {
       setError("Passwords do not match");
       return;
@@ -60,7 +67,7 @@ export default function ResetPassword() {
       subtitle="Enter your new password below"
     >
       {error && (
-        <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+        <div className="mb-4 p-3 rounded-lg bg-red-500/10 text-red-400 text-sm">
           {error}
         </div>
       )}
@@ -78,9 +85,11 @@ export default function ResetPassword() {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               className="pl-10 h-12"
+              aria-describedby="password-hint"
               required
             />
           </div>
+          <PasswordHint id="password-hint" password={newPassword} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="confirm">Confirm Password</Label>

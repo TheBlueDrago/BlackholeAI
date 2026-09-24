@@ -11,6 +11,8 @@ import GoogleIcon from "@/components/GoogleIcon";
 import { toast } from "@/components/ui/use-toast";
 import { safeReturnTo } from "@/lib/authReturnTo";
 import { hasPendingReferral } from "@/lib/referral";
+import { passwordProblem } from "@/lib/passwordCheck";
+import PasswordHint from "@/components/PasswordHint";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -25,6 +27,11 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    const weak = passwordProblem(password, email);
+    if (weak) {
+      setError(weak);
+      return;
+    }
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
@@ -92,7 +99,7 @@ export default function Register() {
         subtitle={`We sent a code to ${email}`}
       >
         {error && (
-          <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+          <div className="mb-4 p-3 rounded-lg bg-red-500/10 text-red-400 text-sm">
             {error}
           </div>
         )}
@@ -174,7 +181,7 @@ export default function Register() {
       </div>
 
       {error && (
-        <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+        <div className="mb-4 p-3 rounded-lg bg-red-500/10 text-red-400 text-sm">
           {error}
         </div>
       )}
@@ -209,9 +216,11 @@ export default function Register() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="pl-10 h-12"
+              aria-describedby="password-hint"
               required
             />
           </div>
+          <PasswordHint id="password-hint" password={password} email={email} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="confirm">Confirm Password</Label>

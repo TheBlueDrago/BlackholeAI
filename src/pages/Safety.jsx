@@ -25,6 +25,7 @@ const SECTIONS = [
     title: "Your account and credits",
     points: [
       "Your credits and plan are counted on our server, so they can't be changed or reset from a browser.",
+      "New passwords that are easy to guess, like the ones on attackers' lists, can't be used.",
       "Admin tools, like giving someone a plan or credits, only work for our team, and that's checked on the server every time.",
       "You can delete your account, and every site and game in it, whenever you like (Settings → Delete account).",
       "Your email address is never shown on your published sites or in the gallery.",
