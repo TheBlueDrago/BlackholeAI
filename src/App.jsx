@@ -20,6 +20,7 @@ const PromoSuccess = lazy(() => import('@/pages/PromoSuccess'));
 import SiteView from '@/pages/SiteView';
 const Buy = lazy(() => import('@/pages/Buy'));
 const Report = lazy(() => import('@/pages/Report'));
+const Safety = lazy(() => import('@/pages/Safety'));
 const Terms = lazy(() => import('@/pages/Legal').then((m) => ({ default: m.Terms })));
 const Privacy = lazy(() => import('@/pages/Legal').then((m) => ({ default: m.Privacy })));
 const Showcase = lazy(() => import('@/pages/Showcase'));
@@ -105,6 +106,7 @@ const AuthenticatedApp = () => {
       <Route path="/site/:name" element={<SiteView />} />
       <Route path="/buy" element={<Buy />} />
       <Route path="/report" element={<Report />} />
+      <Route path="/safety" element={<Safety />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/showcase" element={<Showcase />} />

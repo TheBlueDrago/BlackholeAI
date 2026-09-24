@@ -35,5 +35,6 @@ export const PAGES = {
   enterprise: { title: "Enterprise", description: "Blackhole AI for your whole organization: a seat for everyone and one shared pool of credits. For registered businesses.", path: "/enterprise" },
   about: { title: "About us", description: "We help people make websites and games just by describing them, on any phone or computer.", path: "/about" },
   contact: { title: "Contact us", description: "Questions, ideas, business or partnerships: email us, call us or send a message.", path: "/contact" },
+  safety: { title: "Trust & safety", description: "How Blackhole AI keeps your account, your payments and the sites you publish safe, in plain words.", path: "/safety" },
   showcase: { title: "Gallery", description: "Real websites people made with Blackhole AI by describing them in a sentence.", path: "/showcase" },
 };

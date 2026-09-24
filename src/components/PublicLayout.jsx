@@ -40,6 +40,7 @@ const FOOTER = [
     title: "Help & legal",
     links: [
       ["/#faq", "Questions"],
+      ["/safety", "Trust & safety"],
       ["/report", "Report a page"],
       ["/terms", "Terms"],
       ["/privacy", "Privacy"],
