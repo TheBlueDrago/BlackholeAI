@@ -78,6 +78,24 @@ for (const ok of ["https://en.wikipedia.org/wiki/Essex", "https://www.sussex.ac.
   clearThisBrowser(s, null);
   assert(chats(s) === "" && s.getItem("bh-chats-stash:B"), "clearing the browser removes your chats but keeps the ones other accounts put aside");
   assert(!restoreChats("A", { getItem: () => { throw new Error("blocked"); } }), "blocked storage is fine");
+
+  // The sign-in page says why you were signed out, for a few minutes, in that tab only.
+  const { noteSignedOut, signedOutNote, forgetSignedOutNote } = await import(R + "src/lib/sessionOnly.js");
+  const tab = mem();
+  const t0 = Date.parse("2026-09-24T12:00:00Z");
+  noteSignedOut("signed-out", tab, t0);
+  assert(signedOutNote(tab, t0 + 5000) === "signed-out", "right after signing out, the sign-in page knows why");
+  assert(signedOutNote(tab, t0 + 11 * 60000) === null, "but not long after");
+  forgetSignedOutNote(tab);
+  assert(signedOutNote(tab, t0) === null, "and it's shown once");
+  tab.setItem("bh-signed-out", "not json");
+  assert(signedOutNote(tab, t0) === null, "a broken note is ignored");
+  s = mem();
+  s.setItem("base44_access_token", "tok");
+  s.setItem("bh-forget-on-close", "1");
+  const tab2 = mem();
+  forgetIfBrowserWasClosed(s, "", null, tab2);
+  assert(signedOutNote(tab2) === "closed", "being signed out because the browser was closed is explained too");
 }
 
 // The contact form's topics match the ones the server accepts (cloudflare-lib/contact.js).

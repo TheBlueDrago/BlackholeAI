@@ -48,15 +48,53 @@ export function clearThisBrowser(storage = globalThis.localStorage, idb = global
   }
 }
 
+// Why this tab was just signed out ("signed-out", "cleared" or "closed"), so the sign-in page
+// can say so instead of leaving people wondering whether someone got into their account.
+// Kept for this tab only, and only shown for a few minutes.
+export const SIGNED_OUT = "bh-signed-out";
+const NOTE_MINUTES = 10;
+
+export function noteSignedOut(reason, session = globalThis.sessionStorage, now = Date.now()) {
+  try {
+    session.setItem(SIGNED_OUT, JSON.stringify({ reason, at: now }));
+  } catch {
+    // storage blocked: no note
+  }
+}
+
+// -> the reason, or null. Doesn't remove it (forgetSignedOutNote does, once it's shown).
+export function signedOutNote(session = globalThis.sessionStorage, now = Date.now()) {
+  try {
+    const n = JSON.parse(session.getItem(SIGNED_OUT) || "null");
+    return n && typeof n.reason === "string" && now - n.at >= 0 && now - n.at < NOTE_MINUTES * 60000 ? n.reason : null;
+  } catch {
+    return null;
+  }
+}
+
+export function forgetSignedOutNote(session = globalThis.sessionStorage) {
+  try {
+    session.removeItem(SIGNED_OUT);
+  } catch {
+    // storage blocked
+  }
+}
+
 // At start-up. -> true when it signed the browser out. Someone who chose not to be remembered
 // is treated as being on a shared computer: their chats and projects saved in this browser go
 // too, so the next person can't see them.
-export function forgetIfBrowserWasClosed(storage = globalThis.localStorage, cookies = globalThis.document && globalThis.document.cookie, idb = globalThis.indexedDB) {
+export function forgetIfBrowserWasClosed(
+  storage = globalThis.localStorage,
+  cookies = globalThis.document && globalThis.document.cookie,
+  idb = globalThis.indexedDB,
+  session = globalThis.sessionStorage,
+) {
   try {
     if (storage.getItem(FLAG) !== "1" || hasSessionCookie(cookies)) return false;
     for (const k of TOKEN_KEYS) storage.removeItem(k);
     storage.removeItem(FLAG);
     clearThisBrowser(storage, idb);
+    noteSignedOut("closed", session);
     return true;
   } catch {
     return false;

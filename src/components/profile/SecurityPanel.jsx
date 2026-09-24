@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, ShieldCheck, KeyRound, Loader2, Check, Flag, ExternalLink, Download } from "lucide-react";
 import { collectMyData, downloadJson } from "@/lib/myData";
 import { base44 } from "@/api/base44Client";
-import { clearThisBrowser } from "@/lib/sessionOnly";
+import { clearThisBrowser, noteSignedOut } from "@/lib/sessionOnly";
 
 const TIPS = [
   "We'll never ask for your password, by email, phone or chat.",
@@ -105,6 +105,7 @@ function SharedComputer() {
   const leave = () => {
     if (!window.confirm("Sign out and remove your chats, projects and settings from this browser? Download anything you want to keep first.")) return;
     clearThisBrowser();
+    noteSignedOut("cleared");
     base44.auth.logout();
   };
   return (

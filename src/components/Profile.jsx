@@ -13,7 +13,7 @@ import { downloadChats, importChats } from "@/lib/chatBackup";
 import { useInstallApp } from "@/lib/installPrompt";
 import useEscape from "@/hooks/useEscape";
 import useDialogFocus from "@/hooks/useDialogFocus";
-import { markSessionOnly } from "@/lib/sessionOnly";
+import { markSessionOnly, noteSignedOut } from "@/lib/sessionOnly";
 import { stashChats } from "@/lib/chatStash";
 
 export default function Profile({ open, onClose, initialView = "main", onMonitor, onPromos }) {
@@ -77,6 +77,7 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
   const handleLogout = () => {
     markSessionOnly(false); // the next person to sign in here chooses for themselves
     stashChats(user?.id); // and doesn't see your chats (they come back when you sign in)
+    noteSignedOut("signed-out");
     base44.auth.logout();
   };
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Mail, Lock, Loader2 } from "lucide-react";
@@ -6,7 +6,14 @@ import GoogleIcon from "@/components/GoogleIcon";
 import BlackholeIcon from "@/components/BlackholeIcon";
 import { safeReturnTo } from "@/lib/authReturnTo";
 import ShowPasswordButton from "@/components/ShowPasswordButton";
-import { markSessionOnly } from "@/lib/sessionOnly";
+import { markSessionOnly, signedOutNote, forgetSignedOutNote } from "@/lib/sessionOnly";
+
+// Why you were just signed out (set by the sign-out buttons and at start-up).
+const SIGNED_OUT_NOTES = {
+  "signed-out": "You're signed out. Your chats come back when you sign in here again.",
+  cleared: "You're signed out, and your chats, projects and settings were removed from this browser.",
+  closed: "You were signed out because the browser was closed and \"Remember me\" was off. Chats saved on this computer were cleared.",
+};
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -15,6 +22,8 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [remember, setRemember] = useState(() => localStorage.getItem("infinity-ai-remember") !== "0");
+  const [note] = useState(() => SIGNED_OUT_NOTES[signedOutNote()] || "");
+  useEffect(forgetSignedOutNote, []);
   // Post-login destination (same-origin paths only).
   const returnTo = safeReturnTo();
 
@@ -54,6 +63,11 @@ export default function Login() {
 
           <h1 className="text-2xl font-bold text-white text-center">Sign in to Blackhole AI</h1>
           <p className="text-slate-400 text-sm text-center mt-1.5">Welcome back</p>
+          {note && (
+            <p role="status" className="mt-4 p-3 rounded-lg bg-sky-500/10 border border-sky-500/20 text-slate-300 text-sm text-center">
+              {note}
+            </p>
+          )}
 
           <button
             onClick={handleGoogle}
