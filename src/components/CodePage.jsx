@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import Markdown, { CopyButton } from "@/components/chat/Markdown";
 import { Terminal, RotateCcw } from "lucide-react";
 import { OUT_OF_CREDITS_NOTE } from "@/lib/creditCost";
+import OutOfCredits from "@/components/chat/OutOfCredits";
 import { useEffort, effortFor } from "@/lib/effort";
 import { streamChat } from "@/lib/aiStream";
 import EffortPicker from "@/components/chat/EffortPicker";
@@ -190,6 +191,7 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
 
         <div className="border-t border-emerald-700/40 p-3">
           <QueueList q={q} loading={loading} />
+          {aiCodeExhausted && !loading && <OutOfCredits tier="aiCode" canSwitch={false} />}
           <div className="flex items-end gap-2 bg-slate-800/70 rounded-2xl border border-emerald-700/40 focus-within:border-emerald-500/50 transition-colors">
             <textarea
               value={input}
@@ -206,7 +208,6 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
           <div className="flex items-center gap-2 mt-2">
             <EffortPicker value={effort} onChange={setEffort} />
             <ModeToggle mode={buildMode.mode} onChange={buildMode.setMode} />
-            {aiCodeExhausted && <p className="text-xs text-red-400 ml-auto">You're out of AI Code credits.</p>}
           </div>
           <p className="text-center text-xs text-slate-600 mt-2">Blackhole AI can make mistakes. Check important info.</p>
         </div>

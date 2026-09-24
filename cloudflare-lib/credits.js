@@ -24,22 +24,9 @@ import { base44 } from "./published.js";
 import { teamFor, seatsOf } from "./teams.js";
 import { offerFor, OFFER_TAG } from "./offers.js";
 
-export const TIERS = ["ai", "aiCode", "galaxy5", "space5"];
-export const TIER_OF_MODEL = { automatic: "ai", claude_sonnet_4_6: "aiCode", claude_opus_4_8: "galaxy5", "claude-sonnet-5": "space5" };
-export const TIER_NAMES = { ai: "Blackhole AI", aiCode: "Blackhole Code", galaxy5: "Galaxy", space5: "Space" };
-
-// Monthly allowance per plan (same numbers the app has always shown). Enterprise is per
-// seat: each seat adds these to one pool the whole organization shares, and the org pays
-// $12 a seat a month.
-// Secret can no longer be bought; accounts that already have it keep it.
-export const PLAN_TOTALS = {
-  free: { ai: 50, aiCode: 0, galaxy5: 0, space5: 0 },
-  pro: { ai: 100, aiCode: 50, galaxy5: 50, space5: 50 },
-  team: { ai: 150, aiCode: 100, galaxy5: 100, space5: 100 },
-  secret: { ai: 150, aiCode: 100, galaxy5: 100, space5: 100 },
-  enterprise: { ai: 100, aiCode: 75, galaxy5: 50, space5: 25 },
-  admin: { ai: 150, aiCode: 100, galaxy5: 100, space5: 100 },
-};
+// Plan allowances live in planTotals.js so the app can show them too (out-of-credits card).
+export { TIERS, TIER_OF_MODEL, TIER_NAMES, PLAN_TOTALS } from "./planTotals.js";
+import { TIERS, PLAN_TOTALS } from "./planTotals.js";
 const RANK = { free: 0, pro: 1, team: 2, secret: 3, enterprise: 4, admin: 5 };
 
 // Whole credits: 1 per started 10,000 characters of reply, times the effort level.

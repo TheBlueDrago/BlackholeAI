@@ -19,6 +19,8 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { siteLimit } from "@/lib/publishLimits";
 import { withPreviewShim, PREVIEW_SANDBOX } from "@/lib/previewShim";
 import { OUT_OF_CREDITS_NOTE } from "@/lib/creditCost";
+import { TIER_OF_AI } from "@/lib/creditRefresh";
+import OutOfCredits from "@/components/chat/OutOfCredits";
 import { useEffort, effortFor } from "@/lib/effort";
 import { streamChat } from "@/lib/aiStream";
 import LiveReply from "@/components/chat/LiveReply";
@@ -807,6 +809,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
                 ))}
               </div>
             )}
+            {sendExhausted && !loading && <OutOfCredits tier={TIER_OF_AI[selectedAi]} />}
             <div className="flex items-end gap-2 bg-slate-800/70 rounded-2xl border border-slate-700/50 focus-within:border-sky-500/50 transition-colors">
               <textarea
                 value={input}
@@ -831,11 +834,6 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
               <AiChooser value={selectedAi} onChange={setSelectedAi} plan={plan} allowFable={true} />
               <EffortPicker value={effort} onChange={setEffort} />
               {buildMode.visible && <ModeToggle mode={buildMode.mode} onChange={buildMode.setMode} />}
-              {sendExhausted && (
-                <p className="text-xs text-red-400 ml-auto">
-                  You're out of {isCodeAi ? "Blackhole Code" : isGalaxy ? "Galaxy" : isSpace ? "Space" : "Blackhole AI"} credits. Switch AI or upgrade.
-                </p>
-              )}
             </div>
             <input
               ref={fileInputRef}
