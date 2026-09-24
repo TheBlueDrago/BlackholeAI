@@ -161,6 +161,8 @@ export function Privacy() {
       <h2>Who helps us run it</h2>
       <ul>
         <li><strong>Base44</strong> — sign-in, the app database and payments.</li>
+        <li><strong>Wix</strong> — runs the checkout for Base44 Payments and handles your card. We never see or store your card number.</li>
+        <li><strong>GitHub</strong> — only if you connect your GitHub account to save a site's code there.</li>
         <li><strong>Cloudflare</strong> — hosting, published pages, credits and drafts storage.</li>
         <li>
           <strong>Google (Gemini API)</strong> — writes the AI answers, so your prompts and chat context are sent to
