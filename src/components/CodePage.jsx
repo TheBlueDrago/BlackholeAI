@@ -18,6 +18,9 @@ import useStickToBottom from "@/hooks/useStickToBottom";
 import { isNetworkError, OFFLINE_NOTE } from "@/lib/netError";
 import { secretKeyIn } from "@/lib/privateInfo";
 import { historyBlock } from "@/lib/chatHistory";
+import { readAboutMe, aboutMeBlock } from "@/lib/aboutMe";
+import AboutMeButton from "@/components/chat/AboutMeButton";
+import { useAppShell } from "@/components/AppShellContext";
 import useReplyAnnouncer from "@/hooks/useReplyAnnouncer";
 
 export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICode, userInitial }) {
@@ -26,6 +29,7 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
   const [live, setLive] = useState("");
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
+  const userId = useAppShell()?.currentUser?.id;
   const [loading, setLoading] = useState(false);
   const [focused, setFocused] = useState(false);
   const scrollRef = useRef(null);
@@ -35,7 +39,7 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
   // `before`: how many messages come before this question (Try again leaves out the reply it
   // replaces). The recent conversation goes with it, so follow-ups work (lib/chatHistory.js).
   const runPrompt = async (text, before = messages.length) => {
-    const history = historyBlock(messages.slice(0, before));
+    const history = aboutMeBlock(readAboutMe(userId)) + historyBlock(messages.slice(0, before));
     setMessages((m) => [...m, { role: "user", content: text }]);
     setInput("");
     setLoading(true);
@@ -221,6 +225,7 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
             <SendOrStopButton loading={loading} focused={focused} queued={queued} canSend={canSend} onSend={send} onStop={stop} gradient="from-emerald-500 to-teal-500" />
           </div>
           <div className="flex items-center gap-2 mt-2">
+            <AboutMeButton userId={userId} />
             <EffortPicker value={effort} onChange={setEffort} />
             <ModeToggle mode={buildMode.mode} onChange={buildMode.setMode} />
           </div>

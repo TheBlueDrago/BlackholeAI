@@ -3,6 +3,8 @@ import { askConfirm } from "@/lib/dialogs";
 import Markdown, { CopyButton } from "@/components/chat/Markdown";
 import ReadAloud from "@/components/chat/ReadAloud";
 import { historyBlock } from "@/lib/chatHistory";
+import { readAboutMe, aboutMeBlock } from "@/lib/aboutMe";
+import AboutMeButton from "@/components/chat/AboutMeButton";
 import ReportReply from "@/components/chat/ReportReply";
 import { Plus, X, Paperclip, RotateCcw, Pencil } from "lucide-react";
 import BlackholeIcon from "@/components/BlackholeIcon";
@@ -79,7 +81,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
   // `before`: how many of the chat's messages come before this question (Try again leaves out
   // the answer it replaces); by default all of them.
   const runPrompt = async (text, ai, before = messages.length) => {
-    const history = historyBlock(messages.slice(0, before));
+    const history = aboutMeBlock(readAboutMe(shell?.currentUser?.id)) + historyBlock(messages.slice(0, before));
     let convId = conversation?.id || convIdRef.current;
     const isFirst = !convId || messages.length === 0;
     if (!convId) convId = createConversation();
@@ -397,6 +399,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
             >
               <Plus className="w-4 h-4" />
             </button>
+            <AboutMeButton userId={shell?.currentUser?.id} />
             <VoiceInput onText={(t) => setInput((cur) => (cur.trim() ? `${cur.trimEnd()} ${t}` : t))} />
             <AiChooser value={selectedAi} onChange={setSelectedAi} plan={plan} allowFable={true} />
             <EffortPicker value={effort} onChange={setEffort} />
