@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { askConfirm } from "@/lib/dialogs";
 import Markdown, { CopyButton } from "@/components/chat/Markdown";
+import ReadAloud from "@/components/chat/ReadAloud";
 import ReportReply from "@/components/chat/ReportReply";
 import { Plus, X, Paperclip, RotateCcw, Pencil } from "lucide-react";
 import BlackholeIcon from "@/components/BlackholeIcon";
@@ -289,6 +290,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
                           <RotateCcw className="w-3.5 h-3.5" />
                         </button>
                       )}
+                      <ReadAloud text={m.content} />
                       <CopyButton getText={() => m.content} label="Copy reply" className="p-1 rounded-md text-slate-500 hover:text-slate-200" />
                       <ReportReply question={messages[i - 1]?.role === "user" ? messages[i - 1].content : ""} reply={m.content} />
                     </div>
