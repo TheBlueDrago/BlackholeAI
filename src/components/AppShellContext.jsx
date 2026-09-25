@@ -5,6 +5,7 @@ import { useConversations } from "@/hooks/useConversations";
 import { useCredits } from "@/hooks/useCredits";
 import { claimPendingReferral, hasWelcomePending } from "@/lib/referral";
 import WelcomeReward from "@/components/WelcomeReward";
+import WelcomeTour from "@/components/WelcomeTour";
 import { applyThemeClass, readUserTheme, writeUserTheme } from "@/lib/theme";
 import { restoreChats } from "@/lib/chatStash";
 
@@ -120,6 +121,8 @@ export function AppShellProvider({ children }) {
     <AppShellContext.Provider value={value}>
       {children}
       <WelcomeReward open={welcomeOpen} onClose={() => setWelcomeOpen(false)} onClaimed={credits.sync} />
+      {/* A new account's first visit: a short guided tour, or explore alone (after any invite reward). */}
+      <WelcomeTour user={currentUser} shell={value} blocked={welcomeOpen || isBanned || isBlocked || isUnverified} />
     </AppShellContext.Provider>
   );
 }
