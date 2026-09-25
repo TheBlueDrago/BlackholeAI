@@ -3,9 +3,10 @@ import { askConfirm, askText } from "@/lib/dialogs";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 import {
-  Menu, Globe, Plus, Sparkles, Loader2, Pencil, Trash2, Eye, EyeOff, Crown, ExternalLink, Star,
+  Menu, Globe, Plus, Sparkles, Loader2, Pencil, Trash2, Eye, EyeOff, Crown, ExternalLink, Star, Inbox as InboxIcon,
 } from "lucide-react";
 import { useAppShell } from "@/components/AppShellContext";
+import SiteMessages from "@/components/designer/SiteMessages";
 import { base44 } from "@/api/base44Client";
 import Sidebar from "@/components/Sidebar";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -73,7 +74,7 @@ function SitePreviewThumb({ html }) {
   );
 }
 
-function SiteCard({ site, onEdit, onToggleHidden, onDelete, inGallery, onToggleGallery, takenDown }) {
+function SiteCard({ site, onEdit, onToggleHidden, onDelete, inGallery, onToggleGallery, takenDown, onMessages }) {
   const hasPreview = isInlineHtml(site.html);
   return (
     <div className="group relative rounded-2xl bg-slate-900/60 border border-slate-700/50 p-4 hover:border-indigo-500/40 transition-colors">
@@ -139,6 +140,16 @@ function SiteCard({ site, onEdit, onToggleHidden, onDelete, inGallery, onToggleG
           </button>
         )}
         {!site.hidden && (
+          <button
+            onClick={() => onMessages(site)}
+            title="Messages from your site's forms"
+            aria-label="Messages from your site's forms"
+            className="flex items-center justify-center px-2.5 py-1.5 rounded-lg bg-slate-800 text-slate-200 text-xs hover:bg-slate-700 transition-colors"
+          >
+            <InboxIcon className="w-3.5 h-3.5" />
+          </button>
+        )}
+        {!site.hidden && (
           <a
             href={`/chat/browser?q=${site.name}.blackhole`}
             title="View live"
@@ -163,6 +174,7 @@ export default function DesignerDashboard() {
   const shell = useAppShell();
   const { sidebarOpen, setSidebarOpen, openProfile, avatarInitial, lightMode, toggleLight, navigate, effPlan, currentUser, conv, credits, isAdmin } = shell;
   const [sites, setSites] = useState([]);
+  const [messagesFor, setMessagesFor] = useState(null); // site name whose form messages are open
   const [loading, setLoading] = useState(true);
   const [prompt, setPrompt] = useState("");
   const [selectedAi, setSelectedAi] = useState("ai");
@@ -479,11 +491,13 @@ export default function DesignerDashboard() {
                     inGallery={gallery.has(s.name)}
                     takenDown={takenDown.has(s.name)}
                     onToggleGallery={toggleGallery}
+                    onMessages={(x) => setMessagesFor(x.name)}
                   />
                 ))}
               </div>
             )}
             {err && <p className="text-sm text-red-400 mt-4">{err}</p>}
+            {messagesFor && <SiteMessages site={messagesFor} onClose={() => setMessagesFor(null)} />}
           </section>
         </div>
       </main>

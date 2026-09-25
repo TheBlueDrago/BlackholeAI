@@ -81,6 +81,7 @@ const PARENTS = [
 const RECENT = {
   month: "September 2026",
   items: [
+    "Forms on published sites now reach the site's owner, and password and card-number fields are never sent, so a site can't be used to collect them.",
     "Every new account confirms its email with a code before it can use anything, so nobody can sign up with someone else's address.",
     "Accounts that break the rules can be removed for good: their email can't be used to sign up again.",
     "Only a few new accounts can be made from one network, which stops people making lots of fake accounts.",

@@ -148,6 +148,7 @@ export function Privacy() {
       <h2>What we collect</h2>
       <ul>
         <li><strong>Account:</strong> your email address, and your name and picture if you sign in with Google.</li>
+        <li><strong>Forms on sites people make:</strong> if you fill in a form on a site made with Blackhole AI (a booking, an RSVP, a sign-up), what you type is kept for that site's owner to read, up to their latest 200 messages. Password and card-number fields are never sent, and the owner can delete messages at any time.</li>
         <li><strong>What you make:</strong> the sites and games you publish, and your game draft. Your chats and website projects are saved in your own browser, not on our servers.</li>
         <li><strong>Prompts:</strong> what you send the AI, including any images you attach in the chat, passes through our servers to Google to get an answer. We count the credits it uses, and keep the start (up to 300 characters) of your five most recent questions each month so our team can spot misuse and help if something goes wrong. We don't keep the rest of the text, or any images.</li>
         <li><strong>Usage:</strong> how many credits you use on each AI, your plan, promo codes you redeem, and who invited you or whom you invited. When you join through an invite link we keep a scrambled (hashed) form of your IP address with it, to spot one person creating many accounts.</li>

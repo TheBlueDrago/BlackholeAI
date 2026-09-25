@@ -39,6 +39,23 @@ export function withReportLink(html, kind, name) {
     `if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",add);else add();})();</script>`);
 }
 
+// Forms on the page send what visitors type to the site owner's Messages (cloudflare-lib/
+// inbox.js), alongside whatever the page itself does on submit. Password, card-looking,
+// hidden and file fields are never sent (and the server drops them too).
+export function withFormInbox(html, name) {
+  const site = JSON.stringify(name).replace(/</g, "\\u003c");
+  const url = JSON.stringify(`${APP_ORIGIN}/api/apps/6a8b5eb7787b8a4d6a18f662/functions/site-form`);
+  return beforeBodyEnd(html,
+    `<script data-bh>(function(){var S=/pass|pwd|card|cvv|cvc|ssn|security.?code|seed|recovery|private.?key|\\bpin\\b/i;` +
+    `document.addEventListener("submit",function(e){var f=e.target;if(!f||f.tagName!=="FORM")return;try{var out=[],hp="",els=f.querySelectorAll("input,select,textarea");` +
+    `for(var i=0;i<els.length;i++){var el=els[i],t=(el.type||"").toLowerCase();if(el.name==="_hp"){hp=el.value;continue}` +
+    `if(/^(password|file|submit|button|reset|hidden|image)$/.test(t))continue;if((t==="checkbox"||t==="radio")&&!el.checked)continue;` +
+    `var lb=el.id&&f.querySelector('label[for="'+el.id.replace(/"/g,"")+'"]');var label=(lb&&lb.textContent)||el.getAttribute("aria-label")||el.name||el.placeholder||el.id||("Field "+(i+1));` +
+    `if(S.test(label)||S.test(el.name||"")||/^cc-/.test(el.autocomplete||""))continue;var v=String(el.value||"").trim();if(v)out.push([String(label).trim(),v]);}` +
+    `if(out.length)fetch(${url},{method:"POST",headers:{"Content-Type":"application/json"},keepalive:true,body:JSON.stringify({action:"send",site:${site},fields:out,hp:hp})}).catch(function(){});` +
+    `}catch(_){}},true);})();</script>`);
+}
+
 function beforeBodyEnd(html, snippet) {
   const i = html.toLowerCase().lastIndexOf("</body>");
   return i >= 0 ? html.slice(0, i) + snippet + html.slice(i) : html + snippet;
@@ -89,6 +106,6 @@ export function withShareTags(html) {
 // The page as visitors get it: old copies of the added scripts removed, fresh ones added.
 export function preparePage(html, kind, name) {
   let out = withShareTags(stripInjected(html));
-  if (kind === "site") out = withCheckoutBridge(out, name);
+  if (kind === "site") out = withFormInbox(withCheckoutBridge(out, name), name);
   return withReportLink(out, kind, name);
 }
