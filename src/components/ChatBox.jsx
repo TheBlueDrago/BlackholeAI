@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { askConfirm } from "@/lib/dialogs";
 import Markdown, { CopyButton } from "@/components/chat/Markdown";
 import ReportReply from "@/components/chat/ReportReply";
-import { Plus, X, Paperclip, RotateCcw } from "lucide-react";
+import { Plus, X, Paperclip, RotateCcw, Pencil } from "lucide-react";
 import BlackholeIcon from "@/components/BlackholeIcon";
 import AiChooser from "@/components/AiChooser";
 import QueueList from "@/components/chat/QueueList";
@@ -51,6 +51,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
   const [live, setLive] = useState("");
   const fileInputRef = useRef(null);
   const scrollRef = useRef(null);
+  const inputRef = useRef(null);
   const reqIdRef = useRef(0);
   const abortRef = useRef(null);
   const convIdRef = useRef(null);
@@ -191,6 +192,26 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
     runPrompt(question, selectedAi);
   };
 
+  // Edit your last question: it goes back into the box (with its answer removed) to fix and
+  // send again. Nothing is charged until it's sent.
+  const editLast = () => {
+    const convId = conversation?.id;
+    const n = messages.length;
+    if (!convId || loading) return;
+    const at = messages[n - 1]?.role === "user" ? n - 1 : messages[n - 2]?.role === "user" ? n - 2 : -1;
+    if (at < 0) return;
+    const question = messages[at].content.replace(/ \(attached: [^)]*\)$/, "");
+    for (let k = n - 1; k >= at; k--) removeMessage?.(convId, k);
+    setInput(question);
+    requestAnimationFrame(() => {
+      const el = inputRef.current;
+      if (el) {
+        el.focus();
+        el.setSelectionRange(question.length, question.length);
+      }
+    });
+  };
+
   const startWith = (s) => {
     if (s.go === "designer") return shell?.goDesigner();
     // Opens the game maker as it was left (goGameDesigner would start over and clear a draft).
@@ -274,6 +295,17 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
                   </>
                 )}
               </div>
+              {m.role === "user" && !loading && (i === messages.length - 1 || i === messages.length - 2) && (
+                <button
+                  type="button"
+                  onClick={editLast}
+                  title="Edit this message"
+                  aria-label="Edit this message"
+                  className="order-first self-center p-1 rounded-md text-slate-500 hover:text-slate-200"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                </button>
+              )}
               {m.role === "user" && (
                 <div className="keep-color w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-xs font-bold text-white shrink-0">
                   {userInitial || "U"}
@@ -322,6 +354,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
           {isExhausted && !loading && <OutOfCredits tier={TIER_OF_AI[selectedAi]} />}
           <div className="flex items-end gap-2 bg-slate-800/70 rounded-2xl border border-slate-700/50 focus-within:border-indigo-500/50 transition-colors">
             <textarea
+              ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
