@@ -9,6 +9,8 @@ const UPDATES = [
   {
     date: "September 2026",
     items: [
+      { icon: Sparkles, text: "New here? A short welcome tour shows you around the chat, the menu, the Website and Game Designers and your profile, or you can explore on your own." },
+      { icon: Sparkles, text: "In the chat: edit your last message and send it again, and have any answer read aloud with a tap of the speaker button." },
       { icon: Globe, text: "Forms on the websites you make now work: bookings, RSVPs and sign-ups arrive in your Messages inbox in the Website Designer, with a dot when something new comes in and a download to a spreadsheet." },
       { icon: BookOpen, text: "New guides for using the AI: homework help, writing, learning to code, resumes and cover letters, and running a small business, plus a guide for every website template." },
       { icon: Sparkles, text: "The chat suggests what to try first: homework help, explain simply, help me write and quiz me." },
