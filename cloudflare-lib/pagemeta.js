@@ -66,7 +66,7 @@ export const PAGES = {
   about: { title: "About us", description: "We help people make websites and games just by describing them, on any phone or computer.", path: "/about" },
   contact: { title: "Contact us", description: "Questions, ideas, business or partnerships: email us, call us or send a message.", path: "/contact" },
   safety: { title: "Trust & safety", description: "How Blackhole AI keeps your account, your payments and the sites you publish safe, in plain words.", path: "/safety" },
-  guides: { title: "Guides", description: "Short, step-by-step guides to making websites and games with AI, and getting them in front of people. No coding needed.", path: "/guides" },
+  guides: { title: "Guides", description: "Short, step-by-step guides to getting the most out of AI: homework help, writing, learning to code, websites and games.", path: "/guides" },
   terms: { title: "Terms of Service", description: "The rules for using Blackhole AI: accounts, what you can make and publish, plans and payments, and safety.", path: "/terms" },
   privacy: { title: "Privacy Policy", description: "What Blackhole AI collects, why, who helps us run it, and how to download or delete your data.", path: "/privacy" },
   report: { title: "Report a page", description: "Tell us about a website or game made with Blackhole AI that looks unsafe, a scam, or breaks the rules. We review every report.", path: "/report" },

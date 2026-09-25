@@ -14,7 +14,7 @@ export default function Guides() {
           <BookOpen className="w-4 h-4" /> Guides
         </p>
         <h1 className="mt-2 text-3xl sm:text-5xl font-bold text-white">Learn to make things with AI</h1>
-        <p className="mt-3 text-slate-400 max-w-xl mx-auto">Short, step-by-step guides for websites, games and getting your work in front of people. No coding needed.</p>
+        <p className="mt-3 text-slate-400 max-w-xl mx-auto">Short, step-by-step guides to getting the most out of AI: homework, writing, code, websites and games. No experience needed.</p>
       </section>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-4xl mx-auto">
         {GUIDES.map((g) => (
