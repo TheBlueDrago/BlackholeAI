@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowRight, Eye } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 import { SITE_TEMPLATES } from "@/lib/siteTemplates";
@@ -7,6 +7,10 @@ import { loadDesignerHtmlIntoProject } from "@/lib/designerStore";
 import PublicLayout from "@/components/PublicLayout";
 import SiteThumb from "@/components/SiteThumb";
 import TemplatePreview from "@/components/TemplatePreview";
+import { GUIDES } from "../../cloudflare-lib/guides.js";
+
+// The how-to guide that starts from a template, if there is one (its button opens that template).
+const guideFor = (id) => GUIDES.find((g) => g.cta.to.endsWith("template%3D" + id));
 
 // Public list of the Website Designer's starter templates. "Use this template" opens it in
 // the designer; people without an account sign up first and land there with it open
@@ -63,6 +67,11 @@ export default function Templates() {
               <div className="min-w-0">
                 <h2 className="font-semibold text-white">{t.title}</h2>
                 <p className="text-xs text-slate-400">{t.blurb}</p>
+                {guideFor(t.id) && (
+                  <Link to={`/guides/${guideFor(t.id).slug}`} className="text-xs text-indigo-300 hover:underline">
+                    How-to guide
+                  </Link>
+                )}
               </div>
               <div className="shrink-0 flex items-center gap-2">
                 <button
