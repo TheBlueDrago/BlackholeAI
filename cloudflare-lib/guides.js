@@ -6,6 +6,46 @@ export const GUIDES_UPDATED = "2026-09-24";
 
 export const GUIDES = [
   {
+    slug: "ai-homework-help",
+    title: "How to use AI for homework (the right way)",
+    description:
+      "Use AI to understand your homework, not just copy answers: ask it to explain step by step, quiz you, and check your work. Free with Blackhole AI.",
+    minutes: 4,
+    intro:
+      "AI can be the best study partner you've ever had, or a shortcut that leaves you stuck on the test. The difference is how you ask. Here's how to use Blackhole AI so you actually learn.",
+    sections: [
+      {
+        heading: "Ask it to explain, not just answer",
+        paragraphs: ["Instead of pasting the question and copying the reply, ask the AI to teach you. It's patient, and you can ask the same thing again as many times as you need."],
+        list: ["\"Explain photosynthesis like I'm 10.\"", "\"Show me how to solve this step by step, and stop before the last step so I can try it.\"", "\"Why is this the answer? What's the rule behind it?\""],
+      },
+      {
+        heading: "Send a picture of the problem",
+        paragraphs: ["Take a photo of the worksheet or textbook page and send it in the chat (up to 3 pictures at once), then ask about it. Typing on a phone? Tap the microphone and just say your question."],
+      },
+      {
+        heading: "Let it quiz you",
+        paragraphs: ["Before a test, ask the AI to quiz you. It can make practice questions at your level, tell you what you got wrong, and explain why."],
+        list: ["\"Give me 5 practice questions on fractions, one at a time.\"", "\"Quiz me on the causes of World War I and tell me what I missed.\""],
+      },
+      {
+        heading: "Check your own work",
+        paragraphs: ["Do the work yourself first, then ask the AI to check it and point out mistakes without rewriting the whole thing. You'll remember it far better."],
+      },
+      {
+        heading: "Know the limits",
+        list: [
+          "AI can make mistakes, so double-check facts that matter, and follow your teacher's rules about using AI.",
+          "Don't share private details like your address, phone number or passwords. Blackhole AI warns you if a message looks like it has them.",
+          "Handing in AI's words as your own isn't learning. Use it to understand, then write it yourself.",
+        ],
+      },
+    ],
+    cta: { label: "Start studying free", to: "/register?returnTo=%2Fchat" },
+    more: { label: "For parents and teachers", to: "/safety#parents" },
+    related: ["make-a-website-on-your-phone", "make-a-website-with-ai"],
+  },
+  {
     slug: "make-a-website-with-ai",
     title: "How to make a website for free with AI",
     description:
