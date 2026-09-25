@@ -9,6 +9,8 @@ const UPDATES = [
   {
     date: "September 2026",
     items: [
+      { icon: Sparkles, text: "Talk-back: ask with the microphone and the AI reads its answer out loud, like a voice assistant. Tap the mic again to interrupt it." },
+      { icon: BookOpen, text: "Math homework looks like a textbook now: fractions, powers, square roots and equations in the AI's answers show as real formulas, and Read aloud says them in words." },
       { icon: Sparkles, text: "When the AI writes a web page or an SVG picture in the chat or Blackhole Code, press Preview to run it right there, at computer or phone size." },
       { icon: Globe, text: "Open a page from your own GitHub repository in the Website Designer (on a computer, on paid plans), ask the AI for changes, and push them back to the same file." },
       { icon: Zap, text: "When lots of people are using the AI at once, it quietly tries again for you instead of showing an error, and new chats are named instantly." },

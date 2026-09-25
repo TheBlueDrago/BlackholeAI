@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { askConfirm } from "@/lib/dialogs";
 import Markdown, { CopyButton } from "@/components/chat/Markdown";
-import ReadAloud from "@/components/chat/ReadAloud";
+import ReadAloud, { speakText, unlockSpeech } from "@/components/chat/ReadAloud";
 import { historyBlock } from "@/lib/chatHistory";
 import { readAboutMe, aboutMeBlock } from "@/lib/aboutMe";
 import AboutMeButton from "@/components/chat/AboutMeButton";
@@ -72,6 +72,9 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
   const inputRef = useRef(null);
   const reqIdRef = useRef(0);
   const abortRef = useRef(null);
+  // Talk-back: a question asked with the mic gets its answer read out loud.
+  const spokenRef = useRef(false);
+  const talkBackRef = useRef(false);
   const convIdRef = useRef(null);
   const shell = useAppShell();
 
@@ -131,8 +134,11 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
       spend?.[ai]?.(res.credits);
       const content = res.content ?? "";
       addMessage(convId, { role: "ai", content: res.cut ? `${content.trimEnd()}…\n\n${OUT_OF_CREDITS_NOTE}` : content });
+      if (talkBackRef.current) speakText(content);
+      talkBackRef.current = false;
       if (isFirst) renameConversation(convId, chatTitle(text));
     } catch (e) {
+      talkBackRef.current = false;
       if (reqIdRef.current !== myId) return;
       setLive("");
       const data = e?.response?.data;
@@ -187,6 +193,9 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
       return;
     }
     if (isExhausted) return;
+    talkBackRef.current = spokenRef.current;
+    spokenRef.current = false;
+    if (talkBackRef.current) unlockSpeech();
     runPrompt(text, selectedAi);
   };
 
@@ -372,7 +381,10 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
             <textarea
               ref={inputRef}
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => {
+                setInput(e.target.value);
+                if (!e.target.value.trim()) spokenRef.current = false;
+              }}
               onKeyDown={handleKeyDown}
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
@@ -391,7 +403,12 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
               <Plus className="w-4 h-4" />
             </button>
             <AboutMeButton userId={shell?.currentUser?.id} />
-            <VoiceInput onText={(t) => setInput((cur) => (cur.trim() ? `${cur.trimEnd()} ${t}` : t))} />
+            <VoiceInput
+              onText={(t) => {
+                spokenRef.current = true;
+                setInput((cur) => (cur.trim() ? `${cur.trimEnd()} ${t}` : t));
+              }}
+            />
             <AiChooser value={selectedAi} onChange={setSelectedAi} plan={plan} allowFable={true} />
             <EffortPicker value={effort} onChange={setEffort} />
             {buildMode.visible && <ModeToggle mode={buildMode.mode} onChange={buildMode.setMode} />}

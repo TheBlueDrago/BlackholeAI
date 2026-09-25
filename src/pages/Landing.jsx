@@ -26,7 +26,7 @@ const AI_SKILLS = [
   { icon: PenLine, title: "Writing", text: "Stories, essays, emails and posts: drafts it, fixes it, makes it shorter." },
   { icon: Code2, title: "Code", text: "Blackhole Code writes, explains and fixes code in any language." },
   { icon: Image, title: "Pictures", text: "Send up to 3 photos or screenshots and ask about them." },
-  { icon: Mic, title: "Talk to it", text: "Tap the microphone and speak instead of typing." },
+  { icon: Mic, title: "Talk to it", text: "Tap the microphone and ask out loud, and it answers out loud too." },
   { icon: UserRoundPen, title: "Knows you", text: "Tell it about yourself once and every answer fits you, from your grade to how short you like replies." },
   { icon: Layers, title: "Four AI models", text: "Blackhole AI for everyday help, plus Code, Galaxy and Space on Pro." },
 ];
