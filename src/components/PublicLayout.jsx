@@ -11,6 +11,7 @@ const LOGIN = "/login?returnTo=" + encodeURIComponent("/chat");
 const LINKS = [
   { to: "/arcade", label: "Arcade" },
   { to: "/templates", label: "Templates" },
+  { to: "/guides", label: "Guides" },
   { to: "/pricing", label: "Pricing" },
   { to: "/business", label: "For business" },
   { to: "/about", label: "About us" },
