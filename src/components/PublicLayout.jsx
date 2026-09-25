@@ -41,6 +41,7 @@ const FOOTER = [
     title: "Help & legal",
     links: [
       ["/guides", "Guides"],
+      ["/ideas", "Things to ask AI"],
       ["/whats-new", "What's new"],
       ["/#faq", "Questions"],
       ["/safety", "Trust & safety"],

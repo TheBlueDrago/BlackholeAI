@@ -42,7 +42,21 @@ const STARTERS = [
 ];
 
 export default function ChatBox({ conversation, createConversation, addMessage, removeMessage, renameConversation, plan, exhausted, remaining, spend, userInitial }) {
-  const [input, setInput] = useState("");
+  // ?ask=... (from the Ideas page or a guide): the question starts typed in the box, not sent,
+  // so nothing is charged until the person presses send. Taken out of the address after.
+  const [input, setInput] = useState(() => {
+    try {
+      return (new URLSearchParams(window.location.search).get("ask") || "").slice(0, 500);
+    } catch {
+      return "";
+    }
+  });
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has("ask")) return;
+    url.searchParams.delete("ask");
+    window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
+  }, []);
   const [loading, setLoading] = useState(false);
   const [focused, setFocused] = useState(false);
   const [selectedAi, setSelectedAi] = useState("ai");

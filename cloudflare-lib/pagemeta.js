@@ -66,6 +66,7 @@ export const PAGES = {
   about: { title: "About us", description: "We help people make websites and games just by describing them, on any phone or computer.", path: "/about" },
   contact: { title: "Contact us", description: "Questions, ideas, business or partnerships: email us, call us or send a message.", path: "/contact" },
   safety: { title: "Trust & safety", description: "How Blackhole AI keeps your account, your payments and the sites you publish safe, in plain words.", path: "/safety" },
+  ideas: { title: "Things to ask AI", description: "36 ideas for what to ask an AI: homework help, writing, coding, everyday life, fun and business. Tap one to try it free.", path: "/ideas" },
   "whats-new": { title: "What's new", description: "New features and fixes in Blackhole AI, the AI helper that answers questions, helps you write and code, and builds websites and games.", path: "/whats-new" },
   guides: { title: "Guides", description: "Short, step-by-step guides to getting the most out of AI: homework help, writing, learning to code, websites and games.", path: "/guides" },
   terms: { title: "Terms of Service", description: "The rules for using Blackhole AI: accounts, what you can make and publish, plans and payments, and safety.", path: "/terms" },
