@@ -7,8 +7,8 @@ import { packsForTier, DEFAULT_PACK_SIZE } from "../../cloudflare-lib/creditPack
 
 // The plans a person can buy themselves, cheapest first (prices as in create-checkout).
 const UPGRADES = [
-  { id: "pro", name: "Pro", price: 1.5 },
-  { id: "team", name: "Team", price: 6 },
+  { id: "pro", name: "Pro", price: 2.99 },
+  { id: "team", name: "Team", price: 7.99 },
 ];
 // The AI pickers' keys -> credit tiers.
 export const TIER_OF_AI = { ai: "ai", code: "aiCode", opus5: "galaxy5", fable: "space5" };

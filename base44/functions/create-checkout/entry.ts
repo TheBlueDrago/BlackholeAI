@@ -94,7 +94,7 @@ Deno.serve(async (req: Request) => {
     const PRODUCTS = {
       pro: {
         name: "Pro Plan",
-        price: "1.50",
+        price: "2.99",
         currency: "USD",
         subscriptionInfo: {
           subscriptionSettings: { frequency: "MONTH" },
@@ -104,7 +104,7 @@ Deno.serve(async (req: Request) => {
       },
       team: {
         name: "Team Plan",
-        price: "6.00",
+        price: "7.99",
         currency: "USD",
         subscriptionInfo: {
           subscriptionSettings: { frequency: "MONTH" },
@@ -118,10 +118,10 @@ Deno.serve(async (req: Request) => {
     // credits-<ai>-<size>. Price = the AI's 5-credit price x the size's multiplier. Keep both in
     // step with PACK_BASE and PACK_MULT in cloudflare-lib/creditPacks.js.
     const PACK_BASE: Record<string, { name: string; base: number }> = {
-      ai: { name: "Blackhole AI", base: 0.6667 },
-      code: { name: "Blackhole Code", base: 1.3333 },
-      galaxy: { name: "Galaxy", base: 2 },
-      space: { name: "Space", base: 2.6667 },
+      ai: { name: "Blackhole AI", base: 0.5 },
+      code: { name: "Blackhole Code", base: 1 },
+      galaxy: { name: "Galaxy", base: 1.5 },
+      space: { name: "Space", base: 2 },
     };
     const PACK_MULT: Record<number, number> = { 5: 1, 10: 1.5, 25: 3, 50: 4.5 };
     const CREDIT_PACKS: Record<string, { name: string; price: string; currency: string }> = {};
