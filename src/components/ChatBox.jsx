@@ -21,6 +21,7 @@ import OutOfCredits from "@/components/chat/OutOfCredits";
 import { useEffort, effortFor } from "@/lib/effort";
 import { streamChat } from "@/lib/aiStream";
 import { chatTitle } from "@/lib/chatTitle";
+import { followUps } from "@/lib/followUps";
 import { shrinkImage } from "@/lib/siteImages";
 import EffortPicker from "@/components/chat/EffortPicker";
 import VoiceInput from "@/components/chat/VoiceInput";
@@ -372,6 +373,20 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
                       <CopyButton getText={() => m.content} label="Copy reply" className="p-1 rounded-md text-slate-500 hover:text-slate-200" />
                       <ReportReply question={messages[i - 1]?.role === "user" ? messages[i - 1].content : ""} reply={m.content} />
                     </div>
+                    {i === messages.length - 1 && !loading && !isExhausted && (
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {followUps(messages[i - 1]?.role === "user" ? messages[i - 1].content : "", m.content).map((f) => (
+                          <button
+                            key={f}
+                            type="button"
+                            onClick={() => runPrompt(f, selectedAi)}
+                            className="px-2.5 py-1 rounded-full border border-indigo-500/40 bg-indigo-500/10 text-[12px] text-indigo-200 hover:bg-indigo-500/20 transition-colors"
+                          >
+                            {f}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </>
                 )}
               </div>
