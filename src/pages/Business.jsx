@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Store, Wand2, Globe, Users, Download, ShieldCheck, ArrowRight, Handshake, MessageCircle } from "lucide-react";
+import { Store, Wand2, Globe, Users, Download, ShieldCheck, ArrowRight, Handshake, MessageCircle, Inbox } from "lucide-react";
 import PublicLayout, { START_FREE } from "@/components/PublicLayout";
 import PricingCards from "@/components/landing/PricingCards";
 
@@ -8,6 +8,7 @@ const POINTS = [
   { icon: Wand2, title: "Describe it, get a website", text: "Say what your business does. The AI writes the pages, the words and the design, and changes anything you ask." },
   { icon: MessageCircle, title: "An AI for the daily work", text: "Draft emails and replies to customers, write product descriptions and social posts, and plan your week, in the same app." },
   { icon: Globe, title: "Online in minutes", text: "Publish free at yourbusiness.blackhole-ai-tech.com and share the link anywhere." },
+  { icon: Inbox, title: "Bookings reach you", text: "Booking, contact and sign-up forms on your site send what customers type straight to your Messages inbox." },
   { icon: Store, title: "Sell from your site", text: "Add Buy buttons for your products. Payments are being upgraded right now; ask us for early access." },
   { icon: Users, title: "Work as a team", text: "The Team plan lets up to 3 people build together and share one pool of AI credits." },
   { icon: Download, title: "Your code is yours", text: "On Pro and Team, download your site as a ZIP or push it to GitHub whenever you like." },
