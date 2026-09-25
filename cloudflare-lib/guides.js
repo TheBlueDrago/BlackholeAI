@@ -626,6 +626,93 @@ export const GUIDES = [
     more: { label: "Preview the Event invite template", to: "/templates?preview=event" },
     related: ["make-a-website-on-your-phone", "make-a-website-with-ai"],
   },
+  {
+    slug: "landing-page-for-your-idea",
+    title: "How to make a landing page for your app or idea",
+    description:
+      "Test a product, app or startup idea before you build it. Make a landing page with features, prices and a waitlist sign-up, free with AI, in an hour.",
+    minutes: 4,
+    intro:
+      "Before you spend months building something, find out if people want it. A landing page explains your idea in one screen, and a sign-up form tells you who's interested. Here's how to make one with AI today.",
+    sections: [
+      {
+        heading: "What a good landing page says",
+        list: [
+          "One headline that says what it does and who it's for, in plain words.",
+          "Three short reasons someone would want it.",
+          "What it will cost, even roughly, so sign-ups are real interest.",
+          "One clear button: join the waitlist, or get early access.",
+        ],
+      },
+      {
+        heading: "Step 1: Start from the Product landing template",
+        paragraphs: [
+          "Pick the Product landing template. It already has a headline, a features section and a pricing section, so you only need your own words.",
+        ],
+      },
+      {
+        heading: "Step 2: Describe your idea",
+        paragraphs: [
+          "Tell the AI in a sentence or two: \"It's an app that reminds students when homework is due and splits big projects into small steps. Free for one class, $2 a month for all of them.\" Ask it to rewrite the headline and features to match.",
+        ],
+      },
+      {
+        heading: "Step 3: Add a waitlist",
+        paragraphs: [
+          "Ask for \"a sign-up form with name and email, and a button that says Join the waitlist\". Once the site is published, every sign-up arrives in your Messages: open the Website Designer and tap the inbox button on your site.",
+        ],
+      },
+      {
+        heading: "Step 4: Share it and count the sign-ups",
+        paragraphs: [
+          "Publish at yourproduct.blackhole-ai-tech.com and share the link where your future users are: group chats, forums, social posts. If people sign up, you've found something worth building. If not, change the headline and try again; it only takes a message.",
+        ],
+      },
+    ],
+    cta: { label: "Make your landing page free", to: "/register?returnTo=%2Fchat%2Fdesigner%3Ftemplate%3Dlanding" },
+    more: { label: "Preview the Product landing template", to: "/templates?preview=landing" },
+    related: ["make-a-website-with-ai", "ai-for-small-business"],
+  },
+  {
+    slug: "school-club-website",
+    title: "How to make a website for your school club",
+    description:
+      "Robotics, drama, chess or coding club? Make a club website with meeting times, projects and a join form, free with AI. Great for students and teachers.",
+    minutes: 3,
+    intro:
+      "A club website gives new members one place to find out when you meet, what you're working on and how to join. Students can build it themselves in an afternoon, and it's a real project to be proud of. Here's how.",
+    sections: [
+      {
+        heading: "Step 1: Start from the School club template",
+        paragraphs: [
+          "Pick the School club template. It has a big welcome, a \"When we meet\" section, a place for this year's projects and a join form.",
+        ],
+      },
+      {
+        heading: "Step 2: Make it your club",
+        paragraphs: [
+          "Tell the AI about your club: \"We're the Hillside chess club. We meet Tuesdays at lunch in room 12. Beginners welcome. Use our school colors, green and gold.\" Then add your projects, events or tournament results.",
+        ],
+      },
+      {
+        heading: "Step 3: Collect sign-ups",
+        paragraphs: [
+          "The join form asks for a name and a parent or guardian email. Once the site is published, sign-ups arrive in your Messages, so the club leader can reply.",
+        ],
+      },
+      {
+        heading: "Keep it safe for students",
+        list: [
+          "Use first names only, and no photos of students unless your school allows it.",
+          "Don't list home addresses or personal phone numbers.",
+          "Ask a teacher to look it over before you share the link.",
+        ],
+      },
+    ],
+    cta: { label: "Make your club website free", to: "/register?returnTo=%2Fchat%2Fdesigner%3Ftemplate%3Dclub" },
+    more: { label: "Preview the School club template", to: "/templates?preview=club" },
+    related: ["event-invite-website", "learn-to-code-with-ai"],
+  },
 ];
 
 export const guideBySlug = (slug) => GUIDES.find((g) => g.slug === slug) || null;
