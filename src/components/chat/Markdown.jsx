@@ -1,9 +1,10 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Copy, Check } from "lucide-react";
 import CodePreview from "@/components/chat/CodePreview";
 import { previewable } from "@/lib/codePreview";
+import { prepareMath } from "@/lib/mathText";
 
 // Copies text and briefly shows a tick.
 export function CopyButton({ getText, className = "", label = "Copy" }) {
@@ -67,12 +68,35 @@ const components = {
   ),
 };
 
-// AI replies rendered as Markdown (headings, lists, bold, code). Raw HTML in a reply
+// Math formulas: KaTeX is fetched the first time a reply has math, then kept.
+let mathLoaded = null;
+const loadMath = () => (mathLoaded ||= import("@/lib/mathPlugins"));
+
+// AI replies rendered as Markdown (headings, lists, bold, code, math). Raw HTML in a reply
 // is shown as text, never rendered (react-markdown's default).
 export default function Markdown({ text }) {
+  const { text: shown, hasMath } = prepareMath(text);
+  const [math, setMath] = useState(null);
+  useEffect(() => {
+    if (!hasMath || math) return;
+    let alive = true;
+    loadMath()
+      .then((m) => alive && setMath(m))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [hasMath, math]);
+  const useMath = hasMath && math;
   return (
-    <div className="break-words [&_p]:my-1.5 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5 [&_ul]:my-1.5 [&_ol]:my-1.5 [&_li]:my-0.5 [&_h1]:text-lg [&_h2]:text-base [&_h3]:text-sm [&_h1]:font-semibold [&_h2]:font-semibold [&_h3]:font-semibold [&_h1]:mt-3 [&_h2]:mt-3 [&_h3]:mt-2 [&_h1]:mb-1 [&_h2]:mb-1 [&_blockquote]:border-l-2 [&_blockquote]:border-slate-600 [&_blockquote]:pl-3 [&_blockquote]:text-slate-300 [&_hr]:my-3 [&_hr]:border-slate-700">
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>{text || ""}</ReactMarkdown>
+    <div className="break-words [&_.katex-display]:overflow-x-auto [&_.katex-display]:overflow-y-hidden [&_.katex-display]:py-1 [&_p]:my-1.5 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5 [&_ul]:my-1.5 [&_ol]:my-1.5 [&_li]:my-0.5 [&_h1]:text-lg [&_h2]:text-base [&_h3]:text-sm [&_h1]:font-semibold [&_h2]:font-semibold [&_h3]:font-semibold [&_h1]:mt-3 [&_h2]:mt-3 [&_h3]:mt-2 [&_h1]:mb-1 [&_h2]:mb-1 [&_blockquote]:border-l-2 [&_blockquote]:border-slate-600 [&_blockquote]:pl-3 [&_blockquote]:text-slate-300 [&_hr]:my-3 [&_hr]:border-slate-700">
+      <ReactMarkdown
+        remarkPlugins={useMath ? [remarkGfm, math.remarkMathPlugin] : [remarkGfm]}
+        rehypePlugins={useMath ? [math.rehypeKatexPlugin] : []}
+        components={components}
+      >
+        {useMath ? shown : text || ""}
+      </ReactMarkdown>
     </div>
   );
 }
