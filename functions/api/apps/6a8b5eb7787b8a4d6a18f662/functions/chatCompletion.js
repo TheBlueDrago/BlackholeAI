@@ -218,6 +218,25 @@ async function generate(apiKey, model, prompt, generationConfig, timeoutMs, { on
 const NOW_WORDS = /\b(today|tonight|yesterday|tomorrow|this (week|weekend|month|year|season)|right now|currently|latest|newest|recent(ly)?|news|headlines?|breaking|scores?|who won|who is winning|standings|weather|forecast|temperature outside|stock|share price|price of|exchange rate|release date|coming out|election|president|ceo of|trending|live)\b|\b20[2-9]\d\b/i;
 export const wantsSearch = (question) => NOW_WORDS.test(String(question || "").slice(0, 500));
 
+// Google's free tier often has no search quota ("exceeded your current quota"). After a refusal,
+// searching is skipped for an hour (remembered in Cloudflare's free cache, not KV), so those
+// questions don't wait on a call that will fail. It turns itself back on to check again.
+const SEARCH_OFF_KEY = "https://blackhole-ai-tech.com/__internal/search-off";
+async function searchOff() {
+  try {
+    await caches.default.put(new Request(SEARCH_OFF_KEY), new Response("1", { headers: { "cache-control": "max-age=3600" } }));
+  } catch {
+    // No cache here: it tries again next time.
+  }
+}
+async function searchAllowed() {
+  try {
+    return !(await caches.default.match(new Request(SEARCH_OFF_KEY)));
+  } catch {
+    return true;
+  }
+}
+
 // Tries the model with the effort's thinking settings; if the model rejects those
 // settings, retries once without them rather than failing the request.
 async function generateWithEffort(apiKey, model, prompt, effort, timeoutMs, maxTokens, opts) {
@@ -230,6 +249,7 @@ async function generateWithEffort(apiKey, model, prompt, effort, timeoutMs, maxT
       // This model can't search, or the free search quota is used up: answer without it.
       if (!(err instanceof GeminiError) || ![400, 403, 429].includes(err.status)) throw err;
       console.warn("search unavailable", model, err.status, String(err.message).slice(0, 300));
+      await searchOff();
       return generateWithEffort(apiKey, model, prompt, effort, timeoutMs, maxTokens, { ...opts, search: false });
     }
   }
@@ -365,7 +385,7 @@ export async function onRequestPost(context) {
     // The reply stops at what the user's credits cover: whole credits x effort multiplier.
     const maxChars = internal ? Infinity : Math.floor(left / mult) * CHARS_PER_CREDIT;
     const maxTokens = internal ? 1024 : 0;
-    const search = !internal && wantsSearch(body.question);
+    const search = !internal && wantsSearch(body.question) && (await searchAllowed());
 
     // Charge for what was produced. A cut reply takes every remaining credit, which
     // pauses the chat until the user has more.

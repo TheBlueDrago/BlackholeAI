@@ -55,3 +55,12 @@ bodies.length = 0;
 refuseSearch = true;
 [s, b] = await call("What's the latest news today?");
 assert(s === 200 && bodies.length === 2 && bodies[0].tools && !bodies[1].tools && b.content === "The Lakers won 110-104.", "search refused: answered without it on the same model");
+
+bodies.length = 0;
+[s, b] = await call("Any breaking news today?");
+assert(s === 200 && bodies.length === 1 && !bodies[0].tools, "after a refusal, search is skipped for a while (no wasted call)");
+cache.clear();
+refuseSearch = false;
+bodies.length = 0;
+[s, b] = await call("Any breaking news today?");
+assert(bodies[0].tools && b.content.includes("Sources"), "and comes back once that wears off");
