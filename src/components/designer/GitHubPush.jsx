@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Github, Loader2, Check, X, ChevronDown, Upload, Lock, ExternalLink, LogOut } from "lucide-react";
 import { useExportAccess } from "@/lib/exportAccess";
-import { savedToken, forgetToken, savedRepo, rememberRepo, connect, listRepos, pushFile } from "@/lib/githubClient";
+import { savedToken, forgetToken, savedRepo, rememberRepo, savedPath, connect, listRepos, pushFile } from "@/lib/githubClient";
 
 const NEW_TOKEN_URL = "https://github.com/settings/personal-access-tokens/new";
 
@@ -21,6 +21,15 @@ export default function GitHubPush({ html, siteName, plan, onUpgrade }) {
   const ref = useRef(null);
 
   useEffect(() => setSelectedRepo(savedRepo(siteName)), [siteName]);
+  // The file it was opened from (Open repo), else index.html. Re-read on open, since Open repo
+  // may have just changed it.
+  const [path, setPath] = useState(() => savedPath(siteName));
+  useEffect(() => {
+    if (!open) return;
+    setPath(savedPath(siteName));
+    setSelectedRepo(savedRepo(siteName));
+    setToken(savedToken());
+  }, [open, siteName]);
 
   useEffect(() => {
     if (!open || !token || !access.allowed || repos.length) return;
@@ -74,7 +83,7 @@ export default function GitHubPush({ html, siteName, plan, onUpgrade }) {
     setError("");
     setResult("");
     try {
-      const url = await pushFile(token, selectedRepo, html, `Update ${siteName || "website"} from Blackhole AI`);
+      const url = await pushFile(token, selectedRepo, html, `Update ${path} from Blackhole AI`, path);
       rememberRepo(siteName, selectedRepo);
       setResult(url);
     } catch (err) {
@@ -187,7 +196,7 @@ export default function GitHubPush({ html, siteName, plan, onUpgrade }) {
                   className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-white text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90"
                 >
                   {busy === "push" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                  {busy === "push" ? "Pushing…" : "Push index.html"}
+                  {busy === "push" ? "Pushing…" : `Push ${path}`}
                 </button>
 
                 {result && (

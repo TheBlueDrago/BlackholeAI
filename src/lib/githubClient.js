@@ -5,6 +5,7 @@
 // The token stays in this browser (localStorage) and only ever goes to api.github.com.
 const TOKEN_KEY = "bh-github-token";
 const REPO_KEY = (name) => `bh-github-repo:${name || "_"}`;
+const PATH_KEY = (name) => `bh-github-path:${name || "_"}`;
 const API = "https://api.github.com";
 
 const get = (k) => {
@@ -27,6 +28,9 @@ export const savedToken = () => get(TOKEN_KEY);
 export const forgetToken = () => set(TOKEN_KEY, "");
 export const savedRepo = (name) => get(REPO_KEY(name));
 export const rememberRepo = (name, repo) => set(REPO_KEY(name), repo);
+// The file a project was opened from (Open from GitHub), so Push writes back to it.
+export const savedPath = (name) => get(PATH_KEY(name)) || "index.html";
+export const rememberPath = (name, path) => set(PATH_KEY(name), path === "index.html" ? "" : path);
 
 async function gh(token, path, init = {}) {
   const res = await fetch(API + path, {
@@ -39,7 +43,7 @@ async function gh(token, path, init = {}) {
       res.status === 401
         ? "GitHub didn't accept that token. It may have expired: make a new one."
         : res.status === 403 || res.status === 404
-          ? "This token can't write to that repository. Give it \"Contents: Read and write\" for this repo."
+          ? "This token can't use that repository. Give it \"Contents: Read and write\" for this repo."
           : data.message || `GitHub error ${res.status}`
     );
     e.status = res.status;
@@ -62,6 +66,33 @@ export async function listRepos(token) {
   return repos.filter((r) => !r.archived).map((r) => ({ full_name: r.full_name, private: r.private, branch: r.default_branch }));
 }
 
+// The repo's web pages (.html files), for Open from GitHub. Folders like node_modules are skipped.
+export async function listPages(token, fullName, branch) {
+  if (!/^[\w.-]+\/[\w.-]+$/.test(fullName)) throw new Error("Pick a repository.");
+  const tree = await gh(token, `/repos/${fullName}/git/trees/${encodeURIComponent(branch || "HEAD")}?recursive=1`).catch((e) => {
+    if (e.status === 409) return { tree: [] }; // an empty repo
+    throw e;
+  });
+  return (tree.tree || [])
+    .filter((f) => f.type === "blob" && /\.html?$/i.test(f.path) && !/(^|\/)(node_modules|\.git|vendor)\//.test(f.path) && f.size < 1_500_000)
+    .map((f) => f.path)
+    .sort((a, b) => a.split("/").length - b.split("/").length || a.localeCompare(b))
+    .slice(0, 300);
+}
+
+// One text file from the repo (UTF-8). Resolves "" when it doesn't exist.
+export async function readFile(token, fullName, path) {
+  try {
+    const f = await gh(token, `/repos/${fullName}/contents/${path.split("/").map(encodeURIComponent).join("/")}`);
+    if (typeof f.content !== "string") return "";
+    const bin = atob(f.content.replace(/\s/g, ""));
+    return new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0)));
+  } catch (e) {
+    if (e.status === 404) return "";
+    throw e;
+  }
+}
+
 // UTF-8 safe base64 for the contents API.
 const b64 = (text) => {
   const bytes = new TextEncoder().encode(text);
@@ -70,10 +101,10 @@ const b64 = (text) => {
   return btoa(bin);
 };
 
-// Creates or updates index.html in the repo. Returns the file's GitHub address.
+// Creates or updates a file (index.html unless told) in the repo. Returns the file's GitHub address.
 export async function pushFile(token, fullName, html, message, path = "index.html") {
   if (!/^[\w.-]+\/[\w.-]+$/.test(fullName)) throw new Error("Pick a repository.");
-  const url = `/repos/${fullName}/contents/${path}`;
+  const url = `/repos/${fullName}/contents/${path.split("/").map(encodeURIComponent).join("/")}`;
   let sha;
   try {
     sha = (await gh(token, url)).sha;

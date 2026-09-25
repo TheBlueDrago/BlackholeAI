@@ -14,12 +14,12 @@ import SendOrStopButton from "@/components/chat/SendOrStopButton";
 import useMessageQueue from "@/hooks/useMessageQueue";
 import useBuildMode, { BUILD_NOTE, ANSWER_NOTE, resolveIntent } from "@/hooks/useBuildMode";
 import ModeToggle from "@/components/chat/ModeToggle";
-import { base44 } from "@/api/base44Client";
 import { OUT_OF_CREDITS_NOTE } from "@/lib/creditCost";
 import { TIER_OF_AI } from "@/lib/creditRefresh";
 import OutOfCredits from "@/components/chat/OutOfCredits";
 import { useEffort, effortFor } from "@/lib/effort";
 import { streamChat } from "@/lib/aiStream";
+import { chatTitle } from "@/lib/chatTitle";
 import { shrinkImage } from "@/lib/siteImages";
 import EffortPicker from "@/components/chat/EffortPicker";
 import VoiceInput from "@/components/chat/VoiceInput";
@@ -131,19 +131,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
       spend?.[ai]?.(res.credits);
       const content = res.content ?? "";
       addMessage(convId, { role: "ai", content: res.cut ? `${content.trimEnd()}…\n\n${OUT_OF_CREDITS_NOTE}` : content });
-      // Named in the background, so the chat isn't stuck on "Thinking..." after the answer.
-      if (isFirst) {
-        base44.functions
-          .invoke("chatCompletion", {
-            prompt: `Create a very short title (max 4 words, no quotes, no trailing punctuation) summarizing what this chat is about based on the user's first message: "${text.slice(0, 500)}". Respond with only the title.`,
-            internal: true,
-          })
-          .then((titleRes) => {
-            const title = (titleRes.data?.content ?? "").trim().replace(/^["']|["'.]$/g, "").slice(0, 50);
-            if (title) renameConversation(convId, title);
-          })
-          .catch(() => {});
-      }
+      if (isFirst) renameConversation(convId, chatTitle(text));
     } catch (e) {
       if (reqIdRef.current !== myId) return;
       setLive("");

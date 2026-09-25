@@ -8,7 +8,37 @@ import { appParams } from "@/lib/app-params";
 // (err.response.status / err.response.data) so existing catch blocks keep working.
 // Pass { signal } and abort it when the user presses Stop: the connection closes, the
 // server stops generating and charges only for what was written.
-export async function streamChat(body, onDelta, { signal } = {}) {
+// When the AI is busy (Google's free tier, before any text was written) it asks again by
+// itself, a few seconds apart, so a short rush shows as a longer "Thinking..." rather than an
+// error. Busy answers aren't charged.
+export const BUSY_RETRY_WAITS_MS = [3000, 7000];
+
+const wait = (ms, signal) =>
+  new Promise((resolve, reject) => {
+    if (signal?.aborted) return reject(new DOMException("Aborted", "AbortError"));
+    const t = setTimeout(resolve, ms);
+    signal?.addEventListener("abort", () => {
+      clearTimeout(t);
+      reject(new DOMException("Aborted", "AbortError"));
+    }, { once: true });
+  });
+
+export async function streamChat(body, onDelta, { signal, waits = BUSY_RETRY_WAITS_MS } = {}) {
+  for (let attempt = 0; ; attempt++) {
+    let wrote = false;
+    try {
+      return await streamOnce(body, (t) => {
+        wrote = true;
+        onDelta?.(t);
+      }, { signal });
+    } catch (e) {
+      if (wrote || !e?.response?.data?.busy || attempt >= waits.length || signal?.aborted) throw e;
+      await wait(waits[attempt], signal);
+    }
+  }
+}
+
+async function streamOnce(body, onDelta, { signal } = {}) {
   const appId = appParams.appId;
   const token = localStorage.getItem("base44_access_token") || appParams.token;
   const res = await fetch(`/api/apps/${appId}/functions/chatCompletion`, {

@@ -93,6 +93,9 @@ export const SAFETY_RULES =
 // the next one (overloaded models take ~20-40s just to return their 503).
 const HEADERS_TIMEOUT_MS = 20000;
 const RETRYABLE = new Set([408, 429, 500, 502, 503, 504]);
+// When the whole chain failed within this long, it's tried once more after a short wait.
+const RETRY_PASS_WITHIN_MS = 15000;
+const RETRY_PASS_WAIT_MS = 2500;
 
 class GeminiError extends Error {
   constructor(message, { status = 0, retryable = false, badConfig = false } = {}) {
@@ -215,15 +218,22 @@ async function runChain(apiKey, chain, prompt, effort, maxTokens, opts) {
         opts.onDelta(t);
       }
     : undefined;
-  for (let i = 0; i < chain.length; i++) {
-    const isLast = i === chain.length - 1;
-    try {
-      const r = await generateWithEffort(apiKey, chain[i], prompt, effort, isLast ? 0 : HEADERS_TIMEOUT_MS, maxTokens, { ...opts, onDelta });
-      return { ...r, model: chain[i] };
-    } catch (err) {
-      lastErr = err;
-      if (started || !(err instanceof GeminiError) || !err.retryable) break;
+  const t0 = Date.now();
+  for (let pass = 0; pass < 2; pass++) {
+    for (let i = 0; i < chain.length; i++) {
+      const isLast = i === chain.length - 1;
+      try {
+        const r = await generateWithEffort(apiKey, chain[i], prompt, effort, isLast ? 0 : HEADERS_TIMEOUT_MS, maxTokens, { ...opts, onDelta });
+        return { ...r, model: chain[i] };
+      } catch (err) {
+        lastErr = err;
+        if (started || !(err instanceof GeminiError) || !err.retryable) throw err;
+      }
     }
+    // Every model said no quickly (per-minute rate limits, which clear in seconds, rather
+    // than slow overload): wait a moment and go round once more instead of failing.
+    if (Date.now() - t0 > RETRY_PASS_WITHIN_MS || opts.shouldStop?.()) break;
+    await new Promise((r) => setTimeout(r, RETRY_PASS_WAIT_MS));
   }
   throw lastErr || new GeminiError("No model available");
 }
@@ -232,8 +242,10 @@ function failure(err) {
   const busy = err instanceof GeminiError && err.retryable;
   return {
     error: busy
-      ? "The AI is very busy right now (Google's free tier is overloaded). Please try again in a minute."
+      ? "Blackhole AI is very busy right now. Please try again in a minute."
       : "The AI couldn't answer that request.",
+    // The app waits a few seconds and asks again by itself when this is set (lib/aiStream.js).
+    ...(busy ? { busy: true } : {}),
     detail: err ? String(err.message).slice(0, 500) : "",
   };
 }
