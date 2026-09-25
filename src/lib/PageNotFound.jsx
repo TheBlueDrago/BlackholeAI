@@ -1,10 +1,12 @@
 import React, { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, Gamepad2, LayoutTemplate, Mail } from "lucide-react";
+import { Home, Gamepad2, LayoutTemplate, Mail, MessageCircle, BookOpen } from "lucide-react";
 import PublicLayout from "@/components/PublicLayout";
 
 const LINKS = [
   { to: "/", label: "Home", icon: Home },
+  { to: "/chat", label: "Chat with the AI", icon: MessageCircle },
+  { to: "/guides", label: "Guides", icon: BookOpen },
   { to: "/arcade", label: "Play games", icon: Gamepad2 },
   { to: "/templates", label: "Website templates", icon: LayoutTemplate },
   { to: "/contact", label: "Contact us", icon: Mail },
@@ -29,7 +31,7 @@ export default function PageNotFound() {
         <p className="mt-3 text-slate-400 break-all">
           Nothing lives at <span className="text-slate-200">{pathname}</span>. The link may be old or mistyped.
         </p>
-        <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto">
+        <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 gap-3 max-w-2xl mx-auto">
           {LINKS.map(({ to, label, icon: Icon }) => (
             <Link key={to} to={to} className="rounded-2xl bg-slate-900/60 border border-slate-700/50 p-4 hover:border-indigo-500/50 transition-colors">
               <Icon className="w-6 h-6 text-indigo-300 mx-auto" />
