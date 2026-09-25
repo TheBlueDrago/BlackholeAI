@@ -27,6 +27,9 @@ export default function SiteMessages({ site, onClose }) {
 
   useEffect(() => {
     call({ action: "list" }, "load");
+    try {
+      localStorage.setItem(`bh-inbox-seen:${site}`, new Date().toISOString());
+    } catch {}
     const onKey = (e) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);

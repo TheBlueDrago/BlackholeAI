@@ -66,6 +66,8 @@ assert((await call({ action: "list", site: "rosas-bakery" }, true)).status === 4
 me = { id: "owner1", role: "user" };
 const list = await call({ action: "list", site: "rosas-bakery" }, true);
 assert(list.status === 200 && list.data.messages[0].fields.length === 1 && list.data.messages[0].fields[0][1] === "Sam", "the owner sees the message, without the password");
+const cnt = await call({ action: "count", site: "rosas-bakery" }, true);
+assert(cnt.status === 200 && cnt.data.count === 1 && cnt.data.latest === list.data.messages[0].at, "the owner can see how many messages there are, for the new-messages dot");
 const del = await call({ action: "delete", site: "rosas-bakery", id: list.data.messages[0].id }, true);
 assert(del.data.messages.length === 0, "the owner can delete a message");
 

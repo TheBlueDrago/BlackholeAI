@@ -74,7 +74,31 @@ function SitePreviewThumb({ html }) {
   );
 }
 
+// A dot on the inbox button when form messages arrived since the owner last opened them.
+function useNewMessages(site) {
+  const [fresh, setFresh] = useState(false);
+  useEffect(() => {
+    if (site.hidden) return;
+    let alive = true;
+    base44.functions
+      .invoke("site-form", { action: "count", site: site.name })
+      .then((r) => {
+        let seen = "";
+        try {
+          seen = localStorage.getItem(`bh-inbox-seen:${site.name}`) || "";
+        } catch {}
+        if (alive) setFresh(!!r.data?.latest && r.data.latest > seen);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [site.name, site.hidden]);
+  return [fresh, () => setFresh(false)];
+}
+
 function SiteCard({ site, onEdit, onToggleHidden, onDelete, inGallery, onToggleGallery, takenDown, onMessages }) {
+  const [fresh, clearFresh] = useNewMessages(site);
   const hasPreview = isInlineHtml(site.html);
   return (
     <div className="group relative rounded-2xl bg-slate-900/60 border border-slate-700/50 p-4 hover:border-indigo-500/40 transition-colors">
@@ -141,12 +165,16 @@ function SiteCard({ site, onEdit, onToggleHidden, onDelete, inGallery, onToggleG
         )}
         {!site.hidden && (
           <button
-            onClick={() => onMessages(site)}
-            title="Messages from your site's forms"
+            onClick={() => {
+              clearFresh();
+              onMessages(site);
+            }}
+            title={fresh ? "New messages from your site's forms" : "Messages from your site's forms"}
             aria-label="Messages from your site's forms"
             className="flex items-center justify-center px-2.5 py-1.5 rounded-lg bg-slate-800 text-slate-200 text-xs hover:bg-slate-700 transition-colors"
           >
             <InboxIcon className="w-3.5 h-3.5" />
+            {fresh && <span className="ml-1 w-2 h-2 rounded-full bg-sky-400" aria-label="new" />}
           </button>
         )}
         {!site.hidden && (

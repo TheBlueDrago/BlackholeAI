@@ -1,6 +1,7 @@
 // Forms on published sites (cloudflare-lib/inbox.js).
 //   Anyone (the published page): { action: "send", site, fields: [[label, value]], hp } -> { ok }
-//   The site's owner or an admin: { action: "list" | "delete" | "clear", site, id? } -> { messages }
+//   The site's owner or an admin: { action: "list" | "delete" | "clear", site, id? } -> { messages },
+//   or { action: "count", site } -> { count, latest } (the new-messages badge)
 // Published pages run in a sandbox with no origin of their own, so "send" answers any origin
 // (no cookies or sign-in are involved); everything else needs the owner's sign-in.
 import { json, badName, ownerOf, kvKey } from "../../../../../cloudflare-lib/published.js";
@@ -42,6 +43,10 @@ export async function onRequestPost(context) {
     if (!user) return reply({ error: "Please sign in." }, 401);
     if (user.role !== "admin" && (await ownerOf(request, kv, "site", site)) !== user.id) return reply({ error: "Only the site's owner can see its messages." }, 403);
     if (action === "list") return reply({ messages: await listMessages(kv, site) });
+    if (action === "count") {
+      const all = await listMessages(kv, site);
+      return reply({ count: all.length, latest: all[0] ? all[0].at : null });
+    }
     if (action === "delete") return reply({ messages: await removeMessage(kv, site, String(body.id || "") || "__none__") });
     if (action === "clear") return reply({ messages: await removeMessage(kv, site, "") });
     return reply({ error: "Unknown action." }, 400);
