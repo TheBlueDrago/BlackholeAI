@@ -95,6 +95,8 @@ const GAMES = [
 ];
 
 const FAQ = [
+  ["What can the AI help me with?", "Almost anything you'd ask a smart friend: homework explained step by step, practice quizzes, essays, emails and stories, code, questions about a photo you send, and building websites and games. You can type or just talk to it.", ["/guides", "See the guides"]],
+  ["Can I use it for school?", "Yes. It's built to help you understand, not just hand you answers: ask it to explain step by step or quiz you. Always follow your teacher's rules about AI.", ["/guides/ai-homework-help", "Using AI for homework the right way"]],
   ["Is Blackhole AI free?", "Yes. The Free plan gives you 50 AI credits every month and lets you publish a website and a game, and new accounts get a free week of Pro. Pro is $1.50 a month and Team is $6 a month when you want more."],
   ["Do I need to know how to code?", "No. You describe what you want in your own words. If you do know code, you can edit it by hand, and on Pro you can download it or push it to GitHub."],
   ["Does it work on my phone?", "Yes. Everything works on phones, tablets and computers, and you can install it like an app from your profile."],
