@@ -229,6 +229,7 @@ async function generateWithEffort(apiKey, model, prompt, effort, timeoutMs, maxT
     } catch (err) {
       // This model can't search, or the free search quota is used up: answer without it.
       if (!(err instanceof GeminiError) || ![400, 403, 429].includes(err.status)) throw err;
+      console.warn("search unavailable", model, err.status, String(err.message).slice(0, 300));
       return generateWithEffort(apiKey, model, prompt, effort, timeoutMs, maxTokens, { ...opts, search: false });
     }
   }
