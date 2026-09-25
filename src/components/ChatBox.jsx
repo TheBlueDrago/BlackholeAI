@@ -275,6 +275,9 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
                   </button>
                 ))}
               </div>
+              <a href="/ideas" className="mt-3 text-xs text-indigo-300 hover:text-indigo-200 underline underline-offset-2">
+                More ideas for what to ask
+              </a>
             </div>
           )}
 

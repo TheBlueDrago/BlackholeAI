@@ -267,8 +267,8 @@ export default function Landing() {
           >
             Start chatting free <ArrowRight className="w-4 h-4" />
           </Link>
-          <Link to="/guides/ai-homework-help" className="ml-4 inline-flex items-center gap-1 text-sm text-indigo-300 hover:text-indigo-200">
-            See how people use it <ArrowRight className="w-4 h-4" />
+          <Link to="/ideas" className="ml-4 inline-flex items-center gap-1 text-sm text-indigo-300 hover:text-indigo-200">
+            Things to ask it <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </section>
