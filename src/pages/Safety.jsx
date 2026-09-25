@@ -58,7 +58,6 @@ const SECTIONS = [
     points: [
       "Our AI is instructed, from our server, to keep what it writes suitable for kids and not to build scam or password-stealing pages. Publishing checks catch what gets through.",
       "Pages are checked for adult content, scams, hidden code and other harmful things before they go live.",
-      "The Blackhole Browser is family-friendly: adult, gambling and piracy sites are left out of search and can't be opened in it.",
       "Every published page has a Report link, and reports are reviewed by a person.",
       "Pages that break the rules are taken down, and their owner can't put them back up.",
     ],
@@ -72,7 +71,7 @@ const PARENTS = [
   "Blackhole AI is for ages 13 and up. Anyone under 18 needs a parent or guardian's permission, especially before buying anything.",
   "It's free to use. Paid plans are monthly and credit packs are one-time, and every purchase goes through a secure checkout that shows the price first.",
   "Every purchase is listed in Settings → Subscriptions. To cancel a plan or ask about a charge, contact us and pick \"Plans, credits or payments\".",
-  "The AI is told to keep what it writes suitable for young people, published pages are checked before they go live, and Blackhole Browser searches are filtered.",
+  "The AI is told to keep what it writes suitable for young people, published pages are checked before they go live.",
   "The chat asks before sending anything that looks like a phone number, home address, password or card number, and a flag under every AI reply lets you report one that isn't right.",
   "Chats are saved on the device; our servers keep only the start of the last few questions, to spot misuse. You can download a copy of an account's data, or delete the account and everything in it, from Settings.",
 ];
@@ -95,7 +94,6 @@ const RECENT = {
     "New passwords that are easy to guess can't be used, and you can show your password while typing it.",
     "On shared and school computers: signing in without \"Remember me\" signs you out and clears your chats when the browser closes, and Settings → Security can sign out and clear the browser any time.",
     "Pages asking for a crypto wallet's secret recovery phrase can't be published.",
-    "The Blackhole Browser leaves out adult, gambling and piracy sites.",
     "The chat asks before you send something that looks like a card number, password, phone number or home address.",
     "You can report a page for bullying someone or sharing their private information.",
     "You can download a copy of your account's data from Settings.",

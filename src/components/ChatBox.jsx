@@ -131,15 +131,18 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
       spend?.[ai]?.(res.credits);
       const content = res.content ?? "";
       addMessage(convId, { role: "ai", content: res.cut ? `${content.trimEnd()}…\n\n${OUT_OF_CREDITS_NOTE}` : content });
+      // Named in the background, so the chat isn't stuck on "Thinking..." after the answer.
       if (isFirst) {
-        try {
-          const titleRes = await base44.functions.invoke("chatCompletion", {
+        base44.functions
+          .invoke("chatCompletion", {
             prompt: `Create a very short title (max 4 words, no quotes, no trailing punctuation) summarizing what this chat is about based on the user's first message: "${text.slice(0, 500)}". Respond with only the title.`,
             internal: true,
-          });
-          const title = (titleRes.data?.content ?? "").trim().slice(0, 50);
-          if (title && reqIdRef.current === myId) renameConversation(convId, title);
-        } catch {}
+          })
+          .then((titleRes) => {
+            const title = (titleRes.data?.content ?? "").trim().replace(/^["']|["'.]$/g, "").slice(0, 50);
+            if (title) renameConversation(convId, title);
+          })
+          .catch(() => {});
       }
     } catch (e) {
       if (reqIdRef.current !== myId) return;

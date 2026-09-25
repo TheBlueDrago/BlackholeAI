@@ -12,6 +12,7 @@ import Sidebar from "@/components/Sidebar";
 import ThemeToggle from "@/components/ThemeToggle";
 import AiChooser from "@/components/AiChooser";
 import { siteLimit } from "@/lib/publishLimits";
+import { siteUrl } from "@/lib/blackholeDomain";
 import { resetDesignerProject, loadDesignerHtmlIntoProject } from "@/lib/designerStore";
 import { SITE_TEMPLATES } from "@/lib/siteTemplates";
 import { hasProFeatures, hasSpace } from "@/lib/plans";
@@ -179,7 +180,9 @@ function SiteCard({ site, onEdit, onToggleHidden, onDelete, inGallery, onToggleG
         )}
         {!site.hidden && (
           <a
-            href={`/chat/browser?q=${site.name}.blackhole`}
+            href={siteUrl(site.name) || "#"}
+            target="_blank"
+            rel="noopener noreferrer"
             title="View live"
             className="flex items-center justify-center px-2.5 py-1.5 rounded-lg bg-slate-800 text-slate-200 text-xs hover:bg-slate-700 transition-colors"
           >
@@ -361,7 +364,6 @@ export default function DesignerDashboard() {
                 onNewChat={shell.newChat}
                 onGoSubscriptions={shell.goPlans}
                 onGoDesigner={shell.goDesigner}
-                onGoBrowser={shell.goBrowser}
                 onGoGames={shell.goGames}
                 onGoMonitor={shell.goMonitor}
                 isAdmin={isAdmin}

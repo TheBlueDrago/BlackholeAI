@@ -41,7 +41,7 @@ export function Terms() {
     <LegalPage title="Terms of Service" other={{ to: "/privacy", label: "Privacy Policy" }}>
       <p>
         These terms cover your use of Blackhole AI at blackhole-ai-tech.com, including its AI chat, Blackhole Code,
-        the Website and Game Designers, the Blackhole Browser and the sites and games people publish with it. By
+        the Website and Game Designers and the sites and games people publish with it. By
         creating an account or using Blackhole AI you agree to them. If you don't agree, please don't use it.
       </p>
 

@@ -18,7 +18,7 @@ const STEPS = [
   {
     icon: Menu,
     title: "Everything is in the menu",
-    text: "The menu button in the top-left corner opens your chats and every tool: Blackhole Code for programming, the Website Designer, games and the Blackhole Browser.",
+    text: "The menu button in the top-left corner opens your chats and every tool: Blackhole Code for programming, the Website Designer and games.",
     cta: "Open the menu",
     go: "menu",
   },

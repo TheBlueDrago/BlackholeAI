@@ -976,7 +976,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
               className="w-full max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain max-w-md bg-slate-900 border border-slate-700/60 rounded-2xl shadow-2xl p-6"
             >
               <h3 className="text-lg font-semibold text-white">{isRepublish ? "Re-publish your website" : "Publish your website"}</h3>
-              <p className="text-slate-400 text-sm mt-1">Your website will be live in Blackhole Browser at:</p>
+              <p className="text-slate-400 text-sm mt-1">Your website will be live at:</p>
               <div className="mt-3 flex items-center gap-2 bg-slate-800/70 border border-slate-700/50 rounded-xl px-3 py-2.5">
                 <Globe className="w-4 h-4 text-sky-300 shrink-0" />
                 <span className="text-slate-100 text-sm font-mono truncate">

@@ -59,7 +59,6 @@ const SettingsView = lazy(() => import('@/pages/chat/Views').then((m) => ({ defa
 const GamesFront = lazy(() => import('@/pages/chat/GamesFront'));
 const GamesDesignerWorkspace = lazy(() => import('@/components/GamesDesignerWorkspace'));
 const GameView = lazy(() => import('@/pages/chat/GameView'));
-const BlackholeBrowser = lazy(() => import('@/pages/chat/BlackholeBrowser'));
 
 // Signed out: a shared game link (/chat/game/<name>) opens the public player instead of the login page.
 function SignedOutRedirect() {
@@ -132,7 +131,7 @@ const AuthenticatedApp = () => {
           </Route>
           <Route path="designer" element={<DesignerDashboard />} />
           <Route path="designer/build" element={<DesignerWorkspace />} />
-          <Route path="browser" element={<BlackholeBrowser />} />
+          <Route path="browser" element={<Navigate to="/chat" replace />} />
           <Route path="games" element={<GamesFront />} />
           <Route path="game-designer" element={<GamesDesignerWorkspace />} />
           <Route path="game/:name" element={<GameView />} />

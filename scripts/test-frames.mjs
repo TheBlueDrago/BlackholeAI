@@ -32,10 +32,8 @@ assert(!PREVIEW_SANDBOX.includes("allow-top-navigation"), "previews can't move t
 
 // Frames allowed to pair scripts with allow-same-origin: they only ever load another
 // website's address (checked by siteUrl / safeWebUrl), never HTML on the app's origin.
-const OTHER_ORIGIN_FRAMES = {
-  "src/components/browser/BrowserSiteFrame.jsx": "siteUrl(",
-  "src/components/browser/BrowserWebFrame.jsx": "safeWebUrl(",
-};
+// (None now: Blackhole Browser, which had two, was removed.)
+const OTHER_ORIGIN_FRAMES = {};
 
 // The sandbox value a frame uses: a string literal, PREVIEW_SANDBOX, or a constant in the file.
 function sandboxOf(tag, src) {
@@ -72,7 +70,7 @@ for (const file of files) {
     assert(rel === "src/components/ui/chart.jsx", `${rel} doesn't set raw HTML`);
   }
 }
-assert(frames >= 10, `found the app's frames (${frames})`);
+assert(frames >= 7, `found the app's frames (${frames})`);
 
 const pkg = JSON.parse(readFileSync(join(R, "package.json"), "utf8"));
 const deps = { ...pkg.dependencies, ...pkg.devDependencies };

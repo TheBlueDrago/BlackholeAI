@@ -19,7 +19,6 @@ const APP_TITLES = [
   [/^\/chat\/game-designer/, "Game Designer"],
   [/^\/chat\/games/, "Games"],
   [/^\/chat\/game\//, "Game"],
-  [/^\/chat\/browser/, "Blackhole Browser"],
   [/^\/chat\/(shop|plans)/, "Shop"],
   [/^\/chat\/monitor/, "Monitor"],
   [/^\/chat\/promos/, "Promo codes"],
