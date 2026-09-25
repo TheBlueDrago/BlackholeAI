@@ -134,6 +134,16 @@ export function Privacy() {
   return (
     <LegalPage title="Privacy Policy" other={{ to: "/terms", label: "Terms of Service" }}>
       <p>This explains what Blackhole AI collects, why, and who helps us run it.</p>
+      <div className="my-6 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5">
+        <p className="font-semibold text-white">In short</p>
+        <ul>
+          <li>We don't sell your information, and we don't show ads or use tracking cookies.</li>
+          <li>Your chats and website projects are saved in your own browser, not on our servers.</li>
+          <li>What you ask the AI goes to Google to get an answer; we keep only the start of your five latest questions, to keep the service safe.</li>
+          <li>You can download a copy of your data or delete your account at any time.</li>
+          <li>You pay on a secure checkout page, so we never see your card number.</li>
+        </ul>
+      </div>
 
       <h2>What we collect</h2>
       <ul>
