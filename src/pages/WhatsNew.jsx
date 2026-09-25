@@ -9,7 +9,7 @@ const UPDATES = [
   {
     date: "September 2026",
     items: [
-      { icon: Globe, text: "Forms on the websites you make now work: bookings, RSVPs and sign-ups arrive in your Messages inbox in the Website Designer." },
+      { icon: Globe, text: "Forms on the websites you make now work: bookings, RSVPs and sign-ups arrive in your Messages inbox in the Website Designer, with a dot when something new comes in and a download to a spreadsheet." },
       { icon: BookOpen, text: "New guides for using the AI: homework help, writing, learning to code, resumes and cover letters, and running a small business, plus a guide for every website template." },
       { icon: Sparkles, text: "The chat suggests what to try first: homework help, explain simply, help me write and quiz me." },
       { icon: Sparkles, text: "Try any website template full screen before you sign up, and four new ones: local business, event invite, school club and resume." },
