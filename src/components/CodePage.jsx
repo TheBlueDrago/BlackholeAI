@@ -18,6 +18,7 @@ import useStickToBottom from "@/hooks/useStickToBottom";
 import { isNetworkError, OFFLINE_NOTE } from "@/lib/netError";
 import { secretKeyIn } from "@/lib/privateInfo";
 import { historyBlock } from "@/lib/chatHistory";
+import { followUps } from "@/lib/followUps";
 import { readAboutMe, aboutMeBlock } from "@/lib/aboutMe";
 import AboutMeButton from "@/components/chat/AboutMeButton";
 import { useAppShell } from "@/components/AppShellContext";
@@ -176,6 +177,20 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
                       <CopyButton getText={() => m.content} label="Copy reply" className="p-1 rounded-md text-slate-500 hover:text-slate-200" />
                       <ReportReply question={messages[i - 1]?.role === "user" ? messages[i - 1].content : ""} reply={m.content} />
                     </div>
+                    {i === messages.length - 1 && !loading && !aiCodeExhausted && (
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {followUps(messages[i - 1]?.role === "user" ? messages[i - 1].content : "", m.content).map((f) => (
+                          <button
+                            key={f}
+                            type="button"
+                            onClick={() => runPrompt(f)}
+                            className="px-2.5 py-1 rounded-full border border-emerald-500/40 bg-emerald-500/10 text-[12px] text-emerald-200 hover:bg-emerald-500/20 transition-colors"
+                          >
+                            {f}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </>
                 )}
               </div>
