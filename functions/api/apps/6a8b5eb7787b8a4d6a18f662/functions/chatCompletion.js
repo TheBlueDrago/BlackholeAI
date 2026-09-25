@@ -112,7 +112,7 @@ class GeminiError extends Error {
 // there (the user's credits ran out) and returns { text, cut: true }. If shouldStop()
 // turns true (the user pressed Stop and the app hung up), it stops there too and
 // returns { text, stopped: true }, so only what was written is charged.
-async function generate(apiKey, model, prompt, generationConfig, timeoutMs, { onDelta, maxChars = Infinity, shouldStop } = {}) {
+async function generate(apiKey, model, prompt, generationConfig, timeoutMs, { onDelta, maxChars = Infinity, shouldStop, search = false } = {}) {
   const ctrl = new AbortController();
   const timer = timeoutMs ? setTimeout(() => ctrl.abort(), timeoutMs) : null;
   let res;
@@ -121,9 +121,11 @@ async function generate(apiKey, model, prompt, generationConfig, timeoutMs, { on
       method: "POST",
       headers: { "content-type": "application/json", "x-goog-api-key": apiKey },
       body: JSON.stringify({
-        systemInstruction: { parts: [{ text: SAFETY_RULES }] },
+        // The date, so "today", "this year" or "how old is…" are answered for now.
+        systemInstruction: { parts: [{ text: `${SAFETY_RULES} Today's date is ${new Date().toISOString().slice(0, 10)}.` }] },
         contents: [{ parts: typeof prompt === "string" ? [{ text: prompt }] : prompt }],
         generationConfig,
+        ...(search ? { tools: [{ google_search: {} }] } : {}),
       }),
       signal: ctrl.signal,
     });
@@ -167,9 +169,16 @@ async function generate(apiKey, model, prompt, generationConfig, timeoutMs, { on
       streamError = chunk.error;
       return;
     }
-    const parts = (chunk.candidates && chunk.candidates[0] && chunk.candidates[0].content && chunk.candidates[0].content.parts) || [];
+    const cand = (chunk.candidates && chunk.candidates[0]) || {};
+    const parts = (cand.content && cand.content.parts) || [];
     for (const p of parts) if (p.text && !p.thought) add(p.text);
+    // Web pages the answer came from (Google Search grounding).
+    for (const g of (cand.groundingMetadata && cand.groundingMetadata.groundingChunks) || []) {
+      const uri = g && g.web && g.web.uri;
+      if (typeof uri === "string" && /^https:\/\//.test(uri) && !sources.some((s) => s.uri === uri)) sources.push({ uri, title: String((g.web.title || "").trim() || "source") });
+    }
   };
+  const sources = [];
   let stopped = false;
   while (!cut) {
     if (shouldStop && shouldStop()) {
@@ -191,19 +200,44 @@ async function generate(apiKey, model, prompt, generationConfig, timeoutMs, { on
     const code = Number(streamError.code) || 0;
     throw new GeminiError(streamError.message || "Gemini stream error", { status: code, retryable: RETRYABLE.has(code) });
   }
+  // Searched answers end with where they came from.
+  if (out && sources.length && !cut && !stopped) {
+    const links = sources
+      .slice(0, 4)
+      .map((s) => `[${s.title.replace(/[[\]()\n]/g, " ").slice(0, 60)}](${s.uri})`)
+      .join(" · ");
+    const tail = `\n\n_Sources: ${links}_`;
+    out += tail;
+    if (onDelta) onDelta(tail);
+  }
   return { text: out, cut, stopped };
 }
+
+// Questions about now (news, scores, weather, prices, "today", "latest") get a Google search
+// first, so the answer isn't out of date. Only these, to save the free search quota.
+const NOW_WORDS = /\b(today|tonight|yesterday|tomorrow|this (week|weekend|month|year|season)|right now|currently|latest|newest|recent(ly)?|news|headlines?|breaking|scores?|who won|who is winning|standings|weather|forecast|temperature outside|stock|share price|price of|exchange rate|release date|coming out|election|president|ceo of|trending|live)\b|\b20[2-9]\d\b/i;
+export const wantsSearch = (question) => NOW_WORDS.test(String(question || "").slice(0, 500));
 
 // Tries the model with the effort's thinking settings; if the model rejects those
 // settings, retries once without them rather than failing the request.
 async function generateWithEffort(apiKey, model, prompt, effort, timeoutMs, maxTokens, opts) {
   const { thinkingConfig } = EFFORT[effort];
   const maxOutputTokens = maxTokens || EFFORT[effort].maxOutputTokens;
+  if (opts.search) {
+    try {
+      return await generateWithEffort(apiKey, model, prompt, effort, timeoutMs, maxTokens, { ...opts, search: false, withSearch: true });
+    } catch (err) {
+      // This model can't search, or the free search quota is used up: answer without it.
+      if (!(err instanceof GeminiError) || ![400, 403, 429].includes(err.status)) throw err;
+      return generateWithEffort(apiKey, model, prompt, effort, timeoutMs, maxTokens, { ...opts, search: false });
+    }
+  }
+  const call = { ...opts, search: !!opts.withSearch };
   try {
-    return await generate(apiKey, model, prompt, { maxOutputTokens, thinkingConfig }, timeoutMs, opts);
+    return await generate(apiKey, model, prompt, { maxOutputTokens, thinkingConfig }, timeoutMs, call);
   } catch (err) {
     if (!(err instanceof GeminiError) || !err.badConfig) throw err;
-    return generate(apiKey, model, prompt, { maxOutputTokens }, timeoutMs, opts);
+    return generate(apiKey, model, prompt, { maxOutputTokens }, timeoutMs, call);
   }
 }
 
@@ -330,6 +364,7 @@ export async function onRequestPost(context) {
     // The reply stops at what the user's credits cover: whole credits x effort multiplier.
     const maxChars = internal ? Infinity : Math.floor(left / mult) * CHARS_PER_CREDIT;
     const maxTokens = internal ? 1024 : 0;
+    const search = !internal && wantsSearch(body.question);
 
     // Charge for what was produced. A cut reply takes every remaining credit, which
     // pauses the chat until the user has more.
@@ -345,7 +380,7 @@ export async function onRequestPost(context) {
 
     if (!body.stream) {
       try {
-        const r = await runChain(env.GEMINI_API_KEY, chain, input, effort, maxTokens, { maxChars });
+        const r = await runChain(env.GEMINI_API_KEY, chain, input, effort, maxTokens, { maxChars, search });
         return json({ content: r.text, model: r.model, effort, ...(await settle(r.text, r.cut)) });
       } catch (err) {
         // 503 rather than 502: Cloudflare replaces 502 bodies on the custom domain with a
@@ -371,7 +406,7 @@ export async function onRequestPost(context) {
     context.waitUntil(
       (async () => {
         try {
-          const r = await runChain(env.GEMINI_API_KEY, chain, input, effort, maxTokens, { maxChars, onDelta: (t) => send({ delta: t }), shouldStop: () => gone });
+          const r = await runChain(env.GEMINI_API_KEY, chain, input, effort, maxTokens, { maxChars, search, onDelta: (t) => send({ delta: t }), shouldStop: () => gone });
           await send({ done: true, model: r.model, effort, ...(await settle(r.text, r.cut, r.stopped)) });
         } catch (err) {
           await send({ ...failure(err), status: 503 });
