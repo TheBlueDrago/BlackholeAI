@@ -6,7 +6,8 @@ import { historyBlock } from "@/lib/chatHistory";
 import { readAboutMe, aboutMeBlock } from "@/lib/aboutMe";
 import AboutMeButton from "@/components/chat/AboutMeButton";
 import ReportReply from "@/components/chat/ReportReply";
-import { Plus, X, Paperclip, RotateCcw, Pencil } from "lucide-react";
+import { Plus, RotateCcw, Pencil, ImagePlus } from "lucide-react";
+import AttachedFile from "@/components/chat/AttachedFile";
 import BlackholeIcon from "@/components/BlackholeIcon";
 import AiChooser from "@/components/AiChooser";
 import QueueList from "@/components/chat/QueueList";
@@ -64,6 +65,14 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
   const [focused, setFocused] = useState(false);
   const [selectedAi, setSelectedAi] = useState("ai");
   const [files, setFiles] = useState([]);
+  const [dragging, setDragging] = useState(false);
+  // Pasted screenshots and dropped pictures are attached like the + button's (up to 10 files).
+  const attach = (list) => {
+    const fs = Array.from(list || []).filter((f) => f && f.size > 0);
+    if (fs.length) setFiles((prev) => [...prev, ...fs].slice(0, 10));
+    return fs.length > 0;
+  };
+  const hasFiles = (e) => Array.from(e.dataTransfer?.types || []).includes("Files");
   const buildMode = useBuildMode(selectedAi);
   const [effort, setEffort] = useEffort();
   const [live, setLive] = useState("");
@@ -258,7 +267,29 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
       <p className="sr-only" role="status" aria-live="polite">{announce}</p>
       {/* No backdrop blur, smooth scrolling or scroll trapping here: on phones (iPhones especially)
           they got in the way of scrolling the messages. At either end, a swipe scrolls the page. */}
-      <div className="bg-slate-900/80 border border-slate-700/50 rounded-3xl overflow-hidden shadow-2xl">
+      <div
+        className={`relative bg-slate-900/80 border rounded-3xl overflow-hidden shadow-2xl ${dragging ? "border-indigo-400" : "border-slate-700/50"}`}
+        onDragOver={(e) => {
+          if (!hasFiles(e)) return;
+          e.preventDefault();
+          setDragging(true);
+        }}
+        onDragLeave={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget)) setDragging(false);
+        }}
+        onDrop={(e) => {
+          if (!hasFiles(e)) return;
+          e.preventDefault();
+          setDragging(false);
+          attach(e.dataTransfer.files);
+        }}
+      >
+        {dragging && (
+          <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-slate-950/80 text-indigo-200">
+            <ImagePlus className="w-8 h-8" />
+            <p className="text-sm font-medium">Drop pictures to ask about them</p>
+          </div>
+        )}
         <div ref={scrollRef} className="h-[55vh] sm:h-96 overflow-y-auto overscroll-y-auto p-4 sm:p-6 space-y-4">
           {messages.length === 0 && !loading && (
             <div className="h-full flex flex-col items-center justify-center text-center">
@@ -366,13 +397,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
           {files.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-2">
               {files.map((f, i) => (
-                <div key={i} className="flex items-center gap-1.5 bg-slate-800 border border-slate-700/50 rounded-lg px-2 py-1 text-xs text-slate-200">
-                  <Paperclip className="w-3 h-3 text-slate-400" />
-                  <span className="max-w-[140px] truncate">{f.name}</span>
-                  <button onClick={() => setFiles((fs) => fs.filter((_, j) => j !== i))} className="text-slate-400 hover:text-red-400">
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
+                <AttachedFile key={`${f.name}-${f.size}-${i}`} file={f} onRemove={() => setFiles((fs) => fs.filter((_, j) => j !== i))} />
               ))}
             </div>
           )}
@@ -386,6 +411,11 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
                 if (!e.target.value.trim()) spokenRef.current = false;
               }}
               onKeyDown={handleKeyDown}
+              onPaste={(e) => {
+                // A copied screenshot or picture: attach it (text pastes as usual).
+                const pics = Array.from(e.clipboardData?.files || []);
+                if (pics.length && attach(pics) && !e.clipboardData.getData("text")) e.preventDefault();
+              }}
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
               placeholder={queued ? "Type to queue your next message…" : "Message Blackhole AI..."}
@@ -397,7 +427,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
           <div className="flex items-center gap-2 mt-2">
             <button
               onClick={() => fileInputRef.current?.click()}
-              title="Attach images or files"
+              title="Attach pictures or files (or paste or drop them here)"
               className="p-1.5 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
             >
               <Plus className="w-4 h-4" />
@@ -419,8 +449,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
             multiple
             className="hidden"
             onChange={(e) => {
-              const fs = Array.from(e.target.files || []);
-              if (fs.length) setFiles((prev) => [...prev, ...fs]);
+              attach(e.target.files);
               e.target.value = "";
             }}
           />

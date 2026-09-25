@@ -9,6 +9,8 @@ const UPDATES = [
   {
     date: "September 2026",
     items: [
+      { icon: Sparkles, text: "Paste a screenshot straight into the chat, or drag pictures onto it, and ask about them. You'll see a small preview of each picture before you send." },
+      { icon: Sparkles, text: "The AI always knows today's date, so questions like \"how many days until…\" or \"how old is…\" come out right." },
       { icon: Sparkles, text: "Talk-back: ask with the microphone and the AI reads its answer out loud, like a voice assistant. Tap the mic again to interrupt it." },
       { icon: BookOpen, text: "Math homework looks like a textbook now: fractions, powers, square roots and equations in the AI's answers show as real formulas, and Read aloud says them in words." },
       { icon: Sparkles, text: "When the AI writes a web page or an SVG picture in the chat or Blackhole Code, press Preview to run it right there, at computer or phone size." },
