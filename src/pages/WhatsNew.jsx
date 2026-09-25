@@ -9,6 +9,10 @@ const UPDATES = [
   {
     date: "September 2026",
     items: [
+      { icon: Sparkles, text: "When the AI writes a web page or an SVG picture in the chat or Blackhole Code, press Preview to run it right there, at computer or phone size." },
+      { icon: Globe, text: "Open a page from your own GitHub repository in the Website Designer (on a computer, on paid plans), ask the AI for changes, and push them back to the same file." },
+      { icon: Zap, text: "When lots of people are using the AI at once, it quietly tries again for you instead of showing an error, and new chats are named instantly." },
+      { icon: Sparkles, text: "About you: tell the AI about yourself once (your grade, your interests, how you like answers) and every reply fits you. It's kept only on your device." },
       { icon: Sparkles, text: "The AI now remembers what you said earlier in the chat, so follow-ups like \"make it shorter\", \"why?\" or \"next question\" just work, in the chat and in Blackhole Code." },
       { icon: BookOpen, text: "Not sure what to ask? \"Things to ask AI\" has 36 ideas for school, writing, coding, everyday life, fun and work; tap one to try it." },
       { icon: Sparkles, text: "New here? A short welcome tour shows you around the chat, the menu, the Website and Game Designers and your profile, or you can explore on your own." },

@@ -2,6 +2,8 @@ import React, { useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Copy, Check } from "lucide-react";
+import CodePreview from "@/components/chat/CodePreview";
+import { previewable } from "@/lib/codePreview";
 
 // Copies text and briefly shows a tick.
 export function CopyButton({ getText, className = "", label = "Copy" }) {
@@ -22,18 +24,27 @@ export function CopyButton({ getText, className = "", label = "Copy" }) {
   );
 }
 
+// The code block's language ("language-html" → "html") and text, from the <code> inside.
+const codeInfo = (children) => {
+  const code = React.Children.toArray(children)[0];
+  const lang = (/language-([\w-]+)/.exec(code?.props?.className || "") || [])[1] || "";
+  const text = React.Children.toArray(code?.props?.children).join("");
+  return { lang, text };
+};
+
 function CodeBlock({ children }) {
   const ref = useRef(null);
+  const { lang, text } = codeInfo(children);
+  const canPreview = previewable(lang, text);
   return (
     <div className="relative group my-2">
-      <pre ref={ref} className="bg-black/40 border border-slate-700/60 rounded-lg p-3 pr-9 overflow-x-auto text-[12.5px] leading-snug">
+      <pre ref={ref} className={`bg-black/40 border border-slate-700/60 rounded-lg p-3 pr-9 ${canPreview ? "pt-10" : ""} overflow-x-auto text-[12.5px] leading-snug`}>
         {children}
       </pre>
-      <CopyButton
-        getText={() => ref.current?.innerText || ""}
-        label="Copy code"
-        className="absolute top-2 right-2 p-1 rounded-md bg-slate-800/90 text-slate-300 hover:text-white"
-      />
+      <div className="absolute top-2 right-2 flex items-center gap-1">
+        {canPreview && <CodePreview getCode={() => ref.current?.innerText || text} />}
+        <CopyButton getText={() => ref.current?.innerText || ""} label="Copy code" className="p-1 rounded-md bg-slate-800/90 text-slate-300 hover:text-white" />
+      </div>
     </div>
   );
 }
