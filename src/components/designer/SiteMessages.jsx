@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { Inbox, Loader2, Trash2, X } from "lucide-react";
+import { Download, Inbox, Loader2, Trash2, X } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { askConfirm } from "@/lib/dialogs";
+import { messagesCsv } from "@/lib/messagesCsv";
 
 // What visitors sent through the forms on one of your published sites (bookings, RSVPs,
 // sign-ups): cloudflare-lib/inbox.js. Only the site's owner (or an admin) can read them.
@@ -92,7 +93,22 @@ export default function SiteMessages({ site, onClose }) {
         </div>
         {messages && messages.length > 0 && (
           <div className="px-5 py-3 border-t border-slate-700/60 flex items-center justify-between text-xs text-slate-500">
-            <span>The latest 200 are kept.</span>
+            <span className="flex items-center gap-3">
+              The latest 200 are kept.
+              <button
+                onClick={() => {
+                  const blob = new Blob([String.fromCharCode(0xfeff) + messagesCsv(messages)], { type: "text/csv;charset=utf-8" });
+                  const a = document.createElement("a");
+                  a.href = URL.createObjectURL(blob);
+                  a.download = `${site}-messages.csv`;
+                  a.click();
+                  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+                }}
+                className="inline-flex items-center gap-1 text-sky-300 hover:text-sky-200"
+              >
+                <Download className="w-3.5 h-3.5" /> Download spreadsheet
+              </button>
+            </span>
             <button onClick={clearAll} disabled={!!busy} className="text-red-300 hover:text-red-200 disabled:opacity-40">
               Delete all
             </button>
