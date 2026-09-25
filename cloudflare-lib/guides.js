@@ -6,6 +6,72 @@ export const GUIDES_UPDATED = "2026-09-24";
 
 export const GUIDES = [
   {
+    slug: "write-better-with-ai",
+    title: "How to write better with AI (essays, emails, stories)",
+    description:
+      "Use AI as a writing coach: plan, draft, and polish essays, emails and stories in your own voice, and learn what makes writing good.",
+    minutes: 4,
+    intro:
+      "A blank page is the hardest part of writing. Blackhole AI can help you get started, organise your ideas and polish what you wrote, while it still sounds like you. Here's how.",
+    sections: [
+      {
+        heading: "Start with a plan",
+        paragraphs: ["Tell the AI what you're writing, who it's for and how long it should be, and ask for an outline first. Change the outline until it fits, then write."],
+        list: ["\"I need a 500-word essay on why sleep matters for teenagers. Give me an outline with three main points.\"", "\"Help me plan a short scary story. Ask me questions about the characters first.\""],
+      },
+      {
+        heading: "Write it, then ask for feedback",
+        paragraphs: ["Write your own draft, then paste it in and ask what's working and what isn't. You learn more from feedback on your writing than from reading the AI's."],
+        list: ["\"What\x27s the weakest paragraph and why?\"", "\"Point out grammar mistakes but don\x27t rewrite it.\"", "\"Is my ending strong enough?\""],
+      },
+      {
+        heading: "Polish emails and messages",
+        paragraphs: ["For everyday writing, the AI is great at making things clearer and kinder: \"Make this email to my boss shorter and more polite\" or \"Help me say no to this invitation nicely\"."],
+      },
+      {
+        heading: "Keep it yours",
+        list: ["Ask it to keep your words and voice: \"Only fix what\x27s wrong.\"", "Check facts, names and dates yourself.", "For school, follow your teacher\x27s rules on AI."],
+      },
+    ],
+    cta: { label: "Start writing free", to: "/register?returnTo=%2Fchat" },
+    related: ["ai-homework-help", "learn-to-code-with-ai"],
+  },
+  {
+    slug: "learn-to-code-with-ai",
+    title: "How to learn to code with AI",
+    description:
+      "Learn programming with an AI tutor: get code explained line by line, fix errors, and build small projects that actually run, for free.",
+    minutes: 4,
+    intro:
+      "Learning to code is easier with a tutor who never gets tired of questions. Blackhole Code explains code, finds bugs and helps you build real projects, one small step at a time.",
+    sections: [
+      {
+        heading: "Pick a small first project",
+        paragraphs: ["The fastest way to learn is to build something you care about, small enough to finish in an afternoon."],
+        list: ["A tip calculator", "A to-do list web page", "A quiz game about your favourite show"],
+      },
+      {
+        heading: "Ask it to explain, line by line",
+        paragraphs: ["Paste any code and ask \"Explain this line by line like I\x27m new to coding.\" Then change one thing and ask what will happen before you run it."],
+      },
+      {
+        heading: "Fix errors yourself, with hints",
+        paragraphs: ["When something breaks, paste the error and ask for a hint, not the fix: \"What does this error mean, and where should I look?\" You'll learn to debug, the most useful skill in programming."],
+      },
+      {
+        heading: "See it running right away",
+        paragraphs: ["Want to see your code on screen? The Website Designer and Games Designer turn your ideas into pages and games you can open, and the Edit code tab lets you read and change the code by hand."],
+      },
+      {
+        heading: "Stay safe",
+        list: ["Never paste real passwords, API keys or tokens into any AI chat. Blackhole AI warns you if you try.", "Keep practising without AI too, so you can code on your own."],
+      },
+    ],
+    cta: { label: "Try Blackhole Code free", to: "/register?returnTo=%2Fchat%2Fcode" },
+    more: { label: "Make a game", to: "/guides/make-a-game-without-coding" },
+    related: ["make-a-game-without-coding", "ai-homework-help"],
+  },
+  {
     slug: "ai-homework-help",
     title: "How to use AI for homework (the right way)",
     description:

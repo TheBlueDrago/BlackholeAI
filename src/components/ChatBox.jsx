@@ -30,11 +30,14 @@ const FABLE_SYS = "You are Space, Blackhole AI's premium creative model. Be imag
 const AI_NAMES = { ai: "Blackhole AI", code: "Blackhole Code", opus5: "Galaxy", fable: "Space" };
 const MODELS = { ai: "automatic", code: "claude_sonnet_4_6", opus5: "claude_opus_4_8", fable: "claude-sonnet-5" };
 // Shown in an empty chat so new people see what they can make right away.
+// What people most often come for first: help from the AI; building is one tap away.
 const STARTERS = [
+  { icon: "📚", label: "Homework help", hint: "Step by step", prompt: "Help me with my homework. Ask me what the question is, then explain it step by step instead of just giving the answer." },
+  { icon: "💡", label: "Explain simply", hint: "Like black holes", prompt: "Explain black holes like I'm 10." },
+  { icon: "✍️", label: "Help me write", hint: "Essay, email, story", prompt: "Help me write something. Ask me what it's for, who will read it and how long it should be first." },
+  { icon: "🧠", label: "Quiz me", hint: "Practise for a test", prompt: "Quiz me to practise for a test. Ask me the topic and my grade first, then give me one question at a time." },
   { icon: "🌐", label: "Build a website", hint: "Templates or your idea", go: "designer" },
   { icon: "🎮", label: "Make a game", hint: "Describe it, then play it", go: "game" },
-  { icon: "💡", label: "Explain simply", hint: "Like black holes", prompt: "Explain black holes like I'm 10." },
-  { icon: "✍️", label: "Write a story", hint: "A short, fun one", prompt: "Help me write a short, fun story. Ask me a few questions about it first." },
 ];
 
 export default function ChatBox({ conversation, createConversation, addMessage, removeMessage, renameConversation, plan, exhausted, remaining, spend, userInitial }) {
