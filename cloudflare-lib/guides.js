@@ -2,7 +2,7 @@
 // (src/pages/Guide.jsx) and the Cloudflare function that serves each guide with its text
 // already in the page for search engines (functions/guides/[slug].js) use the same words.
 // Keep every claim true to the product: limits and prices here must match the app.
-export const GUIDES_UPDATED = "2026-09-24";
+export const GUIDES_UPDATED = "2026-09-25";
 
 export const GUIDES = [
   {
@@ -450,6 +450,181 @@ export const GUIDES = [
     ],
     cta: { label: "Start building on your phone", to: "/register?returnTo=%2Fchat%2Fdesigner" },
     related: ["make-a-website-with-ai", "make-a-game-without-coding"],
+  },
+  {
+    slug: "link-in-bio-page",
+    title: "How to make a free link in bio page",
+    description:
+      "One link for your Instagram, TikTok or YouTube bio that holds all your other links. Make your own link in bio page free, with your name on it.",
+    minutes: 3,
+    intro:
+      "Most apps only let you put one link in your bio. A link in bio page fixes that: one short address that opens a page with all your links, your photo and a line about you. Here's how to make your own for free, with no monthly fee and no one else's logo on top.",
+    sections: [
+      {
+        heading: "Step 1: Start from the Link in bio template",
+        paragraphs: [
+          "Open the templates and pick Link in bio. It's already laid out for phones, where almost all your visitors will be: your name at the top, then big buttons that are easy to tap.",
+        ],
+      },
+      {
+        heading: "Step 2: Put in your own links",
+        paragraphs: [
+          "Tell the AI what to add, in plain words: \"Buttons for my YouTube, my TikTok, my shop and my newest video. Put my shop first.\" Paste the full web addresses so every button goes to the right place.",
+        ],
+      },
+      {
+        heading: "Step 3: Make it look like you",
+        list: [
+          "\"Use my colors: black and hot pink.\"",
+          "\"Add a short line under my name: gamer, artist, streaming every Friday.\"",
+          "\"Make the buttons rounder and add a small icon to each one.\"",
+        ],
+      },
+      {
+        heading: "Step 4: Publish and put it in your bio",
+        paragraphs: [
+          "Publish with a name like yourname.blackhole-ai-tech.com and paste that link into every bio you have. When you post something new, change the page and publish again; the link in your bios never needs to change.",
+        ],
+      },
+    ],
+    cta: { label: "Make your link in bio page", to: "/register?returnTo=%2Fchat%2Fdesigner%3Ftemplate%3Dlinks" },
+    more: { label: "Preview the Link in bio template", to: "/templates?preview=links" },
+    related: ["make-a-website-on-your-phone", "portfolio-website"],
+  },
+  {
+    slug: "restaurant-website",
+    title: "How to make a restaurant website with a menu",
+    description:
+      "Put your menu, hours and address online in an afternoon. A simple guide to a restaurant or cafe website that looks great on phones, made free with AI.",
+    minutes: 4,
+    intro:
+      "When people look up a place to eat, they want three things fast: the menu, the hours and where you are. A clean, quick website that answers those beats a menu photo nobody can read. Here's how to make one with AI, without a web designer.",
+    sections: [
+      {
+        heading: "What your site needs",
+        list: [
+          "Your menu as real text, with prices, so it's easy to read on a phone and search engines can find it.",
+          "Opening hours for each day, and any days you're closed.",
+          "Your address with a link to directions, and a phone number people can tap to call.",
+          "A few good photos of your food and your place.",
+        ],
+      },
+      {
+        heading: "Step 1: Start from the Restaurant template",
+        paragraphs: [
+          "Pick the Restaurant menu template. It already has a menu, hours and a location section, so you only have to swap in your own details.",
+        ],
+      },
+      {
+        heading: "Step 2: Paste in your menu",
+        paragraphs: [
+          "Copy your menu from wherever you keep it and paste it into the chat: \"Replace the menu with this one, grouped into starters, mains and drinks.\" The AI lays it out neatly. Read the prices over once before you publish.",
+        ],
+      },
+      {
+        heading: "Step 3: Add the details that bring people in",
+        list: [
+          "\"Add a Call us button and a Get directions button at the top.\"",
+          "\"Add a line saying we do takeaway and have vegetarian options.\"",
+          "\"Add a small section for today's specials.\"",
+        ],
+      },
+      {
+        heading: "Step 4: Publish and keep it fresh",
+        paragraphs: [
+          "Publish at yourplace.blackhole-ai-tech.com and put the link on your Google listing, your social pages and a small QR code by the till. When prices or hours change, update the page by chatting and publish again. The link stays the same.",
+        ],
+      },
+    ],
+    cta: { label: "Make your restaurant site free", to: "/register?returnTo=%2Fchat%2Fdesigner%3Ftemplate%3Drestaurant" },
+    more: { label: "Preview the Restaurant template", to: "/templates?preview=restaurant" },
+    related: ["small-business-website", "ai-for-small-business"],
+  },
+  {
+    slug: "portfolio-website",
+    title: "How to make a portfolio website to show your work",
+    description:
+      "Photographers, artists, designers and students: make a clean portfolio website to show off your best work and get hired. Free, with AI, in minutes.",
+    minutes: 4,
+    intro:
+      "A portfolio is the fastest way to show what you can do. Instead of describing your work, you send one link and let it speak for itself. Here's how to make a simple, good-looking portfolio with AI, even if you've never built a website.",
+    sections: [
+      {
+        heading: "Pick your best work, not all of it",
+        paragraphs: [
+          "Six to twelve strong pieces beat fifty average ones. Choose work that shows the kind of job you want next, and write one line about each: what it was, and what you did.",
+        ],
+      },
+      {
+        heading: "Step 1: Start from the Portfolio template",
+        paragraphs: [
+          "Pick the Portfolio template. It has a big title, a grid for your work, a short about section and a way for people to reach you.",
+        ],
+      },
+      {
+        heading: "Step 2: Tell the AI about you",
+        paragraphs: [
+          "Describe yourself in a sentence or two: \"I'm a wedding and portrait photographer in Leeds. Use my name, Sam Carter, and a calm, light style.\" Then ask it to add your projects and the one line about each.",
+        ],
+      },
+      {
+        heading: "Step 3: Make it easy to hire you",
+        list: [
+          "\"Add a contact form asking for name, email and what they need.\" Messages sent through it arrive in your Messages once the site is published.",
+          "\"Add links to my Instagram and my email.\"",
+          "\"Add a short list of clients or schools I've worked with.\"",
+        ],
+      },
+      {
+        heading: "Step 4: Publish and share it",
+        paragraphs: [
+          "Publish at yourname.blackhole-ai-tech.com and put the link on your applications, your social bios and your email signature. Add new work by chatting and publish again; the link stays the same.",
+        ],
+      },
+    ],
+    cta: { label: "Make your portfolio free", to: "/register?returnTo=%2Fchat%2Fdesigner%3Ftemplate%3Dportfolio" },
+    more: { label: "Preview the Portfolio template", to: "/templates?preview=portfolio" },
+    related: ["resume-website", "link-in-bio-page"],
+  },
+  {
+    slug: "event-invite-website",
+    title: "How to make an event invite page with RSVP",
+    description:
+      "Birthday, wedding, party or school event? Make a pretty invite page with a countdown, all the details and an RSVP form, free, and share one link.",
+    minutes: 3,
+    intro:
+      "Group chats bury the details. An invite page keeps the date, the place and what to bring in one spot, counts down to the day, and lets guests say whether they're coming. Here's how to make one in a few minutes.",
+    sections: [
+      {
+        heading: "Step 1: Start from the Event invite template",
+        paragraphs: [
+          "Pick the Event invite template. It comes with a countdown, a section for the details and an RSVP form.",
+        ],
+      },
+      {
+        heading: "Step 2: Fill in your event",
+        paragraphs: [
+          "Tell the AI the basics in one message: \"It's Maya's 12th birthday, Saturday 14 March at 2pm, at Riverside Park. Bring a swimsuit. Make it bright and fun with balloons.\" It updates the text and the countdown for you.",
+        ],
+      },
+      {
+        heading: "Step 3: Collect RSVPs",
+        paragraphs: [
+          "Once the page is published, every RSVP a guest sends arrives in your Messages, so you can count who's coming. Open the Website Designer and tap the inbox button on your site to see them.",
+        ],
+      },
+      {
+        heading: "Keep it safe",
+        list: [
+          "Don't put a home address on a page anyone can find. Share it by message with people who RSVP instead.",
+          "Use first names only for children.",
+          "You can take the page down after the event.",
+        ],
+      },
+    ],
+    cta: { label: "Make your invite page free", to: "/register?returnTo=%2Fchat%2Fdesigner%3Ftemplate%3Devent" },
+    more: { label: "Preview the Event invite template", to: "/templates?preview=event" },
+    related: ["make-a-website-on-your-phone", "make-a-website-with-ai"],
   },
 ];
 
