@@ -604,7 +604,9 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                     <LogOut className="w-4 h-4" />
                     Log out
                   </button>
-                  <p className="pt-1 text-center text-[11px] text-slate-500 space-x-3">
+                  <p className="pt-1 text-center text-[11px] text-slate-500 flex flex-wrap justify-center gap-x-3 gap-y-1">
+                    <Link to="/whats-new" target="_blank" className="hover:text-slate-300">What's new</Link>
+                    <Link to="/guides" target="_blank" className="hover:text-slate-300">Guides</Link>
                     <Link to="/showcase" target="_blank" className="hover:text-slate-300">Gallery</Link>
                     <Link to="/terms" target="_blank" className="hover:text-slate-300">Terms</Link>
                     <Link to="/privacy" target="_blank" className="hover:text-slate-300">Privacy</Link>
