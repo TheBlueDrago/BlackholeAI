@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Square, Volume2 } from "lucide-react";
+import { mathToWords } from "@/lib/mathText";
 
 const synth = typeof window !== "undefined" ? window.speechSynthesis : null;
 
-// Markdown to plain speech: no code blocks, links read as their text, no symbols.
+// Markdown to plain speech: no code blocks, links read as their text, formulas as words, no symbols.
 export function speakable(md) {
-  return String(md || "")
-    .replace(/```[\s\S]*?```/g, " (code) ")
+  return mathToWords(String(md || "").replace(/```[\s\S]*?```/g, " (code) "))
     .replace(/`([^`]*)`/g, "$1")
     .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
     .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")

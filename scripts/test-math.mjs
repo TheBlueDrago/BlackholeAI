@@ -20,3 +20,8 @@ assert(p("```js\nconst s = `$x^2$`;\n```").text === "```js\nconst s = `$x^2$`;\n
 assert(p("Use `$HOME` and `$x^2$` in a shell").text === "Use `$HOME` and `$x^2$` in a shell", "inline code untouched");
 assert(!p("Save $ 5 = nothing $").hasMath, "$ with spaces inside isn't math");
 assert(!p("No math here at all.").hasMath, "plain text");
+
+const { mathToWords } = await import("../src/lib/mathText.js");
+assert(mathToWords("So $x^2 = 9$.") === "So  x squared equals 9 .", "read aloud: powers and equals as words");
+assert(mathToWords("Half is $\\frac{1}{2}$").includes("1 over 2") && mathToWords("$\\sqrt{25}$").includes("the square root of 25"), "read aloud: fractions and roots");
+assert(mathToWords("$x = 5 \\pm 1$").includes("plus or minus") && mathToWords("It's $5 or $10") === "It's $5 or $10", "read aloud: ± as words, prices untouched");

@@ -46,3 +46,39 @@ export function prepareMath(text) {
     .join("");
   return { text: text2, hasMath };
 }
+
+// Formulas as words, for Read aloud: "$\frac{1}{2}$" → "1 over 2", "x^2" → "x squared".
+function formulaWords(f) {
+  let s = f;
+  for (let i = 0; i < 4; i++) {
+    s = s
+      .replace(/\\[dt]?frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}/g, " $1 over $2 ")
+      .replace(/\\sqrt\s*\{([^{}]*)\}/g, " the square root of $1 ");
+  }
+  return s
+    .replace(/\^\s*\{?2\}?(?![0-9])/g, " squared ")
+    .replace(/\^\s*\{?3\}?(?![0-9])/g, " cubed ")
+    .replace(/\^\s*\{([^{}]*)\}|\^\s*(\S)/g, (_, a, b) => ` to the power of ${a || b} `)
+    .replace(/_\s*\{([^{}]*)\}|_\s*(\S)/g, (_, a, b) => ` sub ${a || b} `)
+    .replace(/\\pm/g, " plus or minus ")
+    .replace(/\\(times|cdot)/g, " times ")
+    .replace(/\\div/g, " divided by ")
+    .replace(/\\(neq|ne)\b/g, " is not equal to ")
+    .replace(/\\(leq|le)\b/g, " is at most ")
+    .replace(/\\(geq|ge)\b/g, " is at least ")
+    .replace(/\\approx/g, " is about ")
+    .replace(/\\(left|right|displaystyle|quad|qquad|,|;|!)/g, " ")
+    .replace(/\\text\s*\{([^{}]*)\}/g, " $1 ")
+    .replace(/\\([A-Za-z]+)/g, " $1 ")
+    .replace(/[{}]/g, " ")
+    .replace(/=/g, " equals ")
+    .replace(/(\S)\s*-\s*(\S)/g, "$1 minus $2")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function mathToWords(text) {
+  const { text: t, hasMath } = prepareMath(text);
+  if (!hasMath) return String(text || "");
+  return t.replace(/\$\$([\s\S]+?)\$\$/g, (_, f) => ` ${formulaWords(f)} `);
+}
