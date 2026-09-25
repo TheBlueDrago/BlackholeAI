@@ -33,6 +33,7 @@ const Business = lazy(() => import('@/pages/Business'));
 const Pricing = lazy(() => import('@/pages/Pricing'));
 const About = lazy(() => import('@/pages/About'));
 const Guides = lazy(() => import('@/pages/Guides'));
+const WhatsNew = lazy(() => import('@/pages/WhatsNew'));
 const Guide = lazy(() => import('@/pages/Guide'));
 const Enterprise = lazy(() => import('@/pages/Enterprise'));
 import { captureReferral } from '@/lib/referral';
@@ -118,6 +119,7 @@ const AuthenticatedApp = () => {
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/about" element={<About />} />
       <Route path="/guides" element={<Guides />} />
+      <Route path="/whats-new" element={<WhatsNew />} />
       <Route path="/guides/:slug" element={<Guide />} />
       <Route path="/enterprise" element={<Enterprise />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<SignedOutRedirect />} />}>
