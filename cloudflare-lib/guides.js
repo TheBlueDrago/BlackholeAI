@@ -330,7 +330,7 @@ export const GUIDES = [
       {
         heading: "Make contacting you easy",
         paragraphs: [
-          "Ask for a big \"Call us\" button that dials your number on a phone, and an email link. The booking forms in the templates show a thank-you message but don't send the details anywhere yet, so for now ask the AI to make the booking button open an email to you, or put your phone number right next to it.",
+          "Ask for a big \"Call us\" button that dials your number on a phone, and an email link. Once your site is published, whatever customers send through its booking or contact form arrives in your Messages: open the Website Designer and tap the inbox button on your site. Check it every day, or put your phone number next to the form for anything urgent.",
         ],
       },
       {
