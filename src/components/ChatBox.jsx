@@ -5,6 +5,8 @@ import ReadAloud, { speakText, unlockSpeech } from "@/components/chat/ReadAloud"
 import { historyBlock } from "@/lib/chatHistory";
 import { readAboutMe, aboutMeBlock } from "@/lib/aboutMe";
 import AboutMeButton from "@/components/chat/AboutMeButton";
+import StudyModeButton from "@/components/chat/StudyModeButton";
+import { studyModeOn, studyBlock } from "@/lib/studyMode";
 import ReportReply from "@/components/chat/ReportReply";
 import { Plus, RotateCcw, Pencil, ImagePlus } from "lucide-react";
 import AttachedFile from "@/components/chat/AttachedFile";
@@ -94,7 +96,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
   // `before`: how many of the chat's messages come before this question (Try again leaves out
   // the answer it replaces); by default all of them.
   const runPrompt = async (text, ai, before = messages.length) => {
-    const history = aboutMeBlock(readAboutMe(shell?.currentUser?.id)) + historyBlock(messages.slice(0, before));
+    const history = (ai === "ai" ? studyBlock(studyModeOn()) : "") + aboutMeBlock(readAboutMe(shell?.currentUser?.id)) + historyBlock(messages.slice(0, before));
     let convId = conversation?.id || convIdRef.current;
     const isFirst = !convId || messages.length === 0;
     if (!convId) convId = createConversation();
@@ -472,6 +474,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
               <Plus className="w-4 h-4" />
             </button>
             <AboutMeButton userId={shell?.currentUser?.id} />
+            {selectedAi === "ai" && <StudyModeButton />}
             <VoiceInput
               onText={(t) => {
                 spokenRef.current = true;

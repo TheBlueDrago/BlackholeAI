@@ -22,7 +22,7 @@ const FACTS = [
 // What the AI itself does (all real features of the chat and Code pages).
 const AI_SKILLS = [
   { icon: MessageCircle, title: "Ask anything", text: "Clear answers in seconds, in your own words, about any topic." },
-  { icon: GraduationCap, title: "Homework help", text: "Explains things simply, step by step, and makes quizzes to practise with." },
+  { icon: GraduationCap, title: "Homework help", text: "Explains things simply and makes quizzes. Study mode guides you step by step so you really learn it." },
   { icon: PenLine, title: "Writing", text: "Stories, essays, emails and posts: drafts it, fixes it, makes it shorter." },
   { icon: Code2, title: "Code", text: "Blackhole Code writes, explains and fixes code in any language." },
   { icon: Image, title: "Pictures", text: "Send up to 3 photos or screenshots and ask about them." },
