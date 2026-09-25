@@ -44,7 +44,7 @@ const FEATURES = [
     eyebrow: "Websites",
     title: "Describe your website. It's live in minutes.",
     text: "Say what your site is for. The AI writes the pages and the design, and changes anything you ask. Publish it free at yourname.blackhole-ai-tech.com.",
-    bullets: ["Free templates to start from", "Edit by chatting or by hand", "Keep your code: ZIP download or GitHub on Pro"],
+    bullets: ["Free templates to start from", "Edit by chatting or by hand", "Messages from your site's forms come straight to you", "Keep your code: ZIP download or GitHub on Pro"],
     cta: { to: "/templates", label: "Browse templates" },
     Picture: SiteShot,
   },
