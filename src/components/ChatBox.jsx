@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { askConfirm } from "@/lib/dialogs";
 import Markdown, { CopyButton } from "@/components/chat/Markdown";
 import ReadAloud from "@/components/chat/ReadAloud";
+import { historyBlock } from "@/lib/chatHistory";
 import ReportReply from "@/components/chat/ReportReply";
 import { Plus, X, Paperclip, RotateCcw, Pencil } from "lucide-react";
 import BlackholeIcon from "@/components/BlackholeIcon";
@@ -75,7 +76,10 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
   const messages = conversation?.messages || [];
   const isExhausted = !!exhausted?.[selectedAi];
 
-  const runPrompt = async (text, ai) => {
+  // `before`: how many of the chat's messages come before this question (Try again leaves out
+  // the answer it replaces); by default all of them.
+  const runPrompt = async (text, ai, before = messages.length) => {
+    const history = historyBlock(messages.slice(0, before));
     let convId = conversation?.id || convIdRef.current;
     const isFirst = !convId || messages.length === 0;
     if (!convId) convId = createConversation();
@@ -107,7 +111,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
     const sys = ai === "code" ? CODE_SYS : ai === "fable" ? FABLE_SYS : "";
     const intent = ai !== "ai" ? resolveIntent(text, buildMode.mode) : { build: true };
     const modeNote = ai !== "ai" ? (intent.build ? BUILD_NOTE : ANSWER_NOTE) + "\n\n" : "";
-    const fullPrompt = `${sys ? sys + "\n\n" : ""}${modeNote}${text}${fileNote}`;
+    const fullPrompt = `${sys ? sys + "\n\n" : ""}${modeNote}${history}${text}${fileNote}`;
     if (reqIdRef.current !== myId) return;
     try {
       const eff = effortFor(effort, text, { build: ai !== "ai" && intent.build });
@@ -204,7 +208,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
     const question = messages[n - 2].content.replace(/ \(attached: [^)]*\)$/, "");
     removeMessage?.(convId, n - 1);
     removeMessage?.(convId, n - 2);
-    runPrompt(question, selectedAi);
+    runPrompt(question, selectedAi, n - 2);
   };
 
   // Edit your last question: it goes back into the box (with its answer removed) to fix and

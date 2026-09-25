@@ -17,6 +17,7 @@ import ModeToggle from "@/components/chat/ModeToggle";
 import useStickToBottom from "@/hooks/useStickToBottom";
 import { isNetworkError, OFFLINE_NOTE } from "@/lib/netError";
 import { secretKeyIn } from "@/lib/privateInfo";
+import { historyBlock } from "@/lib/chatHistory";
 import useReplyAnnouncer from "@/hooks/useReplyAnnouncer";
 
 export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICode, userInitial }) {
@@ -31,7 +32,10 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
   const reqIdRef = useRef(0);
   const abortRef = useRef(null);
 
-  const runPrompt = async (text) => {
+  // `before`: how many messages come before this question (Try again leaves out the reply it
+  // replaces). The recent conversation goes with it, so follow-ups work (lib/chatHistory.js).
+  const runPrompt = async (text, before = messages.length) => {
+    const history = historyBlock(messages.slice(0, before));
     setMessages((m) => [...m, { role: "user", content: text }]);
     setInput("");
     setLoading(true);
@@ -46,7 +50,7 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
       abortRef.current?.abort();
       const abort = new AbortController();
       abortRef.current = abort;
-      const res = await streamChat({ prompt: `${modeNote}\n\n${text}`, question: text, model: "claude_sonnet_4_6", effort: eff }, (soFar) => {
+      const res = await streamChat({ prompt: `${modeNote}\n\n${history}${text}`, question: text, model: "claude_sonnet_4_6", effort: eff }, (soFar) => {
         if (reqIdRef.current === myId) setLive(soFar);
       }, { signal: abort.signal });
       if (reqIdRef.current !== myId) return;
@@ -108,7 +112,7 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
     if (loading || aiCodeExhausted || n < 2 || messages[n - 1].role !== "ai" || messages[n - 2].role !== "user") return;
     const question = messages[n - 2].content;
     setMessages((m) => m.slice(0, -2));
-    runPrompt(question);
+    runPrompt(question, n - 2);
   };
 
   const handleKeyDown = (e) => {
