@@ -6,6 +6,88 @@ export const GUIDES_UPDATED = "2026-09-24";
 
 export const GUIDES = [
   {
+    slug: "resume-and-cover-letter-with-ai",
+    title: "How to write a resume and cover letter with AI",
+    description:
+      "Use AI to turn your experience into a strong resume and a cover letter for each job, in your own words, then put it online for free.",
+    minutes: 4,
+    intro:
+      "Job hunting means writing about yourself again and again. Blackhole AI can help you find the right words, fit each application to the job, and catch mistakes, while it still sounds like you.",
+    sections: [
+      {
+        heading: "Turn what you did into results",
+        paragraphs: ["Tell the AI what you did in each job or project, in plain words, and ask it to help you show the result. Numbers make a resume stand out."],
+        list: ["\"I ran the school bake sale. Help me describe it for a resume.\"", "\"Make this bullet point stronger: helped customers at the store.\""],
+      },
+      {
+        heading: "Fit it to each job",
+        paragraphs: ["Paste the job listing and your resume, and ask which of your skills to put first for this job. Don't add anything that isn't true: only change what you highlight."],
+      },
+      {
+        heading: "Write a cover letter that sounds like you",
+        paragraphs: ["Ask for a short outline first: why this company, what you'd bring, one example. Then write it yourself and ask the AI to check the tone and spelling."],
+        list: ["\"Is this cover letter too long? What would you cut?\"", "\"Does this sound confident without bragging?\""],
+      },
+      {
+        heading: "Put it online",
+        paragraphs: ["A resume website is a link you can add to every application. Start from the Resume template, fill it with your details, and publish it free at yourname.blackhole-ai-tech.com."],
+      },
+      {
+        heading: "Keep private details private",
+        list: ["Leave your home address and personal phone number off anything public.", "Never paste passwords or ID numbers into any AI chat."],
+      },
+    ],
+    cta: { label: "Start free", to: "/register?returnTo=%2Fchat" },
+    more: { label: "Preview the resume template", to: "/templates?preview=resume" },
+    related: ["resume-website", "write-better-with-ai"],
+  },
+  {
+    slug: "ai-for-small-business",
+    title: "10 ways AI can help your small business",
+    description:
+      "Practical ways a small business can use AI every day: customer emails, product descriptions, social posts, planning, and a website, for free.",
+    minutes: 5,
+    intro:
+      "You don't need a big team to get help with the busywork. Here are ten everyday jobs Blackhole AI can take off your plate, with example requests you can copy.",
+    sections: [
+      {
+        heading: "Talking to customers",
+        list: [
+          "1. Reply to emails and messages: \"Write a friendly reply to this customer who got the wrong order.\"",
+          "2. Answer common questions: \"Write clear answers to the 5 questions customers ask us most.\"",
+          "3. Handle reviews: \"Help me reply politely to this 2-star review.\"",
+        ],
+      },
+      {
+        heading: "Selling and marketing",
+        list: [
+          "4. Product descriptions: \"Write a short description for these handmade candles.\"",
+          "5. Social posts: \"Give me a week of Instagram captions for our bakery.\"",
+          "6. Flyers and signs: \"Write the words for a flyer for our summer sale.\"",
+        ],
+      },
+      {
+        heading: "Running the business",
+        list: [
+          "7. Planning: \"Help me plan my week: here\x27s everything I need to do.\"",
+          "8. Simple maths: \"If I raise my prices by 10%, how much more do I make on 200 orders?\"",
+          "9. Explaining things: \"Explain what a profit margin is in simple words.\"",
+        ],
+      },
+      {
+        heading: "Getting online",
+        list: ["10. A website: describe your business to the Website Designer, or start from the Local business template, and publish it free the same day."],
+      },
+      {
+        heading: "A few good habits",
+        list: ["Check facts, prices and anything legal before you send it.", "Don\x27t paste customers\x27 card numbers or passwords into any AI chat.", "Keep your own voice: ask it to \"sound like a friendly local shop\"."],
+      },
+    ],
+    cta: { label: "Try it free", to: "/register?returnTo=%2Fchat" },
+    more: { label: "Websites for your business", to: "/business" },
+    related: ["small-business-website", "write-better-with-ai"],
+  },
+  {
     slug: "write-better-with-ai",
     title: "How to write better with AI (essays, emails, stories)",
     description:
