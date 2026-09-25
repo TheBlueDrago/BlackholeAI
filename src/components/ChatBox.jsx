@@ -257,6 +257,30 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
     }
   };
 
+  // Keyboard shortcuts: Esc stops the answer being written, "/" jumps to the message box,
+  // Ctrl+Shift+O (Cmd+Shift+O on a Mac) starts a new chat.
+  const stopRef = useRef(stop);
+  stopRef.current = loading ? stop : null;
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.defaultPrevented || e.isComposing) return;
+      const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target?.tagName) || e.target?.isContentEditable;
+      if (document.querySelector('[aria-modal="true"]')) return; // a dialog handles its own keys
+      if (e.key === "Escape" && stopRef.current) {
+        e.preventDefault();
+        stopRef.current();
+      } else if (e.key === "/" && !typing && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        inputRef.current?.focus();
+      } else if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "o") {
+        e.preventDefault();
+        shell?.newChat?.();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [shell]);
+
   const queued = loading || q.paused;
   const canSend = input.trim().length > 0 && (queued || !isExhausted);
 
