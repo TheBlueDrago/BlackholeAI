@@ -31,6 +31,7 @@ export default function Contact() {
     return TOPICS.some(([k]) => k === t) ? t : "other";
   });
   const [email, setEmail] = useState("");
+  const [otherEmail, setOtherEmail] = useState(false); // signed in, but wants the reply somewhere else
   const [message, setMessage] = useState("");
   const [website, setWebsite] = useState("");
   const [busy, setBusy] = useState(false);
@@ -44,11 +45,20 @@ export default function Contact() {
 
   const submit = async (e) => {
     e.preventDefault();
-    if (!signedInEmail && typo.pauseForTypo()) return; // our reply would go to the misspelled address
+    if (message.trim().length < 5) {
+      setError("Write a little more so we know how to help (at least 5 characters).");
+      return;
+    }
+    const useTyped = !signedInEmail || otherEmail;
+    if (useTyped && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setError("Enter the email address we should reply to.");
+      return;
+    }
+    if (useTyped && typo.pauseForTypo()) return; // our reply would go to the misspelled address
     setBusy(true);
     setError("");
     try {
-      const res = await base44.functions.invoke("contact", { action: "send", topic, message, email: signedInEmail || email, website });
+      const res = await base44.functions.invoke("contact", { action: "send", topic, message, email: signedInEmail && !otherEmail ? signedInEmail : email.trim(), website });
       if (res.data?.error) setError(res.data.error);
       else setSent(true);
     } catch (err) {
@@ -116,8 +126,13 @@ export default function Contact() {
                   ))}
                 </select>
               </label>
-              {signedInEmail ? (
-                <p className="text-sm text-slate-400">We'll reply to <span className="text-slate-200">{signedInEmail}</span>.</p>
+              {signedInEmail && !otherEmail ? (
+                <p className="text-sm text-slate-400">
+                  We'll reply to <span className="text-slate-200">{signedInEmail}</span>.{" "}
+                  <button type="button" onClick={() => setOtherEmail(true)} className="text-indigo-300 underline hover:text-indigo-200">
+                    Use a different email
+                  </button>
+                </p>
               ) : (
                 <>
                   <label className="block text-sm">
@@ -134,7 +149,7 @@ export default function Contact() {
               {error && <p className="text-sm text-red-400">{error}</p>}
               <button
                 type="submit"
-                disabled={busy || message.trim().length < 5}
+                disabled={busy}
                 className="w-full inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-medium rounded-lg py-2.5"
               >
                 {busy && <Loader2 className="w-4 h-4 animate-spin" />} Send
