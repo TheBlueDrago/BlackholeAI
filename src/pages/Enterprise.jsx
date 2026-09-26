@@ -16,7 +16,7 @@ const ENTITY_TYPES = [
 
 const POINTS = [
   { icon: Users, title: "A seat for everyone", text: "Add and remove the people in your organization yourself, as many as you need." },
-  { icon: Sparkles, title: "One shared pool of credits", text: "Each seat adds 100 Blackhole AI, 75 Code, 50 Galaxy and 25 Space credits a month to a pool everyone in your organization uses." },
+  { icon: Sparkles, title: "One shared pool of credits", text: "Each seat adds 100 Nebulux AI, 75 Code, 50 Galaxy and 25 Space credits a month to a pool everyone in your organization uses." },
   { icon: Download, title: "All features", text: "All 4 AI models, 10 published websites, 10 new games a month, ZIP download and GitHub push." },
   { icon: ShieldCheck, title: "Verified organizations only", text: "Enterprise is for legally registered businesses. We check every application before approving it." },
 ];
@@ -86,9 +86,9 @@ export default function Enterprise() {
           <p className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-violet-300">
             <Building2 className="w-4 h-4" /> Enterprise
           </p>
-          <h1 className="mt-2 text-4xl sm:text-5xl font-bold text-white leading-tight">Blackhole AI for your whole organization</h1>
+          <h1 className="mt-2 text-4xl sm:text-5xl font-bold text-white leading-tight">Nebulux AI for your whole organization</h1>
           <p className="mt-5 text-slate-400 text-lg">
-            Give everyone in your business or organization Blackhole AI, sharing one pool of credits that grows with every seat. Pricing depends on how many people will use it: tell us
+            Give everyone in your business or organization Nebulux AI, sharing one pool of credits that grows with every seat. Pricing depends on how many people will use it: tell us
             about your organization and we'll send you a quote.
           </p>
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">

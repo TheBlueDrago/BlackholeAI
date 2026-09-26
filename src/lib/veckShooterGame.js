@@ -1,6 +1,6 @@
 // A hand-built, self-contained arena shooter: top-down twin-stick combat vs AI bots,
 // with wave-based difficulty and full touch controls. No external assets/scripts/network
-// calls, matching every other game in Blackhole Games — same convention as gameTemplate.js.
+// calls, matching every other game in Nebulux Games — same convention as gameTemplate.js.
 // genre "shooting" + name "veck" resolves to the veck.shooter address via gameDomainOf().
 export const VECK_SHOOTER_META = { name: "veck", title: "Veck", genre: "shooting" };
 

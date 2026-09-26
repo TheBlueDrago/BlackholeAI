@@ -99,7 +99,7 @@ Deno.serve(async (req: Request) => {
         subscriptionInfo: {
           subscriptionSettings: { frequency: "MONTH" },
           title: "Pro Plan",
-          description: "100 Blackhole AI, 50 Code, 50 Galaxy 5, 50 Space 5 credits, billed monthly",
+          description: "100 Nebulux AI, 50 Code, 50 Galaxy 5, 50 Space 5 credits, billed monthly",
         },
       },
       team: {
@@ -109,14 +109,14 @@ Deno.serve(async (req: Request) => {
         subscriptionInfo: {
           subscriptionSettings: { frequency: "MONTH" },
           title: "Team Plan",
-          description: "150 Blackhole AI, 100 Code, 100 Galaxy 5, 100 Space 5 shared credits, and up to 2 members (3 with you), billed monthly",
+          description: "150 Nebulux AI, 100 Code, 100 Galaxy 5, 100 Space 5 shared credits, and up to 2 members (3 with you), billed monthly",
         },
       },
     };
     // One-time credit packs of 10, 25 or 50 credits for each AI: bought instead of a plan, no
     // subscription, added to the buyer's bonus credits by the credit server. Ids are
     // credits-<ai>-<size>. Keep in step with PACK_PRICES in cloudflare-lib/creditPacks.js.
-    const PACK_NAMES: Record<string, string> = { ai: "Blackhole AI", code: "Blackhole Code", galaxy: "Galaxy", space: "Space" };
+    const PACK_NAMES: Record<string, string> = { ai: "Nebulux AI", code: "Nebulux Code", galaxy: "Galaxy", space: "Space" };
     const PACK_PRICES: Record<string, Record<number, string>> = {
       ai: { 10: "0.50", 25: "0.69", 50: "0.99" },
       code: { 10: "0.50", 25: "0.89", 50: "1.49" },

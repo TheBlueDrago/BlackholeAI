@@ -18,7 +18,7 @@ export function withCheckoutBridge(html, name) {
     `location.href="${APP_ORIGIN}/buy?"+new URLSearchParams({site:${site},product:String(d.productId||""),qty:String(d.quantity||1)});});})();</script>`);
 }
 
-// A small "Made with Blackhole AI" badge (brings visitors to the builder — the main way
+// A small "Made with Nebulux AI" badge (brings visitors to the builder — the main way
 // new people discover it) and a "Report" link in the corner, so visitors can flag phishing, scams or abuse
 // (it opens the app's /report page). Only when the page is shown on its own — inside
 // the Blackhole Browser or Games front the app shows its own report button. Put in a
@@ -31,10 +31,10 @@ export function withReportLink(html, kind, name) {
     `h.style.cssText="all:initial;position:fixed;right:8px;bottom:8px;z-index:2147483647";var r=h.attachShadow({mode:"closed"});` +
     `var st='font:12px system-ui,sans-serif;color:#cbd5e1;background:rgba(15,23,42,.8);padding:4px 9px;border-radius:999px;` +
     `text-decoration:none;border:1px solid rgba(148,163,184,.35);margin-left:6px';` +
-    `r.innerHTML='<a target="_blank" rel="noopener" style="'+st+'">\u2728 Made with Blackhole AI</a><a target="_blank" rel="noopener" style="'+st+'">\u2691 Report</a>';` +
+    `r.innerHTML='<a target="_blank" rel="noopener" style="'+st+'">\u2728 Made with Nebulux AI</a><a target="_blank" rel="noopener" style="'+st+'">\u2691 Report</a>';` +
     `var a=r.querySelectorAll("a");a[0].href=${badge};a[1].href=${href};` +
     // Says whose page this is, so nobody mistakes a user's page for an official one.
-    `a[0].title="Made by someone using Blackhole AI, not by Blackhole AI itself";a[1].title="Report this page to Blackhole AI";` +
+    `a[0].title="Made by someone using Nebulux AI, not by Nebulux AI itself";a[1].title="Report this page to Nebulux AI";` +
     `document.documentElement.appendChild(h);}` +
     `if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",add);else add();})();</script>`);
 }
@@ -61,14 +61,14 @@ function beforeBodyEnd(html, snippet) {
   return i >= 0 ? html.slice(0, i) + snippet + html.slice(i) : html + snippet;
 }
 
-export function removedPage(kind, why = "It was taken down for breaking the Blackhole AI rules.") {
+export function removedPage(kind, why = "It was taken down for breaking the Nebulux AI rules.") {
   const what = kind === "game" ? "game" : "site";
   return (
     `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">` +
     `<title>Removed</title><style>body{background:#05060f;color:#e2e8f0;font-family:system-ui,sans-serif;display:flex;` +
     `flex-direction:column;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:16px;text-align:center}a{color:#818cf8}</style>` +
     `</head><body><h1>This ${what} has been removed</h1><p>${why}</p>` +
-    `<p><a href="${APP_ORIGIN}">Go to Blackhole AI</a></p></body></html>`
+    `<p><a href="${APP_ORIGIN}">Go to Nebulux AI</a></p></body></html>`
   );
 }
 
@@ -89,7 +89,7 @@ export const HEADERS = {
 const esc = (t) => String(t).replace(/"/g, "&quot;").replace(/</g, "&lt;");
 
 // Link previews (chat apps, social sites) for pages that don't set their own: the
-// page's <title> and first paragraph-ish text, credited to Blackhole AI.
+// page's <title> and first paragraph-ish text, credited to Nebulux AI.
 export function withShareTags(html) {
   if (/<meta[^>]+property\s*=\s*["']?og:title/i.test(html)) return html;
   const title = ((html.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [])[1] || "").trim();
@@ -98,7 +98,7 @@ export function withShareTags(html) {
   const tags =
     `<meta data-bh property="og:type" content="website"><meta data-bh property="og:title" content="${esc(title)}">` +
     (text ? `<meta data-bh property="og:description" content="${esc(text)}">` : "") +
-    `<meta data-bh property="og:site_name" content="Made with Blackhole AI"><meta data-bh name="twitter:card" content="summary">`;
+    `<meta data-bh property="og:site_name" content="Made with Nebulux AI"><meta data-bh name="twitter:card" content="summary">`;
   const i = html.search(/<\/head>/i);
   return i >= 0 ? html.slice(0, i) + tags + html.slice(i) : html;
 }

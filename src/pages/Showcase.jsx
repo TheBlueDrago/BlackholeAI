@@ -7,7 +7,7 @@ import PublicLayout, { START_FREE } from "@/components/PublicLayout";
 import { SITE_TEMPLATES } from "@/lib/siteTemplates";
 import { siteUrl } from "@/lib/blackholeDomain";
 
-// Public gallery of sites people built with Blackhole AI (owners opt in from the
+// Public gallery of sites people built with Nebulux AI (owners opt in from the
 // Website Designer). Doubles as a landing page for visitors who aren't signed up.
 export default function Showcase() {
   const [sites, setSites] = useState(null);
@@ -23,7 +23,7 @@ export default function Showcase() {
   return (
     <PublicLayout title="Gallery">
       <div className="text-center py-10 sm:py-14">
-        <h1 className="text-3xl sm:text-5xl font-bold text-white">Made with Blackhole AI</h1>
+        <h1 className="text-3xl sm:text-5xl font-bold text-white">Made with Nebulux AI</h1>
         <p className="text-slate-400 mt-3 max-w-xl mx-auto">
           Real websites people described in a sentence and published in minutes. Describe yours and it's live at
           <span className="text-slate-200"> yourname.blackhole-ai-tech.com</span>.

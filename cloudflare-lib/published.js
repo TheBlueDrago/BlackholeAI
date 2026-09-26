@@ -37,7 +37,7 @@ export const kvKey = (kind, name) => `${kind}:${name}`;
 // The maker's name as anyone can read it on a published page's record: a first name
 // only, never an email address (the records are public and many users are kids).
 // Names that would make a page look official ("by Blackhole", "by Admin") aren't shown.
-export const OFFICIAL_SOUNDING = /blackhole|black\s*hole|official|admin|staff|support|moderator|\bteam\b/i;
+export const OFFICIAL_SOUNDING = /nebulux|blackhole|black\s*hole|official|admin|staff|support|moderator|\bteam\b/i;
 export function publicName(user) {
   const first = String((user && user.full_name) || "").trim().split(/\s+/)[0] || "";
   return first.includes("@") || OFFICIAL_SOUNDING.test(first) ? "" : first.slice(0, 40);
@@ -168,7 +168,7 @@ export async function publish(context, kind, { name, html: rawHtml, extra, check
     if (scan.block.length && user.role !== "admin") {
       return json(
         {
-          error: `This ${label.toLowerCase()} can't be published because it has ${scan.block.join(", ")}. Blackhole AI is used by kids, so pages must be safe for everyone — ask the AI to remove that part and try again.`,
+          error: `This ${label.toLowerCase()} can't be published because it has ${scan.block.join(", ")}. Nebulux AI is used by kids, so pages must be safe for everyone — ask the AI to remove that part and try again.`,
         },
         422
       );
@@ -184,7 +184,7 @@ export async function publish(context, kind, { name, html: rawHtml, extra, check
     // Having a row with this name isn't enough (rows can be written straight into Base44):
     // the name must be free or yours (see ownerOf).
     if (kind === "site" && !rows.length && user.role !== "admin" && looksOfficial(name)) {
-      return json({ error: "That name looks like one of Blackhole AI's own pages, so it isn't allowed. Try another." }, 400);
+      return json({ error: "That name looks like one of Nebulux AI's own pages, so it isn't allowed. Try another." }, 400);
     }
     const owner = await ownerOf(request, env.PUBLISHED_HTML, kind, name, rows);
     if (owner && owner !== user.id && user.role !== "admin") {

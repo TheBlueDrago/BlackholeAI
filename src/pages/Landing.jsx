@@ -24,11 +24,11 @@ const AI_SKILLS = [
   { icon: MessageCircle, title: "Ask anything", text: "Clear answers in seconds, in your own words, about any topic." },
   { icon: GraduationCap, title: "Homework help", text: "Explains things simply and makes quizzes. Study mode guides you step by step so you really learn it." },
   { icon: PenLine, title: "Writing", text: "Stories, essays, emails and posts: drafts it, fixes it, makes it shorter." },
-  { icon: Code2, title: "Code", text: "Blackhole Code writes, explains and fixes code in any language." },
+  { icon: Code2, title: "Code", text: "Nebulux Code writes, explains and fixes code in any language." },
   { icon: Image, title: "Pictures", text: "Send up to 3 photos or screenshots and ask about them." },
   { icon: Mic, title: "Talk to it", text: "Tap the microphone and ask out loud, and it answers out loud too." },
   { icon: UserRoundPen, title: "Knows you", text: "Tell it about yourself once and every answer fits you, from your grade to how short you like replies." },
-  { icon: Layers, title: "Four AI models", text: "Blackhole AI for everyday help, plus Code, Galaxy and Space on Pro." },
+  { icon: Layers, title: "Four AI models", text: "Nebulux AI for everyday help, plus Code, Galaxy and Space on Pro." },
 ];
 
 const FEATURES = [
@@ -105,10 +105,10 @@ const GAMES = [
 ];
 
 const FAQ = [
-  ["Why use Blackhole AI instead of another site?", "Because it does everything in one place: the same AI helps with questions, homework, writing and code, and builds real websites and games for you, with no coding and no hosting bills. It's made for learning (Study mode, quizzes, math that looks like a textbook), everything published is safety-checked, and it's free to start."],
+  ["Why use Nebulux AI instead of another site?", "Because it does everything in one place: the same AI helps with questions, homework, writing and code, and builds real websites and games for you, with no coding and no hosting bills. It's made for learning (Study mode, quizzes, math that looks like a textbook), everything published is safety-checked, and it's free to start."],
   ["What can the AI help me with?", "Almost anything you'd ask a smart friend: homework explained step by step, practice quizzes, essays, emails and stories, code, questions about a photo you send, and building websites and games. You can type or just talk to it.", ["/guides", "See the guides"]],
   ["Can I use it for school?", "Yes. It's built to help you understand, not just hand you answers: ask it to explain step by step or quiz you. Always follow your teacher's rules about AI.", ["/guides/ai-homework-help", "Using AI for homework the right way"]],
-  ["Is Blackhole AI free?", "Yes. The Free plan gives you 50 AI credits every month and lets you publish a website and a game, and new accounts get a free week of Pro. Pro is $7 a month and Team is $10 a month when you want more."],
+  ["Is Nebulux AI free?", "Yes. The Free plan gives you 50 AI credits every month and lets you publish a website and a game, and new accounts get a free week of Pro. Pro is $7 a month and Team is $10 a month when you want more."],
   ["Do I need to know how to code?", "No. You describe what you want in your own words. If you do know code, you can edit it by hand, and on Pro you can download it or push it to GitHub."],
   ["Does it work on my phone?", "Yes. Everything works on phones, tablets and computers, and you can install it like an app from your profile."],
   ["What are credits?", "Credits are what the AI uses up when it works for you. Bigger jobs use more. Your plan gives you a fresh allowance every month."],
@@ -117,7 +117,7 @@ const FAQ = [
   ["Can I take my site down?", "Yes. You can unpublish or delete your websites and games at any time from your profile."],
 ];
 
-// "Made with Blackhole AI" badges link here with ?from=site:<name> or game:<name>.
+// "Made with Nebulux AI" badges link here with ?from=site:<name> or game:<name>.
 function cameFrom() {
   const m = /^(site|game):([a-z0-9.-]{1,63})$/.exec(new URLSearchParams(window.location.search).get("from") || "");
   return m ? { kind: m[1], name: m[2] } : null;
@@ -186,7 +186,7 @@ function FeatureRow({ eyebrow, title, text, bullets, cta, Picture, flip }) {
   );
 }
 
-// What visitors see first: a long page explaining what Blackhole AI does, with pictures,
+// What visitors see first: a long page explaining what Nebulux AI does, with pictures,
 // prices, answers and "Get started for free" all the way down.
 export default function Landing() {
   const [from] = useState(cameFrom);
@@ -209,7 +209,7 @@ export default function Landing() {
           {from && (
             <p className="inline-flex items-center gap-1.5 mb-6 px-3 py-1.5 rounded-full bg-slate-800/70 border border-slate-700/60 text-xs text-slate-300">
               <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              {from.kind === "game" ? "The game" : "The site"} &ldquo;{from.name}&rdquo; was made with Blackhole AI
+              {from.kind === "game" ? "The game" : "The site"} &ldquo;{from.name}&rdquo; was made with Nebulux AI
             </p>
           )}
           <h1 className="text-4xl sm:text-6xl font-bold tracking-tight leading-[1.05]">
@@ -218,7 +218,7 @@ export default function Landing() {
             </span>
           </h1>
           <p className="mt-5 text-slate-400 text-lg max-w-xl mx-auto lg:mx-0">
-            Ask Blackhole AI anything, send it a picture or just talk to it. And when you want to make something, it builds websites and games for you too. Free to start.
+            Ask Nebulux AI anything, send it a picture or just talk to it. And when you want to make something, it builds websites and games for you too. Free to start.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3">
             <Link
@@ -297,10 +297,10 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Why Blackhole AI */}
+      {/* Why Nebulux AI */}
       <section id="why" className="mt-28 sm:mt-36 scroll-mt-24">
         <Reveal className="text-center">
-          <h2 className="text-3xl sm:text-5xl font-bold text-white">Why Blackhole AI?</h2>
+          <h2 className="text-3xl sm:text-5xl font-bold text-white">Why Nebulux AI?</h2>
           <p className="mt-4 text-slate-400 text-lg max-w-2xl mx-auto">Why use it instead of another AI site, or building everything yourself.</p>
         </Reveal>
         <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -338,7 +338,7 @@ export default function Landing() {
         <div className="flex items-end justify-between gap-3">
           <div>
             <h2 className="text-3xl sm:text-4xl font-bold text-white">Play one now</h2>
-            <p className="mt-2 text-slate-400">Games made with Blackhole AI. No account needed.</p>
+            <p className="mt-2 text-slate-400">Games made with Nebulux AI. No account needed.</p>
           </div>
           <Link to="/arcade" className="shrink-0 text-sm text-indigo-300 hover:text-indigo-200">All games</Link>
         </div>
@@ -418,7 +418,7 @@ export default function Landing() {
         <FeatureRow
           eyebrow="Safety"
           title="Safe for everyone, including kids."
-          text="Blackhole AI is used by young people, so every website and game is checked before it goes live, and anyone can report a page for us to review."
+          text="Nebulux AI is used by young people, so every website and game is checked before it goes live, and anyone can report a page for us to review."
           bullets={[
             "Adult content, scams and harmful code are blocked",
             "Fake login and card forms aren't allowed",

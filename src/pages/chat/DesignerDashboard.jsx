@@ -420,7 +420,7 @@ export default function DesignerDashboard() {
           {/* Hero / create */}
           <div className="text-center mb-8 sm:mb-10">
             <h1 className="text-2xl sm:text-3xl font-bold text-white">What do you want to build?</h1>
-            <p className="text-slate-400 mt-2 text-sm sm:text-base">Describe a website and Blackhole AI builds it live.</p>
+            <p className="text-slate-400 mt-2 text-sm sm:text-base">Describe a website and Nebulux AI builds it live.</p>
           </div>
 
           <div className="max-w-2xl mx-auto bg-slate-900/70 border border-slate-700/50 focus-within:border-indigo-500/60 rounded-2xl p-3 sm:p-4 shadow-2xl transition-colors">

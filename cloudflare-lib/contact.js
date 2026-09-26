@@ -6,7 +6,7 @@ const KEY = "contact";
 const MAX_KEEP = 200;
 const DAILY_WRITES = 50;
 const DAILY_PER_SENDER = 3;
-export const TOPICS = { account: "Account or sign-in", billing: "Plans, credits or payments", bug: "Something isn't working", ai: "A problem with an AI reply", security: "A security problem or scam", parent: "I'm a parent or teacher", idea: "Idea or feedback", business: "Using Blackhole AI for my business", partnership: "Partnership, investment or acquisition", other: "Something else" };
+export const TOPICS = { account: "Account or sign-in", billing: "Plans, credits or payments", bug: "Something isn't working", ai: "A problem with an AI reply", security: "A security problem or scam", parent: "I'm a parent or teacher", idea: "Idea or feedback", business: "Using Nebulux AI for my business", partnership: "Partnership, investment or acquisition", other: "Something else" };
 
 async function sha(text) {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));

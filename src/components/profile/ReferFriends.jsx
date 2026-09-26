@@ -31,7 +31,7 @@ export default function ReferFriends({ onBack }) {
     }
   };
 
-  const share = () => navigator.share?.({ title: "Blackhole AI", text: "Join me on Blackhole AI:", url: data.link }).catch(() => {});
+  const share = () => navigator.share?.({ title: "Nebulux AI", text: "Join me on Nebulux AI:", url: data.link }).catch(() => {});
 
   const claim = async (referredId, tier) => {
     setBusy(referredId);

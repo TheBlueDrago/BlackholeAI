@@ -8,7 +8,7 @@ const ORIGIN = "https://blackhole-ai-tech.com";
 // Replacements are functions, never strings: in a replacement string "$1" or "$&" means a
 // matched part, so a description with "$1" in it came out garbled.
 export function withMeta(html, { title, description, path }) {
-  const full = `${title} · Blackhole AI`;
+  const full = `${title} · Nebulux AI`;
   const setMeta = (out, attr, key, value) =>
     out.replace(new RegExp(`(<meta\\s+${attr}="${key}"\\s+content=")[^"]*(")`, "i"), (_, a, b) => a + esc(value) + b);
   let out = html.replace(/<title>[\s\S]*?<\/title>/i, () => `<title>${esc(full)}</title>`);
@@ -58,19 +58,19 @@ export const servePage = (meta) =>
   };
 
 export const PAGES = {
-  arcade: { title: "Free games made with AI", description: "Play free games in your browser on any phone or computer. No download, no account. Every one was made by describing it to Blackhole AI.", path: "/arcade" },
+  arcade: { title: "Free games made with AI", description: "Play free games in your browser on any phone or computer. No download, no account. Every one was made by describing it to Nebulux AI.", path: "/arcade" },
   templates: { title: "Free website templates", description: "Pick a free template and change anything by telling the AI what you want. Publish it free at yourname.blackhole-ai-tech.com.", path: "/templates" },
   pricing: { title: "Pricing", description: "Free to start. Pro is $7 a month, Team is $10 a month for up to 3 people, credit packs start at $0.50, and Enterprise is priced per seat.", path: "/pricing" },
   business: { title: "Websites for your business", description: "Describe your business and get a website in minutes. Sell from your site, work as a team and keep your code.", path: "/business" },
-  enterprise: { title: "Enterprise", description: "Blackhole AI for your whole organization: a seat for everyone and one shared pool of credits. For registered businesses.", path: "/enterprise" },
+  enterprise: { title: "Enterprise", description: "Nebulux AI for your whole organization: a seat for everyone and one shared pool of credits. For registered businesses.", path: "/enterprise" },
   about: { title: "About us", description: "We help people make websites and games just by describing them, on any phone or computer.", path: "/about" },
   contact: { title: "Contact us", description: "Questions, ideas, business or partnerships: email us, call us or send a message.", path: "/contact" },
-  safety: { title: "Trust & safety", description: "How Blackhole AI keeps your account, your payments and the sites you publish safe, in plain words.", path: "/safety" },
+  safety: { title: "Trust & safety", description: "How Nebulux AI keeps your account, your payments and the sites you publish safe, in plain words.", path: "/safety" },
   ideas: { title: "Things to ask AI", description: "38 ideas for what to ask an AI: homework help, writing, coding, everyday life, fun and business. Tap one to try it free.", path: "/ideas" },
-  "whats-new": { title: "What's new", description: "New features and fixes in Blackhole AI, the AI helper that answers questions, helps you write and code, and builds websites and games.", path: "/whats-new" },
+  "whats-new": { title: "What's new", description: "New features and fixes in Nebulux AI, the AI helper that answers questions, helps you write and code, and builds websites and games.", path: "/whats-new" },
   guides: { title: "Guides", description: "Short, step-by-step guides to getting the most out of AI: homework help, writing, learning to code, websites and games.", path: "/guides" },
-  terms: { title: "Terms of Service", description: "The rules for using Blackhole AI: accounts, what you can make and publish, plans and payments, and safety.", path: "/terms" },
-  privacy: { title: "Privacy Policy", description: "What Blackhole AI collects, why, who helps us run it, and how to download or delete your data.", path: "/privacy" },
-  report: { title: "Report a page", description: "Tell us about a website or game made with Blackhole AI that looks unsafe, a scam, or breaks the rules. We review every report.", path: "/report" },
-  showcase: { title: "Gallery", description: "Real websites people made with Blackhole AI by describing them in a sentence.", path: "/showcase" },
+  terms: { title: "Terms of Service", description: "The rules for using Nebulux AI: accounts, what you can make and publish, plans and payments, and safety.", path: "/terms" },
+  privacy: { title: "Privacy Policy", description: "What Nebulux AI collects, why, who helps us run it, and how to download or delete your data.", path: "/privacy" },
+  report: { title: "Report a page", description: "Tell us about a website or game made with Nebulux AI that looks unsafe, a scam, or breaks the rules. We review every report.", path: "/report" },
+  showcase: { title: "Gallery", description: "Real websites people made with Nebulux AI by describing them in a sentence.", path: "/showcase" },
 };

@@ -80,7 +80,7 @@ export default function ReportReply({ question, reply }) {
             aria-label="Anything to add? (optional)"
             className="mt-2 w-full resize-none rounded-lg bg-slate-800 border border-slate-700/60 px-2.5 py-1.5 text-xs text-slate-100 placeholder:text-slate-400 outline-none focus:border-indigo-500/60"
           />
-          <p className="mt-1.5 text-[11px] text-slate-400">This sends the reply and your question before it to the Blackhole AI team.</p>
+          <p className="mt-1.5 text-[11px] text-slate-400">This sends the reply and your question before it to the Nebulux AI team.</p>
           {error && <p className="mt-1.5 text-[11px] text-red-400" role="alert">{error}</p>}
           <div className="mt-2 flex justify-end gap-2">
             <button type="button" onClick={close} className="px-3 py-1.5 rounded-lg text-xs text-slate-300 hover:bg-slate-800">

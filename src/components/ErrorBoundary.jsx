@@ -30,9 +30,9 @@ export default class ErrorBoundary extends React.Component {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-slate-950 text-slate-200 p-6 text-center">
         {updating && <span className="w-8 h-8 rounded-full border-2 border-indigo-400 border-t-transparent animate-spin" aria-hidden="true" />}
-        <p className="text-lg font-semibold">{updating ? "Blackhole AI was just updated" : "Something went wrong."}</p>
+        <p className="text-lg font-semibold">{updating ? "Nebulux AI was just updated" : "Something went wrong."}</p>
         <p className="text-sm text-slate-400 max-w-sm">
-          {updating ? "Loading the new version… This takes a few seconds." : "Reloading usually fixes it — especially right after Blackhole AI was updated."}
+          {updating ? "Loading the new version… This takes a few seconds." : "Reloading usually fixes it — especially right after Nebulux AI was updated."}
         </p>
         <button
           onClick={() => window.location.reload()}

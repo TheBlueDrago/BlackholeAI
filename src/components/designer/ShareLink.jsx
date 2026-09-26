@@ -10,7 +10,7 @@ export default function ShareLink({ url, title, className = "ml-1 bg-white/20 ho
   const share = async () => {
     if (navigator.share) {
       try {
-        await navigator.share({ title, text: `Check out ${title}, made with Blackhole AI:`, url });
+        await navigator.share({ title, text: `Check out ${title}, made with Nebulux AI:`, url });
         return;
       } catch (e) {
         if (e && e.name === "AbortError") return;

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { ScrollText, Loader2, RefreshCw } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
-const TIER = { ai: "Blackhole AI", aiCode: "Code", galaxy5: "Galaxy", space5: "Space" };
+const TIER = { ai: "Nebulux AI", aiCode: "Code", galaxy5: "Galaxy", space5: "Space" };
 
 // One line for each kind of admin action (cloudflare-lib/audit.js).
 function describe({ what, details: d = {} }) {

@@ -90,10 +90,10 @@ export default async function (req) {
         (failed ? `\nCouldn't check today whether these sites were taken down: look at Monitor before paying.\n` : '');
     }
 
-    const subject = `Blackhole daily payout summary - ${day}`;
+    const subject = `Nebulux AI daily payout summary - ${day}`;
     for (const to of recipients) {
       try {
-        await base44.asServiceRole.integrations.Core.SendEmail({ to, subject, body, from_name: 'Blackhole AI' });
+        await base44.asServiceRole.integrations.Core.SendEmail({ to, subject, body, from_name: 'Nebulux AI' });
       } catch (e) {
         console.error('dailyPayoutEmail: send failed for', to, e);
       }

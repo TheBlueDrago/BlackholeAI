@@ -9,8 +9,8 @@ export const DISCOUNT_TARGETS = [
   { id: "pro", label: "Pro plan" },
   { id: "team", label: "Team plan" },
   { id: "credits", label: "All credit packs" },
-  { id: "credits-ai", label: "Blackhole AI credit packs" },
-  { id: "credits-code", label: "Blackhole Code credit packs" },
+  { id: "credits-ai", label: "Nebulux AI credit packs" },
+  { id: "credits-code", label: "Nebulux Code credit packs" },
   { id: "credits-galaxy", label: "Galaxy credit packs" },
   { id: "credits-space", label: "Space credit packs" },
 ];

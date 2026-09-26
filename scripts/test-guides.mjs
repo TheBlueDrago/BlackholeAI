@@ -51,7 +51,7 @@ assert(guideBySlug("nope") === null && guideBySlug("__proto__") === null, "unkno
   const out = withMeta(index, PAGES.pricing);
   assert(out.includes('content="Free to start. Pro is $7 a month') && (out.match(/<meta name="description"/g) || []).length === 1, "Pricing's description keeps \"$1 a month\"");
   const game = withGameMeta(index, { title: "Win $1 & $& $$ prizes" });
-  assert(game.includes("<title>Win $1 &amp; $&amp; $$ prizes · Blackhole AI</title>") && game.includes('content="Play Win $1 &amp; $&amp; $$ prizes"'), "a game name with $ signs stays intact");
+  assert(game.includes("<title>Win $1 &amp; $&amp; $$ prizes · Nebulux AI</title>") && game.includes('content="Play Win $1 &amp; $&amp; $$ prizes"'), "a game name with $ signs stays intact");
   assert((out.match(/rel="canonical"/g) || []).length === 1 && out.includes('<link rel="canonical" href="https://blackhole-ai-tech.com/pricing" />'), "pages name their one true address");
 }
 
@@ -61,7 +61,7 @@ assert(guideBySlug("nope") === null && guideBySlug("__proto__") === null, "unkno
   const g = GUIDES[0];
   const res = await serveGuide({ request: new Request(`https://blackhole-ai-tech.com/guides/${g.slug}`), env, params: { slug: g.slug } });
   const html = await res.text();
-  assert(res.status === 200 && html.includes(`<title>${g.title} · Blackhole AI</title>`), "a guide is served with its own title");
+  assert(res.status === 200 && html.includes(`<title>${g.title} · Nebulux AI</title>`), "a guide is served with its own title");
   assert(html.includes(`<div id="root"><article`) && html.includes(g.sections[1].heading.replace(/&/g, "&amp;")), "its full text is in the page before the app loads");
   assert(html.includes('"@type":"Article"') && html.includes(`<link rel="canonical" href="https://blackhole-ai-tech.com/guides/${g.slug}" />`), "it has Article data and its own address");
   assert(res.headers.get("x-frame-options") === "SAMEORIGIN", "it has the security headers");
@@ -69,7 +69,7 @@ assert(guideBySlug("nope") === null && guideBySlug("__proto__") === null, "unkno
   assert(miss.status === 404 && !(await miss.text()).includes("<article"), "an unknown guide is a 404");
   const list = await serveList({ request: new Request("https://blackhole-ai-tech.com/guides"), env });
   const listHtml = await list.text();
-  assert(list.status === 200 && listHtml.includes("<title>Guides · Blackhole AI</title>") && listHtml.includes(`/guides/${GUIDES[1].slug}`), "the guide list is served with its links");
+  assert(list.status === 200 && listHtml.includes("<title>Guides · Nebulux AI</title>") && listHtml.includes(`/guides/${GUIDES[1].slug}`), "the guide list is served with its links");
 }
 
 if (failed) {

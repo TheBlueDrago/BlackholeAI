@@ -6,7 +6,7 @@ import CreditControls from "./CreditControls";
 import useEscape from "@/hooks/useEscape";
 import useDialogFocus from "@/hooks/useDialogFocus";
 
-const LABELS = { ai: "Blackhole AI", aiCode: "Blackhole Code", galaxy5: "Galaxy", space5: "Space" };
+const LABELS = { ai: "Nebulux AI", aiCode: "Nebulux Code", galaxy5: "Galaxy", space5: "Space" };
 
 function fmtTime(min) {
   if (!min) return "under a minute";

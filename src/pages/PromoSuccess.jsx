@@ -4,7 +4,7 @@ import { Gift } from "lucide-react";
 import { Link, Navigate, useLocation } from "react-router-dom";
 import MotionPrefs from "@/components/MotionPrefs";
 
-const AI_LABELS = { ai: "Blackhole AI", aiCode: "Blackhole Code", galaxy5: "Galaxy", space5: "Space" };
+const AI_LABELS = { ai: "Nebulux AI", aiCode: "Nebulux Code", galaxy5: "Galaxy", space5: "Space" };
 
 export default function PromoSuccessPage() {
   return (
@@ -18,7 +18,7 @@ function PromoSuccess() {
   const location = useLocation();
   const aiModel = location.state?.aiModel ?? "ai";
   const credits = location.state?.credits ?? 0;
-  const label = AI_LABELS[aiModel] ?? "Blackhole AI";
+  const label = AI_LABELS[aiModel] ?? "Nebulux AI";
   // Opened directly (not right after redeeming a code): there's nothing to celebrate, so
   // don't show "+0 credits".
   if (!(credits > 0)) return <Navigate to="/chat" replace />;

@@ -36,10 +36,10 @@ export async function importChats(file) {
   try {
     data = JSON.parse(await file.text());
   } catch {
-    throw new Error("That file isn't a Blackhole AI chat backup.");
+    throw new Error("That file isn't a Nebulux AI chat backup.");
   }
   const incoming = Array.isArray(data) ? data : data && data.kind === "chats" && Array.isArray(data.chats) ? data.chats : null;
-  if (!incoming) throw new Error("That file isn't a Blackhole AI chat backup.");
+  if (!incoming) throw new Error("That file isn't a Nebulux AI chat backup.");
   const chats = current();
   const have = new Set(chats.map((c) => c.id));
   const added = incoming

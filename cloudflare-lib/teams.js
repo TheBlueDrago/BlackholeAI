@@ -76,7 +76,7 @@ function teamActive(team) {
   return Date.now() - new Date(team.ownerPlanAt || 0).getTime() < OWNER_STALE_DAYS * 24 * 3600 * 1000;
 }
 
-// For credits: which shared pool (if any) this user draws Blackhole Code from, and the
+// For credits: which shared pool (if any) this user draws Nebulux Code from, and the
 // plan a membership gives. basePlan is the user's own plan (admin, grant or payment).
 export async function teamFor(kv, user, basePlan) {
   if (["team", "secret", "enterprise"].includes(basePlan)) {

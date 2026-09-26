@@ -12,7 +12,7 @@ const VALUES = [
   { icon: Rocket, title: "Always improving", text: "New features ship all the time, often straight from ideas people send us." },
 ];
 
-// About us: what Blackhole AI is, what it stands for, and how to reach the people behind it.
+// About us: what Nebulux AI is, what it stands for, and how to reach the people behind it.
 export default function About() {
   return (
     <PublicLayout title="About us">
@@ -21,7 +21,7 @@ export default function About() {
           <p className="text-sm font-semibold uppercase tracking-wider text-indigo-300">About us</p>
           <h1 className="mt-2 text-4xl sm:text-5xl font-bold text-white leading-tight">We help people make things on the internet</h1>
           <p className="mt-5 text-slate-400 text-lg">
-            Blackhole AI is an AI helper that anyone can use to chat, build a website or make a game, just by describing what they want. It's an independent
+            Nebulux AI is an AI helper that anyone can use to chat, build a website or make a game, just by describing what they want. It's an independent
             project, built for students, creators and small businesses.
           </p>
           <p className="mt-4 text-slate-400 text-lg">
@@ -69,7 +69,7 @@ export default function About() {
         <div className="rounded-3xl bg-gradient-to-br from-indigo-600/30 via-fuchsia-600/20 to-transparent border border-indigo-400/20 p-8 flex flex-col">
           <h2 className="text-2xl font-bold text-white">Partners, investors and acquirers</h2>
           <p className="mt-2 text-slate-300 flex-1">
-            Want to work with Blackhole AI, invest in it or buy it? We'd love to talk.
+            Want to work with Nebulux AI, invest in it or buy it? We'd love to talk.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link to="/contact?topic=partnership" className="px-5 py-3 rounded-full bg-white text-slate-900 font-semibold hover:bg-slate-200">Get in touch</Link>

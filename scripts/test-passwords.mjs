@@ -14,7 +14,7 @@ const refused = [
   "aaaaaaaa", "!!!!!!!!!!", // one character
   "12345678", "87654321", "abcdefgh", "qwertyui", "asdfghjkl", "1qaz2wsx3edc", // runs
   "83920175", "0000011111", // numbers only, under 12
-  "password", "Password1", "PASSWORD123!", "p@ssw0rd", "minecraft2024", "Roblox123", "iloveyou!!", "123blackhole", "Blackhole AI", "letmein99", "sunshine.",
+  "password", "Password1", "PASSWORD123!", "p@ssw0rd", "minecraft2024", "Roblox123", "iloveyou!!", "123blackhole", "Nebulux AI", "letmein99", "sunshine.",
   "x".repeat(129),
 ];
 for (const p of refused) assert(passwordProblem(p) !== "", `refused ${JSON.stringify(p.length > 20 ? p.slice(0, 8) + "…" : p)}`);

@@ -30,9 +30,9 @@ export default function Play() {
   }, [name]);
 
   useEffect(() => {
-    if (game?.title) document.title = `${game.title} · Blackhole AI`;
+    if (game?.title) document.title = `${game.title} · Nebulux AI`;
     return () => {
-      document.title = "Blackhole AI";
+      document.title = "Nebulux AI";
     };
   }, [game?.title]);
 
@@ -42,7 +42,7 @@ export default function Play() {
   return (
     <div className="h-[100dvh] flex flex-col bg-slate-950 text-slate-100">
       <header className="h-12 shrink-0 flex items-center gap-2 px-3 border-b border-white/10">
-        <Link to="/" className="shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center" title="Blackhole AI">
+        <Link to="/" className="shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center" title="Nebulux AI">
           <BlackholeIcon className="w-5 h-5" />
         </Link>
         <div className="flex-1 min-w-0 flex items-center gap-2">
@@ -79,7 +79,7 @@ export default function Play() {
           <div className="flex flex-col items-center justify-center h-full text-slate-400 px-6 text-center">
             <Gamepad2 className="w-10 h-10 mb-2" />
             <p>{game.missing}</p>
-            <Link to="/" className="mt-4 text-sm text-indigo-300 hover:text-indigo-200">Make your own game with Blackhole AI</Link>
+            <Link to="/" className="mt-4 text-sm text-indigo-300 hover:text-indigo-200">Make your own game with Nebulux AI</Link>
           </div>
         ) : (
           <iframe srcDoc={withPreviewShim(game.html)} title={game.title || name} sandbox={PREVIEW_SANDBOX} className="w-full h-full" />

@@ -25,7 +25,7 @@ export default function useReplyAnnouncer(messages, loading, conversationKey) {
       return;
     }
     const last = messages[messages.length - 1];
-    if (!loading && messages.length > s.count && last && last.role === "ai") setText(`Blackhole AI replied: ${spokenReply(last.content)}`);
+    if (!loading && messages.length > s.count && last && last.role === "ai") setText(`Nebulux AI replied: ${spokenReply(last.content)}`);
     s.count = messages.length;
   }, [messages, loading, conversationKey]);
   return text;

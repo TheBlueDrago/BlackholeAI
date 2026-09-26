@@ -13,7 +13,7 @@ export default function AuthLayout({ title, subtitle, footer, children }) {
           <Link
             to="/"
             className="inline-flex w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 items-center justify-center shadow-lg shadow-indigo-500/30 mb-4"
-            aria-label="Blackhole AI home"
+            aria-label="Nebulux AI home"
           >
             <BlackholeIcon className="w-9 h-9" />
           </Link>

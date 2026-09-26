@@ -181,7 +181,7 @@ async function handleOrderApproved(db: any, eventData: any): Promise<Response> {
     console.log("payments-webhook: credit pack paid", { userId: grantUserId, productId: purchase.productId, quantity: purchase.quantity });
     await notifyAdmins(
       db,
-      "Credits bought on Blackhole AI",
+      "Credits bought on Nebulux AI",
       `Credits were bought.\n\nEmail: ${buyerEmail ?? "unknown"}\nProduct: ${purchase.productName ?? purchase.productId} x${purchase.quantity ?? 1}\nAmount: ${purchase.amount ?? "?"} ${purchase.currency ?? ""}`
     );
   } else if (grantUserId) {

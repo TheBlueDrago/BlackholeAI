@@ -1,7 +1,7 @@
 import { base44 } from "@/api/base44Client";
 import { siteUrl } from "@/lib/blackholeDomain";
 
-// Settings → Security → Download my data: a copy of what Blackhole AI keeps about this
+// Settings → Security → Download my data: a copy of what Nebulux AI keeps about this
 // account (including the AI activity record the Privacy Policy describes), as one JSON file.
 // Each part is loaded on its own, so one that fails is noted in the file instead of stopping
 // the rest. Chats aren't in it: they're kept in this browser and have their own backup

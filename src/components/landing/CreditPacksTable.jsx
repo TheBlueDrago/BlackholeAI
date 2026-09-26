@@ -2,8 +2,8 @@ import React from "react";
 import { PACK_SIZES, PACK_PRICES } from "../../../cloudflare-lib/creditPacks.js";
 
 const TIERS = [
-  ["ai", "Blackhole AI"],
-  ["aiCode", "Blackhole Code"],
+  ["ai", "Nebulux AI"],
+  ["aiCode", "Nebulux Code"],
   ["galaxy5", "Galaxy"],
   ["space5", "Space"],
 ];

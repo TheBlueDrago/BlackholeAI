@@ -229,7 +229,7 @@ export default function GamesFront() {
           <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-fuchsia-500 to-indigo-500 flex items-center justify-center">
             <Gamepad2 className="w-4 h-4 text-white" />
           </div>
-          <span className="font-bold tracking-tight hidden sm:inline">Blackhole <span className="text-fuchsia-400">Games</span></span>
+          <span className="font-bold tracking-tight hidden sm:inline">Nebulux <span className="text-fuchsia-400">Games</span></span>
         </div>
         <div className="flex-1 min-w-0 max-w-md mx-auto">
           <div className="flex items-center gap-2 bg-white/5 border border-white/10 focus-within:border-white/40 rounded-lg px-3 h-9 transition-colors">

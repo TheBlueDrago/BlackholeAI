@@ -1,5 +1,5 @@
 {
-  "name": "Blackhole AI",
+  "name": "Nebulux AI",
   "site": {
     "installCommand": "npm install",
     "buildCommand": "npm run build",

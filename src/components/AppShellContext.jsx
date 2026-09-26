@@ -77,7 +77,7 @@ export function AppShellProvider({ children }) {
 
   const goHome = useCallback(() => { navigate("/chat"); setSidebarOpen(false); }, [navigate]);
   const goCode = useCallback(() => {
-    // Access follows credits: anyone with Blackhole Code credits can use it, and anyone without
+    // Access follows credits: anyone with Nebulux Code credits can use it, and anyone without
     // gets the page's out-of-credits card, where they can buy some whatever their plan.
     navigate("/chat/code");
     setSidebarOpen(false);

@@ -65,7 +65,7 @@ export default function Login() {
             </div>
           </div>
 
-          <h1 className="text-2xl font-bold text-white text-center">Sign in to Blackhole AI</h1>
+          <h1 className="text-2xl font-bold text-white text-center">Sign in to Nebulux AI</h1>
           <p className="text-slate-400 text-sm text-center mt-1.5">Welcome back</p>
           {note && (
             <p role="status" className="mt-4 p-3 rounded-lg bg-sky-500/10 border border-sky-500/20 text-slate-300 text-sm text-center">

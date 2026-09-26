@@ -79,7 +79,7 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
     }
   };
 
-  const q = useMessageQueue({ run: runPrompt, remaining: { code: aiCodeRemaining ?? (aiCodeExhausted ? 0 : Infinity) }, names: { code: "Blackhole Code" }, selectedAi: "code" });
+  const q = useMessageQueue({ run: runPrompt, remaining: { code: aiCodeRemaining ?? (aiCodeExhausted ? 0 : Infinity) }, names: { code: "Nebulux Code" }, selectedAi: "code" });
 
   useStickToBottom(scrollRef, [messages, loading, live, q.queue.length], messages.filter((m) => m.role === "user").length);
 
@@ -145,7 +145,7 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
                 <Terminal className="w-6 h-6 text-white" />
               </div>
               <p className="text-slate-200 font-medium text-lg">Let's start coding</p>
-              <p className="text-slate-500 text-sm mt-1">Blackhole Code is ready to build</p>
+              <p className="text-slate-500 text-sm mt-1">Nebulux Code is ready to build</p>
             </div>
           )}
 
@@ -234,7 +234,7 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
               onKeyDown={handleKeyDown}
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
-              placeholder={queued ? "Type to queue your next message…" : "Message Blackhole AI..."}
+              placeholder={queued ? "Type to queue your next message…" : "Message Nebulux AI..."}
               rows={1}
               className="flex-1 bg-transparent resize-none outline-none text-slate-100 placeholder:text-slate-500 px-4 py-3 max-h-32 text-sm"
             />
@@ -246,7 +246,7 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
             <EffortPicker value={effort} onChange={setEffort} />
             <ModeToggle mode={buildMode.mode} onChange={buildMode.setMode} />
           </div>
-          <p className="text-center text-xs text-slate-600 mt-2">Blackhole AI can make mistakes. Check important info, and never share passwords or card numbers with it.</p>
+          <p className="text-center text-xs text-slate-600 mt-2">Nebulux AI can make mistakes. Check important info, and never share passwords or card numbers with it.</p>
         </div>
       </div>
     </div>

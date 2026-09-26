@@ -18,7 +18,7 @@ export default function Intro() {
         </div>
 
         <h1 className="bh-rise text-6xl sm:text-7xl md:text-8xl font-bold tracking-tight" style={{ animationDelay: "0.2s" }}>
-          <span className="bg-gradient-to-r from-[#ffffff] via-indigo-200 to-fuchsia-200 bg-clip-text text-transparent">Blackhole AI</span>
+          <span className="bg-gradient-to-r from-[#ffffff] via-indigo-200 to-fuchsia-200 bg-clip-text text-transparent">Nebulux AI</span>
         </h1>
 
         <p className="bh-fade-in mt-6 text-slate-400 text-lg sm:text-xl font-light tracking-wide" style={{ animationDelay: "0.5s" }}>

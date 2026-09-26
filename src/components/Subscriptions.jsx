@@ -9,7 +9,7 @@ import { savedDiscount, saveDiscount, promoPctFor } from "@/lib/promoDiscount";
 import { discountedPrice } from "../../cloudflare-lib/discounts.js";
 
 function FreeCard({ onFree }) {
-  const features = ["50 Blackhole AI credits"];
+  const features = ["50 Nebulux AI credits"];
   return (
     <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-indigo-500/60 rounded-3xl p-6 shadow-2xl shadow-indigo-500/10 flex flex-col">
       <div className="flex items-center justify-between">
@@ -56,7 +56,7 @@ function PriceTag({ amount, pct }) {
 }
 
 function Plan2Card({ onPro, pct }) {
-  const features = ["4 AI's (incl. Galaxy and Space in Website Designer)", "50 Blackhole Code credits", "100 Blackhole AI credits", "50 Galaxy credits", "50 Space credits", "Push to GitHub (no 2-way sync)", "Download a ZIP of your website or game in the designers"];
+  const features = ["4 AI's (incl. Galaxy and Space in Website Designer)", "50 Nebulux Code credits", "100 Nebulux AI credits", "50 Galaxy credits", "50 Space credits", "Push to GitHub (no 2-way sync)", "Download a ZIP of your website or game in the designers"];
   return (
     <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-emerald-500/60 rounded-3xl p-6 shadow-2xl shadow-emerald-500/10 flex flex-col">
       <div className="flex items-center justify-between">
@@ -93,8 +93,8 @@ function Plan2Card({ onPro, pct }) {
 function TeamCard({ onTeam, pct }) {
   const features = [
     "4 AI's (incl. Galaxy and Space in Website Designer)",
-    "100 Blackhole Code credits",
-    "150 Blackhole AI credits",
+    "100 Nebulux Code credits",
+    "150 Nebulux AI credits",
     "100 Galaxy credits",
     "100 Space credits",
     "Add up to 2 people — everyone shares the credits",
@@ -139,7 +139,7 @@ function EnterpriseCard({ onEnterprise }) {
   const features = [
     "For registered organizations (LLC, corporation, nonprofit…)",
     "As many seats as you need",
-    "Everyone shares one pool of credits: each seat adds 100 Blackhole AI, 75 Code, 50 Galaxy and 25 Space a month",
+    "Everyone shares one pool of credits: each seat adds 100 Nebulux AI, 75 Code, 50 Galaxy and 25 Space a month",
     "All 4 AI's, ZIP download and GitHub push",
     "10 published websites and 10 new games a month",
   ];

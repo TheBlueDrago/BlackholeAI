@@ -13,7 +13,7 @@ export async function loadGame(name) {
   ]);
   const d = res.data;
   if (!d || d.error || !d.html) return null;
-  if (status?.data?.blocked) return { removed: "This game was taken down for breaking the Blackhole AI rules." };
+  if (status?.data?.blocked) return { removed: "This game was taken down for breaking the Nebulux AI rules." };
   if (findCredentialForm(d.html)) return { removed: "This game asks for passwords or card numbers, which isn't allowed here." };
   return { html: d.html, title: d.title, genre: d.genre };
 }

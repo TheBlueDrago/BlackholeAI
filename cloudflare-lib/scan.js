@@ -78,7 +78,7 @@ export function scanPage(html) {
     malware += 60;
     reasons.push(`Phishing: ${phish}`);
   }
-  // Stricter: passwords or card numbers sent away by script, or a fake Blackhole AI sign-in.
+  // Stricter: passwords or card numbers sent away by script, or a fake Nebulux AI sign-in.
   // Refused at publish; only flagged (not taken down) for pages that are already live.
   const leak = !phish && findCredentialLeak(src);
   if (leak) {
@@ -132,7 +132,7 @@ export function scanPage(html) {
     yellow = true;
     reasons.push(`Embeds other websites (${frameHosts.slice(0, 2).join(", ")})`);
   }
-  if (/(?:window\.|document\.|top\.)location(?:\.href)?\s*=\s*["'`]https?:\/\/(?!([a-z0-9-]+\.)*blackhole-ai-tech\.com)/i.test(src) || /<meta[^>]+http-equiv\s*=\s*["']?refresh[^>]+url\s*=\s*https?:\/\//i.test(src)) {
+  if (/(?:window\.|document\.|top\.)location(?:\.href)?\s*=\s*["'`]https?:\/\/(?!([a-z0-9-]+\.)*(blackhole-ai-tech|nebuluxai)\.com)/i.test(src) || /<meta[^>]+http-equiv\s*=\s*["']?refresh[^>]+url\s*=\s*https?:\/\//i.test(src)) {
     malware += 20;
     yellow = true;
     reasons.push("Sends visitors to another website automatically");

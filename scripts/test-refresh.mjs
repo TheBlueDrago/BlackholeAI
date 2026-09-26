@@ -18,8 +18,8 @@ assert(waitText(oct1 - now) === "6 days 4 hours", "wait shown in days and hours"
 assert(waitText(3 * 3600000 + 12 * 60000) === "3 hours 12 minutes" && waitText(5 * 60000) === "5 minutes" && waitText(1000) === "1 minute", "shorter waits");
 
 let o = outOfCreditsOptions("ai", { plan: "free" }, now);
-assert(o.upgrade.id === "pro" && o.upgrade.price === 7 && o.upgrade.extra === 50 && !o.upgrade.salePrice, "Free, Blackhole AI: Pro for $7, 50 more now");
-assert(o.refresh.at === oct1 && o.refresh.amount === 50, "Free, Blackhole AI: 50 come back on the 1st");
+assert(o.upgrade.id === "pro" && o.upgrade.price === 7 && o.upgrade.extra === 50 && !o.upgrade.salePrice, "Free, Nebulux AI: Pro for $7, 50 more now");
+assert(o.refresh.at === oct1 && o.refresh.amount === 50, "Free, Nebulux AI: 50 come back on the 1st");
 
 o = outOfCreditsOptions("galaxy5", { plan: "free" }, now);
 assert(o.upgrade.id === "pro" && o.upgrade.extra === 50 && o.refresh === null, "Free has no Galaxy credits: upgrade only, nothing to wait for");
@@ -40,7 +40,7 @@ o = outOfCreditsOptions("space5", { plan: "enterprise", shared: true, seats: 4 }
 assert(o.upgrade === null && o.refresh.amount === 100, "Enterprise: the pool refills 25 Space per seat");
 
 o = outOfCreditsOptions("ai", { plan: "free" }, now);
-assert(o.pack && o.pack.id === "credits-ai-25" && o.pack.min === 10 && o.pack.max === 50 && Number(o.pack.from) === 0.5, "Blackhole AI packs of 10-50 credits, from $0.50, starting on 25");
+assert(o.pack && o.pack.id === "credits-ai-25" && o.pack.min === 10 && o.pack.max === 50 && Number(o.pack.from) === 0.5, "Nebulux AI packs of 10-50 credits, from $0.50, starting on 25");
 o = outOfCreditsOptions("space5", { plan: "team" }, now);
 assert(o.upgrade === null && o.pack.id === "credits-space-25", "Team, nothing to upgrade to: can still buy a Space pack");
 o = outOfCreditsOptions("galaxy5", { plan: "free" }, now);

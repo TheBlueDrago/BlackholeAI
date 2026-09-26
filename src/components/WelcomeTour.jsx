@@ -18,7 +18,7 @@ const STEPS = [
   {
     icon: Menu,
     title: "Everything is in the menu",
-    text: "The menu button in the top-left corner opens your chats and every tool: Blackhole Code for programming, the Website Designer and games.",
+    text: "The menu button in the top-left corner opens your chats and every tool: Nebulux Code for programming, the Website Designer and games.",
     cta: "Open the menu",
     go: "menu",
   },
@@ -95,7 +95,7 @@ export default function WelcomeTour({ user, shell, blocked }) {
               <BlackholeIcon className="w-8 h-8" />
             </div>
             <h2 id="bh-tour-title" className="mt-4 text-xl font-bold text-white">
-              Welcome to Blackhole AI!
+              Welcome to Nebulux AI!
             </h2>
             <p className="mt-2 text-sm text-slate-400">Want a quick tour? It takes about a minute, and you can stop any time.</p>
             <div className="mt-6 space-y-2">
@@ -104,7 +104,7 @@ export default function WelcomeTour({ user, shell, blocked }) {
                 autoFocus
                 className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-[#fff] font-semibold hover:opacity-90"
               >
-                <Compass className="w-5 h-5" /> Let Blackhole AI guide me
+                <Compass className="w-5 h-5" /> Let Nebulux AI guide me
               </button>
               <button onClick={finish} className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 font-medium hover:bg-slate-700">
                 I'll explore myself

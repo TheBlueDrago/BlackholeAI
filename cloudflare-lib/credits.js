@@ -15,7 +15,7 @@
 //   (User.plan / User.bonus / User.banned are NOT trusted — a user can set their own.)
 // - Promo bonus credits: PromoRedemption rows (service-only writes), folded into
 //   the server-owned "bonus:<userId>" balance once each.
-// - Monthly usage: "usage:<userId>:<YYYY-MM>"; for a team's shared Blackhole Code pool,
+// - Monthly usage: "usage:<userId>:<YYYY-MM>"; for a team's shared Nebulux Code pool,
 //   "teamusage:<teamId>:<YYYY-MM>"; and for an Enterprise organization, which shares all of
 //   its credits, "orgusage:<ownerId>:<YYYY-MM>" ({ ai, aiCode, galaxy5, space5 }).
 // Stored in the PUBLISHED_HTML KV namespace (already bound to this Pages project)
@@ -249,7 +249,7 @@ export async function creditStatus(kv, ent) {
 }
 
 // Takes whole credits from the bonus balance first, then the monthly allowance (or the
-// team's shared pool for Blackhole Code on a team plan, or the organization's shared pool
+// team's shared pool for Nebulux Code on a team plan, or the organization's shared pool
 // for everything on Enterprise).
 // Monitor's per-user activity (questions asked, time on the AI, latest questions) rides
 // along in the same monthly usage record, so logging it costs no extra KV write when

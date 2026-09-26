@@ -76,9 +76,9 @@ export default function PublicLayout({ title, children }) {
 
   useEffect(() => {
     if (!title) return;
-    document.title = `${title} · Blackhole AI`;
+    document.title = `${title} · Nebulux AI`;
     return () => {
-      document.title = "Blackhole AI";
+      document.title = "Nebulux AI";
     };
   }, [title]);
 
@@ -112,7 +112,7 @@ export default function PublicLayout({ title, children }) {
             <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center">
               <BlackholeIcon className="w-5 h-5" />
             </span>
-            Blackhole AI
+            Nebulux AI
           </Link>
           <nav className="hidden lg:flex items-center gap-6 text-sm">
             {LINKS.map((l) => (
@@ -190,7 +190,7 @@ export default function PublicLayout({ title, children }) {
         </div>
         <div className="max-w-6xl mx-auto px-4 pb-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
           <span className="flex items-center gap-2">
-            <BlackholeIcon className="w-4 h-4" /> © {new Date().getFullYear()} Blackhole AI
+            <BlackholeIcon className="w-4 h-4" /> © {new Date().getFullYear()} Nebulux AI
           </span>
           <span>Made for creators, students and small businesses.</span>
         </div>

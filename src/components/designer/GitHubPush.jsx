@@ -83,7 +83,7 @@ export default function GitHubPush({ html, siteName, plan, onUpgrade }) {
     setError("");
     setResult("");
     try {
-      const url = await pushFile(token, selectedRepo, html, `Update ${path} from Blackhole AI`, path);
+      const url = await pushFile(token, selectedRepo, html, `Update ${path} from Nebulux AI`, path);
       rememberRepo(siteName, selectedRepo);
       setResult(url);
     } catch (err) {

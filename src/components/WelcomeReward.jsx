@@ -68,7 +68,7 @@ export default function WelcomeReward({ open, onClose, onClaimed }) {
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-2">
                 <Gift className="w-5 h-5 text-amber-300" />
-                <h3 className="text-lg font-semibold text-white">Welcome to Blackhole AI!</h3>
+                <h3 className="text-lg font-semibold text-white">Welcome to Nebulux AI!</h3>
               </div>
               <button onClick={onClose} className="p-1 rounded-lg text-slate-400 hover:bg-white/10" title="Later">
                 <X className="w-4 h-4" />

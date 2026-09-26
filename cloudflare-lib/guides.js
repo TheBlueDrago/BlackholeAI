@@ -12,7 +12,7 @@ export const GUIDES = [
       "Use AI to turn your experience into a strong resume and a cover letter for each job, in your own words, then put it online for free.",
     minutes: 4,
     intro:
-      "Job hunting means writing about yourself again and again. Blackhole AI can help you find the right words, fit each application to the job, and catch mistakes, while it still sounds like you.",
+      "Job hunting means writing about yourself again and again. Nebulux AI can help you find the right words, fit each application to the job, and catch mistakes, while it still sounds like you.",
     sections: [
       {
         heading: "Turn what you did into results",
@@ -48,7 +48,7 @@ export const GUIDES = [
       "Practical ways a small business can use AI every day: customer emails, product descriptions, social posts, planning, and a website, for free.",
     minutes: 5,
     intro:
-      "You don't need a big team to get help with the busywork. Here are ten everyday jobs Blackhole AI can take off your plate, with example requests you can copy.",
+      "You don't need a big team to get help with the busywork. Here are ten everyday jobs Nebulux AI can take off your plate, with example requests you can copy.",
     sections: [
       {
         heading: "Talking to customers",
@@ -94,7 +94,7 @@ export const GUIDES = [
       "Use AI as a writing coach: plan, draft, and polish essays, emails and stories in your own voice, and learn what makes writing good.",
     minutes: 4,
     intro:
-      "A blank page is the hardest part of writing. Blackhole AI can help you get started, organise your ideas and polish what you wrote, while it still sounds like you. Here's how.",
+      "A blank page is the hardest part of writing. Nebulux AI can help you get started, organise your ideas and polish what you wrote, while it still sounds like you. Here's how.",
     sections: [
       {
         heading: "Start with a plan",
@@ -125,7 +125,7 @@ export const GUIDES = [
       "Learn programming with an AI tutor: get code explained line by line, fix errors, and build small projects that actually run, for free.",
     minutes: 4,
     intro:
-      "Learning to code is easier with a tutor who never gets tired of questions. Blackhole Code explains code, finds bugs and helps you build real projects, one small step at a time.",
+      "Learning to code is easier with a tutor who never gets tired of questions. Nebulux Code explains code, finds bugs and helps you build real projects, one small step at a time.",
     sections: [
       {
         heading: "Pick a small first project",
@@ -146,10 +146,10 @@ export const GUIDES = [
       },
       {
         heading: "Stay safe",
-        list: ["Never paste real passwords, API keys or tokens into any AI chat. Blackhole AI warns you if you try.", "Keep practising without AI too, so you can code on your own."],
+        list: ["Never paste real passwords, API keys or tokens into any AI chat. Nebulux AI warns you if you try.", "Keep practising without AI too, so you can code on your own."],
       },
     ],
-    cta: { label: "Try Blackhole Code free", to: "/register?returnTo=%2Fchat%2Fcode" },
+    cta: { label: "Try Nebulux Code free", to: "/register?returnTo=%2Fchat%2Fcode" },
     more: { label: "Make a game", to: "/guides/make-a-game-without-coding" },
     related: ["make-a-game-without-coding", "ai-homework-help"],
   },
@@ -157,10 +157,10 @@ export const GUIDES = [
     slug: "make-flashcards-with-ai",
     title: "How to make flashcards with AI in seconds",
     description:
-      "Ask Blackhole AI for flashcards on any topic and flip through them right in the chat: shuffle, mark what you know, and quiz yourself. Free to start.",
+      "Ask Nebulux AI for flashcards on any topic and flip through them right in the chat: shuffle, mark what you know, and quiz yourself. Free to start.",
     minutes: 3,
     intro:
-      "Making flashcards by hand takes longer than studying them. With Blackhole AI you ask for them in one sentence and study straight away, on your phone or computer.",
+      "Making flashcards by hand takes longer than studying them. With Nebulux AI you ask for them in one sentence and study straight away, on your phone or computer.",
     sections: [
       {
         heading: "Ask for them",
@@ -188,10 +188,10 @@ export const GUIDES = [
     slug: "ai-study-mode",
     title: "Study mode: an AI tutor that helps you learn, not just copy",
     description:
-      "Turn on Study mode in Blackhole AI and it tutors you step by step with hints and questions instead of handing over the answer. Free for students.",
+      "Turn on Study mode in Nebulux AI and it tutors you step by step with hints and questions instead of handing over the answer. Free for students.",
     minutes: 3,
     intro:
-      "The fastest way to get an answer isn't always the fastest way to learn it. Study mode makes Blackhole AI act like a patient tutor, so you understand the work and can do it on the test.",
+      "The fastest way to get an answer isn't always the fastest way to learn it. Study mode makes Nebulux AI act like a patient tutor, so you understand the work and can do it on the test.",
     sections: [
       {
         heading: "Turn it on",
@@ -207,7 +207,7 @@ export const GUIDES = [
       },
       {
         heading: "For parents and teachers",
-        paragraphs: ["Study mode is built for learning: it encourages students to think through the work instead of copying it. Everything published on Blackhole AI is safety-checked, and every page has a Report button."],
+        paragraphs: ["Study mode is built for learning: it encourages students to think through the work instead of copying it. Everything published on Nebulux AI is safety-checked, and every page has a Report button."],
       },
     ],
     cta: { label: "Try Study mode free", to: "/register?returnTo=%2Fchat" },
@@ -218,10 +218,10 @@ export const GUIDES = [
     slug: "ai-homework-help",
     title: "How to use AI for homework (the right way)",
     description:
-      "Use AI to understand your homework, not just copy answers: ask it to explain step by step, quiz you, and check your work. Free with Blackhole AI.",
+      "Use AI to understand your homework, not just copy answers: ask it to explain step by step, quiz you, and check your work. Free with Nebulux AI.",
     minutes: 4,
     intro:
-      "AI can be the best study partner you've ever had, or a shortcut that leaves you stuck on the test. The difference is how you ask. Here's how to use Blackhole AI so you actually learn.",
+      "AI can be the best study partner you've ever had, or a shortcut that leaves you stuck on the test. The difference is how you ask. Here's how to use Nebulux AI so you actually learn.",
     sections: [
       {
         heading: "Ask it to explain, not just answer",
@@ -245,7 +245,7 @@ export const GUIDES = [
         heading: "Know the limits",
         list: [
           "AI can make mistakes, so double-check facts that matter, and follow your teacher's rules about using AI.",
-          "Don't share private details like your address, phone number or passwords. Blackhole AI warns you if a message looks like it has them.",
+          "Don't share private details like your address, phone number or passwords. Nebulux AI warns you if a message looks like it has them.",
           "Handing in AI's words as your own isn't learning. Use it to understand, then write it yourself.",
         ],
       },
@@ -261,11 +261,11 @@ export const GUIDES = [
       "Make a real website without coding: describe it, let the AI build it, change anything by chatting, and publish it free with your own link.",
     minutes: 4,
     intro:
-      "You don't need to know how to code, pay for hosting or wrestle with a page builder to have a website. With Blackhole AI you describe the site you want in plain words, and the AI builds it in about a minute. Here's how, step by step.",
+      "You don't need to know how to code, pay for hosting or wrestle with a page builder to have a website. With Nebulux AI you describe the site you want in plain words, and the AI builds it in about a minute. Here's how, step by step.",
     sections: [
       {
         heading: "What you need",
-        paragraphs: ["A phone or computer with a web browser, and a free Blackhole AI account. No coding, no hosting to set up and no credit card."],
+        paragraphs: ["A phone or computer with a web browser, and a free Nebulux AI account. No coding, no hosting to set up and no credit card."],
       },
       {
         heading: "Step 1: Describe your site",
@@ -318,7 +318,7 @@ export const GUIDES = [
       "Turn a game idea into something you can play and share: describe it to the AI, test it, tweak it by chatting and publish it with one link.",
     minutes: 4,
     intro:
-      "Everyone has a game idea. With Blackhole AI's Games Designer you can turn yours into a real game that runs in any browser, on phones too, without writing code. Here's how to go from idea to a link your friends can play.",
+      "Everyone has a game idea. With Nebulux AI's Games Designer you can turn yours into a real game that runs in any browser, on phones too, without writing code. Here's how to go from idea to a link your friends can play.",
     sections: [
       {
         heading: "Start with a simple idea",
@@ -355,7 +355,7 @@ export const GUIDES = [
       },
       {
         heading: "Get inspired",
-        paragraphs: ["Play the games in the Arcade to see what's possible. Every one of them was made by describing it to Blackhole AI."],
+        paragraphs: ["Play the games in the Arcade to see what's possible. Every one of them was made by describing it to Nebulux AI."],
       },
     ],
     cta: { label: "Make a game free", to: "/register?returnTo=%2Fchat%2Fgame-designer" },
@@ -474,10 +474,10 @@ export const GUIDES = [
       "No computer? You can build and publish a real website from an iPhone or Android phone. Here's how, step by step, in about ten minutes.",
     minutes: 3,
     intro:
-      "You don't need a laptop to make a website. Blackhole AI works in your phone's browser, so you can build, change and publish a real site from the couch or the bus. Here's how.",
+      "You don't need a laptop to make a website. Nebulux AI works in your phone's browser, so you can build, change and publish a real site from the couch or the bus. Here's how.",
     sections: [
       {
-        heading: "Step 1: Open Blackhole AI and sign up",
+        heading: "Step 1: Open Nebulux AI and sign up",
         paragraphs: [
           "Go to blackhole-ai-tech.com in Safari, Chrome or any browser and make a free account. There's nothing to download. On Android you can also install it like an app for one-tap access.",
         ],
@@ -819,8 +819,8 @@ export function guideJsonLd(g, origin) {
     description: g.description,
     dateModified: GUIDES_UPDATED,
     datePublished: GUIDES_UPDATED,
-    author: { "@type": "Organization", name: "Blackhole AI", url: origin + "/" },
-    publisher: { "@type": "Organization", name: "Blackhole AI", logo: { "@type": "ImageObject", url: origin + "/og-image.jpg" } },
+    author: { "@type": "Organization", name: "Nebulux AI", url: origin + "/" },
+    publisher: { "@type": "Organization", name: "Nebulux AI", logo: { "@type": "ImageObject", url: origin + "/og-image.jpg" } },
     image: origin + "/og-image.jpg",
     mainEntityOfPage: origin + "/guides/" + g.slug,
   };

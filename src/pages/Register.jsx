@@ -61,7 +61,7 @@ export default function Register() {
         return;
       }
       if (status === "removed") {
-        setError("This email can't be used to sign up for Blackhole AI.");
+        setError("This email can't be used to sign up for Nebulux AI.");
         return;
       }
       if (status === "exists") {

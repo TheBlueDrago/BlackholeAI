@@ -1,12 +1,12 @@
 import { useEffect } from "react";
 
-// The browser tab (and what screen readers announce on arrival): "Sign in · Blackhole AI".
+// The browser tab (and what screen readers announce on arrival): "Sign in · Nebulux AI".
 export default function usePageTitle(title) {
   useEffect(() => {
     if (!title) return undefined;
-    document.title = `${title} · Blackhole AI`;
+    document.title = `${title} · Nebulux AI`;
     return () => {
-      document.title = "Blackhole AI";
+      document.title = "Nebulux AI";
     };
   }, [title]);
 }
@@ -14,7 +14,7 @@ export default function usePageTitle(title) {
 // Titles for the signed-in pages under /chat (and a few next to it).
 const APP_TITLES = [
   [/^\/chat\/?$/, "Chat"],
-  [/^\/chat\/code/, "Blackhole Code"],
+  [/^\/chat\/code/, "Nebulux Code"],
   [/^\/chat\/designer/, "Website Designer"],
   [/^\/chat\/game-designer/, "Game Designer"],
   [/^\/chat\/games/, "Games"],

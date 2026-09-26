@@ -13,8 +13,8 @@ const PLAN = {
   admin: { name: "Admin", price: "Free" },
 };
 const TIER_NAMES = [
-  ["ai", "Blackhole AI"],
-  ["aiCode", "Blackhole Code"],
+  ["ai", "Nebulux AI"],
+  ["aiCode", "Nebulux Code"],
   ["galaxy5", "Galaxy"],
   ["space5", "Space"],
 ];
@@ -43,10 +43,10 @@ export default function SubscriptionPanel({ onBack, onManagePeople }) {
   let status;
   if (source === "trial") status = `Free trial of Pro until ${fmtDate(endsAt)} (${timeLeft(endsAt)}). After that you're back on Free unless you choose a plan.`;
   else if (source === "paid") status = "Paid monthly. To cancel or change how you pay, contact us.";
-  else if (source === "grant") status = endsAt ? `Given to you by Blackhole AI until ${fmtDate(endsAt)}.` : "Given to you by Blackhole AI, with no end date.";
+  else if (source === "grant") status = endsAt ? `Given to you by Nebulux AI until ${fmtDate(endsAt)}.` : "Given to you by Nebulux AI, with no end date.";
   else if (source === "member") status = credits.plan === "enterprise" ? "Through your organization's Enterprise plan." : "Through your team's plan.";
   else if (source === "admin") status = "Admin account: every feature, free.";
-  else status = "You're on the Free plan: 50 Blackhole AI credits every month.";
+  else status = "You're on the Free plan: 50 Nebulux AI credits every month.";
 
   return (
     <div className="p-6">

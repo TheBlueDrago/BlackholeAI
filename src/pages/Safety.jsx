@@ -36,7 +36,7 @@ const SECTIONS = [
     icon: ShieldCheck,
     title: "Published sites and games are walled off",
     points: [
-      "Every published site lives at its own web address, so it can't read your Blackhole AI account.",
+      "Every published site lives at its own web address, so it can't read your Nebulux AI account.",
       "Previews in the app run in a locked-down frame that can't reach your account either.",
       "Pages with a form that sends passwords or card numbers to another website are refused when they're published, and when they're served.",
       "Buy buttons on sites people make always go through the same secure checkout. Sites can't collect card numbers themselves.",
@@ -64,11 +64,11 @@ const SECTIONS = [
   },
 ];
 
-// For a parent or teacher deciding whether a young person can use Blackhole AI. Each point
+// For a parent or teacher deciding whether a young person can use Nebulux AI. Each point
 // matches the app: the 13+ rule (Terms, sign-up), paying (create-checkout; plans are $1 and
 // $5 a month), the purchase list and data download (Settings), deletion, and the filters.
 const PARENTS = [
-  "Blackhole AI is for ages 13 and up. Anyone under 18 needs a parent or guardian's permission, especially before buying anything.",
+  "Nebulux AI is for ages 13 and up. Anyone under 18 needs a parent or guardian's permission, especially before buying anything.",
   "It's free to use. Paid plans are monthly and credit packs are one-time, and every purchase goes through a secure checkout that shows the price first.",
   "Every purchase is listed in Settings → Subscriptions. To cancel a plan or ask about a charge, contact us and pick \"Plans, credits or payments\".",
   "The AI is told to keep what it writes suitable for young people, published pages are checked before they go live.",
@@ -104,7 +104,7 @@ const TIPS = [
   "We will never ask for your password, by email, phone or chat.",
   "Only type your password on blackhole-ai-tech.com. Check the address first.",
   "Use a password you don't use anywhere else.",
-  "If a site made with Blackhole AI asks for a password or card number, don't enter it, and report it.",
+  "If a site made with Nebulux AI asks for a password or card number, don't enter it, and report it.",
 ];
 
 export default function Safety() {
@@ -121,7 +121,7 @@ export default function Safety() {
         <p className="text-sm font-semibold uppercase tracking-wider text-emerald-300">Trust & safety</p>
         <h1 className="mt-2 text-4xl sm:text-5xl font-bold text-white leading-tight">How we keep you, your money and your work safe</h1>
         <p className="mt-5 text-slate-400 text-lg">
-          Lots of people who use Blackhole AI are students and first-time makers. Here, in plain words, is what protects your account, your payments and the
+          Lots of people who use Nebulux AI are students and first-time makers. Here, in plain words, is what protects your account, your payments and the
           things you publish.
         </p>
       </section>

@@ -61,7 +61,7 @@ export default async function (req: Request): Promise<Response> {
     const rName = String(user.full_name ?? "").trim() || email;
     await notifyAdmins(
       db,
-      "Blackhole AI promo redeemed",
+      "Nebulux AI promo redeemed",
       `${rName} redeemed a promo code.\n\nName: ${rName}\nEmail: ${email}\nCode: ${code}\nCredits: +${credits} ${aiModel}`
     );
     return Response.json({ ok: true, code, aiModel, credits });

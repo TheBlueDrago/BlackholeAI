@@ -47,7 +47,7 @@ export default function VerifyEmailScreen({ email }) {
         <MailCheck className="w-10 h-10 text-sky-300 mx-auto" />
         <h1 className="mt-3 text-xl font-bold text-white">Confirm your email</h1>
         <p className="mt-2 text-sm text-slate-400">
-          To keep Blackhole AI safe, every account confirms its email before using the app. Send a code to <span className="text-slate-200 break-all">{email}</span>{" "}
+          To keep Nebulux AI safe, every account confirms its email before using the app. Send a code to <span className="text-slate-200 break-all">{email}</span>{" "}
           and type it below.
         </p>
         <button

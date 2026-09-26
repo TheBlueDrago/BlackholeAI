@@ -11,8 +11,8 @@
 // Backed by Google's Gemini API on the FREE tier (no billing) instead of a paid
 // provider. The 2.5-series returned "no longer available to new users" for this
 // account, so tiers use confirmed-working 3.x models, ordered by coding strength:
-//   automatic         (Blackhole AI)   -> gemini-3.5-flash (mid tier, general use)
-//   claude_sonnet_4_6 (Blackhole Code) -> gemini-3.6-flash (3rd-best coding)
+//   automatic         (Nebulux AI)   -> gemini-3.5-flash (mid tier, general use)
+//   claude_sonnet_4_6 (Nebulux Code) -> gemini-3.6-flash (3rd-best coding)
 //   claude_opus_4_8   (Galaxy)         -> gemini-3.7-flash (2nd-best coding)
 //   claude-sonnet-5   (Space)          -> gemini-3.8-flash (best coding)
 // On the free tier any of these can answer 503 "experiencing high demand" (or 429
@@ -62,8 +62,8 @@ const MAX_PROMPT_CHARS = 800000;
 const WHO_ARE_YOU = /\b(who|what)\b[^?.!]{0,30}\b(made|created|built|trained|developed|owns?|are)\s+you\b|\bwhat (ai|model|llm)\b|\bare you (gemini|chatgpt|gpt|google|bard|claude|an? (ai|bot|robot|human))\b|\byour (name|creator|maker|model)\b/i;
 export const asksWhoItIs = (q) => WHO_ARE_YOU.test(String(q || "").slice(0, 300));
 export const IDENTITY_NOTE =
-  "[Reminder for this answer: you are Blackhole AI, made by the Blackhole AI team (blackhole-ai-tech.com). Introduce yourself that way, " +
-  "never as Gemini, Google, ChatGPT or another company's AI. If asked what powers you: Blackhole AI uses several AI models behind the scenes.]";
+  "[Reminder for this answer: you are Nebulux AI, made by the Nebulux AI team (nebuluxai.com). Introduce yourself that way, " +
+  "never as Gemini, Google, ChatGPT or another company's AI. If asked what powers you: Nebulux AI uses several AI models behind the scenes.]";
 
 function promptParts(prompt, images) {
   if (!Array.isArray(images) || !images.length) return prompt;
@@ -83,16 +83,16 @@ function promptParts(prompt, images) {
 // the app, so they can't be removed from a browser. They match what publishing refuses
 // (cloudflare-lib/scan.js, phishing.js), so nobody spends credits on a page that can't go live.
 export const SAFETY_RULES =
-  "You are Blackhole AI, the AI assistant of blackhole-ai-tech.com, made by the Blackhole AI team. If asked who you are or who made you, " +
-  "say that: you are Blackhole AI, made by the Blackhole AI team. If asked what technology or model powers you, say Blackhole AI uses " +
+  "You are Nebulux AI, the AI assistant of nebuluxai.com, made by the Nebulux AI team. If asked who you are or who made you, " +
+  "say that: you are Nebulux AI, made by the Nebulux AI team. If asked what technology or model powers you, say Nebulux AI uses " +
   "several AI models behind the scenes. " +
-  "Blackhole AI is used by people of all ages, including children and teens, so keep everything you write suitable for them. " +
+  "Nebulux AI is used by people of all ages, including children and teens, so keep everything you write suitable for them. " +
   "Never ask the user for passwords, card numbers or other private details. " +
   "Don't build pages that send passwords or card numbers to another website, ask for a crypto wallet's recovery phrase or private key, " +
-  "copy the sign-in page of Blackhole AI or another real company, bully or mock a real person or post their private details " +
+  "copy the sign-in page of Nebulux AI or another real company, bully or mock a real person or post their private details " +
   "(address, phone number, school), or run code meant to trick, steal from or harm people " +
   "(malware, crypto miners, fake 'free Robux' or gift-card generators). If asked for one of these, say briefly that it isn't allowed " +
-  "on Blackhole AI and offer a safe version instead. Everything else the user asks for, help with fully. " +
+  "on Nebulux AI and offer a safe version instead. Everything else the user asks for, help with fully. " +
   "If someone says they are thinking about hurting themselves, or that someone is hurting them, answer with warmth and care, " +
   "encourage them to talk to a trusted adult or friend right away, and share where to get help now: in the US, call or text 988 " +
   "(the Suicide & Crisis Lifeline); anywhere, local emergency services if they are in danger. " +
@@ -314,7 +314,7 @@ function failure(err) {
   const busy = err instanceof GeminiError && err.retryable;
   return {
     error: busy
-      ? "Blackhole AI is very busy right now. Please try again in a minute."
+      ? "Nebulux AI is very busy right now. Please try again in a minute."
       : "The AI couldn't answer that request.",
     // The app waits a few seconds and asks again by itself when this is set (lib/aiStream.js).
     ...(busy ? { busy: true } : {}),

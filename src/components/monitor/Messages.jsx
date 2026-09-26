@@ -55,7 +55,7 @@ export default function Messages() {
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-[11px] bg-slate-700/60 text-slate-300 rounded px-1.5 py-0.5">{TOPIC[m.topic] || m.topic}</span>
                 {m.email ? (
-                  <a href={`mailto:${m.email}?subject=${encodeURIComponent("Re: your message to Blackhole AI")}`} className="text-sm text-sky-300 hover:underline break-all">
+                  <a href={`mailto:${m.email}?subject=${encodeURIComponent("Re: your message to Nebulux AI")}`} className="text-sm text-sky-300 hover:underline break-all">
                     {m.name ? `${m.name} · ` : ""}{m.email}
                   </a>
                 ) : (

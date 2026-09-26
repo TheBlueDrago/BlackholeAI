@@ -71,5 +71,5 @@ export function outOfCreditsOptions(tier, credits, now = Date.now()) {
       }
     : null;
 
-  return { name: TIER_NAMES[tier] || "Blackhole AI", upgrade, pack, refresh };
+  return { name: TIER_NAMES[tier] || "Nebulux AI", upgrade, pack, refresh };
 }

@@ -56,7 +56,7 @@ export function ChatShot({ className = "" }) {
         <span className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center">
           <BlackholeIcon className="w-4 h-4" />
         </span>
-        <span className="text-sm font-semibold text-white">Blackhole AI</span>
+        <span className="text-sm font-semibold text-white">Nebulux AI</span>
         <span className="ml-auto text-[10px] text-emerald-300 bg-emerald-500/10 border border-emerald-400/30 rounded-full px-2 py-0.5">online</span>
       </div>
       <Bubble me>Can you explain photosynthesis simply?</Bubble>
@@ -202,7 +202,7 @@ export function EnterpriseShot({ className = "" }) {
         <span className="w-9 h-9 rounded-full ring-2 ring-slate-900 bg-slate-700 flex items-center justify-center text-[11px] font-semibold text-slate-200">+18</span>
       </div>
       <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
-        {[["Blackhole AI", "100"], ["Code", "75"], ["Galaxy", "50"], ["Space", "25"]].map(([n, v]) => (
+        {[["Nebulux AI", "100"], ["Code", "75"], ["Galaxy", "50"], ["Space", "25"]].map(([n, v]) => (
           <span key={n} className="rounded-lg bg-slate-800/70 border border-slate-700/50 px-3 py-2 text-slate-400">
             {n} <b className="block text-white text-sm">{v} / seat</b>
           </span>

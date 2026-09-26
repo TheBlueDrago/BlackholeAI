@@ -26,7 +26,7 @@ export function findCredentialForm(html) {
 function isExternal(action) {
   if (!/^(https?:)?\/\//i.test(action)) return false;
   const host = hostOf(action);
-  return !(host === "blackhole-ai-tech.com" || host.endsWith(".blackhole-ai-tech.com") || host.endsWith("nebuluxai.pages.dev"));
+  return !(host === "blackhole-ai-tech.com" || host.endsWith(".blackhole-ai-tech.com") || host === "nebuluxai.com" || host.endsWith(".nebuluxai.com") || host.endsWith("nebuluxai.pages.dev"));
 }
 
 function hostOf(url) {
@@ -44,7 +44,7 @@ function hostOf(url) {
 // 1. A page with a password or card-number field that sends data to another website from a
 //    script (fetch, XMLHttpRequest, sendBeacon, WebSocket, an image "beacon" built from
 //    values, or a form whose action is changed by script). A form isn't needed for that.
-// 2. A sign-in page dressed up as Blackhole AI's (its title or main heading says Blackhole
+// 2. A sign-in page dressed up as Nebulux AI's (its title or main heading says Blackhole
 //    AI, and it asks for a password), to trick people into typing their real password.
 const SENSITIVE_FIELD =
   /<input\b[^>]*\btype\s*=\s*["']?password\b|\b(autocomplete|name|id)\s*=\s*["']?(cc-number|cc-csc|cardnumber|card[-_]?number|cvv|cvc|card[-_]?cvc)\b/i;
@@ -72,10 +72,10 @@ export function findCredentialLeak(html) {
   }
   const title = (text.match(/<title\b[^>]*>([\s\S]*?)<\/title>/i) || [])[1] || "";
   const heading = (text.match(/<h[12]\b[^>]*>([\s\S]*?)<\/h[12]>/i) || [])[1] || "";
-  if (what === "password" && /blackhole\s*ai/i.test(`${title} ${heading.replace(/<[^>]+>/g, " ")}`)) {
-    return "a sign-in page that looks like Blackhole AI's own";
+  if (what === "password" && /(nebulux|blackhole)\s*ai/i.test(`${title} ${heading.replace(/<[^>]+>/g, " ")}`)) {
+    return "a sign-in page that looks like Nebulux AI's own";
   }
   return "";
 }
 
-const isOurs = (host) => host === "blackhole-ai-tech.com" || host.endsWith(".blackhole-ai-tech.com") || host.endsWith("nebuluxai.pages.dev");
+const isOurs = (host) => host === "blackhole-ai-tech.com" || host.endsWith(".blackhole-ai-tech.com") || host === "nebuluxai.com" || host.endsWith(".nebuluxai.com") || host.endsWith("nebuluxai.pages.dev");

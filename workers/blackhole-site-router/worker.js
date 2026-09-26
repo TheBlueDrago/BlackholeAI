@@ -41,7 +41,7 @@ function notFoundPage(rawName) {
     name +
     "\".</p><p><a href='https://" +
     ROOT +
-    "'>Back to Blackhole AI</a></p></body></html>"
+    "'>Back to Nebulux AI</a></p></body></html>"
   );
 }
 

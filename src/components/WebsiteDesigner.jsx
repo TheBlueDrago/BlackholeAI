@@ -49,14 +49,14 @@ const STORE_KEY = DESIGNER_STORE_KEY;
 const TAKEN_KEY = "infinity-ai-taken-sites";
 const MODEL = "claude_sonnet_4_6";
 const MODELS = { ai: "automatic", code: MODEL, opus5: "claude_opus_4_8", fable: "claude-sonnet-5" };
-const AI_NAMES = { ai: "Blackhole AI", code: "Blackhole Code", opus5: "Galaxy", fable: "Space" };
+const AI_NAMES = { ai: "Nebulux AI", code: "Nebulux Code", opus5: "Galaxy", fable: "Space" };
 
 const RESERVED = ["home", "www", "admin", "api", "mail", "infinity", "ai", "app", "login", "register", "support", "blog"];
 
 // One-tap improvements shown under the latest version of the site.
 const SITE_TWEAKS = ["Make it look more modern", "Add a contact form", "Improve the wording", "Make it better on phones", "Add a new section"];
 
-const SYSTEM = `You are Blackhole AI Website Designer. The user describes a website and you build it.
+const SYSTEM = `You are Nebulux AI Website Designer. The user describes a website and you build it.
 ALWAYS build a single complete, self-contained HTML document: include <!DOCTYPE html>, <html>, <head> with inline <style> CSS, and <body> with inline <script> for any interactivity.
 Make it modern, responsive, and visually polished — clean typography, good spacing, a tasteful color palette, and smooth interactions. Use placeholder content that fits the site's purpose.
 Every button, link, tab, menu and form must actually do something when clicked — scroll to its section, switch views, open/close menus and modals, validate and "submit" forms with a confirmation message. Never leave a button with no behaviour.
@@ -69,7 +69,7 @@ PAYMENTS: never add a checkout, billing, payment or "buy" page unless the user e
 <script type="application/json" id="blackhole-products">[{"id":"basic","name":"Basic","price":"9.99","currency":"USD"}]</script>
 Product ids are lowercase letters, numbers and hyphens; price is major units as a string and must be at least 0.50.
 2) Every buy button must call: parent.postMessage({ type: 'blackhole-checkout', productId: 'basic', quantity: 1 }, '*')
-Blackhole then opens the secure hosted checkout, collects the buyer's card, email and address, and the site owner is paid out after platform fees and taxes. Design the page beautifully, but never collect payment details yourself.`;
+Nebulux AI then opens the secure hosted checkout, collects the buyer's card, email and address, and the site owner is paid out after platform fees and taxes. Design the page beautifully, but never collect payment details yourself.`;
 
 function extractHtml(text) {
   if (!text) return "";
@@ -435,7 +435,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
         : "") + (others.length ? `\n[Attached files: ${others.map((f) => f.name).join(", ")}]` : "");
     if (reqIdRef.current !== myId) return;
     const spendFor = { ai: onSpendAI, code: onSpendAICode, opus5: onSpendGalaxy5, fable: onSpendSpace5 };
-    // Normal Blackhole AI always builds; the code AIs can also just answer a question.
+    // Normal Nebulux AI always builds; the code AIs can also just answer a question.
     const intent = ai !== "ai" ? resolveIntent(text, buildMode.mode) : { build: true };
     try {
       const lastHtml = prior.filter(isHtmlMsg).pop()?.content || "";
@@ -776,7 +776,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
                   <Globe className="w-6 h-6 text-white" />
                 </div>
                 <p className="text-slate-300 font-medium">Describe your website</p>
-                <p className="text-slate-500 text-sm mt-1">Blackhole AI will build it live</p>
+                <p className="text-slate-500 text-sm mt-1">Nebulux AI will build it live</p>
               </div>
             )}
 

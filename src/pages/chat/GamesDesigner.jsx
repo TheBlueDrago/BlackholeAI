@@ -49,7 +49,7 @@ const TAKEN_KEY = "infinity-ai-taken-games";
 const MODEL = "claude_sonnet_4_6";
 const SPACE5_MODEL = "claude-sonnet-5";
 const MODELS = { ai: "automatic", code: MODEL, opus5: "claude_opus_4_8", fable: SPACE5_MODEL };
-const AI_NAMES = { ai: "Blackhole AI", code: "Blackhole Code", opus5: "Galaxy", fable: "Space" };
+const AI_NAMES = { ai: "Nebulux AI", code: "Nebulux Code", opus5: "Galaxy", fable: "Space" };
 
 const RESERVED = ["home", "www", "admin", "api", "mail", "infinity", "ai", "app", "login", "register", "support", "blog", "game", "games"];
 
@@ -66,7 +66,7 @@ const GENRES = [
   { id: "strategy", label: "Strategy" },
 ];
 
-const SYSTEM = `You are Blackhole AI Games Designer. The user describes a game and you build it as a fully playable HTML5 game.
+const SYSTEM = `You are Nebulux AI Games Designer. The user describes a game and you build it as a fully playable HTML5 game.
 ALWAYS respond with a single complete, self-contained HTML document: include <!DOCTYPE html>, <html>, <head> with inline <style> CSS, and <body> with a <canvas> element and inline <script> implementing the entire game.
 The game MUST be genuinely playable on computers (keyboard and/or mouse) AND on phones and tablets (touch): include a start screen, a scoring system, increasing difficulty, and a game-over screen with a restart button. Use a smooth requestAnimationFrame loop, a responsive canvas that fills the viewport, and clean neon visuals. No external assets, scripts, or network calls — everything must run offline inside the single document.
 PHONES: many players are on phones with no keyboard. Include <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">. On touch devices (matchMedia("(pointer: coarse)") or "ontouchstart" in window) show on-screen controls for every action the keyboard does — e.g. left/right/jump/fire buttons or a virtual joystick — at least 56px, semi-transparent, in the bottom corners, never covering the HUD. Handle touchstart/touchmove/touchend (or pointer events) with preventDefault() and CSS touch-action:none so the page doesn't scroll or zoom, and support several fingers at once. Resize the canvas on resize/orientation change, keep text and buttons readable on a 360px-wide screen, and never require hovering, right-clicking or pointer lock.
@@ -391,7 +391,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
         : "") + (others.length ? `\n[Attached files: ${others.map((f) => f.name).join(", ")}]` : "");
     if (reqIdRef.current !== myId) return;
     const spendFor = { ai: onSpendAI, code: onSpendAICode, opus5: onSpendGalaxy5, fable: onSpendSpace5 };
-    // Normal Blackhole AI always builds; the code AIs can also just answer a question.
+    // Normal Nebulux AI always builds; the code AIs can also just answer a question.
     const intent = ai !== "ai" ? resolveIntent(text, buildMode.mode) : { build: true };
     try {
       const lastHtml = prior.filter(isHtmlMsg).pop()?.content || "";
@@ -620,7 +620,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
                   <Gamepad2 className="w-6 h-6 text-white" />
                 </div>
                 <p className="text-slate-300 font-medium">Describe your game</p>
-                <p className="text-slate-400 text-sm mt-1">Blackhole AI will build it live</p>
+                <p className="text-slate-400 text-sm mt-1">Nebulux AI will build it live</p>
                 <div className="flex flex-wrap justify-center gap-2 mt-4">
                   {GAME_IDEAS.map((idea) => (
                     <button

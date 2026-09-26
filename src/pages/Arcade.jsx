@@ -22,7 +22,7 @@ const THUMB = {
   strategy: "from-slate-500 to-slate-700",
 };
 
-// Public arcade: every game made with Blackhole AI, playable without an account
+// Public arcade: every game made with Nebulux AI, playable without an account
 // (each opens /play/<name>). Shared game links and search engines bring players here.
 export default function Arcade() {
   const { isAuthenticated } = useAuth();
@@ -57,7 +57,7 @@ export default function Arcade() {
       <section className="text-center pt-8 pb-8">
         <h1 className="text-3xl sm:text-5xl font-bold text-white">Free games, made with AI</h1>
         <p className="mt-3 text-slate-400 max-w-xl mx-auto">
-          Play in your browser on a phone or computer. No download, no account. Every game here was made by describing it to Blackhole AI.
+          Play in your browser on a phone or computer. No download, no account. Every game here was made by describing it to Nebulux AI.
         </p>
       </section>
 

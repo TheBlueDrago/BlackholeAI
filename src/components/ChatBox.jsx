@@ -36,9 +36,9 @@ import { privateInfoIn } from "@/lib/privateInfo";
 import { isNetworkError, OFFLINE_NOTE } from "@/lib/netError";
 import useReplyAnnouncer from "@/hooks/useReplyAnnouncer";
 
-const CODE_SYS = "You are Blackhole Code Assistant. Help with programming. Give clear, correct code with brief explanations.";
-const FABLE_SYS = "You are Space, Blackhole AI's premium creative model. Be imaginative and high-quality.";
-const AI_NAMES = { ai: "Blackhole AI", code: "Blackhole Code", opus5: "Galaxy", fable: "Space" };
+const CODE_SYS = "You are Nebulux Code Assistant. Help with programming. Give clear, correct code with brief explanations.";
+const FABLE_SYS = "You are Space, Nebulux AI's premium creative model. Be imaginative and high-quality.";
+const AI_NAMES = { ai: "Nebulux AI", code: "Nebulux Code", opus5: "Galaxy", fable: "Space" };
 const MODELS = { ai: "automatic", code: "claude_sonnet_4_6", opus5: "claude_opus_4_8", fable: "claude-sonnet-5" };
 // Shown in an empty chat so new people see what they can make right away.
 // What people most often come for first: help from the AI; building is one tap away.
@@ -471,7 +471,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
               }}
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
-              placeholder={queued ? "Type to queue your next message…" : "Message Blackhole AI..."}
+              placeholder={queued ? "Type to queue your next message…" : "Message Nebulux AI..."}
               rows={1}
               className="flex-1 bg-transparent resize-none outline-none text-slate-100 placeholder:text-slate-500 px-4 py-3 max-h-32 text-sm"
             />
@@ -522,7 +522,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
               e.target.value = "";
             }}
           />
-          <p className="text-center text-xs text-slate-600 mt-2">Blackhole AI can make mistakes. Check important info, and never share passwords or card numbers with it.</p>
+          <p className="text-center text-xs text-slate-600 mt-2">Nebulux AI can make mistakes. Check important info, and never share passwords or card numbers with it.</p>
         </div>
       </div>
     </div>

@@ -67,6 +67,6 @@ A short map for anyone changing this code. Keep these rules when you touch the f
   came from, and Monitor warns when they came from more than one country in 30 days. Every
   admin endpoint checks the admin role on the server.
 - **Phishing checks at publish** (`cloudflare-lib/phishing.js`, `scan.js`): forms or scripts
-  that send passwords or card numbers to another website, and fake Blackhole AI sign-in pages.
+  that send passwords or card numbers to another website, and fake Nebulux AI sign-in pages.
 
 Offline tests for all of this run with `npm test`.

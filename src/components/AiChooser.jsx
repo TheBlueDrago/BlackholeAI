@@ -6,7 +6,7 @@ import { hasProFeatures } from "@/lib/plans";
 
 const OPTIONS = [
   { id: "ai", label: "AI", icon: Sparkles, color: "text-indigo-400" },
-  { id: "code", label: "Blackhole Code", icon: Code, color: "text-emerald-300" },
+  { id: "code", label: "Nebulux Code", icon: Code, color: "text-emerald-300" },
   { id: "opus5", label: "Galaxy", icon: Gem, color: "text-sky-300" },
   { id: "fable", label: "Space", icon: Star, color: "text-fuchsia-300" },
 ];

@@ -107,7 +107,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
               <div className="w-6 h-6 rounded-md bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center">
                 <BlackholeIcon className="w-4 h-4" />
               </div>
-              <span className="text-[13px] font-semibold">Blackhole AI</span>
+              <span className="text-[13px] font-semibold">Nebulux AI</span>
             </button>
             <button
               onClick={onGoCode}
@@ -116,7 +116,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
               <div className="w-6 h-6 rounded-md bg-slate-800 flex items-center justify-center">
                 <Code className="w-3.5 h-3.5 text-emerald-300" />
               </div>
-              <span className="text-[13px] font-medium">Blackhole Code</span>
+              <span className="text-[13px] font-medium">Nebulux Code</span>
             </button>
             <button
               onClick={onGoDesigner}
@@ -134,7 +134,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
               <div className="w-6 h-6 rounded-md bg-slate-800 flex items-center justify-center">
                 <Gamepad2 className="w-3.5 h-3.5 text-fuchsia-300" />
               </div>
-              <span className="text-[13px] font-medium">Blackhole Games</span>
+              <span className="text-[13px] font-medium">Nebulux Games</span>
             </button>
             <button
               onClick={onGoSubscriptions}
@@ -167,7 +167,7 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
             />
             <CreditBar
               icon={<Code className="w-3 h-3 text-emerald-300" />}
-              label="Blackhole Code"
+              label="Nebulux Code"
               used={credits.aiCodeUsed ?? 0}
               total={credits.aiCodeTotal ?? 0}
               gradient="from-emerald-500 to-teal-500"

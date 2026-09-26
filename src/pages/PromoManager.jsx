@@ -7,8 +7,8 @@ import { DISCOUNT_TARGETS, targetLabel } from "../../cloudflare-lib/discounts.js
 import { promoWarning } from "@/lib/promoRisk";
 
 const MODELS = [
-  { id: "ai", label: "Blackhole AI" },
-  { id: "aiCode", label: "Blackhole Code" },
+  { id: "ai", label: "Nebulux AI" },
+  { id: "aiCode", label: "Nebulux Code" },
   { id: "galaxy5", label: "Galaxy" },
   { id: "space5", label: "Space" },
 ];

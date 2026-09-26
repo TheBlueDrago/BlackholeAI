@@ -64,7 +64,7 @@ export default function Report() {
             <p className="text-sm text-slate-400">
               If you're worried about someone's safety right now, tell a parent, teacher or another adult you trust.
             </p>
-            <a href="/" className="inline-block text-sm text-indigo-300 underline">Go to Blackhole AI</a>
+            <a href="/" className="inline-block text-sm text-indigo-300 underline">Go to Nebulux AI</a>
           </div>
         ) : (
           <form onSubmit={submit} className="relative space-y-4">
@@ -128,7 +128,7 @@ export default function Report() {
               {busy && <Loader2 className="w-4 h-4 animate-spin" />} Send report
             </button>
             <p className="text-[11px] text-slate-400 text-center">
-              Sites on Blackhole AI are made by its users, not by Blackhole AI. See the{" "}
+              Sites on Nebulux AI are made by its users, not by Nebulux AI. See the{" "}
               <a href="/terms" className="underline">rules</a>.
             </p>
           </form>

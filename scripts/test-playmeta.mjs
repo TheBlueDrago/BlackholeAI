@@ -8,12 +8,12 @@ const assert = (c, m) => {
     process.exitCode = 1;
   } else console.log("ok", m);
 };
-const index = `<head><meta name="description" content="Chat with AI." /><meta property="og:title" content="Blackhole AI" /><meta property="og:description" content="Chat with AI." /><title>Blackhole AI</title></head>`;
+const index = `<head><meta name="description" content="Chat with AI." /><meta property="og:title" content="Nebulux AI" /><meta property="og:description" content="Chat with AI." /><title>Nebulux AI</title></head>`;
 
 let out = withGameMeta(index, { title: "Space Race", genre: "racing" });
-assert(out.includes("<title>Space Race · Blackhole AI</title>"), "the tab title names the game");
+assert(out.includes("<title>Space Race · Nebulux AI</title>"), "the tab title names the game");
 assert(out.includes('property="og:title" content="Play Space Race"'), "the preview title names the game");
-assert(out.includes('property="og:description" content="A racing game made with Blackhole AI.'), "the preview says what it is");
+assert(out.includes('property="og:description" content="A racing game made with Nebulux AI.'), "the preview says what it is");
 assert(out.includes('name="description" content="A racing game'), "the search description is updated too");
 
 out = withGameMeta(index, { title: `"><script>alert(1)</script>` });

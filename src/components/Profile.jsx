@@ -492,7 +492,7 @@ export default function Profile({ open, onClose, initialView = "main", onMonitor
                   ) : user ? (
                     <>
                       <h3 className="mt-4 text-lg font-semibold text-white">
-                        {user.full_name || "Blackhole User"}
+                        {user.full_name || "Nebulux User"}
                       </h3>
                       {isEnterprise ? (
                         <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-gradient-to-r from-violet-500/25 to-indigo-500/25 text-violet-200 border border-violet-400/50">

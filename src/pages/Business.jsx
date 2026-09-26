@@ -22,7 +22,7 @@ export default function Business() {
       <section className="text-center pt-8 pb-12">
         <h1 className="text-3xl sm:text-5xl font-bold text-white">A website for your business, today</h1>
         <p className="mt-3 text-slate-400 max-w-xl mx-auto">
-          For shops, cafés, clubs, freelancers and side projects. No designer, no code: describe it and Blackhole AI builds it.
+          For shops, cafés, clubs, freelancers and side projects. No designer, no code: describe it and Nebulux AI builds it.
         </p>
         <div className="mt-7 flex flex-col sm:flex-row gap-3 justify-center">
           <Link to={START_FREE} className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-white font-semibold hover:opacity-90">
@@ -60,7 +60,7 @@ export default function Business() {
         <div className="flex-1 text-center sm:text-left">
           <h2 className="text-xl sm:text-2xl font-bold text-white">Partners, investors and acquirers</h2>
           <p className="mt-1 text-slate-400">
-            Interested in partnering with Blackhole AI, investing, or acquiring it? We'd like to hear from you.
+            Interested in partnering with Nebulux AI, investing, or acquiring it? We'd like to hear from you.
           </p>
         </div>
         <Link to="/contact?topic=partnership" className="shrink-0 px-5 py-3 rounded-xl bg-white text-slate-900 font-semibold hover:bg-slate-200">

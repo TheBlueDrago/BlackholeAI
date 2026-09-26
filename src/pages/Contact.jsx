@@ -16,12 +16,12 @@ const TOPICS = [
   ["security", "A security problem or scam"],
   ["parent", "I'm a parent or teacher"],
   ["idea", "Idea or feedback"],
-  ["business", "Using Blackhole AI for my business"],
+  ["business", "Using Nebulux AI for my business"],
   ["partnership", "Partnership, investment or acquisition"],
   ["other", "Something else"],
 ];
 
-// Public: people can write to the Blackhole AI team; messages show in Monitor →
+// Public: people can write to the Nebulux AI team; messages show in Monitor →
 // Messages (functions/contact.js). Signed-in users are replied to at their account email.
 export default function Contact() {
   const [signedInEmail, setSignedInEmail] = useState("");

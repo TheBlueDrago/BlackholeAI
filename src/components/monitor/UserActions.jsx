@@ -49,7 +49,7 @@ export default function UserActions({ user, onApply }) {
   };
 
   const ban = async () => {
-    if (!(await askConfirm(`Ban ${who} forever? They can't use Blackhole AI until you unban them.`, { confirmLabel: "Ban", danger: true }))) return;
+    if (!(await askConfirm(`Ban ${who} forever? They can't use Nebulux AI until you unban them.`, { confirmLabel: "Ban", danger: true }))) return;
     run({ banned: true, blockedUntil: null });
   };
   const block = () =>

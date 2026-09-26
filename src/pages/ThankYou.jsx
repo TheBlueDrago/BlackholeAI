@@ -58,7 +58,7 @@ function ThankYou() {
             Bought a plan or credits? They'll be ready shortly, in Settings → Subscriptions → Your purchases. {help}
           </p>
           <p className="text-slate-400 mt-2 text-center max-w-md text-sm">
-            Bought something on a site made with Blackhole AI? The site's owner is the seller and will deliver it.
+            Bought something on a site made with Nebulux AI? The site's owner is the seller and will deliver it.
           </p>
         </>
       )}
@@ -74,7 +74,7 @@ function ThankYou() {
           to="/chat"
           className="mt-8 inline-flex items-center gap-2 px-8 py-3 rounded-2xl bg-gradient-to-br from-emerald-700 to-teal-700 text-[#fff] font-medium shadow-lg shadow-emerald-500/30 hover:opacity-90 transition-opacity"
         >
-          Back to Blackhole AI
+          Back to Nebulux AI
         </Link>
       )}
     </motion.div>

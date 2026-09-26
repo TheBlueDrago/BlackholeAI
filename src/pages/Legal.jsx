@@ -23,7 +23,7 @@ function LegalPage({ title, other, children }) {
     <div className="min-h-screen bg-slate-950 text-slate-300 px-4 py-10">
       <article className="max-w-2xl mx-auto text-sm leading-relaxed [&_h2]:text-white [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:mt-8 [&_h2]:mb-2 [&_p]:mb-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-3 [&_li]:mb-1 [&_a]:text-indigo-300 [&_a]:underline">
         <Link to="/" className="!no-underline !text-slate-400 hover:!text-white inline-flex items-center gap-1.5 text-sm">
-          <ArrowLeft className="w-4 h-4" /> Blackhole AI
+          <ArrowLeft className="w-4 h-4" /> Nebulux AI
         </Link>
         <h1 className="text-3xl font-bold text-white mt-6">{title}</h1>
         <p className="text-slate-400 mt-1 mb-6">Last updated {UPDATED}</p>
@@ -40,9 +40,9 @@ export function Terms() {
   return (
     <LegalPage title="Terms of Service" other={{ to: "/privacy", label: "Privacy Policy" }}>
       <p>
-        These terms cover your use of Blackhole AI at blackhole-ai-tech.com, including its AI chat, Blackhole Code,
+        These terms cover your use of Nebulux AI at blackhole-ai-tech.com, including its AI chat, Nebulux Code,
         the Website and Game Designers and the sites and games people publish with it. By
-        creating an account or using Blackhole AI you agree to them. If you don't agree, please don't use it.
+        creating an account or using Nebulux AI you agree to them. If you don't agree, please don't use it.
       </p>
 
       <h2>Who can use it</h2>
@@ -54,7 +54,7 @@ export function Terms() {
 
       <h2>Plans and credits</h2>
       <ul>
-        <li>Using the AIs costs credits. Your plan gives you a monthly allowance, and you can also get credits from referrals, promo codes or the Blackhole AI team.</li>
+        <li>Using the AIs costs credits. Your plan gives you a monthly allowance, and you can also get credits from referrals, promo codes or the Nebulux AI team.</li>
         <li>Credits have no cash value, can't be sold or transferred, and may expire as described in the app.</li>
         <li>Paid plans are charged through our payment provider (Base44 Payments) at the price shown before you pay. We never see or store your full card number.</li>
         <li>Instead of a plan you can buy a one-time pack of credits for one AI. Bought credits are used before your monthly allowance and don't reset at the end of the month. The new-member discount doesn't apply to credit packs.</li>
@@ -73,7 +73,7 @@ export function Terms() {
       <ul>
         <li>The Enterprise plan is only for legally registered organizations. You apply with your organization's details, we check them, and we may decline an application.</li>
         <li>Enterprise is priced per seat. We send a quote before anything is charged, and turn the plan on once it's paid.</li>
-        <li>The organization's credits are shared by everyone on it. The person who applied manages who is on it and is responsible for how those people use Blackhole AI.</li>
+        <li>The organization's credits are shared by everyone on it. The person who applied manages who is on it and is responsible for how those people use Nebulux AI.</li>
       </ul>
 
       <h2>AI answers</h2>
@@ -85,14 +85,14 @@ export function Terms() {
 
       <h2>What you publish</h2>
       <ul>
-        <li>You keep ownership of what you create. By publishing a site or game you let us host, show and copy it as needed to run Blackhole AI.</li>
+        <li>You keep ownership of what you create. By publishing a site or game you let us host, show and copy it as needed to run Nebulux AI.</li>
         <li>Published sites and games are public: anyone with the address can see them.</li>
-        <li>If you sell things on your site, you are the seller and are responsible for delivering what you sell, for refunds to your buyers and for following the law. Blackhole AI keeps a platform fee from each sale, as shown when you set up selling.</li>
+        <li>If you sell things on your site, you are the seller and are responsible for delivering what you sell, for refunds to your buyers and for following the law. Nebulux AI keeps a platform fee from each sale, as shown when you set up selling.</li>
         <li>Payouts for your sales are sent after a waiting period, so that card disputes can come in first, and a payout can be held while we check a sale that looks like fraud (for example, buying from your own site). A sale that turns out to be fraudulent or is charged back isn't paid out.</li>
       </ul>
 
       <h2>Not allowed</h2>
-      <p>You may not use Blackhole AI, or publish anything with it, that:</p>
+      <p>You may not use Nebulux AI, or publish anything with it, that:</p>
       <ul>
         <li>tricks people into giving passwords, card numbers or other private information (phishing);</li>
         <li>scams people, sells things that don't exist, or pretends to be another person, company or brand;</li>
@@ -112,7 +112,7 @@ export function Terms() {
 
       <h2>No warranty</h2>
       <p>
-        Blackhole AI is provided "as is". We work to keep it running, but it may change, have errors or be
+        Nebulux AI is provided "as is". We work to keep it running, but it may change, have errors or be
         unavailable, and features, plans and prices can change. To the fullest extent the law allows, we are not
         liable for indirect or lost-profit damages, and our total liability to you is limited to what you paid us in
         the 3 months before the problem.
@@ -120,7 +120,7 @@ export function Terms() {
 
       <h2>Ending</h2>
       <p>
-        You can stop using Blackhole AI and delete your account at any time from your profile. We may update these
+        You can stop using Nebulux AI and delete your account at any time from your profile. We may update these
         terms; if the changes are important we'll tell you in the app, and continuing to use it means you accept them.
       </p>
 
@@ -133,7 +133,7 @@ export function Terms() {
 export function Privacy() {
   return (
     <LegalPage title="Privacy Policy" other={{ to: "/terms", label: "Terms of Service" }}>
-      <p>This explains what Blackhole AI collects, why, and who helps us run it.</p>
+      <p>This explains what Nebulux AI collects, why, and who helps us run it.</p>
       <div className="my-6 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5">
         <p className="font-semibold text-white">In short</p>
         <ul>
@@ -148,15 +148,15 @@ export function Privacy() {
       <h2>What we collect</h2>
       <ul>
         <li><strong>Account:</strong> your email address, and your name and picture if you sign in with Google.</li>
-        <li><strong>Forms on sites people make:</strong> if you fill in a form on a site made with Blackhole AI (a booking, an RSVP, a sign-up), what you type is kept for that site's owner to read, up to their latest 200 messages. Password and card-number fields are never sent, and the owner can delete messages at any time.</li>
+        <li><strong>Forms on sites people make:</strong> if you fill in a form on a site made with Nebulux AI (a booking, an RSVP, a sign-up), what you type is kept for that site's owner to read, up to their latest 200 messages. Password and card-number fields are never sent, and the owner can delete messages at any time.</li>
         <li><strong>What you make:</strong> the sites and games you publish, and your game draft. Your chats and website projects are saved in your own browser, not on our servers.</li>
         <li><strong>Prompts:</strong> what you send the AI, including any images you attach in the chat, passes through our servers to Google to get an answer. We count the credits it uses, and keep the start (up to 300 characters) of your five most recent questions each month so our team can spot misuse and help if something goes wrong. We don't keep the rest of the text, or any images.</li>
         <li><strong>Usage:</strong> how many credits you use on each AI, your plan, promo codes you redeem, and who invited you or whom you invited. When you join through an invite link we keep a scrambled (hashed) form of your IP address with it, to spot one person creating many accounts.</li>
         <li><strong>Payments:</strong> what you bought and when. Card details go straight to the payment provider; we never see your full card number.</li>
         <li><strong>Messages:</strong> what you send through the contact form, with your email address so we can reply. If you report an AI reply, that reply and the question you asked just before it are sent to us too.</li>
         <li><strong>Voice:</strong> if you use the microphone button, your browser turns what you say into text (Chrome and Edge do this on Google's or Microsoft's servers). We only receive the text you then send.</li>
-        <li><strong>Enterprise applications:</strong> your organization's legal name, type, where it's registered, registration number or EIN, website, and your name, role, work email and phone. Only the Blackhole AI team sees them, to check the organization is real and send a quote.</li>
-        <li><strong>Admin actions:</strong> when the Blackhole AI team changes an account's plan, credits, access or a promo code, or takes a page down, we record what changed, on which account, which team member did it and roughly where they were (city and country), to catch mistakes and misuse.</li>
+        <li><strong>Enterprise applications:</strong> your organization's legal name, type, where it's registered, registration number or EIN, website, and your name, role, work email and phone. Only the Nebulux AI team sees them, to check the organization is real and send a quote.</li>
+        <li><strong>Admin actions:</strong> when the Nebulux AI team changes an account's plan, credits, access or a promo code, or takes a page down, we record what changed, on which account, which team member did it and roughly where they were (city and country), to catch mistakes and misuse.</li>
         <li><strong>Sign-in safety:</strong> to stop people guessing passwords or sign-up codes, we briefly count sign-in tries for each email address and network. The counts are kept for at most an hour and aren't used for anything else.</li>
         <li><strong>Reports:</strong> when you report a site we keep your reason and note, plus a scrambled (hashed) form of your IP address so the same person can't report one page many times.</li>
         <li><strong>Usage analytics:</strong> basic information about how the app is used, such as which pages are opened, how long a visit lasts and which website sent you here. It's collected by Base44, which runs the app's sign-in and database, and helps us see what's working. We don't use it for ads.</li>
@@ -166,7 +166,7 @@ export function Privacy() {
       <h2>How we use it</h2>
       <ul>
         <li>To run your account and the features you use, and to count and enforce credits.</li>
-        <li>To keep Blackhole AI safe: stopping abuse, reviewing reported content and preventing fraud.</li>
+        <li>To keep Nebulux AI safe: stopping abuse, reviewing reported content and preventing fraud.</li>
         <li>To handle payments and pay site owners for their sales.</li>
         <li>To give new accounts their free week and one-time discount, and to check Enterprise applications.</li>
       </ul>
@@ -209,7 +209,7 @@ export function Privacy() {
       </p>
 
       <h2>Children</h2>
-      <p>Blackhole AI isn't for children under 13, and we don't knowingly collect their information.</p>
+      <p>Nebulux AI isn't for children under 13, and we don't knowingly collect their information.</p>
 
       <h2>Changes and contact</h2>
       <p>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 // Build/Discuss mode for the code-capable AIs. Resets to "build" whenever the AI changes,
-// and is only shown when the selected AI isn't the plain Blackhole AI.
+// and is only shown when the selected AI isn't the plain Nebulux AI.
 export default function useBuildMode(selectedAi) {
   const [mode, setMode] = useState("build");
   useEffect(() => {

@@ -88,7 +88,7 @@ s = await status({ id: "u4" });
 const again = await status({ id: "u4" });
 assert(s.tiers.aiCode.total === 20 && again.tiers.aiCode.total === 20, "a promo redemption adds its credits exactly once");
 
-// Team (kept in KV, cloudflare-lib/teams.js): Blackhole Code uses the owner's shared pool
+// Team (kept in KV, cloudflare-lib/teams.js): Nebulux Code uses the owner's shared pool
 fresh();
 const T = await import(R + "cloudflare-lib/teams.js");
 const owner = { id: "own", email: "owner@x.com" };
@@ -100,7 +100,7 @@ assert(team.memberEmails.length === 2 && team.memberEmails[0] === "member@x.com"
 ent = await C.entitlement(kv, req, member);
 await C.charge(kv, ent, "aiCode", 3);
 s = await C.creditStatus(kv, await C.entitlement(kv, req, owner));
-assert(ent.plan === "team" && s.tiers.aiCode.used === 3 && store.get("teamusage:own:" + s.month) === "3", "team members share the owner's Blackhole Code pool");
+assert(ent.plan === "team" && s.tiers.aiCode.used === 3 && store.get("teamusage:own:" + s.month) === "3", "team members share the owner's Nebulux Code pool");
 const mt = await T.myTeam(kv, member, "free", 3);
 assert(mt && mt.active && !mt.isOwner && mt.ownerPlan === "team", "my-team shape for a member");
 await T.leave(kv, member);
