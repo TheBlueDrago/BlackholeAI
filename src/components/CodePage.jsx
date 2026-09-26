@@ -64,7 +64,7 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
       // The server charged the credits (cutting the reply off if they ran out); show its new status.
       onSpendAICode?.(res.credits);
       const content = res.content ?? "";
-      setMessages((m) => [...m, { role: "ai", content: res.cut ? `${content.trimEnd()}…\n\n${OUT_OF_CREDITS_NOTE}` : content }]);
+      setMessages((m) => [...m, { role: "ai", content: res.cut ? `${content.trimEnd()}…\n\n${OUT_OF_CREDITS_NOTE}` : content, ...(res.more ? { more: true } : {}) }]);
     } catch (e) {
       if (reqIdRef.current !== myId) return;
       setLive("");
@@ -180,7 +180,7 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
                     </div>
                     {i === messages.length - 1 && !loading && !aiCodeExhausted && (
                       <div className="flex flex-wrap gap-1.5 mt-2">
-                        {followUps(messages[i - 1]?.role === "user" ? messages[i - 1].content : "", m.content).map((f) => (
+                        {(m.more ? ["Keep going from exactly where you stopped."] : followUps(messages[i - 1]?.role === "user" ? messages[i - 1].content : "", m.content)).map((f) => (
                           <button
                             key={f}
                             type="button"
