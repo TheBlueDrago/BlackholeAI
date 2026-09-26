@@ -9,6 +9,7 @@ const UPDATES = [
   {
     date: "September 2026",
     items: [
+      { icon: BookOpen, text: "Tap-to-answer quizzes: say Quiz me (or tap Quiz me on this) and answer multiple-choice questions right in the chat, with the reason for each answer and your score at the end." },
       { icon: Globe, text: "QR codes: after you publish, or from your list of websites, show a QR code so people nearby can scan it and open your site or game on their phone." },
       { icon: Sparkles, text: "One-tap improvements in the Website and Game Designers: Make it harder, Add sound effects, Add a high score, Make it look more modern, Add a contact form and more." },
       { icon: BookOpen, text: "New guides: Study mode, and making flashcards with AI." },

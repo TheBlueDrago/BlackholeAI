@@ -9,7 +9,9 @@ export function followUps(question, answer) {
   const q = String(question || "");
   if (!a.trim() || a.startsWith("⚠") || /_\(stopped\)_\s*$/.test(a) || /Sorry, something went wrong/.test(a)) return [];
   const out = [];
-  if (/```flashcards/.test(a)) {
+  if (/```quiz/.test(a)) {
+    out.push("Quiz me again, a bit harder", "Make flashcards");
+  } else if (/```flashcards/.test(a)) {
     out.push("Make 10 more flashcards", "Quiz me on this");
   } else if (hasCode(a)) {
     out.push("Explain this code step by step");

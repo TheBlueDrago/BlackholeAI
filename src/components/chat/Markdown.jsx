@@ -6,6 +6,7 @@ import CodePreview from "@/components/chat/CodePreview";
 import { previewable } from "@/lib/codePreview";
 import { prepareMath } from "@/lib/mathText";
 import Flashcards from "@/components/chat/Flashcards";
+import Quiz from "@/components/chat/Quiz";
 
 // Copies text and briefly shows a tick.
 export function CopyButton({ getText, className = "", label = "Copy" }) {
@@ -39,6 +40,7 @@ function CodeBlock({ children }) {
   const { lang, text } = codeInfo(children);
   const canPreview = previewable(lang, text);
   if (lang === "flashcards") return <Flashcards text={text} />;
+  if (lang === "quiz") return <Quiz text={text} />;
   return (
     <div className="relative group my-2">
       <pre ref={ref} className={`bg-black/40 border border-slate-700/60 rounded-lg p-3 pr-9 ${canPreview ? "pt-10" : ""} overflow-x-auto text-[12.5px] leading-snug`}>

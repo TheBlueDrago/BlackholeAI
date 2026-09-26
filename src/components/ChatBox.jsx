@@ -25,6 +25,7 @@ import { streamChat } from "@/lib/aiStream";
 import { chatTitle } from "@/lib/chatTitle";
 import { followUps } from "@/lib/followUps";
 import { wantsFlashcards, FLASHCARD_NOTE } from "@/lib/flashcards";
+import { wantsQuiz, QUIZ_NOTE } from "@/lib/quiz";
 import { shrinkImage } from "@/lib/siteImages";
 import EffortPicker from "@/components/chat/EffortPicker";
 import VoiceInput from "@/components/chat/VoiceInput";
@@ -133,7 +134,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
     const sys = ai === "code" ? CODE_SYS : ai === "fable" ? FABLE_SYS : "";
     const intent = ai !== "ai" ? resolveIntent(text, buildMode.mode) : { build: true };
     const modeNote = ai !== "ai" ? (intent.build ? BUILD_NOTE : ANSWER_NOTE) + "\n\n" : "";
-    const cardNote = ai === "ai" && wantsFlashcards(text) ? FLASHCARD_NOTE : "";
+    const cardNote = ai !== "ai" ? "" : wantsFlashcards(text) ? FLASHCARD_NOTE : wantsQuiz(text) ? QUIZ_NOTE : "";
     const fullPrompt = `${sys ? sys + "\n\n" : ""}${modeNote}${cardNote}${history}${text}${fileNote}`;
     if (reqIdRef.current !== myId) return;
     try {
