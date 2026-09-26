@@ -21,6 +21,7 @@ import { historyBlock } from "@/lib/chatHistory";
 import { followUps } from "@/lib/followUps";
 import { readAboutMe, aboutMeBlock } from "@/lib/aboutMe";
 import AboutMeButton from "@/components/chat/AboutMeButton";
+import VoiceInput from "@/components/chat/VoiceInput";
 import { useAppShell } from "@/components/AppShellContext";
 import useReplyAnnouncer from "@/hooks/useReplyAnnouncer";
 
@@ -241,6 +242,7 @@ export default function CodePage({ aiCodeExhausted, aiCodeRemaining, onSpendAICo
           </div>
           <div className="flex items-center gap-2 mt-2">
             <AboutMeButton userId={userId} />
+            <VoiceInput onText={(t) => setInput((cur) => (cur.trim() ? `${cur.trimEnd()} ${t}` : t))} />
             <EffortPicker value={effort} onChange={setEffort} />
             <ModeToggle mode={buildMode.mode} onChange={buildMode.setMode} />
           </div>
