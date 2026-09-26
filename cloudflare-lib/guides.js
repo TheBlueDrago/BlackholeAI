@@ -154,6 +154,67 @@ export const GUIDES = [
     related: ["make-a-game-without-coding", "ai-homework-help"],
   },
   {
+    slug: "make-flashcards-with-ai",
+    title: "How to make flashcards with AI in seconds",
+    description:
+      "Ask Blackhole AI for flashcards on any topic and flip through them right in the chat: shuffle, mark what you know, and quiz yourself. Free to start.",
+    minutes: 3,
+    intro:
+      "Making flashcards by hand takes longer than studying them. With Blackhole AI you ask for them in one sentence and study straight away, on your phone or computer.",
+    sections: [
+      {
+        heading: "Ask for them",
+        paragraphs: ["Say what the cards are about and, if you like, your grade or how many you want. The cards appear in the chat, ready to flip."],
+        list: ["\"Make flashcards about the planets.\"", "\"Make 12 flashcards for Spanish food words.\"", "\"Flashcards on the causes of World War I for 8th grade.\""],
+      },
+      {
+        heading: "Or turn any answer into cards",
+        paragraphs: ["After the AI explains something, tap Make flashcards under its answer and you get cards on exactly what it just taught you."],
+      },
+      {
+        heading: "Study them",
+        list: ["Tap a card to flip between the question and the answer.", "Mark the ones you know, and see how many are left.", "Shuffle to test yourself in a new order.", "Tap Make 10 more flashcards or Quiz me on this when you're ready for more."],
+      },
+      {
+        heading: "Check them",
+        paragraphs: ["AI can make mistakes, so compare the cards with your notes or textbook, especially dates, numbers and names."],
+      },
+    ],
+    cta: { label: "Make flashcards free", to: "/register?returnTo=%2Fchat" },
+    more: { label: "Use AI for homework the right way", to: "/guides/ai-homework-help" },
+    related: ["ai-study-mode", "ai-homework-help"],
+  },
+  {
+    slug: "ai-study-mode",
+    title: "Study mode: an AI tutor that helps you learn, not just copy",
+    description:
+      "Turn on Study mode in Blackhole AI and it tutors you step by step with hints and questions instead of handing over the answer. Free for students.",
+    minutes: 3,
+    intro:
+      "The fastest way to get an answer isn't always the fastest way to learn it. Study mode makes Blackhole AI act like a patient tutor, so you understand the work and can do it on the test.",
+    sections: [
+      {
+        heading: "Turn it on",
+        paragraphs: ["In the chat, tap Study under the message box. It turns green when it's on, and it stays on for your next questions until you turn it off."],
+      },
+      {
+        heading: "What changes",
+        list: ["It explains the idea briefly, then guides you one step at a time.", "It asks you to try the next step and gives a hint if you're stuck.", "It checks your tries kindly and tells you what was right.", "It gives the full answer only if you ask for it or after a few tries."],
+      },
+      {
+        heading: "Works with photos and voice",
+        paragraphs: ["Tap Snap a question to take a photo of a worksheet, or tap the microphone and say your question. With the microphone, the AI reads its answer out loud too."],
+      },
+      {
+        heading: "For parents and teachers",
+        paragraphs: ["Study mode is built for learning: it encourages students to think through the work instead of copying it. Everything published on Blackhole AI is safety-checked, and every page has a Report button."],
+      },
+    ],
+    cta: { label: "Try Study mode free", to: "/register?returnTo=%2Fchat" },
+    more: { label: "For parents and teachers", to: "/safety#parents" },
+    related: ["make-flashcards-with-ai", "ai-homework-help"],
+  },
+  {
     slug: "ai-homework-help",
     title: "How to use AI for homework (the right way)",
     description:

@@ -5,7 +5,7 @@ import PublicLayout from "@/components/PublicLayout";
 import { GUIDES } from "../../cloudflare-lib/guides.js";
 
 // Guides about using the AI itself; the rest are about building websites and games.
-const AI_HELP = new Set(["ai-homework-help", "write-better-with-ai", "learn-to-code-with-ai", "resume-and-cover-letter-with-ai", "ai-for-small-business"]);
+const AI_HELP = new Set(["ai-study-mode", "make-flashcards-with-ai", "ai-homework-help", "write-better-with-ai", "learn-to-code-with-ai", "resume-and-cover-letter-with-ai", "ai-for-small-business"]);
 const GROUPS = [
   { title: "Get help from the AI", guides: GUIDES.filter((g) => AI_HELP.has(g.slug)) },
   { title: "Build websites and games", guides: GUIDES.filter((g) => !AI_HELP.has(g.slug)) },
