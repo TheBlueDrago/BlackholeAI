@@ -18,8 +18,13 @@ export const SHOP = {
   "badge-rocket": { kind: "badge", name: "🚀 Builder badge", price: 150, value: "🚀" },
   "badge-brain": { kind: "badge", name: "🧠 Brainy badge", price: 150, value: "🧠" },
   "badge-crown": { kind: "badge", name: "👑 Legend badge", price: 500, value: "👑" },
+  "badge-plus": { kind: "badge", name: "💎 Plus badge (Pro and up)", price: 0, value: "💎", plusOnly: true },
 };
 
 export const FREE_COLORS = ["#e2e8f0", "#a5b4fc", "#93c5fd", "#fda4af", "#fde68a", "#a7f3d0"];
 export const AVATAR_EMOJI = ["🌌", "🪐", "🚀", "⭐", "🌙", "☄️", "👾", "🤖", "🐱", "🐶", "🦊", "🐼", "🐸", "🦄", "🐉", "🎮", "🎨", "🎧", "⚽", "🏀", "🍕", "🌈", "🔥", "💎"];
 export const AVATAR_BG = ["#6366f1", "#8b5cf6", "#ec4899", "#f43f5e", "#f97316", "#eab308", "#22c55e", "#14b8a6", "#0ea5e9", "#334155"];
+
+// Like Discord Nitro: Pro and up get these free, and more stars from quests.
+export const PLUS_FREE = [...Object.keys(SHOP).filter((id) => SHOP[id].kind === "name_color"), "frame-glow", "badge-plus"];
+export const STAR_MULTIPLIER = { pro: 1.5, team: 2, enterprise: 2, secret: 2, admin: 2 };

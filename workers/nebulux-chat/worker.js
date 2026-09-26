@@ -3,7 +3,8 @@
 // and one Durable Object (Hub) holds everyone's live connection, so new messages, typing and
 // notifications arrive instantly. People are recognised by their Nebulux AI (Base44) sign-in.
 import { cleanMessage, cleanName } from "./safety.js";
-import { SHOP, DAILY_ORBS, ORBS_PER_MESSAGE, MAX_MESSAGE_ORBS_PER_DAY, FREE_COLORS, AVATAR_EMOJI, AVATAR_BG } from "./shop.js";
+import { SHOP, FREE_COLORS, AVATAR_EMOJI, AVATAR_BG, PLUS_FREE, STAR_MULTIPLIER } from "./shop.js";
+import { QUESTS, questDone } from "./quests.js";
 
 const APP_ID = "6a8b5eb7787b8a4d6a18f662";
 const BASE44 = "https://blackhole-ai.base44.app";
@@ -55,7 +56,9 @@ const rowToProfile = (p) =>
   };
 
 // The profile for this person, made the first time they open the chat.
-async function profileOf(env, who) {
+const newCode = () => [...crypto.getRandomValues(new Uint8Array(6))].map((b) => "abcdefghjkmnpqrstuvwxyz23456789"[b % 31]).join("");
+
+async function profileOf(env, who, invite = "") {
   let p = await env.DB.prepare("SELECT * FROM profiles WHERE user_id = ?").bind(who.id).first();
   if (!p) {
     let name = (cleanName(who.name).name || "Explorer").slice(0, 20);
@@ -66,14 +69,47 @@ async function profileOf(env, who) {
     }
     const avatar = AVATAR_EMOJI[Math.floor(Math.random() * AVATAR_EMOJI.length)];
     const bg = AVATAR_BG[Math.floor(Math.random() * AVATAR_BG.length)];
-    await env.DB.prepare("INSERT OR IGNORE INTO profiles (user_id, name, avatar, avatar_bg, is_admin, created_at) VALUES (?, ?, ?, ?, ?, ?)").bind(who.id, name, avatar, bg, who.admin ? 1 : 0, now()).run();
+    // Joined with someone's Nebulux Chat invite link: that completes their invite quest.
+    const inviter = invite ? await env.DB.prepare("SELECT user_id, name FROM profiles WHERE invite_code = ?").bind(String(invite).slice(0, 12)).first() : null;
+    await env.DB.prepare("INSERT OR IGNORE INTO profiles (user_id, name, avatar, avatar_bg, is_admin, invite_code, invited_by, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)").bind(who.id, name, avatar, bg, who.admin ? 1 : 0, newCode(), inviter && inviter.user_id !== who.id ? inviter.user_id : null, now()).run();
     p = await env.DB.prepare("SELECT * FROM profiles WHERE user_id = ?").bind(who.id).first();
-  } else if (!!p.is_admin !== who.admin) {
+    if (inviter && inviter.user_id !== who.id) await notify(env, inviter.user_id, "reward", `${name} joined Nebulux Chat with your invite! Claim your quest for stars.`, "/chat/community?tab=quests");
+  }
+  if (p && !p.invite_code) {
+    const code = newCode();
+    await env.DB.prepare("UPDATE profiles SET invite_code = ? WHERE user_id = ?").bind(code, who.id).run();
+    p.invite_code = code;
+  }
+  if (!!p.is_admin !== who.admin) {
     await env.DB.prepare("UPDATE profiles SET is_admin = ? WHERE user_id = ?").bind(who.admin ? 1 : 0, who.id).run();
     p.is_admin = who.admin ? 1 : 0;
   }
   return p;
 }
+
+// The person's Nebulux AI plan (Pro and up = Plus perks), checked at most every 10 minutes.
+async function plusOf(token, userId) {
+  const key = new Request(`https://nebulux-chat.internal/plan/${userId}`);
+  const hit = await caches.default.match(key).catch(() => null);
+  if (hit) return hit.json();
+  let plan = "free";
+  let source = "";
+  try {
+    const r = await fetch(`https://nebuluxai.pages.dev/api/apps/${APP_ID}/functions/credits`, { method: "POST", headers: { authorization: `Bearer ${token}`, "content-type": "application/json", "X-App-Id": APP_ID }, body: "{}" });
+    if (r.ok) {
+      const j = await r.json();
+      plan = String(j.plan || "free");
+      source = String(j.planSource || "");
+    }
+  } catch {
+    // Unknown: no perks this time.
+  }
+  const mult = source === "trial" ? 1 : STAR_MULTIPLIER[plan] || 1;
+  const out = { plan, plus: mult > 1, mult };
+  await caches.default.put(key, new Response(JSON.stringify(out), { headers: { "cache-control": "max-age=600" } })).catch(() => {});
+  return out;
+}
+const ownedWithPlus = (me, plus) => [...new Set([...JSON.parse(me.owned || "[]"), ...(plus.plus ? PLUS_FREE : [])])];
 
 const dmId = (a, b) => `dm:${[a, b].sort().join(":")}`;
 const dmUsers = (id) => (id.startsWith("dm:") ? id.slice(3).split(":") : null);
@@ -122,22 +158,23 @@ async function withAuthors(env, rows) {
   }));
 }
 
-async function route(request, env, who) {
+async function route(request, env, who, token) {
   const url = new URL(request.url);
   const path = url.pathname.replace(/^\/api/, "");
   const method = request.method;
   const body = method === "GET" ? {} : await request.json().catch(() => ({}));
-  const me = await profileOf(env, who);
+  const me = await profileOf(env, who, url.searchParams.get("invite") || "");
   if (me.banned) return fail(request, "You can't use Nebulux Chat right now.", 403);
   const seg = path.split("/").filter(Boolean);
 
   // --- my profile, orbs and the shop
   if (path === "/me" && method === "GET") {
     await env.DB.prepare("UPDATE profiles SET last_seen = ? WHERE user_id = ?").bind(now(), who.id).run();
-    return json(request, { me: rowToProfile(me), orbs: me.orbs, owned: JSON.parse(me.owned || "[]"), dailyReady: me.daily_at !== today(), shop: SHOP, freeColors: FREE_COLORS, avatars: AVATAR_EMOJI, avatarBgs: AVATAR_BG });
+    const plus = await plusOf(token, who.id);
+    return json(request, { me: rowToProfile(me), orbs: me.orbs, owned: ownedWithPlus(me, plus), plus, inviteCode: me.invite_code, shop: SHOP, freeColors: FREE_COLORS, avatars: AVATAR_EMOJI, avatarBgs: AVATAR_BG });
   }
   if (path === "/me" && method === "PATCH") {
-    const owned = JSON.parse(me.owned || "[]");
+    const owned = ownedWithPlus(me, await plusOf(token, who.id));
     const sets = [];
     const vals = [];
     if (body.name !== undefined) {
@@ -160,14 +197,14 @@ async function route(request, env, who) {
     }
     if (body.nameColor !== undefined) {
       const bought = Object.entries(SHOP).find(([id, it]) => it.kind === "name_color" && it.value === body.nameColor && owned.includes(id));
-      if (!FREE_COLORS.includes(body.nameColor) && !bought) return fail(request, "Get that color in the Orb shop first.");
+      if (!FREE_COLORS.includes(body.nameColor) && !bought) return fail(request, "Get that color in the Star shop first.");
       sets.push("name_color = ?");
       vals.push(body.nameColor);
     }
     for (const [field, kind] of [["frame", "frame"], ["badge", "badge"]]) {
       if (body[field] === undefined) continue;
       const ok = body[field] === "" || Object.entries(SHOP).some(([id, it]) => it.kind === kind && it.value === body[field] && owned.includes(id));
-      if (!ok) return fail(request, `Get that ${kind} in the Orb shop first.`);
+      if (!ok) return fail(request, `Get that ${kind} in the Star shop first.`);
       sets.push(`${field} = ?`);
       vals.push(body[field]);
     }
@@ -181,20 +218,48 @@ async function route(request, env, who) {
     const p = await env.DB.prepare("SELECT * FROM profiles WHERE user_id = ?").bind(who.id).first();
     return json(request, { me: rowToProfile(p) });
   }
-  if (path === "/daily" && method === "POST") {
-    if (me.daily_at === today()) return fail(request, "You already got today's orbs. Come back tomorrow!");
-    await env.DB.prepare("UPDATE profiles SET orbs = orbs + ?, daily_at = ? WHERE user_id = ?").bind(DAILY_ORBS, today(), who.id).run();
-    return json(request, { orbs: me.orbs + DAILY_ORBS, got: DAILY_ORBS });
+  // --- quests: the way to earn orbs, each checked for real when claimed
+  if (path === "/quests" && method === "GET" || path === "/quests/claim" && method === "POST") {
+    const ctx = {
+      env,
+      userId: who.id,
+      base44Get: async (entity, filter) => {
+        const r = await fetch(`${BASE44}/api/apps/${APP_ID}/entities/${entity}?q=${encodeURIComponent(JSON.stringify(filter))}&limit=1`, { headers: { authorization: `Bearer ${token}`, "X-App-Id": APP_ID } }).catch(() => null);
+        const rows = r && r.ok ? await r.json().catch(() => []) : [];
+        return Array.isArray(rows) ? rows.length : 0;
+      },
+      planOf: async () => {
+        const r = await fetch(`https://nebuluxai.pages.dev/api/apps/${APP_ID}/functions/credits`, { method: "POST", headers: { authorization: `Bearer ${token}`, "content-type": "application/json", "X-App-Id": APP_ID }, body: "{}" }).catch(() => null);
+        return r && r.ok ? r.json().catch(() => null) : null;
+      },
+    };
+    const claimed = new Set(((await env.DB.prepare("SELECT quest_id FROM quests_done WHERE user_id = ?").bind(who.id).all()).results || []).map((x) => x.quest_id));
+    if (method === "GET") {
+      const list = [];
+      for (const q of QUESTS) list.push({ ...q, status: claimed.has(q.id) ? "claimed" : (await questDone(q.id, ctx).catch(() => false)) ? "ready" : "todo" });
+      return json(request, { quests: list, inviteCode: me.invite_code, orbs: me.orbs });
+    }
+    const q = QUESTS.find((x) => x.id === body.id);
+    if (!q) return fail(request, "That quest doesn't exist.");
+    if (claimed.has(q.id)) return fail(request, "You already got the stars for this quest.");
+    if (!(await questDone(q.id, ctx).catch(() => false))) return fail(request, "Finish the quest first!");
+    const plus = await plusOf(token, who.id);
+    const got = Math.round(q.stars * plus.mult);
+    const ins = await env.DB.prepare("INSERT OR IGNORE INTO quests_done (user_id, quest_id, orbs, created_at) VALUES (?, ?, ?, ?)").bind(who.id, q.id, got, now()).run();
+    if (!ins.meta.changes) return fail(request, "You already got the stars for this quest.");
+    await env.DB.prepare("UPDATE profiles SET orbs = orbs + ? WHERE user_id = ?").bind(got, who.id).run();
+    return json(request, { orbs: me.orbs + got, got, mult: plus.mult });
   }
   if (path === "/shop/buy" && method === "POST") {
     const item = SHOP[body.item];
     if (!item) return fail(request, "That item isn't in the shop.");
+    if (item.plusOnly) return fail(request, "That one comes free with Pro and up.");
     const owned = JSON.parse(me.owned || "[]");
     if (owned.includes(body.item)) return fail(request, "You already have that.");
-    if (me.orbs < item.price) return fail(request, `You need ${item.price - me.orbs} more orbs.`);
+    if (me.orbs < item.price) return fail(request, `You need ${item.price - me.orbs} more stars.`);
     owned.push(body.item);
     const r = await env.DB.prepare("UPDATE profiles SET orbs = orbs - ?, owned = ? WHERE user_id = ? AND orbs >= ?").bind(item.price, JSON.stringify(owned), who.id, item.price).run();
-    if (!r.meta.changes) return fail(request, "Not enough orbs.");
+    if (!r.meta.changes) return fail(request, "Not enough stars.");
     return json(request, { orbs: me.orbs - item.price, owned });
   }
 
@@ -239,10 +304,6 @@ async function route(request, env, who) {
       const [msg] = await withAuthors(env, [row]);
       const pair = dmUsers(channelId);
       await push(env, { type: "message", message: msg }, pair);
-      // Orbs for chatting, up to a daily cap.
-      const day = today();
-      const earned = me.earned_day === day ? me.earned_today : 0;
-      if (earned < MAX_MESSAGE_ORBS_PER_DAY) await env.DB.prepare("UPDATE profiles SET orbs = orbs + ?, earned_day = ?, earned_today = ? WHERE user_id = ?").bind(ORBS_PER_MESSAGE, day, earned + 1, who.id).run();
       if (pair) {
         const other = pair.find((u) => u !== who.id);
         await notify(env, other, "message", `${me.name}: ${c.text.slice(0, 80)}`, `/chat/community?c=${encodeURIComponent(channelId)}`);
@@ -402,7 +463,7 @@ export default {
     const who = await whoIs(token);
     if (!who) return fail(request, "Sign in to use Nebulux Chat.", 401);
     try {
-      return await route(request, env, who);
+      return await route(request, env, who, token);
     } catch (e) {
       return fail(request, "Something went wrong. Try again.", 500);
     }

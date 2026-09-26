@@ -234,9 +234,9 @@ export default function Community() {
         <button onClick={() => openChannel("general")} title="Nebulux community" className={`w-12 h-12 overflow-hidden transition-all ${view === "server" && !channel.startsWith("dm:") ? "rounded-2xl" : "rounded-full hover:rounded-2xl"}`}>
           <img src="/logo.png" alt="Nebulux" className="w-full h-full object-cover" />
         </button>
-        <div className="mt-auto flex flex-col items-center gap-1" title="Your orbs">
-          <span className="text-lg">🔮</span>
-          <span className="text-[11px] font-bold text-violet-300">{orbs}</span>
+        <div className="mt-auto flex flex-col items-center gap-1" title="Your stars">
+          <span className="text-lg">⭐</span>
+          <span className="text-[11px] font-bold text-violet-300">{stars}</span>
         </div>
       </div>
       {/* Channel list */}
@@ -278,10 +278,10 @@ export default function Community() {
             <Avatar user={me} size={32} online />
             <span className="min-w-0">
               <Name user={me} className="block truncate text-sm" />
-              <span className="block text-[11px] text-slate-400">🔮 {orbs} orbs</span>
+              <span className="block text-[11px] text-slate-400">⭐ {stars} stars</span>
             </span>
           </button>
-          <button onClick={() => setProfileOpen(true)} title="Profile, looks and Orb shop" aria-label="Profile settings" className="p-2 rounded-md text-slate-300 hover:bg-[#35373c]">
+          <button onClick={() => setProfileOpen(true)} title="Profile, looks and Star shop" aria-label="Profile settings" className="p-2 rounded-md text-slate-300 hover:bg-[#35373c]">
             <Settings className="w-5 h-5" />
           </button>
         </div>
@@ -527,7 +527,7 @@ export default function Community() {
               .then((r) => {
                 setOrbs(r.orbs);
                 setMeta((m) => ({ ...m, dailyReady: false }));
-                addNotification({ kind: "reward", text: `You got ${r.got} orbs! Come back tomorrow for more.` });
+                addNotification({ kind: "reward", text: `You got ${r.got} stars! Come back tomorrow for more.` });
               })
               .catch((e) => flash(e.message))
           }
@@ -728,12 +728,12 @@ function ProfileEditor({ me, orbs, meta, onClose, onSaved, onOrbs, onDaily }) {
   return (
     <Modal onClose={onClose} wide>
       <div className="flex border-b border-black/30 px-5 pt-4 gap-4">
-        {[["profile", "My profile"], ["shop", "Orb shop"]].map(([id, label]) => (
+        {[["profile", "My profile"], ["shop", "Star shop"]].map(([id, label]) => (
           <button key={id} onClick={() => setTab(id)} className={`pb-3 text-sm font-semibold border-b-2 ${tab === id ? "border-indigo-400 text-white" : "border-transparent text-slate-400"}`}>
             {label}
           </button>
         ))}
-        <span className="ml-auto pb-3 text-sm font-bold text-violet-300 pr-8">🔮 {orbs}</span>
+        <span className="ml-auto pb-3 text-sm font-bold text-violet-300 pr-8">⭐ {stars}</span>
       </div>
       {tab === "profile" ? (
         <div className="p-5 grid sm:grid-cols-2 gap-5">
@@ -767,7 +767,7 @@ function ProfileEditor({ me, orbs, meta, onClose, onSaved, onOrbs, onDaily }) {
                   <button key={c} aria-label={c} onClick={() => setDraft({ ...draft, nameColor: c })} className={`keep-color w-7 h-7 rounded-full ${draft.nameColor === c ? "ring-2 ring-white" : ""}`} style={{ background: c }} />
                 ))}
               </div>
-              <p className="mt-1 text-[11px] text-slate-500">Get more colors in the Orb shop.</p>
+              <p className="mt-1 text-[11px] text-slate-500">Get more colors in the Star shop.</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
               {[["frame", "Avatar frame"], ["badge", "Badge"]].map(([field, label]) => (
@@ -804,9 +804,9 @@ function ProfileEditor({ me, orbs, meta, onClose, onSaved, onOrbs, onDaily }) {
               </div>
             </div>
             <button onClick={onDaily} disabled={!meta.dailyReady} className="mt-4 w-full inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-violet-600 text-[#fff] text-sm font-semibold hover:bg-violet-500 disabled:opacity-40">
-              <Gift className="w-4 h-4" /> {meta.dailyReady ? "Claim today's orbs" : "Come back tomorrow for more orbs"}
+              <Gift className="w-4 h-4" /> {meta.dailyReady ? "Claim today's stars" : "Come back tomorrow for more stars"}
             </button>
-            <p className="mt-2 text-[11px] text-slate-500">Earn orbs every day and by chatting (up to 25 a day).</p>
+            <p className="mt-2 text-[11px] text-slate-500">Earn stars every day and by chatting (up to 25 a day).</p>
             {err && <p className="mt-3 text-sm text-red-400">{err}</p>}
             <button onClick={save} disabled={saving} className="mt-4 w-full px-3 py-2.5 rounded-lg bg-emerald-600 text-[#fff] text-sm font-semibold hover:bg-emerald-500 disabled:opacity-50">
               {saving ? "Saving…" : "Save changes"}
@@ -816,7 +816,7 @@ function ProfileEditor({ me, orbs, meta, onClose, onSaved, onOrbs, onDaily }) {
       ) : (
         <div className="p-5">
           <p className="text-sm text-slate-400 mb-3 flex items-center gap-1.5">
-            <Sparkles className="w-4 h-4 text-violet-300" /> Spend orbs on name tag colors, avatar frames and badges.
+            <Sparkles className="w-4 h-4 text-violet-300" /> Spend stars on name tag colors, avatar frames and badges.
           </p>
           {err && <p className="mb-3 text-sm text-red-400">{err}</p>}
           <div className="grid sm:grid-cols-2 gap-2">
@@ -829,11 +829,11 @@ function ProfileEditor({ me, orbs, meta, onClose, onSaved, onOrbs, onDaily }) {
                   </span>
                   <span className="flex-1 min-w-0">
                     <span className="block text-sm font-medium text-white">{it.name}</span>
-                    <span className="block text-xs text-violet-300">🔮 {it.price}</span>
+                    <span className="block text-xs text-violet-300">⭐ {it.price}</span>
                   </span>
                   <button
                     disabled={have || orbs < it.price}
-                    onClick={() => { setErr(""); chatApi("/shop/buy", "POST", { item: id }).then((r) => onOrbs(r.orbs, r.owned)).catch((e) => setErr(e.message)); }}
+                    onClick={() => { setErr(""); chatApi("/shop/buy", "POST", { item: id }).then((r) => onOrbs(r.stars, r.owned)).catch((e) => setErr(e.message)); }}
                     className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md bg-indigo-600 text-[#fff] text-xs font-semibold disabled:opacity-40"
                   >
                     {have ? <Check className="w-3.5 h-3.5" /> : <ShoppingBag className="w-3.5 h-3.5" />} {have ? "Owned" : "Buy"}

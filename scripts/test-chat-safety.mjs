@@ -1,4 +1,4 @@
-// Offline test: what Nebulux Chat lets through (workers/nebulux-chat/safety.js) and the Orb shop.
+// Offline test: what Nebulux Chat lets through (workers/nebulux-chat/safety.js) and the Star shop.
 // Run: node scripts/test-chat-safety.mjs
 import { cleanMessage, cleanName } from "../workers/nebulux-chat/safety.js";
 import { SHOP, DAILY_ORBS } from "../workers/nebulux-chat/shop.js";
@@ -16,4 +16,4 @@ assert(cleanMessage("go to evil.com/free-robux").text.includes("[link removed]")
 assert(cleanMessage("this is shit").text.includes("****") && !!cleanMessage("fuck shit bitch").error, "bad words starred, a message of only bad words refused");
 assert(!!cleanMessage("").error && !!cleanMessage("x".repeat(2001)).error, "empty and too-long messages refused");
 assert(cleanName("Sam_2012").name === "Sam_2012" && !!cleanName("NebuluxAdmin").error && !!cleanName("a").error, "names: normal ok, official-looking or too short refused");
-assert(DAILY_ORBS > 0 && Object.values(SHOP).every((i) => i.price > 0 && ["name_color", "frame", "badge"].includes(i.kind)), "the Orb shop has priced items");
+assert(DAILY_ORBS > 0 && Object.values(SHOP).every((i) => (i.price > 0 || i.plusOnly) && ["name_color", "frame", "badge"].includes(i.kind)), "the Star shop has priced items");
