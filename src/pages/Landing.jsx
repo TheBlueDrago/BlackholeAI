@@ -82,6 +82,16 @@ const FEATURES = [
   },
 ];
 
+// Why here and not another site or building it yourself: every point is a real feature.
+const WHY = [
+  { icon: Layers, title: "Everything in one place", text: "Other sites do one thing. Here the same AI answers questions, helps with homework, writes, codes, and builds websites and games." },
+  { icon: Code2, title: "No coding, no hosting bills", text: "Describe a website or game and it's live in minutes at its own free web address. Building it yourself takes months and costs money." },
+  { icon: GraduationCap, title: "Made for learning", text: "Study mode tutors you step by step, math shows like a textbook, and it makes quizzes and reads answers aloud." },
+  { icon: ShieldCheck, title: "Safe for kids", text: "Every website and game is checked before it goes live, scams and adult content are blocked, and every page has a Report button." },
+  { icon: Sparkles, title: "Free to start, cheap after", text: "A free plan and a free week of Pro for new accounts. Pro is $7 a month, less than most AI website builders." },
+  { icon: Globe, title: "Always getting better", text: "New features almost every week, many from ideas people send us. See What's new." },
+];
+
 const STEPS = [
   ["Ask or describe", "Type or say what you need: a question, homework, an essay, some code, or the website or game you want."],
   ["Get it in seconds", "A clear answer you can ask more about, or a working first version of your site or game to try right away."],
@@ -95,6 +105,7 @@ const GAMES = [
 ];
 
 const FAQ = [
+  ["Why use Blackhole AI instead of another site?", "Because it does everything in one place: the same AI helps with questions, homework, writing and code, and builds real websites and games for you, with no coding and no hosting bills. It's made for learning (Study mode, quizzes, math that looks like a textbook), everything published is safety-checked, and it's free to start."],
   ["What can the AI help me with?", "Almost anything you'd ask a smart friend: homework explained step by step, practice quizzes, essays, emails and stories, code, questions about a photo you send, and building websites and games. You can type or just talk to it.", ["/guides", "See the guides"]],
   ["Can I use it for school?", "Yes. It's built to help you understand, not just hand you answers: ask it to explain step by step or quiz you. Always follow your teacher's rules about AI.", ["/guides/ai-homework-help", "Using AI for homework the right way"]],
   ["Is Blackhole AI free?", "Yes. The Free plan gives you 50 AI credits every month and lets you publish a website and a game, and new accounts get a free week of Pro. Pro is $7 a month and Team is $10 a month when you want more."],
@@ -282,6 +293,25 @@ export default function Landing() {
         <div className="mt-16 space-y-24 sm:space-y-32">
           {FEATURES.map((f, i) => (
             <FeatureRow key={f.eyebrow} {...f} flip={i % 2 === 1} />
+          ))}
+        </div>
+      </section>
+
+      {/* Why Blackhole AI */}
+      <section id="why" className="mt-28 sm:mt-36 scroll-mt-24">
+        <Reveal className="text-center">
+          <h2 className="text-3xl sm:text-5xl font-bold text-white">Why Blackhole AI?</h2>
+          <p className="mt-4 text-slate-400 text-lg max-w-2xl mx-auto">Why use it instead of another AI site, or building everything yourself.</p>
+        </Reveal>
+        <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {WHY.map(({ icon: Icon, title, text }) => (
+            <div key={title} className="rounded-3xl bg-slate-900/50 border border-slate-800 p-6">
+              <span className="keep-color w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center">
+                <Icon className="w-5 h-5 text-white" />
+              </span>
+              <p className="mt-4 text-lg font-semibold text-white">{title}</p>
+              <p className="mt-1 text-slate-400">{title === "Always getting better" ? <>New features almost every week, many from ideas people send us. See <Link to="/whats-new" className="text-indigo-300 underline hover:text-indigo-200">What's new</Link>.</> : text}</p>
+            </div>
           ))}
         </div>
       </section>
