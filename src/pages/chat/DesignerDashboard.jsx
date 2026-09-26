@@ -3,10 +3,11 @@ import { askConfirm, askText } from "@/lib/dialogs";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 import {
-  Menu, Globe, Plus, Sparkles, Loader2, Pencil, Trash2, Eye, EyeOff, Crown, ExternalLink, Star, Inbox as InboxIcon,
+  Menu, Globe, Plus, Sparkles, Loader2, Pencil, Trash2, Eye, EyeOff, Crown, ExternalLink, QrCode, Star, Inbox as InboxIcon,
 } from "lucide-react";
 import { useAppShell } from "@/components/AppShellContext";
 import SiteMessages from "@/components/designer/SiteMessages";
+import QrDialog from "@/components/designer/QrDialog";
 import { base44 } from "@/api/base44Client";
 import Sidebar from "@/components/Sidebar";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -98,7 +99,7 @@ function useNewMessages(site) {
   return [fresh, () => setFresh(false)];
 }
 
-function SiteCard({ site, onEdit, onToggleHidden, onDelete, inGallery, onToggleGallery, takenDown, onMessages }) {
+function SiteCard({ site, onEdit, onToggleHidden, onDelete, inGallery, onToggleGallery, takenDown, onMessages, onQr }) {
   const [fresh, clearFresh] = useNewMessages(site);
   const hasPreview = isInlineHtml(site.html);
   return (
@@ -189,6 +190,17 @@ function SiteCard({ site, onEdit, onToggleHidden, onDelete, inGallery, onToggleG
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
         )}
+        {!site.hidden && siteUrl(site.name) && (
+          <button
+            type="button"
+            onClick={() => onQr(siteUrl(site.name))}
+            title="QR code to open it on a phone"
+            aria-label="QR code to open it on a phone"
+            className="flex items-center justify-center px-2.5 py-1.5 rounded-lg bg-slate-800 text-slate-200 text-xs hover:bg-slate-700 transition-colors"
+          >
+            <QrCode className="w-3.5 h-3.5" />
+          </button>
+        )}
         <button
           onClick={() => onDelete(site)}
           title="Delete"
@@ -205,6 +217,7 @@ export default function DesignerDashboard() {
   const shell = useAppShell();
   const { sidebarOpen, setSidebarOpen, openProfile, avatarInitial, lightMode, toggleLight, navigate, effPlan, currentUser, conv, credits, isAdmin } = shell;
   const [sites, setSites] = useState([]);
+  const [qrUrl, setQrUrl] = useState("");
   const [messagesFor, setMessagesFor] = useState(null); // site name whose form messages are open
   const [loading, setLoading] = useState(true);
   const [prompt, setPrompt] = useState("");
@@ -522,12 +535,14 @@ export default function DesignerDashboard() {
                     takenDown={takenDown.has(s.name)}
                     onToggleGallery={toggleGallery}
                     onMessages={(x) => setMessagesFor(x.name)}
+                    onQr={setQrUrl}
                   />
                 ))}
               </div>
             )}
             {err && <p className="text-sm text-red-400 mt-4">{err}</p>}
             {messagesFor && <SiteMessages site={messagesFor} onClose={() => setMessagesFor(null)} />}
+            <QrDialog url={qrUrl} title="Scan to open the site" onClose={() => setQrUrl("")} />
           </section>
         </div>
       </main>

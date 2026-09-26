@@ -33,6 +33,7 @@ import { EXPLAIN_NOTE, splitBuildReply, editReplyNote, introBeforeCode } from "@
 import { syncSiteProducts } from "@/lib/siteProducts";
 import SaveStatus from "@/components/designer/SaveStatus";
 import ShareLink from "@/components/designer/ShareLink";
+import QrDialog, { QrButton } from "@/components/designer/QrDialog";
 import { EDIT_NOTE, hasEditBlocks, applyEdits } from "@/lib/htmlEdits";
 import { DESIGNER_STORE_KEY } from "@/lib/designerStore";
 import { saveBuilds, loadBuilds } from "@/lib/buildHistory";
@@ -604,6 +605,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   };
 
   const reload = () => setReloadKey((k) => k + 1);
+  const [qrUrl, setQrUrl] = useState("");
   const previewBoxRef = useRestartWhenShown(reload);
 
   const taken = nameTaken;
@@ -1095,6 +1097,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
               </a>
             )}
             {publishUrl && <ShareLink url={publishUrl} title={publishUrl.replace(/^https:\/\//, "")} />}
+            {publishUrl && <QrButton onClick={() => setQrUrl(publishUrl)} />}
             {/* Right after publishing is when people most want to share: invite friends too. */}
             <button
               type="button"
@@ -1106,6 +1109,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
           </motion.div>
         )}
       </AnimatePresence>
+      <QrDialog url={qrUrl} title="Open my website" onClose={() => setQrUrl("")} />
     </div>
   );
 }

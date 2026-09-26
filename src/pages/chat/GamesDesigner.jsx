@@ -5,6 +5,7 @@ import { RotateCcw } from "lucide-react";
 import { findBuiltInGame } from "@/lib/builtInGames";
 import PageSize from "@/components/designer/PageSize";
 import ShareLink from "@/components/designer/ShareLink";
+import QrDialog, { QrButton } from "@/components/designer/QrDialog";
 import Markdown from "@/components/chat/Markdown";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Gamepad2, RefreshCw, Plus, X, Crown, Rocket, Paperclip } from "lucide-react";
@@ -534,6 +535,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
   };
 
   const reload = () => setReloadKey((k) => k + 1);
+  const [qrUrl, setQrUrl] = useState("");
   const previewBoxRef = useRestartWhenShown(reload);
   const taken = nameTaken;
   const ownerInitial = (user?.full_name || user?.email || "U").trim().charAt(0).toUpperCase();
@@ -900,6 +902,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
               </a>
             )}
             {publishUrl && <ShareLink url={publishUrl} title={(title || "").trim() || "my game"} />}
+            {publishUrl && <QrButton onClick={() => setQrUrl(publishUrl)} />}
             {/* Right after publishing is when people most want to share: invite friends too. */}
             <button
               type="button"
@@ -911,6 +914,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
           </motion.div>
         )}
       </AnimatePresence>
+      <QrDialog url={qrUrl} title={(title || "").trim() || "Play my game"} onClose={() => setQrUrl("")} />
     </div>
   );
 }
