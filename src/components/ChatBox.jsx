@@ -6,6 +6,8 @@ import { historyBlock } from "@/lib/chatHistory";
 import { readAboutMe, aboutMeBlock } from "@/lib/aboutMe";
 import AboutMeButton from "@/components/chat/AboutMeButton";
 import StudyModeButton from "@/components/chat/StudyModeButton";
+import StreakChip from "@/components/chat/StreakChip";
+import { noteActivity } from "@/lib/streak";
 import { studyModeOn, studyBlock } from "@/lib/studyMode";
 import ReportReply from "@/components/chat/ReportReply";
 import { Plus, RotateCcw, Pencil, ImagePlus } from "lucide-react";
@@ -99,6 +101,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
   // the answer it replaces); by default all of them.
   const runPrompt = async (text, ai, before = messages.length) => {
     const history = (ai === "ai" ? studyBlock(studyModeOn()) : "") + aboutMeBlock(readAboutMe(shell?.currentUser?.id)) + historyBlock(messages.slice(0, before));
+    noteActivity(shell?.currentUser?.id);
     let convId = conversation?.id || convIdRef.current;
     const isFirst = !convId || messages.length === 0;
     if (!convId) convId = createConversation();
@@ -471,7 +474,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
             />
             <SendOrStopButton loading={loading} focused={focused} queued={queued} canSend={canSend} onSend={send} onStop={stop} />
           </div>
-          <div className="flex items-center gap-2 mt-2">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2">
             <button
               onClick={() => fileInputRef.current?.click()}
               title="Attach pictures or files (or paste or drop them here)"
@@ -490,6 +493,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
             <AiChooser value={selectedAi} onChange={setSelectedAi} plan={plan} allowFable={true} />
             <EffortPicker value={effort} onChange={setEffort} />
             {buildMode.visible && <ModeToggle mode={buildMode.mode} onChange={buildMode.setMode} />}
+            <StreakChip userId={shell?.currentUser?.id} />
           </div>
           <input
             ref={cameraRef}
