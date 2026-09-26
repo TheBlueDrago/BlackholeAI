@@ -12,7 +12,7 @@ const UPDATES = [
       { icon: Globe, text: "QR codes: after you publish, or from your list of websites, show a QR code so people nearby can scan it and open your site or game on their phone." },
       { icon: Sparkles, text: "One-tap improvements in the Website and Game Designers: Make it harder, Add sound effects, Add a high score, Make it look more modern, Add a contact form and more." },
       { icon: BookOpen, text: "New guides: Study mode, and making flashcards with AI." },
-      { icon: Sparkles, text: "Daily streak: the chat shows how many days in a row you've asked the AI something (🔥 3 days). Snap a question: take a photo of homework straight from the chat's start screen." },
+      { icon: Sparkles, text: "Snap a question: take a photo of homework straight from the chat's start screen." },
       { icon: BookOpen, text: "Flashcards: ask for flashcards on any topic (or tap Make flashcards under an answer) and flip through them right in the chat, shuffle them and mark the ones you know." },
       { icon: Sparkles, text: "Pin your favourite chats to the top of the chat list with the pin button." },
       { icon: BookOpen, text: "Study mode: switch it on in the chat and the AI becomes a tutor, guiding you one step at a time with hints instead of just giving the answer. Ask for the answer whenever you want it." },
