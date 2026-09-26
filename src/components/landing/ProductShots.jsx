@@ -53,8 +53,8 @@ export function ChatShot({ className = "" }) {
   return (
     <div className={`rounded-2xl bg-slate-900/95 border border-slate-700/70 shadow-2xl shadow-indigo-950/60 p-4 space-y-3 ${className}`}>
       <div className="flex items-center gap-2 pb-2 border-b border-slate-800">
-        <span className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center">
-          <BlackholeIcon className="w-4 h-4" />
+        <span className="w-7 h-7 rounded-lg overflow-hidden flex items-center justify-center">
+          <BlackholeIcon className="w-full h-full" />
         </span>
         <span className="text-sm font-semibold text-white">Nebulux AI</span>
         <span className="ml-auto text-[10px] text-emerald-300 bg-emerald-500/10 border border-emerald-400/30 rounded-full px-2 py-0.5">online</span>

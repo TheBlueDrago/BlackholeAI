@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Mail, Lock, Loader2 } from "lucide-react";
 import GoogleIcon from "@/components/GoogleIcon";
+import { googleLogin } from "@/lib/googleLogin";
 import BlackholeIcon from "@/components/BlackholeIcon";
 import { safeReturnTo } from "@/lib/authReturnTo";
 import ShowPasswordButton from "@/components/ShowPasswordButton";
@@ -49,7 +50,7 @@ export default function Login() {
   const handleGoogle = () => {
     // Set before leaving for Google: the session cookie lasts through the round trip.
     markSessionOnly(!remember);
-    base44.auth.loginWithProvider("google", returnTo);
+    googleLogin(returnTo);
   };
 
   return (
@@ -60,8 +61,8 @@ export default function Login() {
         <div className="bg-slate-900/70 backdrop-blur-xl border border-slate-700/50 rounded-3xl shadow-2xl p-8">
           {/* Logo */}
           <div className="flex justify-center mb-6">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-              <BlackholeIcon className="w-9 h-9" />
+            <div className="w-14 h-14 rounded-2xl overflow-hidden flex items-center justify-center shadow-lg shadow-indigo-500/30">
+              <BlackholeIcon className="w-full h-full" />
             </div>
           </div>
 

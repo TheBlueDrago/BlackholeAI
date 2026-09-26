@@ -12,8 +12,8 @@ export default function Intro() {
 
       <div className="text-center relative z-10">
         <div className="bh-rise mb-6 flex justify-center">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center shadow-2xl shadow-indigo-500/30">
-            <BlackholeIcon className="w-12 h-12" />
+          <div className="w-20 h-20 rounded-2xl overflow-hidden flex items-center justify-center shadow-2xl shadow-indigo-500/30">
+            <BlackholeIcon className="w-full h-full" />
           </div>
         </div>
 

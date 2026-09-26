@@ -104,8 +104,8 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
               onClick={onGoHome}
               className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-white hover:bg-slate-800/70 transition-colors"
             >
-              <div className="w-6 h-6 rounded-md bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center">
-                <BlackholeIcon className="w-4 h-4" />
+              <div className="w-6 h-6 rounded-md overflow-hidden flex items-center justify-center">
+                <BlackholeIcon className="w-full h-full" />
               </div>
               <span className="text-[13px] font-semibold">Nebulux AI</span>
             </button>

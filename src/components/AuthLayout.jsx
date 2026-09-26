@@ -12,10 +12,10 @@ export default function AuthLayout({ title, subtitle, footer, children }) {
         <div className="text-center mb-8">
           <Link
             to="/"
-            className="inline-flex w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 items-center justify-center shadow-lg shadow-indigo-500/30 mb-4"
+            className="inline-flex w-14 h-14 rounded-2xl overflow-hidden items-center justify-center shadow-lg shadow-indigo-500/30 mb-4"
             aria-label="Nebulux AI home"
           >
-            <BlackholeIcon className="w-9 h-9" />
+            <BlackholeIcon className="w-full h-full" />
           </Link>
           <h1 className="text-3xl font-bold tracking-tight text-white">{title}</h1>
           {subtitle && <p className="text-slate-400 mt-2">{subtitle}</p>}

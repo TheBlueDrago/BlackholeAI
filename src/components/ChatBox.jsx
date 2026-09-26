@@ -332,8 +332,8 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
         <div ref={scrollRef} className="h-[55vh] sm:h-96 overflow-y-auto overscroll-y-auto p-4 sm:p-6 space-y-4">
           {messages.length === 0 && !loading && (
             <div className="h-full flex flex-col items-center justify-center text-center">
-              <div className="keep-color w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center mb-3">
-                <BlackholeIcon className="w-7 h-7" />
+              <div className="keep-color w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center mb-3">
+                <BlackholeIcon className="w-full h-full" />
               </div>
               <p className="text-slate-300 font-medium">Ask me anything</p>
               <p className="text-slate-500 text-sm mt-1">or try one of these</p>

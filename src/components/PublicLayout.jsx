@@ -109,8 +109,8 @@ export default function PublicLayout({ title, children }) {
       <header className="sticky top-0 z-30 bg-[#020617]/80 backdrop-blur-lg border-b border-white/5">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
           <Link to="/" className="flex items-center gap-2 font-bold tracking-tight shrink-0">
-            <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center">
-              <BlackholeIcon className="w-5 h-5" />
+            <span className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
+              <BlackholeIcon className="w-full h-full" />
             </span>
             Nebulux AI
           </Link>

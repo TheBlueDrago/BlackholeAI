@@ -91,8 +91,8 @@ export default function WelcomeTour({ user, shell, blocked }) {
 
         {!s ? (
           <div className="text-center">
-            <div className="keep-color w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center">
-              <BlackholeIcon className="w-8 h-8" />
+            <div className="keep-color w-14 h-14 mx-auto rounded-2xl overflow-hidden flex items-center justify-center">
+              <BlackholeIcon className="w-full h-full" />
             </div>
             <h2 id="bh-tour-title" className="mt-4 text-xl font-bold text-white">
               Welcome to Nebulux AI!
