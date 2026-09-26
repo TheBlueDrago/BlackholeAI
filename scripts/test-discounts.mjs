@@ -37,7 +37,7 @@ const fails = async (p, text) => {
 assert(D.discountedPrice(5, 20) === 4 && D.discountedPrice(1, 30) === 0.7, "20% off $5 is $4; 30% off $1 is $0.70");
 assert(D.discountedPrice(1, 90) === 0.5 && D.discountedPrice(4, 100) === 0.5, "never below the $0.50 payment minimum");
 assert(D.discountApplies("all", "pro") && D.discountApplies("all", "credits-space-50") && !D.discountApplies("all", "enterprise"), "'everything' covers plans and packs");
-assert(D.discountApplies("plans", "team") && !D.discountApplies("plans", "credits-ai-5"), "'all plans' is plans only");
+assert(D.discountApplies("plans", "team") && !D.discountApplies("plans", "credits-ai-10"), "'all plans' is plans only");
 assert(D.discountApplies("credits-galaxy", "credits-galaxy-25") && !D.discountApplies("credits-galaxy", "credits-space-25"), "one AI's packs");
 
 // Admin creates codes
@@ -51,7 +51,7 @@ assert(await fails(P.createPromo(kv, req, { code: "BAD2", kind: "discount", pct:
 const a = { id: "ua" }, b = { id: "ub" }, c = { id: "uc" };
 let d = await P.checkDiscount(kv, req, a, "save20", "pro");
 assert(d.pct === 20 && d.target === "plans", "the code is 20% off plans");
-assert(await fails(P.checkDiscount(kv, req, a, "SAVE20", "credits-ai-5"), "only for"), "not for credit packs");
+assert(await fails(P.checkDiscount(kv, req, a, "SAVE20", "credits-ai-10"), "only for"), "not for credit packs");
 const r = await P.redeemPromo(kv, req, a, "save20");
 assert(r.kind === "discount" && r.pct === 20, "redeeming a discount code in the Shop just returns the discount");
 await P.checkDiscount(kv, req, a, "SAVE20", "pro", { claim: true });

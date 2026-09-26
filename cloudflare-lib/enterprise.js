@@ -11,7 +11,14 @@ import { offerFor, DISCOUNT_PCT } from "./offers.js";
 
 const KEY = "enterprise:apps";
 const MAX_APPS = 300;
-export const PRICE_PER_SEAT = 12; // US dollars a month
+// US dollars a seat a month: $17, less for bigger organizations, never more than $2 off.
+export const PRICE_PER_SEAT = 17;
+export const SEAT_TIERS = [
+  { from: 25, price: 15 },
+  { from: 10, price: 16 },
+  { from: 1, price: 17 },
+];
+export const seatPrice = (seats) => (SEAT_TIERS.find((t) => seats >= t.from) || SEAT_TIERS[SEAT_TIERS.length - 1]).price;
 export const ENTITY_TYPES = {
   llc: "LLC",
   corporation: "Corporation (Inc., Corp.)",
@@ -66,7 +73,7 @@ export function validateApplication(body) {
 export function quoteFor(seats, discountPct = 0) {
   const credits = {};
   for (const t of TIERS) credits[t] = PLAN_TOTALS.enterprise[t] * seats;
-  const perSeat = Math.round(PRICE_PER_SEAT * (100 - discountPct)) / 100;
+  const perSeat = Math.round(seatPrice(seats) * (100 - discountPct)) / 100;
   return { seats, pricePerSeat: perSeat, monthly: Math.round(seats * perSeat * 100) / 100, credits, discountPct };
 }
 export function warningsFor(app) {

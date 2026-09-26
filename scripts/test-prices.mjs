@@ -17,7 +17,7 @@ const load = (p) => import(new URL("../" + p, import.meta.url).href);
 const checkout = read("base44/functions/create-checkout/entry.ts");
 const planPrice = (id) => Number((checkout.match(new RegExp(`\\b${id}: \\{\\s*name: "[^"]+",\\s*price: "([\\d.]+)"`)) || [])[1]);
 const PRICE = { pro: planPrice("pro"), team: planPrice("team") };
-// As prices are written: $12, $2.99.
+// As prices are written: $10, $7.
 const usd = (n) => (Number.isInteger(n) ? String(n) : n.toFixed(2));
 assert(PRICE.pro > 0 && PRICE.team > 0, `checkout prices found (Pro $${PRICE.pro}, Team $${PRICE.team})`);
 
@@ -58,14 +58,11 @@ assert(has(pro, PLAN_TOTALS.pro), "the Shop's Pro card lists the credits Pro giv
 assert(has(team, PLAN_TOTALS.team), "the Shop's Team card lists the credits Team gives");
 assert(PUBLIC_PLANS.find((x) => x.id === "free").features.some((f) => f.startsWith(`${PLAN_TOTALS.free.ai} Blackhole AI credits`)), "public pricing lists Free's credits");
 
-// Credit packs: checkout's copy of the formula matches the app's.
-const { PACK_BASE, PACK_MULT } = await load("cloudflare-lib/creditPacks.js");
-const base = Object.fromEntries([...checkout.matchAll(/(\w+): \{ name: "[^"]+", base: ([\d.]+) \}/g)].map((m) => [m[1], Number(m[2])]));
+// Credit packs: checkout's price table matches the app's.
+const { PACK_PRICES } = await load("cloudflare-lib/creditPacks.js");
 const SLUG = { ai: "ai", aiCode: "code", galaxy5: "galaxy", space5: "space" };
-assert(Object.entries(PACK_BASE).every(([tier, b]) => base[SLUG[tier]] === b), `credit-pack base prices match checkout (${JSON.stringify(base)})`);
-const multSrc = (checkout.match(/PACK_MULT: Record<number, number> = (\{[^}]+\})/) || [])[1] || "";
-const mult = Object.fromEntries([...multSrc.matchAll(/(\d+): ([\d.]+)/g)].map((m) => [m[1], Number(m[2])]));
-assert(Object.entries(PACK_MULT).every(([size, m]) => mult[size] === m) && Object.keys(mult).length === Object.keys(PACK_MULT).length, "credit-pack size multipliers match checkout");
+const rows = Object.fromEntries([...checkout.matchAll(/^\s+(ai|code|galaxy|space): (\{ 10: [^}]+\}),?$/gm)].map((m) => [m[1], m[2]]));
+assert(Object.entries(PACK_PRICES).every(([tier, sizes]) => rows[SLUG[tier]] === `{ ${Object.entries(sizes).map(([n, p]) => `${n}: "${p}"`).join(", ")} }`), `credit-pack prices match checkout (${JSON.stringify(rows)})`);
 
 // Prices written out in words anywhere in the app, link previews and guides ("Pro is $1 a
 // month", "$5 a month for the whole team"): each one next to "Pro" or "Team" must be that

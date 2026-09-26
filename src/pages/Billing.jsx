@@ -77,22 +77,22 @@ function Billing() {
   const PLANS = {
     team: {
       name: "Team Plan",
-      amount: 7.99,
-      price: "$7.99 / month",
+      amount: 10,
+      price: "$10 / month",
       gradient: "from-sky-500 to-indigo-500",
       glow: "bg-sky-600/15",
       features: ["4 AI's (incl. Galaxy and Space)", "150 Blackhole AI credits / month", "100 Blackhole Code credits / month (shared)", "100 Galaxy credits / month", "100 Space credits / month", "Add up to 2 people — shared credits"],
-      button: "Subscribe — $7.99/mo",
+      button: "Subscribe — $10/mo",
       icon: Users,
     },
     pro: {
       name: "Pro Plan",
-      amount: 2.99,
-      price: "$2.99 / month",
+      amount: 7,
+      price: "$7 / month",
       gradient: "from-emerald-500 to-teal-500",
       glow: "bg-emerald-600/15",
       features: ["4 AI's (incl. Galaxy and Space)", "100 Blackhole AI credits / month", "50 Blackhole Code credits / month", "50 Galaxy credits / month", "50 Space credits / month"],
-      button: "Subscribe — $2.99/mo",
+      button: "Subscribe — $7/mo",
       icon: ShieldCheck,
     },
   };

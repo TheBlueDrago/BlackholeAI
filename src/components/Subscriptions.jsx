@@ -44,7 +44,7 @@ function FreeCard({ onFree }) {
 }
 
 // A price chip, with the new-member discount or a promo code when one applies ("$1/mo" -> "$1 $0.70/mo").
-// $12, $2.99: cents only when there are some.
+// $10, $7.50: cents only when there are some.
 const usd = (n) => (Number.isInteger(n) ? String(n) : n.toFixed(2));
 function PriceTag({ amount, pct }) {
   if (!pct) return <>${usd(amount)}/mo</>;
@@ -62,7 +62,7 @@ function Plan2Card({ onPro, pct }) {
       <div className="flex items-center justify-between">
         <h3 className="text-xl font-bold text-white">Pro</h3>
         <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-          <PriceTag amount={2.99} pct={pct} />
+          <PriceTag amount={7} pct={pct} />
         </span>
       </div>
       <div className="h-px bg-slate-700/60 my-4" />
@@ -106,7 +106,7 @@ function TeamCard({ onTeam, pct }) {
       <div className="flex items-center justify-between">
         <h3 className="text-xl font-bold text-white">Team</h3>
         <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/40">
-          <PriceTag amount={7.99} pct={pct} />
+          <PriceTag amount={10} pct={pct} />
         </span>
       </div>
       <div className="h-px bg-slate-700/60 my-4" />

@@ -1,21 +1,20 @@
 // One-time credit packs: bought instead of a plan (whatever the plan), added to the buyer's
 // bonus balance (credits.js), and never reset at the end of the month. Every AI comes in
 // the same sizes. The Base44 create-checkout function holds the authoritative prices, so keep
-// PACK_BASE and PACK_MULT in step with its copy.
+// PACK_PRICES in step with its copy.
 //
-// 5 credits cost the AI's base price. Doubling the pack doubles the price minus half of the
-// smaller pack's price (10 = 1.5x, 50 = 1.5x the 25 pack), and 25 credits are 3x the base,
-// so bigger packs cost less per credit.
-export const PACK_SIZES = [5, 10, 25, 50];
-// Half the first prices ($1/$2/$3/$4 for 5 credits), from 2026-09-25; 5 AI credits stays at the
-// $0.50 payment minimum.
-export const PACK_BASE = { ai: 0.5, aiCode: 1, galaxy5: 1.5, space5: 2 };
-export const PACK_MULT = { 5: 1, 10: 1.5, 25: 3, 50: 4.5 };
-export const PACK_PRICES = {};
-for (const [tier, base] of Object.entries(PACK_BASE)) {
-  PACK_PRICES[tier] = {};
-  for (const size of PACK_SIZES) PACK_PRICES[tier][size] = (base * PACK_MULT[size]).toFixed(2);
-}
+// Priced against the plans (2026-09-25): every 50-credit pack costs less than Pro ($7 for
+// 100 AI + 50 each of Code, Galaxy and Space), and buying Pro's credits as packs costs about
+// 2.5x Pro, so a plan is the better deal and packs are for topping up. Bigger packs cost less
+// per credit. No pack is under the $0.50 payment minimum (so there's no 5-credit pack: it
+// would cost the same as 10).
+export const PACK_SIZES = [10, 25, 50];
+export const PACK_PRICES = {
+  ai: { 10: "0.50", 25: "0.69", 50: "0.99" },
+  aiCode: { 10: "0.50", 25: "0.89", 50: "1.49" },
+  galaxy5: { 10: "0.59", 25: "1.19", 50: "1.99" },
+  space5: { 10: "0.75", 25: "1.49", 50: "2.49" },
+};
 // Product ids: credits-<ai>-<size>, e.g. "credits-galaxy-25".
 const SLUG = { ai: "ai", aiCode: "code", galaxy5: "galaxy", space5: "space" };
 

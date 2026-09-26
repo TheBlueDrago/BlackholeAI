@@ -60,7 +60,7 @@ export const servePage = (meta) =>
 export const PAGES = {
   arcade: { title: "Free games made with AI", description: "Play free games in your browser on any phone or computer. No download, no account. Every one was made by describing it to Blackhole AI.", path: "/arcade" },
   templates: { title: "Free website templates", description: "Pick a free template and change anything by telling the AI what you want. Publish it free at yourname.blackhole-ai-tech.com.", path: "/templates" },
-  pricing: { title: "Pricing", description: "Free to start. Pro is $2.99 a month, Team is $7.99 a month for up to 3 people, credit packs start at $0.50, and Enterprise is priced per seat.", path: "/pricing" },
+  pricing: { title: "Pricing", description: "Free to start. Pro is $7 a month, Team is $10 a month for up to 3 people, credit packs start at $0.50, and Enterprise is priced per seat.", path: "/pricing" },
   business: { title: "Websites for your business", description: "Describe your business and get a website in minutes. Sell from your site, work as a team and keep your code.", path: "/business" },
   enterprise: { title: "Enterprise", description: "Blackhole AI for your whole organization: a seat for everyone and one shared pool of credits. For registered businesses.", path: "/enterprise" },
   about: { title: "About us", description: "We help people make websites and games just by describing them, on any phone or computer.", path: "/about" },

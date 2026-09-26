@@ -94,7 +94,7 @@ Deno.serve(async (req: Request) => {
     const PRODUCTS = {
       pro: {
         name: "Pro Plan",
-        price: "2.99",
+        price: "7.00",
         currency: "USD",
         subscriptionInfo: {
           subscriptionSettings: { frequency: "MONTH" },
@@ -104,7 +104,7 @@ Deno.serve(async (req: Request) => {
       },
       team: {
         name: "Team Plan",
-        price: "7.99",
+        price: "10.00",
         currency: "USD",
         subscriptionInfo: {
           subscriptionSettings: { frequency: "MONTH" },
@@ -113,21 +113,20 @@ Deno.serve(async (req: Request) => {
         },
       },
     };
-    // One-time credit packs of 5-50 credits for each AI: bought instead of a plan, no
+    // One-time credit packs of 10, 25 or 50 credits for each AI: bought instead of a plan, no
     // subscription, added to the buyer's bonus credits by the credit server. Ids are
-    // credits-<ai>-<size>. Price = the AI's 5-credit price x the size's multiplier. Keep both in
-    // step with PACK_BASE and PACK_MULT in cloudflare-lib/creditPacks.js.
-    const PACK_BASE: Record<string, { name: string; base: number }> = {
-      ai: { name: "Blackhole AI", base: 0.5 },
-      code: { name: "Blackhole Code", base: 1 },
-      galaxy: { name: "Galaxy", base: 1.5 },
-      space: { name: "Space", base: 2 },
+    // credits-<ai>-<size>. Keep in step with PACK_PRICES in cloudflare-lib/creditPacks.js.
+    const PACK_NAMES: Record<string, string> = { ai: "Blackhole AI", code: "Blackhole Code", galaxy: "Galaxy", space: "Space" };
+    const PACK_PRICES: Record<string, Record<number, string>> = {
+      ai: { 10: "0.50", 25: "0.69", 50: "0.99" },
+      code: { 10: "0.50", 25: "0.89", 50: "1.49" },
+      galaxy: { 10: "0.59", 25: "1.19", 50: "1.99" },
+      space: { 10: "0.75", 25: "1.49", 50: "2.49" },
     };
-    const PACK_MULT: Record<number, number> = { 5: 1, 10: 1.5, 25: 3, 50: 4.5 };
     const CREDIT_PACKS: Record<string, { name: string; price: string; currency: string }> = {};
-    for (const [slug, p] of Object.entries(PACK_BASE)) {
-      for (const [size, mult] of Object.entries(PACK_MULT)) {
-        CREDIT_PACKS[`credits-${slug}-${size}`] = { name: `${size} ${p.name} credits`, price: (p.base * mult).toFixed(2), currency: "USD" };
+    for (const [slug, sizes] of Object.entries(PACK_PRICES)) {
+      for (const [size, price] of Object.entries(sizes)) {
+        CREDIT_PACKS[`credits-${slug}-${size}`] = { name: `${size} ${PACK_NAMES[slug]} credits`, price, currency: "USD" };
       }
     }
     const isPack = Object.prototype.hasOwnProperty.call(CREDIT_PACKS, productId);
