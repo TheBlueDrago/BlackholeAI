@@ -59,6 +59,12 @@ const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 // message instead when the images aren't acceptable.
 const MAX_PROMPT_CHARS = 800000;
 
+const WHO_ARE_YOU = /\b(who|what)\b[^?.!]{0,30}\b(made|created|built|trained|developed|owns?|are)\s+you\b|\bwhat (ai|model|llm)\b|\bare you (gemini|chatgpt|gpt|google|bard|claude|an? (ai|bot|robot|human))\b|\byour (name|creator|maker|model)\b/i;
+export const asksWhoItIs = (q) => WHO_ARE_YOU.test(String(q || "").slice(0, 300));
+export const IDENTITY_NOTE =
+  "[Reminder for this answer: you are Blackhole AI, made by the Blackhole AI team (blackhole-ai-tech.com). Introduce yourself that way, " +
+  "never as Gemini, Google, ChatGPT or another company's AI. If asked what powers you: Blackhole AI uses several AI models behind the scenes.]";
+
 function promptParts(prompt, images) {
   if (!Array.isArray(images) || !images.length) return prompt;
   if (images.length > MAX_IMAGES) return { error: `Attach at most ${MAX_IMAGES} images.` };
@@ -386,7 +392,9 @@ export async function onRequestPost(context) {
       }
     }
 
-    const input = internal ? prompt : promptParts(prompt, body.images);
+    // "Who made you?": the model's own training says Google, so the reminder goes with the question.
+    const idNote = !internal && asksWhoItIs(body.question) ? `${IDENTITY_NOTE}\n\n` : "";
+    const input = internal ? prompt : promptParts(idNote + prompt, body.images);
     if (input && input.error) return json({ error: input.error }, 400);
 
     const chain = internal ? [DEFAULT_MODEL] : [requested, ...MODELS_BY_STRENGTH.filter((m) => m !== requested)].slice(0, MAX_ATTEMPTS);

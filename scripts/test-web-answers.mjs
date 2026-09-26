@@ -64,3 +64,16 @@ refuseSearch = false;
 bodies.length = 0;
 [s, b] = await call("Any breaking news today?");
 assert(bodies[0].tools && b.content.includes("Sources"), "and comes back once that wears off");
+
+// "Who made you?" gets the identity reminder with the question; other questions don't.
+{
+  const { asksWhoItIs } = mod;
+  assert(["Who made you?", "who created you", "What AI model are you?", "are you gemini", "What's your name?", "who are you"].every(asksWhoItIs), "questions about who the AI is are noticed");
+  assert(!["Who made the Eiffel Tower?", "Explain photosynthesis", "What is the best AI for coding?"].some(asksWhoItIs), "other questions aren't");
+  bodies.length = 0;
+  await call("Who made you?");
+  assert(JSON.stringify(bodies[0].contents).includes("you are Blackhole AI, made by the Blackhole AI team"), "the reminder goes with that question");
+  bodies.length = 0;
+  await call("Explain photosynthesis simply");
+  assert(!JSON.stringify(bodies[0].contents).includes("Reminder for this answer"), "and not with others");
+}
