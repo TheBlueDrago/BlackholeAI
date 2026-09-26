@@ -14,3 +14,4 @@ assert(followUps("write a poem about cats", "Soft paws and whiskers bright, ".re
 assert(followUps("hi", "⚠ Blackhole AI is very busy right now.").length === 0 && followUps("x", "some text\n\n_(stopped)_").length === 0, "errors and stopped answers get none");
 assert(followUps("hi", "Hello! How can I help?").length === 0, "short replies like a greeting get none");
 assert(followUps("q", long.repeat(3)).length === 3, "never more than three");
+assert(followUps("make flashcards", "Here you go:\n```flashcards\nQ: a\nA: b\n```").join() === "Make 10 more flashcards,Quiz me on this", "flashcards get study follow-ups, not code ones");

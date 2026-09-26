@@ -9,7 +9,9 @@ export function followUps(question, answer) {
   const q = String(question || "");
   if (!a.trim() || a.startsWith("⚠") || /_\(stopped\)_\s*$/.test(a) || /Sorry, something went wrong/.test(a)) return [];
   const out = [];
-  if (hasCode(a)) {
+  if (/```flashcards/.test(a)) {
+    out.push("Make 10 more flashcards", "Quiz me on this");
+  } else if (hasCode(a)) {
     out.push("Explain this code step by step");
     out.push("Add comments to the code");
     if (!/\bbug|fix|error\b/i.test(q)) out.push("How could this code go wrong?");
