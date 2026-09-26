@@ -16,6 +16,8 @@ export const IDEAS = [
       "Make me a study plan for my science test on Friday.",
       "What's the difference between weather and climate?",
       "Give me 5 practice questions about the American Revolution.",
+      "Make flashcards about the planets.",
+      "Make 10 flashcards for Spanish words about food.",
     ],
   },
   {

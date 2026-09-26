@@ -24,7 +24,7 @@ const UPDATES = [
       { icon: Zap, text: "When lots of people are using the AI at once, it quietly tries again for you instead of showing an error, and new chats are named instantly." },
       { icon: Sparkles, text: "About you: tell the AI about yourself once (your grade, your interests, how you like answers) and every reply fits you. It's kept only on your device." },
       { icon: Sparkles, text: "The AI now remembers what you said earlier in the chat, so follow-ups like \"make it shorter\", \"why?\" or \"next question\" just work, in the chat and in Blackhole Code." },
-      { icon: BookOpen, text: "Not sure what to ask? \"Things to ask AI\" has 36 ideas for school, writing, coding, everyday life, fun and work; tap one to try it." },
+      { icon: BookOpen, text: "Not sure what to ask? \"Things to ask AI\" has 38 ideas for school, writing, coding, everyday life, fun and work; tap one to try it." },
       { icon: Sparkles, text: "New here? A short welcome tour shows you around the chat, the menu, the Website and Game Designers and your profile, or you can explore on your own." },
       { icon: Sparkles, text: "In the chat: edit your last message and send it again, and have any answer read aloud with a tap of the speaker button." },
       { icon: Globe, text: "Forms on the websites you make now work: bookings, RSVPs and sign-ups arrive in your Messages inbox in the Website Designer, with a dot when something new comes in and a download to a spreadsheet." },
