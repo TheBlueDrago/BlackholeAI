@@ -184,6 +184,7 @@ async function generate(apiKey, model, prompt, generationConfig, timeoutMs, { on
       return;
     }
     const cand = (chunk.candidates && chunk.candidates[0]) || {};
+    if (cand.finishReason) finishReason = cand.finishReason;
     const parts = (cand.content && cand.content.parts) || [];
     for (const p of parts) if (p.text && !p.thought) add(p.text);
     // Web pages the answer came from (Google Search grounding).
@@ -193,6 +194,7 @@ async function generate(apiKey, model, prompt, generationConfig, timeoutMs, { on
     }
   };
   const sources = [];
+  let finishReason = "";
   let stopped = false;
   while (!cut) {
     if (shouldStop && shouldStop()) {
@@ -224,7 +226,8 @@ async function generate(apiKey, model, prompt, generationConfig, timeoutMs, { on
     out += tail;
     if (onDelta) onDelta(tail);
   }
-  return { text: out, cut, stopped };
+  // Ran into the length limit mid-answer: the app offers "Keep going".
+  return { text: out, cut, stopped, more: finishReason === "MAX_TOKENS" && !cut && !stopped };
 }
 
 // Questions about now (news, scores, weather, prices, "today", "latest") get a Google search
@@ -418,7 +421,7 @@ export async function onRequestPost(context) {
     if (!body.stream) {
       try {
         const r = await runChain(env.GEMINI_API_KEY, chain, input, effort, maxTokens, { maxChars, search });
-        return json({ content: r.text, model: r.model, effort, ...(await settle(r.text, r.cut)) });
+        return json({ content: r.text, model: r.model, effort, ...(r.more ? { more: true } : {}), ...(await settle(r.text, r.cut)) });
       } catch (err) {
         // 503 rather than 502: Cloudflare replaces 502 bodies on the custom domain with a
         // bare "error code: 502", which hid this message from users.
@@ -444,7 +447,7 @@ export async function onRequestPost(context) {
       (async () => {
         try {
           const r = await runChain(env.GEMINI_API_KEY, chain, input, effort, maxTokens, { maxChars, search, onDelta: (t) => send({ delta: t }), shouldStop: () => gone });
-          await send({ done: true, model: r.model, effort, ...(await settle(r.text, r.cut, r.stopped)) });
+          await send({ done: true, model: r.model, effort, ...(r.more ? { more: true } : {}), ...(await settle(r.text, r.cut, r.stopped)) });
         } catch (err) {
           await send({ ...failure(err), status: 503 });
         } finally {

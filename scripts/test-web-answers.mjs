@@ -77,3 +77,20 @@ assert(bodies[0].tools && b.content.includes("Sources"), "and comes back once th
   await call("Explain photosynthesis simply");
   assert(!JSON.stringify(bodies[0].contents).includes("Reminder for this answer"), "and not with others");
 }
+
+// An answer that ran into the length limit is marked, so the app offers "Keep going".
+{
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (url, opts) => {
+    if (String(url).includes("generativelanguage")) {
+      const chunk = { candidates: [{ content: { parts: [{ text: "Part one of a long answer" }] }, finishReason: "MAX_TOKENS" }] };
+      return new Response(`data: ${JSON.stringify(chunk)}\n\n`, { status: 200, headers: { "content-type": "text/event-stream" } });
+    }
+    return realFetch(url, opts);
+  };
+  const [s1, b1] = await call("Explain the whole history of Rome");
+  assert(s1 === 200 && b1.more === true, "cut off by the length limit: marked more");
+  globalThis.fetch = realFetch;
+  const [, b2] = await call("Explain photosynthesis simply");
+  assert(!b2.more, "a finished answer isn't");
+}

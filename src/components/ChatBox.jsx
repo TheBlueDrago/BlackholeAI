@@ -42,6 +42,9 @@ const AI_NAMES = { ai: "Blackhole AI", code: "Blackhole Code", opus5: "Galaxy", 
 const MODELS = { ai: "automatic", code: "claude_sonnet_4_6", opus5: "claude_opus_4_8", fable: "claude-sonnet-5" };
 // Shown in an empty chat so new people see what they can make right away.
 // What people most often come for first: help from the AI; building is one tap away.
+// Sent when an answer stopped at the length limit (the server marks it "more").
+const KEEP_GOING = "Keep going from exactly where you stopped.";
+
 const STARTERS = [
   { icon: "📚", label: "Homework help", hint: "Step by step", prompt: "Help me with my homework. Ask me what the question is, then explain it step by step instead of just giving the answer." },
   { icon: "📷", label: "Snap a question", hint: "Photo of homework", go: "photo" },
@@ -151,7 +154,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
       // The server charged the credits (cutting the reply off if they ran out); show its new status.
       spend?.[ai]?.(res.credits);
       const content = res.content ?? "";
-      addMessage(convId, { role: "ai", content: res.cut ? `${content.trimEnd()}…\n\n${OUT_OF_CREDITS_NOTE}` : content });
+      addMessage(convId, { role: "ai", content: res.cut ? `${content.trimEnd()}…\n\n${OUT_OF_CREDITS_NOTE}` : content, ...(res.more ? { more: true } : {}) });
       if (talkBackRef.current) speakText(content);
       talkBackRef.current = false;
       if (isFirst) renameConversation(convId, chatTitle(text));
@@ -386,7 +389,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
                     </div>
                     {i === messages.length - 1 && !loading && !isExhausted && (
                       <div className="flex flex-wrap gap-1.5 mt-2">
-                        {followUps(messages[i - 1]?.role === "user" ? messages[i - 1].content : "", m.content).map((f) => (
+                        {(m.more ? [KEEP_GOING] : followUps(messages[i - 1]?.role === "user" ? messages[i - 1].content : "", m.content)).map((f) => (
                           <button
                             key={f}
                             type="button"
