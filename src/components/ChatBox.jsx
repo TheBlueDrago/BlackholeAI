@@ -24,6 +24,7 @@ import { useEffort, effortFor } from "@/lib/effort";
 import { streamChat } from "@/lib/aiStream";
 import { chatTitle } from "@/lib/chatTitle";
 import { followUps } from "@/lib/followUps";
+import { wantsFlashcards, FLASHCARD_NOTE } from "@/lib/flashcards";
 import { shrinkImage } from "@/lib/siteImages";
 import EffortPicker from "@/components/chat/EffortPicker";
 import VoiceInput from "@/components/chat/VoiceInput";
@@ -128,7 +129,8 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
     const sys = ai === "code" ? CODE_SYS : ai === "fable" ? FABLE_SYS : "";
     const intent = ai !== "ai" ? resolveIntent(text, buildMode.mode) : { build: true };
     const modeNote = ai !== "ai" ? (intent.build ? BUILD_NOTE : ANSWER_NOTE) + "\n\n" : "";
-    const fullPrompt = `${sys ? sys + "\n\n" : ""}${modeNote}${history}${text}${fileNote}`;
+    const cardNote = ai === "ai" && wantsFlashcards(text) ? FLASHCARD_NOTE : "";
+    const fullPrompt = `${sys ? sys + "\n\n" : ""}${modeNote}${cardNote}${history}${text}${fileNote}`;
     if (reqIdRef.current !== myId) return;
     try {
       const eff = effortFor(effort, text, { build: ai !== "ai" && intent.build });

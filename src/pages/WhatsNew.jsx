@@ -9,6 +9,7 @@ const UPDATES = [
   {
     date: "September 2026",
     items: [
+      { icon: BookOpen, text: "Flashcards: ask for flashcards on any topic (or tap Make flashcards under an answer) and flip through them right in the chat, shuffle them and mark the ones you know." },
       { icon: Sparkles, text: "Pin your favourite chats to the top of the chat list with the pin button." },
       { icon: BookOpen, text: "Study mode: switch it on in the chat and the AI becomes a tutor, guiding you one step at a time with hints instead of just giving the answer. Ask for the answer whenever you want it." },
       { icon: Sparkles, text: "Quick follow-ups under each answer: tap \"Explain it more simply\", \"Give me an example\", \"Quiz me on this\" and more, picked to fit the answer." },

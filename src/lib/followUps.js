@@ -17,8 +17,9 @@ export function followUps(question, answer) {
     const n = words(a);
     if (n < 25) return []; // "Hi! How can I help?" needs no follow-ups
     if (n > 60) out.push("Explain it more simply");
-    out.push("Give me an example");
-    if (n > 40 && !/\b(poem|story|email|letter|essay|joke|song)\b/i.test(q)) out.push("Quiz me on this");
+    const studyable = n > 40 && !/\b(poem|story|email|letter|essay|joke|song)\b/i.test(q);
+    out.push(studyable ? "Make flashcards" : "Give me an example");
+    if (studyable) out.push("Quiz me on this");
     if (n > 180) out.push("Make it shorter");
     if (/\b(poem|story|email|letter|essay|post|caption)\b/i.test(q)) {
       out.length = 0;

@@ -8,7 +8,7 @@ const assert = (c, m) => {
   } else console.log("ok", m);
 };
 const long = "Photosynthesis is how plants make food. ".repeat(20);
-assert(followUps("what is photosynthesis", long).join() === "Explain it more simply,Give me an example,Quiz me on this", "explanations: simpler, example, quiz");
+assert(followUps("what is photosynthesis", long).join() === "Explain it more simply,Make flashcards,Quiz me on this", "explanations: simpler, flashcards, quiz");
 assert(followUps("write a python loop", "Here:\n```py\nfor i in range(3): print(i)\n```").includes("Explain this code step by step"), "code gets code follow-ups");
 assert(followUps("write a poem about cats", "Soft paws and whiskers bright, ".repeat(10)).join() === "Make it shorter,Make it funnier,Make it more formal", "writing gets rewrite follow-ups");
 assert(followUps("hi", "⚠ Blackhole AI is very busy right now.").length === 0 && followUps("x", "some text\n\n_(stopped)_").length === 0, "errors and stopped answers get none");
