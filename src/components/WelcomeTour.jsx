@@ -11,7 +11,7 @@ const STEPS = [
   {
     icon: MessageCircle,
     title: "Ask the AI anything",
-    text: "Type or tap the microphone and ask in your own words: homework explained step by step, help writing an essay or email, a quiz before a test, or a question about a photo you send.",
+    text: "Type or tap the microphone and ask in your own words: homework explained step by step, help writing an essay or email, a quiz before a test, or a photo of a question. Turn on Study mode and it guides you step by step, or ask for flashcards to study with.",
     cta: "Start chatting",
     go: "chat",
   },
