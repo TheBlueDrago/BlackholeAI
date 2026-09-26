@@ -5,6 +5,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { siteUrl } from "@/lib/blackholeDomain";
 import MotionPrefs from "@/components/MotionPrefs";
 import usePageTitle from "@/hooks/usePageTitle";
+import { addNotification } from "@/lib/nebuluxChat";
 
 // After paying. Plans and credit packs come back here from create-checkout; purchases on a
 // site someone made come back with ?site=<name> from site-checkout (older checkouts without
@@ -19,6 +20,9 @@ export default function ThankYouPage() {
 
 function ThankYou() {
   usePageTitle("Thank you");
+  React.useEffect(() => {
+    addNotification({ kind: "purchase", text: "Thanks for your purchase! Your plan or credits are being added.", link: "/chat/plans" });
+  }, []);
   const [params] = useSearchParams();
   const siteHome = siteUrl(params.get("site") || "");
   const help = (

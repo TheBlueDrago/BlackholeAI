@@ -10,6 +10,7 @@ import Sidebar from "@/components/Sidebar";
 import ThemeToggle from "@/components/ThemeToggle";
 import { onGamesChanged } from "@/lib/gameEvents";
 import { builtInGameEntities } from "@/lib/builtInGames";
+import NotificationBell from "@/components/NotificationBell";
 
 const GENRES = [
   { id: "io", label: ".io", icon: Zap },
@@ -253,6 +254,7 @@ export default function GamesFront() {
           <Plus className="w-4 h-4" />
           <span className="hidden sm:inline">Create</span>
         </button>
+        <NotificationBell />
         <div className="relative shrink-0">
           <button
             onClick={() => setMenuOpen((o) => !o)}

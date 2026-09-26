@@ -57,6 +57,7 @@ const MonitorView = lazy(() => import('@/pages/chat/Views').then((m) => ({ defau
 const PromosView = lazy(() => import('@/pages/chat/Views').then((m) => ({ default: m.PromosView })));
 const SettingsView = lazy(() => import('@/pages/chat/Views').then((m) => ({ default: m.SettingsView })));
 const GamesFront = lazy(() => import('@/pages/chat/GamesFront'));
+const Community = lazy(() => import('@/pages/chat/Community'));
 const GamesDesignerWorkspace = lazy(() => import('@/components/GamesDesignerWorkspace'));
 const GameView = lazy(() => import('@/pages/chat/GameView'));
 
@@ -133,6 +134,7 @@ const AuthenticatedApp = () => {
           <Route path="designer/build" element={<DesignerWorkspace />} />
           <Route path="browser" element={<Navigate to="/chat" replace />} />
           <Route path="games" element={<GamesFront />} />
+          <Route path="community" element={<Community />} />
           <Route path="game-designer" element={<GamesDesignerWorkspace />} />
           <Route path="game/:name" element={<GameView />} />
           <Route path="shop" element={<PlansView />} />

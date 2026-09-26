@@ -23,6 +23,7 @@ import OutOfCredits from "@/components/chat/OutOfCredits";
 import { useEffort, effortFor } from "@/lib/effort";
 import { streamChat } from "@/lib/aiStream";
 import { chatTitle } from "@/lib/chatTitle";
+import { addNotification } from "@/lib/nebuluxChat";
 import { followUps } from "@/lib/followUps";
 import { wantsFlashcards, FLASHCARD_NOTE } from "@/lib/flashcards";
 import { wantsQuiz, QUIZ_NOTE } from "@/lib/quiz";
@@ -154,6 +155,8 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
       const content = res.content ?? "";
       addMessage(convId, { role: "ai", content: res.cut ? `${content.trimEnd()}…\n\n${OUT_OF_CREDITS_NOTE}` : content, ...(res.more ? { more: true } : {}) });
       if (talkBackRef.current) speakText(content);
+      // Away on another tab: ring the bell and play the chime.
+      if (typeof document !== "undefined" && document.hidden) addNotification({ kind: "ai", text: `Nebulux AI finished: ${text.slice(0, 60)}`, link: "/chat" });
       talkBackRef.current = false;
       if (isFirst) renameConversation(convId, chatTitle(text));
     } catch (e) {
