@@ -1,10 +1,9 @@
 import { base44 } from "@/api/base44Client";
-import { appParams } from "@/lib/app-params";
 
-// "Continue with Google". On nebuluxai.com, Base44 refuses to send people back ("Domain is not
-// valid": only blackhole-ai-tech.com is registered with it), so the round trip starts and ends
-// on the old address, whose /auth-bounce page (functions/auth-bounce.js) passes the session
-// straight back to nebuluxai.com.
+// "Continue with Google". Base44 refuses to finish a sign-in that starts on a site not registered
+// with the Base44 app ("Domain is not valid"), and only the old address is. So on nebuluxai.com
+// the sign-in starts from a small page on the old address (functions/auth-start.js), and its way
+// back (functions/auth-bounce.js) returns people to nebuluxai.com, signed in.
 const OLD = "https://blackhole-ai-tech.com";
 
 export function googleLogin(returnTo = "/") {
@@ -13,6 +12,5 @@ export function googleLogin(returnTo = "/") {
     base44.auth.loginWithProvider("google", returnTo);
     return;
   }
-  const back = `${OLD}/auth-bounce?to=${encodeURIComponent(returnTo)}`;
-  window.location.href = `${OLD}/api/apps/auth/login?app_id=${encodeURIComponent(appParams.appId)}&from_url=${encodeURIComponent(back)}`;
+  window.location.href = `${OLD}/auth-start?to=${encodeURIComponent(returnTo)}`;
 }
