@@ -10,7 +10,7 @@
 // To switch this off for everyone, replace this file with one that calls
 // self.registration.unregister() and deletes the caches.
 // v2: v1 served its saved page first, which after a new version pointed at code that was gone.
-const SHELL = "bh-shell-v2";
+const SHELL = "bh-shell-v3";
 const NETWORK_WAIT_MS = 4000;
 const ASSETS = "bh-assets-v1";
 const MAX_ASSETS = 250;
@@ -106,7 +106,10 @@ self.addEventListener("fetch", (event) => {
         const cache = await caches.open(ASSETS);
         const hit = await cache.match(req);
         if (hit) return hit;
-        const res = await fetch(req);
+        let res = await fetch(req);
+        // A code file asked for while a new version was going out can come back as the app page,
+        // and the browser keeps that copy for hours. Ask the server again, past that copy.
+        if (!isCode(res)) res = await fetch(req, { cache: "reload" }).catch(() => res);
         if (isCode(res)) {
           event.waitUntil(cache.put(req, res.clone()).catch(() => {}));
         } else {
