@@ -1,0 +1,10 @@
+# Email Worker for support@nebuluxai.com (Email Routing rule: send to this Worker).
+# Deploy from this folder: npx wrangler deploy. Secret: SUPPORT_KEY (same value as the Pages app's).
+name = "nebulux-support-mail"
+main = "worker.js"
+compatibility_date = "2026-09-22"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = false
+
+[observability]
+enabled = true

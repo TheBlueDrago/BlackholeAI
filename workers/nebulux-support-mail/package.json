@@ -1,0 +1,17 @@
+{
+  "name": "nebulux-support-mail",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "mimetext": "^3.0.28",
+    "postal-mime": "^3.0.1"
+  },
+  "private": true
+}
