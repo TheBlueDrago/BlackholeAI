@@ -18,7 +18,7 @@ import { createClientFromRequest } from "npm:@base44/sdk@0.8.31";
 
 const CONSTRUCT_URL = "https://www.wixapis.com/payments/platform/v1/checkout-sessions/construct";
 // Discount promo codes live in the Cloudflare app (cloudflare-lib/promos.js). This asks it, as the
-// buyer, what a code takes off. The pages.dev origin: blackhole-ai-tech.com's bot protection
+// buyer, what a code takes off. The pages.dev origin: nebuluxai.com's bot protection
 // challenges server-side requests. A fixed constant, never caller-controlled.
 const PROMO_CHECK_URL = "https://nebuluxai.pages.dev/api/apps/6a8b5eb7787b8a4d6a18f662/functions/promo-discount";
 
@@ -27,9 +27,9 @@ const PROMO_CHECK_URL = "https://nebuluxai.pages.dev/api/apps/6a8b5eb7787b8a4d6a
 // server-owned `WIX_CHECKOUT_APP_URL` secret. We do NOT fall back to the request `Origin`: it's
 // caller-controlled, so a spoofed Origin would make Wix send the paid buyer to an attacker page
 // (open redirect). Both sources above are always present for a connected payments app.
-// The live site is served from Cloudflare at blackhole-ai-tech.com, not from the Base44
+// The live site is served from Cloudflare at nebuluxai.com, not from the Base44
 // host, so buyers are always sent back there. A fixed constant — never caller-controlled.
-const PUBLIC_APP_URL = "https://blackhole-ai-tech.com";
+const PUBLIC_APP_URL = "https://nebuluxai.com";
 function resolveAppUrl(_req: Request): string {
   return PUBLIC_APP_URL;
 }

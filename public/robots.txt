@@ -15,4 +15,4 @@ Disallow: /reset-password
 Disallow: /forgot-password
 Disallow: /oauth
 
-Sitemap: https://blackhole-ai-tech.com/sitemap.xml
+Sitemap: https://nebuluxai.com/sitemap.xml

@@ -23,7 +23,7 @@ export default async function (req) {
       return Response.json({ error: 'Payments not configured' }, { status: 500 });
     }
     // Buyers return to the live site on Cloudflare (a fixed constant, never caller-controlled).
-    const appUrl = 'https://blackhole-ai-tech.com';
+    const appUrl = 'https://nebuluxai.com';
 
     const base44 = createClientFromRequest(req);
     let buyer = null;
@@ -99,13 +99,13 @@ export default async function (req) {
       },
       body: JSON.stringify({
         cart: {
-          items: [{ name: `${product.name || productId} — ${siteName}.blackhole-ai-tech.com`, quantity, price: String(product.price) }],
+          items: [{ name: `${product.name || productId} — ${siteName}.nebuluxai.com`, quantity, price: String(product.price) }],
           ...(buyer?.email ? { customerInfo: { email: buyer.email } } : {}),
         },
         callbackUrls: {
           // ?site= lets the thank-you page talk about this seller rather than plans and credits.
           thankYouPageUrl: `${appUrl}/ThankYou?site=${encodeURIComponent(siteName)}`,
-          postFlowUrl: `https://${siteName}.blackhole-ai-tech.com`,
+          postFlowUrl: `https://${siteName}.nebuluxai.com`,
         },
       }),
     });

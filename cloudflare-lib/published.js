@@ -16,7 +16,7 @@ import { accountBlocked, BLOCKED_MESSAGE } from "./bans.js";
 
 export const BACKEND = "https://blackhole-ai.base44.app";
 export const APP_ID = "6a8b5eb7787b8a4d6a18f662";
-// The pages.dev origin, not blackhole-ai-tech.com: that zone's bot protection answers
+// The pages.dev origin, not nebuluxai.com: that zone's bot protection answers
 // Base44's server-side fetch in get-site-html with a "Just a moment..." challenge page.
 export const PUBLIC_ORIGIN = "https://nebuluxai.pages.dev";
 export const MAX_BYTES = 5 * 1024 * 1024;
@@ -77,7 +77,7 @@ export async function findByName(request, kind, name) {
 }
 
 // Names are checked here, not just in the app, since anyone can call this directly. Site
-// names become web addresses (name.blackhole-ai-tech.com), so they're letters, digits and
+// names become web addresses (name.nebuluxai.com), so they're letters, digits and
 // hyphens only: "evil.com#" would otherwise make an address that's really evil.com. Games live
 // inside the app, and their names may also have dots ("shooter.io"). Same reserved words as the
 // designer. -> an error message, or "".
@@ -100,7 +100,7 @@ export function badName(kind, name) {
   return "";
 }
 
-// New site names that would look like one of our own pages at name.blackhole-ai-tech.com
+// New site names that would look like one of our own pages at name.nebuluxai.com
 // ("blackhole-login", "secure-billing", "verify-account") are refused: those are what a fake
 // sign-in or payment page would use. Only for names nobody has yet, so existing sites keep
 // working and their owners can still republish.

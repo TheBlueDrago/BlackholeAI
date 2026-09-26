@@ -84,7 +84,7 @@ export default function PublishedSites({ user, plan, onBack }) {
           {sites.map((s) => (
             <div key={s.id} className="rounded-xl bg-slate-800 border border-slate-700/50 p-3">
               <p className="text-sm font-medium text-slate-100 truncate">{s.name}</p>
-              <p className="text-[11px] text-slate-500 truncate">{s.name}.blackhole-ai-tech.com{s.hidden ? " · hidden" : ""}</p>
+              <p className="text-[11px] text-slate-500 truncate">{s.name}.nebuluxai.com{s.hidden ? " · hidden" : ""}</p>
               <div className="flex items-center gap-1.5 mt-2">
                 <button onClick={() => edit(s)} className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg bg-slate-700 text-slate-200 text-xs hover:bg-slate-600 transition-colors">
                   <Pencil className="w-3.5 h-3.5" /> Edit

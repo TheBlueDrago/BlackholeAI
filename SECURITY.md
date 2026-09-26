@@ -5,11 +5,11 @@
 If you think you've found a way into accounts, credits, payments or someone else's published
 page, please tell us privately first so it can be fixed before anyone else finds it:
 
-- the contact form at https://blackhole-ai-tech.com/contact?topic=security, or
+- the contact form at https://nebuluxai.com/contact?topic=security, or
 - email thebluedragonstriker@gmail.com
 
 Please don't test against other people's accounts or pages, and don't publish details until
-it's fixed. The same contact is in https://blackhole-ai-tech.com/.well-known/security.txt.
+it's fixed. The same contact is in https://nebuluxai.com/.well-known/security.txt.
 
 ## For the owner
 

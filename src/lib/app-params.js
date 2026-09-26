@@ -60,7 +60,7 @@ const getAppParams = () => {
 		token: getAppParamValue("access_token", { removeFromUrl: true }),
 		fromUrl: getAppParamValue("from_url", { defaultValue: window.location.href }),
 		functionsVersion: builtIn("functions_version", import.meta.env.VITE_BASE44_FUNCTIONS_VERSION),
-		// Always this site (blackhole-ai-tech.com), never blackhole-ai.base44.app: the SDK builds its
+		// Always this site (nebuluxai.com), never blackhole-ai.base44.app: the SDK builds its
 		// sign-in, Google sign-in and sign-out addresses from this, and Base44's copy of the app is
 		// not the website. Those paths reach Base44 through the /api proxy.
 		appBaseUrl: (builtIn("app_base_url", null), isNode ? null : window.location.origin),

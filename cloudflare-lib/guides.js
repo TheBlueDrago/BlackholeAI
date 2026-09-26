@@ -30,7 +30,7 @@ export const GUIDES = [
       },
       {
         heading: "Put it online",
-        paragraphs: ["A resume website is a link you can add to every application. Start from the Resume template, fill it with your details, and publish it free at yourname.blackhole-ai-tech.com."],
+        paragraphs: ["A resume website is a link you can add to every application. Start from the Resume template, fill it with your details, and publish it free at yourname.nebuluxai.com."],
       },
       {
         heading: "Keep private details private",
@@ -294,7 +294,7 @@ export const GUIDES = [
       {
         heading: "Step 4: Publish and share",
         paragraphs: [
-          "Press Publish and choose a name. Your site goes live at yourname.blackhole-ai-tech.com, a link you can text, post or print on a flyer. Every page is checked for scams and harmful content before it goes live, so visitors can trust it.",
+          "Press Publish and choose a name. Your site goes live at yourname.nebuluxai.com, a link you can text, post or print on a flyer. Every page is checked for scams and harmful content before it goes live, so visitors can trust it.",
           "The free plan keeps one website online. Pro, at $7 a month, keeps three and lets you download your site's code as a ZIP or push it to GitHub.",
         ],
       },
@@ -350,7 +350,7 @@ export const GUIDES = [
       {
         heading: "Publish and share",
         paragraphs: [
-          "Press Publish and your game gets its own link, like blackhole-ai-tech.com/play/yourgame. Anyone can play it straight in their browser with no download and no account. The free plan publishes one game a month; Pro publishes three.",
+          "Press Publish and your game gets its own link, like nebuluxai.com/play/yourgame. Anyone can play it straight in their browser with no download and no account. The free plan publishes one game a month; Pro publishes three.",
         ],
       },
       {
@@ -459,7 +459,7 @@ export const GUIDES = [
       {
         heading: "Share it",
         paragraphs: [
-          "Publish it at yourname.blackhole-ai-tech.com, then add the link to your job applications, your LinkedIn profile and your email signature. When something changes, update the page by chatting and publish again. The link stays the same.",
+          "Publish it at yourname.nebuluxai.com, then add the link to your job applications, your LinkedIn profile and your email signature. When something changes, update the page by chatting and publish again. The link stays the same.",
         ],
       },
     ],
@@ -479,7 +479,7 @@ export const GUIDES = [
       {
         heading: "Step 1: Open Nebulux AI and sign up",
         paragraphs: [
-          "Go to blackhole-ai-tech.com in Safari, Chrome or any browser and make a free account. There's nothing to download. On Android you can also install it like an app for one-tap access.",
+          "Go to nebuluxai.com in Safari, Chrome or any browser and make a free account. There's nothing to download. On Android you can also install it like an app for one-tap access.",
         ],
       },
       {
@@ -497,7 +497,7 @@ export const GUIDES = [
       {
         heading: "Step 4: Publish and share",
         paragraphs: [
-          "Press Publish, pick a name, and your site is live at yourname.blackhole-ai-tech.com. Share the link by text, in your social bios, or anywhere else people find you.",
+          "Press Publish, pick a name, and your site is live at yourname.nebuluxai.com. Share the link by text, in your social bios, or anywhere else people find you.",
         ],
       },
       {
@@ -544,7 +544,7 @@ export const GUIDES = [
       {
         heading: "Step 4: Publish and put it in your bio",
         paragraphs: [
-          "Publish with a name like yourname.blackhole-ai-tech.com and paste that link into every bio you have. When you post something new, change the page and publish again; the link in your bios never needs to change.",
+          "Publish with a name like yourname.nebuluxai.com and paste that link into every bio you have. When you post something new, change the page and publish again; the link in your bios never needs to change.",
         ],
       },
     ],
@@ -593,7 +593,7 @@ export const GUIDES = [
       {
         heading: "Step 4: Publish and keep it fresh",
         paragraphs: [
-          "Publish at yourplace.blackhole-ai-tech.com and put the link on your Google listing, your social pages and a small QR code by the till. When prices or hours change, update the page by chatting and publish again. The link stays the same.",
+          "Publish at yourplace.nebuluxai.com and put the link on your Google listing, your social pages and a small QR code by the till. When prices or hours change, update the page by chatting and publish again. The link stays the same.",
         ],
       },
     ],
@@ -639,7 +639,7 @@ export const GUIDES = [
       {
         heading: "Step 4: Publish and share it",
         paragraphs: [
-          "Publish at yourname.blackhole-ai-tech.com and put the link on your applications, your social bios and your email signature. Add new work by chatting and publish again; the link stays the same.",
+          "Publish at yourname.nebuluxai.com and put the link on your applications, your social bios and your email signature. Add new work by chatting and publish again; the link stays the same.",
         ],
       },
     ],
@@ -726,7 +726,7 @@ export const GUIDES = [
       {
         heading: "Step 4: Share it and count the sign-ups",
         paragraphs: [
-          "Publish at yourproduct.blackhole-ai-tech.com and share the link where your future users are: group chats, forums, social posts. If people sign up, you've found something worth building. If not, change the headline and try again; it only takes a message.",
+          "Publish at yourproduct.nebuluxai.com and share the link where your future users are: group chats, forums, social posts. If people sign up, you've found something worth building. If not, change the headline and try again; it only takes a message.",
         ],
       },
     ],

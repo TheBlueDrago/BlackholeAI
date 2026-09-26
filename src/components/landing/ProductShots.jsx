@@ -25,7 +25,7 @@ export function BrowserFrame({ address, children, className = "" }) {
   );
 }
 
-export function SiteShot({ id = "restaurant", address = "olive-and-ember.blackhole-ai-tech.com", className = "" }) {
+export function SiteShot({ id = "restaurant", address = "olive-and-ember.nebuluxai.com", className = "" }) {
   return (
     <BrowserFrame address={address} className={className}>
       <div className="relative aspect-[16/10] bg-white">
@@ -243,7 +243,7 @@ export function SafetyShot({ className = "" }) {
 export function HeroCollage() {
   return (
     <div className="relative mx-auto max-w-2xl pb-10 sm:pb-16">
-      <SiteShot id="landing" address="my-startup.blackhole-ai-tech.com" />
+      <SiteShot id="landing" address="my-startup.nebuluxai.com" />
       <div className="absolute -left-3 sm:-left-10 -bottom-2 sm:bottom-0 w-[58%] sm:w-[46%] rounded-2xl bg-slate-900/95 border border-slate-700/70 shadow-2xl p-3 space-y-2">
         <Bubble me>Make a landing page for my app, with pricing</Bubble>
         <Bubble>Done! It's live. Want a darker theme?</Bubble>

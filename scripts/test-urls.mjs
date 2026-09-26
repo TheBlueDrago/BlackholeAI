@@ -15,7 +15,7 @@ for (const bad of ["javascript:alert(1)", "JaVaScRiPt:alert(1)", "  javascript:a
 assert(safeWebUrl("https://example.com/a?b=1") === "https://example.com/a?b=1", "https addresses open");
 assert(safeWebUrl(" http://example.com ") === "http://example.com/", "http addresses open, trimmed");
 for (const bad of ["evil.com#", "a/b", "x?y", "-x", "x-", "a..b", "", "UPPER spaces"]) assert(siteUrl(bad) === "", `no site address for ${JSON.stringify(bad)}`);
-assert(siteUrl("My-Site-2") === "https://my-site-2.blackhole-ai-tech.com", "site names are lower-cased into their address");
+assert(siteUrl("My-Site-2") === "https://my-site-2.nebuluxai.com", "site names are lower-cased into their address");
 assert(makerName("  Maya ") === "Maya" && makerName("BLACKHOLE") === "" && makerName("x@y.z") === "", "maker names");
 
 const j = (...p) => p.join("");

@@ -85,7 +85,7 @@ const RECENT = {
     "Every new account confirms its email with a code before it can use anything, so nobody can sign up with someone else's address.",
     "Accounts that break the rules can be removed for good: their email can't be used to sign up again.",
     "Only a few new accounts can be made from one network, which stops people making lots of fake accounts.",
-    "Signing out and signing in always stay on blackhole-ai-tech.com.",
+    "Signing out and signing in always stay on nebuluxai.com.",
     "Your GitHub connection stays in your own browser and is only ever sent to GitHub.",
     "Paste code with an API key or access token in it, and the chat asks first, so your accounts stay yours.",
     "You can report an AI reply that's harmful or wrong with the flag under it.",
@@ -102,7 +102,7 @@ const RECENT = {
 
 const TIPS = [
   "We will never ask for your password, by email, phone or chat.",
-  "Only type your password on blackhole-ai-tech.com. Check the address first.",
+  "Only type your password on nebuluxai.com. Check the address first.",
   "Use a password you don't use anywhere else.",
   "If a site made with Nebulux AI asks for a password or card number, don't enter it, and report it.",
 ];

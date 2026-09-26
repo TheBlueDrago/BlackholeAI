@@ -26,7 +26,7 @@ export default function Showcase() {
         <h1 className="text-3xl sm:text-5xl font-bold text-white">Made with Nebulux AI</h1>
         <p className="text-slate-400 mt-3 max-w-xl mx-auto">
           Real websites people described in a sentence and published in minutes. Describe yours and it's live at
-          <span className="text-slate-200"> yourname.blackhole-ai-tech.com</span>.
+          <span className="text-slate-200"> yourname.nebuluxai.com</span>.
         </p>
       </div>
 
@@ -63,7 +63,7 @@ export default function Showcase() {
                 <div className="flex items-center gap-2 mt-3 px-1">
                   <div className="min-w-0 flex-1">
                     <p className="text-white text-sm font-medium truncate">{s.title || s.name}</p>
-                    <p className="text-[11px] text-slate-400 truncate">{s.name}.blackhole-ai-tech.com</p>
+                    <p className="text-[11px] text-slate-400 truncate">{s.name}.nebuluxai.com</p>
                   </div>
                   <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-slate-200 shrink-0" />
                 </div>

@@ -45,7 +45,7 @@ export default function Templates() {
         <h1 className="text-3xl sm:text-5xl font-bold text-white">Free website templates</h1>
         <p className="mt-3 text-slate-400 max-w-xl mx-auto">
           Pick one, then change anything by telling the AI what you want: words, colors, pages, a shop. Publish it free at
-          <span className="text-slate-200"> yourname.blackhole-ai-tech.com</span>.
+          <span className="text-slate-200"> yourname.nebuluxai.com</span>.
         </p>
       </section>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

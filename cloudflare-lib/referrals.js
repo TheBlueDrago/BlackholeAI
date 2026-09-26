@@ -14,7 +14,7 @@
 import { adjustBonus } from "./credits.js";
 
 export const REWARDS = { ai: 25, aiCode: 15, galaxy5: 10, space5: 5 };
-export const APP_ORIGIN = "https://blackhole-ai-tech.com";
+export const APP_ORIGIN = "https://nebuluxai.com";
 // Only accounts created this recently can be counted as referred, so existing users
 // can't claim they were referred by opening a friend's link.
 const NEW_ACCOUNT_MS = 3 * 24 * 60 * 60 * 1000;

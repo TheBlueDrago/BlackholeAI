@@ -3,7 +3,7 @@
 // "removed" page, and the response headers. No imports besides injected.js.
 import { stripInjected } from "./injected.js";
 
-const APP_ORIGIN = "https://blackhole-ai-tech.com";
+const APP_ORIGIN = "https://nebuluxai.com";
 
 // Buy buttons call parent.postMessage({ type: 'blackhole-checkout', ... }). Inside the
 // Blackhole Browser the app answers that (useSiteCheckout), but on the site's own
@@ -72,7 +72,7 @@ export function removedPage(kind, why = "It was taken down for breaking the Nebu
   );
 }
 
-// This path is on the app's own origin (blackhole-ai-tech.com / nebuluxai.pages.dev),
+// This path is on the app's own origin (nebuluxai.com / nebuluxai.pages.dev),
 // where the signed-in user's token lives in localStorage. A published page opened
 // here directly must not run as that origin, or its scripts could read the token.
 // The CSP sandbox gives it an opaque origin instead (scripts, forms and popups still

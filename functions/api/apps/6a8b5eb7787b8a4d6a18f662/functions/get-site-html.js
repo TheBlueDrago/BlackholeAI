@@ -1,6 +1,6 @@
 // Replaces Base44's hosted get-site-html (this exact path takes precedence over the
 // catch-all proxy). The subdomain router Worker asks this for every page it serves on
-// name.blackhole-ai-tech.com, and the Website Designer uses it to open a site for
+// name.nebuluxai.com, and the Website Designer uses it to open a site for
 // editing. Same contract: { name } -> { html, id, name, ownerName }.
 //
 // Base44's version returned whatever the PublishedSite record held, so a site written

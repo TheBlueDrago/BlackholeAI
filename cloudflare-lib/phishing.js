@@ -4,7 +4,7 @@
 
 // Finds a <form> that collects a password or card number and submits it to another
 // website. Returns a short description of what was found, or "" if the page is fine.
-// Forms that post to this page, a relative path, or a blackhole-ai-tech.com address
+// Forms that post to this page, a relative path, or a nebuluxai.com address
 // are allowed (sites built here can't receive form posts anyway).
 export function findCredentialForm(html) {
   const text = String(html || "");

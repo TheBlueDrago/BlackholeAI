@@ -30,7 +30,7 @@ export default function About() {
           </p>
         </div>
         <div className="relative pb-10">
-          <SiteShot id="portfolio" address="maya-chen.blackhole-ai-tech.com" />
+          <SiteShot id="portfolio" address="maya-chen.nebuluxai.com" />
           <ChatShot className="absolute -bottom-4 -left-2 sm:-left-8 w-[75%] sm:w-[60%] hidden sm:block" />
         </div>
       </section>

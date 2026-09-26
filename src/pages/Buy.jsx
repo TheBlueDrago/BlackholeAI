@@ -5,7 +5,7 @@ import { base44 } from "@/api/base44Client";
 import { paymentError } from "@/lib/paymentError";
 import { siteUrl } from "@/lib/blackholeDomain";
 
-// Published sites live on their own subdomain (nova.blackhole-ai-tech.com), where a buy
+// Published sites live on their own subdomain (nova.nebuluxai.com), where a buy
 // button's parent.postMessage has no host page to answer it. The bridge added by
 // functions/published/[kind]/[name].js sends the buyer here instead, and this starts the
 // same Base44 Payments checkout the Blackhole Browser uses (see useSiteCheckout).
@@ -38,7 +38,7 @@ export default function Buy() {
           <p className="text-red-400">{error}</p>
           {siteName && (
             <a href={siteUrl(siteName) || "/"} className="underline text-slate-400">
-              Back to {siteName}.blackhole-ai-tech.com
+              Back to {siteName}.nebuluxai.com
             </a>
           )}
         </>

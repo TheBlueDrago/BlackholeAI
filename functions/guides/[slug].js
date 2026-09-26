@@ -10,7 +10,7 @@ export async function onRequestGet({ request, env, params }) {
   const g = guideBySlug(String(params.slug || ""));
   const html = await page.text();
   if (!g) return new Response(html, { status: 404, headers: withAppHeaders(page.headers) });
-  const origin = "https://blackhole-ai-tech.com";
+  const origin = "https://nebuluxai.com";
   const out = withContent(withMeta(html, { title: g.title, description: g.description, path: `/guides/${g.slug}` }), {
     head: guideJsonLd(g, origin),
     body: guideHtml(g),

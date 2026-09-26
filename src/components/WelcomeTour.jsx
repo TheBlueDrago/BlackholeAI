@@ -25,7 +25,7 @@ const STEPS = [
   {
     icon: Globe,
     title: "Make a website",
-    text: "Describe a website or pick a template, change anything by chatting, and publish it free at yourname.blackhole-ai-tech.com. Forms on it send messages straight to you.",
+    text: "Describe a website or pick a template, change anything by chatting, and publish it free at yourname.nebuluxai.com. Forms on it send messages straight to you.",
     cta: "Open the Website Designer",
     go: "designer",
   },

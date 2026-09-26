@@ -189,7 +189,7 @@ export default function Login() {
         {/* A phishing page can copy this screen, but not the address bar. */}
         <p className="text-center text-slate-400 text-xs mt-3 px-2">
           <Lock className="inline w-3.5 h-3.5 -mt-0.5 mr-1 text-emerald-400" />
-          Only sign in at <span className="text-slate-300">blackhole-ai-tech.com</span>. We never ask for your password anywhere else.{" "}
+          Only sign in at <span className="text-slate-300">nebuluxai.com</span>. We never ask for your password anywhere else.{" "}
           <Link to="/safety" className="hover:underline">Trust &amp; safety</Link>
         </p>
       </div>

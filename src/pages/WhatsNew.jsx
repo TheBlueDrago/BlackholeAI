@@ -36,7 +36,7 @@ const UPDATES = [
       { icon: Sparkles, text: "Try any website template full screen before you sign up, and four new ones: local business, event invite, school club and resume." },
       { icon: Sparkles, text: "Edit your website's code by hand in the Website Designer, and push it to your own GitHub or download it as a ZIP on paid plans." },
       { icon: Zap, text: "The app opens much faster, especially when added to your phone's home screen, with no flash of the wrong colours." },
-      { icon: ShieldCheck, text: "Every new account confirms its email with a code, fake accounts are limited, and sign-in always stays on blackhole-ai-tech.com." },
+      { icon: ShieldCheck, text: "Every new account confirms its email with a code, fake accounts are limited, and sign-in always stays on nebuluxai.com." },
       { icon: ShieldCheck, text: "Buttons that ask \"Are you sure?\" now work in every browser, including the ones built into other apps." },
       { icon: Sparkles, text: "Lower prices for credit packs, and a new-member discount on them too." },
     ],

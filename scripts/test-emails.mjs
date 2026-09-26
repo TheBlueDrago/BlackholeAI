@@ -32,7 +32,7 @@ const fine = [
   "kid@gmail.com", "kid@yahoo.com", "kid@hotmail.com", "kid@outlook.com", "kid@icloud.com", "kid@aol.com",
   "kid@mail.com", "kid@email.com", "kid@ymail.com", "kid@gmx.com", "kid@me.com", "kid@live.com", "kid@cloud.com",
   "kid@yahoo.co.uk", "kid@hotmail.ca", "kid@hotmail.fr", "kid@outlook.de", "kid@live.co.uk", "kid@yahoo.com.au",
-  "kid@myschool.edu", "kid@company.com", "kid@blackhole-ai-tech.com", "kid@proton.me",
+  "kid@myschool.edu", "kid@company.com", "kid@nebuluxai.com", "kid@proton.me",
   "", "not an email", "a@b@gmail.com", "@gmial.com",
 ];
 for (const e of fine) assert(emailSuggestion(e) === "", `no hint for ${JSON.stringify(e)}`);

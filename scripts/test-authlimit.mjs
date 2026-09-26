@@ -43,7 +43,7 @@ async function call(path, body, { ip = "1.1.1.1", method = "POST" } = {}) {
     // Browsers send the body's size; Node's Request doesn't add it by itself.
     init.headers["content-length"] = String(new TextEncoder().encode(init.body).length);
   }
-  const request = new Request(`https://blackhole-ai-tech.com/api/${path}`, init);
+  const request = new Request(`https://nebuluxai.com/api/${path}`, init);
   const before = sent.length;
   const res = await onRequest({ request, params: { path: path.split("/") } });
   return { status: res.status, res, forwarded: sent.length > before ? sent[sent.length - 1] : null };
@@ -125,12 +125,12 @@ assert(r.status === 200, "if counting fails, nobody is locked out");
 // Only Base44's /api/ is reachable through the proxy.
 cacheBroken = false;
 {
-  const up = await onRequest({ request: new Request("https://blackhole-ai-tech.com/api/x"), params: { path: ["..", "evil-page"] } });
+  const up = await onRequest({ request: new Request("https://nebuluxai.com/api/x"), params: { path: ["..", "evil-page"] } });
   assert(up.status === 404 && sent.every((s) => !String(s.url).includes("evil-page")), "a path climbing out of /api/ is refused and nothing is fetched");
-  const enc = await onRequest({ request: new Request("https://blackhole-ai-tech.com/api/x"), params: { path: ["%2e%2e", "evil-page"] } });
+  const enc = await onRequest({ request: new Request("https://nebuluxai.com/api/x"), params: { path: ["%2e%2e", "evil-page"] } });
   assert(enc.status === 404, "also written as %2e%2e");
   for (const seg of ["..%2fsecret", "..%2F..%2Fsecret", "a%5c..%5csecret", "%E0%A4%A"]) {
-    const r2 = await onRequest({ request: new Request("https://blackhole-ai-tech.com/api/x"), params: { path: ["apps", seg] } });
+    const r2 = await onRequest({ request: new Request("https://nebuluxai.com/api/x"), params: { path: ["apps", seg] } });
     assert(r2.status === 404, `a part like ${seg} is refused`);
   }
   const ok = await call(`${APP}/entities/PublishedSite`, undefined, { method: "GET" });

@@ -32,7 +32,7 @@ export default function Report() {
   const [error, setError] = useState("");
   const [sent, setSent] = useState(false);
 
-  const address = kind === "site" ? `${name || "name"}.blackhole-ai-tech.com` : `the game "${name}"`;
+  const address = kind === "site" ? `${name || "name"}.nebuluxai.com` : `the game "${name}"`;
 
   const submit = async (e) => {
     e.preventDefault();
@@ -92,7 +92,7 @@ export default function Report() {
                 ))}
               </div>
               <label className="block text-sm">
-                <span className="text-slate-400">{kind === "site" ? "Site name (the part before .blackhole-ai-tech.com)" : "Game name (from its address)"}</span>
+                <span className="text-slate-400">{kind === "site" ? "Site name (the part before .nebuluxai.com)" : "Game name (from its address)"}</span>
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value.toLowerCase())}

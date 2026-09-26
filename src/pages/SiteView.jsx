@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { siteUrl } from "@/lib/blackholeDomain";
 
-// Published sites now have their own real subdomain (nova.blackhole-ai-tech.com,
+// Published sites now have their own real subdomain (nova.nebuluxai.com,
 // served by the blackhole-site-router Cloudflare Worker), so /site/:name just
 // hands off to it instead of iframing the HTML in — the previous sandboxed
 // srcDoc iframe (sandbox="allow-scripts", no allow-same-origin) silently broke

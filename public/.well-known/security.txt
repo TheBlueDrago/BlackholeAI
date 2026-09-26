@@ -1,7 +1,7 @@
 # Found a security problem in Nebulux AI? Please tell us privately first so we can fix it.
 Contact: mailto:thebluedragonstriker@gmail.com
-Contact: https://blackhole-ai-tech.com/contact?topic=security
-Policy: https://blackhole-ai-tech.com/safety#security
+Contact: https://nebuluxai.com/contact?topic=security
+Policy: https://nebuluxai.com/safety#security
 Preferred-Languages: en
-Canonical: https://blackhole-ai-tech.com/.well-known/security.txt
+Canonical: https://nebuluxai.com/.well-known/security.txt
 Expires: 2027-09-24T00:00:00.000Z

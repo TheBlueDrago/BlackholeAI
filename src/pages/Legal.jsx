@@ -40,7 +40,7 @@ export function Terms() {
   return (
     <LegalPage title="Terms of Service" other={{ to: "/privacy", label: "Privacy Policy" }}>
       <p>
-        These terms cover your use of Nebulux AI at blackhole-ai-tech.com, including its AI chat, Nebulux Code,
+        These terms cover your use of Nebulux AI at nebuluxai.com, including its AI chat, Nebulux Code,
         the Website and Game Designers and the sites and games people publish with it. By
         creating an account or using Nebulux AI you agree to them. If you don't agree, please don't use it.
       </p>

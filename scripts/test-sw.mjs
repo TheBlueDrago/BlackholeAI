@@ -16,12 +16,12 @@ const headers = readFileSync(new URL("../public/_headers", import.meta.url), "ut
 
 // Run the worker's code with a fake `self` and catch its fetch handler.
 const listeners = {};
-const fakeSelf = { addEventListener: (t, f) => (listeners[t] = f), location: { origin: "https://blackhole-ai-tech.com" }, clients: { claim() {} }, skipWaiting() {} };
+const fakeSelf = { addEventListener: (t, f) => (listeners[t] = f), location: { origin: "https://nebuluxai.com" }, clients: { claim() {} }, skipWaiting() {} };
 const fakeCache = { match: async () => null, put: async () => {}, keys: async () => [], delete: async () => true };
 const fakeCaches = { open: async () => fakeCache, keys: async () => [], delete: async () => true };
 const fakeFetch = async () => ({ ok: false, headers: { get: () => "" } });
 new Function("self", "caches", "fetch", src)(fakeSelf, fakeCaches, fakeFetch);
-const handled = (path, { method = "GET", mode = "navigate", destination = "document", origin = "https://blackhole-ai-tech.com" } = {}) => {
+const handled = (path, { method = "GET", mode = "navigate", destination = "document", origin = "https://nebuluxai.com" } = {}) => {
   let responded = false;
   listeners.fetch({ request: { method, url: origin + path, mode, destination }, respondWith: (p) => { responded = true; Promise.resolve(p).catch(() => {}); }, waitUntil: (p) => Promise.resolve(p).catch(() => {}) });
   return responded;
@@ -33,7 +33,7 @@ for (const p of ["/api/apps/x/entities/User/me", "/api/apps/x/functions/create-c
   assert(!handled(p) && !handled(p, { mode: "cors", destination: "" }), `${p} always goes to the network`);
 assert(!handled("/chat", { method: "POST" }), "only GETs are touched");
 assert(!handled("/chat", { destination: "iframe" }), "pages inside frames (previews) are never the app page");
-assert(!handled("/", { origin: "https://nova.blackhole-ai-tech.com" }) && !handled("/assets/x.js", { origin: "https://evil.example", mode: "no-cors", destination: "script" }), "other addresses are never touched");
+assert(!handled("/", { origin: "https://nova.nebuluxai.com" }) && !handled("/assets/x.js", { origin: "https://evil.example", mode: "no-cors", destination: "script" }), "other addresses are never touched");
 assert(/isCode\(r\)/.test(src) && /text\\\/html/.test(src), "a missing code file (served as a page) is never saved as code");
 assert(/import\.meta\.env\.PROD/.test(main) && main.includes("register('/sw.js'"), "it's switched on for the live site only");
 assert(/\/sw\.js\s*\n\s*Cache-Control: no-cache/.test(headers), "fixes to it reach everyone at once (never cached)");

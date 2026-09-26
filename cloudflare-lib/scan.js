@@ -50,7 +50,7 @@ function externalHosts(html, attrRe) {
   while ((m = attrRe.exec(html))) {
     try {
       const h = new URL(m[1]).hostname.toLowerCase();
-      if (!h.endsWith("blackhole-ai-tech.com")) hosts.add(h);
+      if (!h.endsWith("nebuluxai.com")) hosts.add(h);
     } catch {
       // Relative URL: fine.
     }

@@ -238,7 +238,7 @@ export const wantsSearch = (question) => NOW_WORDS.test(String(question || "").s
 // Google's free tier often has no search quota ("exceeded your current quota"). After a refusal,
 // searching is skipped for an hour (remembered in Cloudflare's free cache, not KV), so those
 // questions don't wait on a call that will fail. It turns itself back on to check again.
-const SEARCH_OFF_KEY = "https://blackhole-ai-tech.com/__internal/search-off";
+const SEARCH_OFF_KEY = "https://nebuluxai.com/__internal/search-off";
 async function searchOff() {
   try {
     await caches.default.put(new Request(SEARCH_OFF_KEY), new Response("1", { headers: { "cache-control": "max-age=3600" } }));

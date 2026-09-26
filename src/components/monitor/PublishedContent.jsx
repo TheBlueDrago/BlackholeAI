@@ -148,7 +148,7 @@ export default function PublishedContent() {
               {it.hidden && !it.takenDown && <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-700 text-slate-300 shrink-0">hidden</span>}
             </p>
             <p className="text-xs text-slate-400 break-all">
-              {it.kind === "site" ? `${it.name}.blackhole-ai-tech.com` : `game: ${it.name}`} · by {it.ownerName || "(no name)"} · {it.ownerEmail || "unknown email"}
+              {it.kind === "site" ? `${it.name}.nebuluxai.com` : `game: ${it.name}`} · by {it.ownerName || "(no name)"} · {it.ownerEmail || "unknown email"}
             </p>
           </div>
           <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border shrink-0 ${f.chip}`}>

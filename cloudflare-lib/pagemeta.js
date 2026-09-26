@@ -3,7 +3,7 @@
 // small functions (functions/<page>.js) serve it with the page's own title, description and
 // address instead. Game pages do the same with the game's name (playmeta.js).
 const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-const ORIGIN = "https://blackhole-ai-tech.com";
+const ORIGIN = "https://nebuluxai.com";
 
 // Replacements are functions, never strings: in a replacement string "$1" or "$&" means a
 // matched part, so a description with "$1" in it came out garbled.
@@ -59,7 +59,7 @@ export const servePage = (meta) =>
 
 export const PAGES = {
   arcade: { title: "Free games made with AI", description: "Play free games in your browser on any phone or computer. No download, no account. Every one was made by describing it to Nebulux AI.", path: "/arcade" },
-  templates: { title: "Free website templates", description: "Pick a free template and change anything by telling the AI what you want. Publish it free at yourname.blackhole-ai-tech.com.", path: "/templates" },
+  templates: { title: "Free website templates", description: "Pick a free template and change anything by telling the AI what you want. Publish it free at yourname.nebuluxai.com.", path: "/templates" },
   pricing: { title: "Pricing", description: "Free to start. Pro is $7 a month, Team is $10 a month for up to 3 people, credit packs start at $0.50, and Enterprise is priced per seat.", path: "/pricing" },
   business: { title: "Websites for your business", description: "Describe your business and get a website in minutes. Sell from your site, work as a team and keep your code.", path: "/business" },
   enterprise: { title: "Enterprise", description: "Nebulux AI for your whole organization: a seat for everyone and one shared pool of credits. For registered businesses.", path: "/enterprise" },
