@@ -16,7 +16,7 @@ export const PUBLIC_PLANS = [
     name: "Pro",
     price: "$2.99",
     period: "/month",
-    blurb: "More credits, all 4 AI models and your code to keep. New accounts get a week free.",
+    blurb: "More credits, all 4 AI models and your code to keep. New accounts get a free week (ZIP and GitHub come with the paid plan).",
     features: [
       "100 Blackhole AI credits a month",
       "50 each of Code, Galaxy and Space credits",

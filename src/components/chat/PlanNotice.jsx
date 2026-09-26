@@ -43,7 +43,7 @@ export default function PlanNotice() {
       : {
           key: `bh-note-trial-start:${planEndsAt}`,
           icon: Sparkles,
-          text: `Your free week of Pro has started: all 4 AIs, more credits, ZIP download and GitHub, for ${left(planEndsAt)}. As a new member you also get ${offer.discountPct}% off any plan (${offer.packDiscountPct || 20}% off a credit pack), once.`,
+          text: `Your free week of Pro has started: all 4 AIs and more credits, for ${left(planEndsAt)}. ZIP downloads and connecting a GitHub repo aren't included in the free week; they come with a paid plan. As a new member you also get ${offer.discountPct}% off any plan (${offer.packDiscountPct || 20}% off a credit pack), once.`,
         };
   } else if (offer.discountAvailable) {
     note = {
