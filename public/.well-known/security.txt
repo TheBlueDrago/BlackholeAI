@@ -1,5 +1,5 @@
 # Found a security problem in Nebulux AI? Please tell us privately first so we can fix it.
-Contact: mailto:thebluedragonstriker@gmail.com
+Contact: mailto:support@nebuluxai.com
 Contact: https://nebuluxai.com/contact?topic=security
 Policy: https://nebuluxai.com/safety#security
 Preferred-Languages: en
