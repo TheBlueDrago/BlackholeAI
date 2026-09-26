@@ -129,6 +129,9 @@ function suggestNames(n, projectId) {
 }
 
 // Tap-to-fill ideas for an empty game chat.
+// One-tap improvements shown under the latest version of the game.
+const GAME_TWEAKS = ["Make it harder", "Add sound effects", "Add a high score", "Make it work great on phones", "Add a new level"];
+
 const GAME_IDEAS = [
   "A space shooter with power-ups",
   "A platformer where a cat collects fish",
@@ -648,6 +651,21 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
                       <div className="space-y-2">
                         {m.note && <p className="whitespace-pre-wrap">{m.note}</p>}
                         <span className="block text-fuchsia-300 font-medium">✓ Game updated</span>
+                        {m === lastAi && i > 0 && !loading && !sendExhausted && (
+                          // One tap to improve the game (each is a normal message, so it's charged like one).
+                          <div className="flex flex-wrap gap-1.5 pt-1">
+                            {GAME_TWEAKS.map((t) => (
+                              <button
+                                key={t}
+                                type="button"
+                                onClick={() => runPrompt(t, selectedAi)}
+                                className="px-2.5 py-1 rounded-full border border-fuchsia-500/40 bg-fuchsia-500/10 text-[12px] text-fuchsia-200 hover:bg-fuchsia-500/20 transition-colors"
+                              >
+                                {t}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                         {isHtmlMsg(m) && m !== lastAi && !loading && (
                           <button
                             onClick={() => pushMsg({ role: "ai", content: m.content, note: "Restored an earlier version." })}
