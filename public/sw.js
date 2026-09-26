@@ -84,7 +84,16 @@ self.addEventListener("fetch", (event) => {
           return first;
         }
         const cached = await (await caches.open(SHELL)).match("/");
-        if (cached) return cached;
+        if (cached) {
+          // Slow network: the saved copy opens now, and the new page (once it arrives) is saved
+          // for next time, so a slow connection doesn't keep opening an old version.
+          event.waitUntil(
+            network
+              .then((res) => (res && res.ok ? refreshShell(res.clone()) : null))
+              .catch(() => {})
+          );
+          return cached;
+        }
         return network;
       })()
     );
