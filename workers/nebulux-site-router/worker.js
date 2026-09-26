@@ -1,4 +1,4 @@
-// blackhole-site-router — the Cloudflare Worker that serves every published site on
+// nebulux-site-router — the Cloudflare Worker that serves every published site on
 // its own subdomain (nova.blackhole-ai-tech.com). Bound to the route
 // *.blackhole-ai-tech.com/* (wildcard DNS). This is a copy of the code deployed in the
 // Cloudflare dashboard (Workers & Pages → blackhole-site-router), kept here so it's
@@ -17,7 +17,8 @@ const APP_ID = "6a8b5eb7787b8a4d6a18f662";
 // name.blackhole-ai-tech.com (older links keep working).
 const ROOTS = ["nebuluxai.com", "blackhole-ai-tech.com"];
 const ROOT = ROOTS[0];
-const API_BASE = "https://blackhole-ai-tech.com/api/apps/" + APP_ID + "/functions/";
+// The pages.dev address of the same app: no bot checks in the way of this server-to-server call.
+const API_BASE = "https://nebuluxai.pages.dev/api/apps/" + APP_ID + "/functions/";
 
 // Sent with every page this Worker serves. Sites here are made by users (often young ones):
 // they may not use the camera, microphone, USB devices or the browser's payment sheet (buying

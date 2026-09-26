@@ -1,6 +1,6 @@
-# The subdomain router for published sites. Matches the Worker deployed in the
+# The subdomain router for published sites (renamed from blackhole-site-router on 2026-09-25).
 # Cloudflare dashboard as of 2026-09-22. Deploy from this folder: npx wrangler deploy
-name = "blackhole-site-router"
+name = "nebulux-site-router"
 main = "worker.js"
 compatibility_date = "2026-09-22"
 routes = [

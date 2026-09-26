@@ -1,4 +1,4 @@
-// Offline test for the published-sites Worker (workers/blackhole-site-router/worker.js, deployed
+// Offline test for the published-sites Worker (workers/nebulux-site-router/worker.js, deployed
 // by hand with wrangler): it serves each site with safety headers, never puts the requested
 // address into its "not found" page unescaped, and leaves the app's own domain alone.
 // Run: node scripts/test-site-router.mjs
@@ -8,7 +8,7 @@ const assert = (c, m) => {
     process.exitCode = 1;
   } else console.log("ok", m);
 };
-const worker = (await import(new URL("../workers/blackhole-site-router/worker.js", import.meta.url).href)).default;
+const worker = (await import(new URL("../workers/nebulux-site-router/worker.js", import.meta.url).href)).default;
 let answer = { html: "<!DOCTYPE html><html><body>Nova</body></html>" };
 const asked = [];
 globalThis.fetch = async (input, init) => {
