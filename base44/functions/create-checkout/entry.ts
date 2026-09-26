@@ -120,7 +120,7 @@ Deno.serve(async (req: Request) => {
     const PACK_PRICES: Record<string, Record<number, string>> = {
       ai: { 10: "0.50", 25: "0.69", 50: "0.99" },
       code: { 10: "0.55", 25: "0.89", 50: "1.49" },
-      galaxy: { 10: "0.59", 25: "1.19", 50: "1.99" },
+      galaxy: { 10: "0.69", 25: "1.39", 50: "2.29" },
       space: { 10: "0.75", 25: "1.49", 50: "2.49" },
     };
     const CREDIT_PACKS: Record<string, { name: string; price: string; currency: string }> = {};

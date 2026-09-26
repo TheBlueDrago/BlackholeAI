@@ -12,7 +12,7 @@ export const PACK_SIZES = [10, 25, 50];
 export const PACK_PRICES = {
   ai: { 10: "0.50", 25: "0.69", 50: "0.99" },
   aiCode: { 10: "0.55", 25: "0.89", 50: "1.49" },
-  galaxy5: { 10: "0.59", 25: "1.19", 50: "1.99" },
+  galaxy5: { 10: "0.69", 25: "1.39", 50: "2.29" },
   space5: { 10: "0.75", 25: "1.49", 50: "2.49" },
 };
 // Product ids: credits-<ai>-<size>, e.g. "credits-galaxy-25".
