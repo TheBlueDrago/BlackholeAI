@@ -13,8 +13,11 @@
 // changing when those rules change. It adds PAGE_HEADERS below to every page it sends.
 
 const APP_ID = "6a8b5eb7787b8a4d6a18f662";
-const ROOT = "blackhole-ai-tech.com";
-const API_BASE = "https://" + ROOT + "/api/apps/" + APP_ID + "/functions/";
+// Sites and games answer on both addresses: name.nebuluxai.com (the new one) and
+// name.blackhole-ai-tech.com (older links keep working).
+const ROOTS = ["nebuluxai.com", "blackhole-ai-tech.com"];
+const ROOT = ROOTS[0];
+const API_BASE = "https://blackhole-ai-tech.com/api/apps/" + APP_ID + "/functions/";
 
 // Sent with every page this Worker serves. Sites here are made by users (often young ones):
 // they may not use the camera, microphone, USB devices or the browser's payment sheet (buying
@@ -48,14 +51,16 @@ function notFoundPage(rawName) {
 export default {
   async fetch(request) {
     var url = new URL(request.url);
-    var host = url.hostname;
-    if (host === ROOT || host === "www." + ROOT) {
+    var host = url.hostname.toLowerCase();
+    var root = ROOTS.find(function (r) {
+      return host === r || host.endsWith("." + r);
+    });
+    if (!root) return new Response("Not found", { status: 404 });
+    if (host === root || host === "www." + root) {
       return fetch(request);
     }
-    if (host.indexOf("." + ROOT) !== host.length - ROOT.length - 1) {
-      return new Response("Not found", { status: 404 });
-    }
-    var name = host.slice(0, host.length - ROOT.length - 1).toLowerCase();
+    var name = host.slice(0, host.length - root.length - 1);
+    if (name.indexOf(".") >= 0) return new Response("Not found", { status: 404 });
     var apiRes;
     try {
       apiRes = await fetch(API_BASE + "get-site-html", {
@@ -65,6 +70,18 @@ export default {
       });
     } catch (err) {
       return new Response(notFoundPage(name), { status: 502, headers: PAGE_HEADERS });
+    }
+    if (!apiRes.ok) {
+      // No website by that name: it may be a game (games share the same addresses).
+      try {
+        apiRes = await fetch(API_BASE + "get-game-html", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: name }),
+        });
+      } catch (err) {
+        return new Response(notFoundPage(name), { status: 502, headers: PAGE_HEADERS });
+      }
     }
     if (!apiRes.ok) {
       return new Response(notFoundPage(name), { status: 404, headers: PAGE_HEADERS });

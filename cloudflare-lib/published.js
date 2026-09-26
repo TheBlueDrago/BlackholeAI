@@ -190,6 +190,13 @@ export async function publish(context, kind, { name, html: rawHtml, extra, check
     if (owner && owner !== user.id && user.role !== "admin") {
       return json({ error: "That name is taken. Try another." }, 409);
     }
+    // Websites and games share one set of web addresses (name.nebuluxai.com), so a name used by
+    // someone else's game can't be a website, and the other way round.
+    const other = kind === "site" ? "game" : "site";
+    const otherRows = await findByName(request, other, name).catch(() => []);
+    if (otherRows.some((r) => r.created_by_id !== user.id) && user.role !== "admin") {
+      return json({ error: `That name is used by a ${other === "game" ? "game" : "website"}. Try another.` }, 409);
+    }
 
     // Plan limits, for a page that's new to this person (republishing your own never counts).
     if (checkLimit && user.role !== "admin" && owner !== user.id && !mine) {

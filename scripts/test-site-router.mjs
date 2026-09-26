@@ -19,6 +19,10 @@ globalThis.fetch = async (input, init) => {
     if (name === "down") throw new Error("offline");
     return answer && name === "nova" ? new Response(JSON.stringify(answer), { status: 200 }) : new Response("{}", { status: 404 });
   }
+  if (url.includes("/functions/get-game-html")) {
+    const { name } = JSON.parse(init.body);
+    return name === "star-catch" ? new Response(JSON.stringify({ html: "<!DOCTYPE html><html><body>Star game</body></html>" }), { status: 200 }) : new Response("{}", { status: 404 });
+  }
   return new Response("app", { status: 200 });
 };
 const get = (host) => worker.fetch(new Request(`https://${host}/`));
@@ -51,3 +55,16 @@ assert(res.status === 502, "if the app can't be reached, a clear error page");
 asked.length = 0;
 res = await get("blackhole-ai-tech.com");
 assert(asked.length === 1 && !asked[0].includes("get-site-html"), "the app's own domain passes straight through");
+
+// The new address, and games on their own address too.
+res = await get("nova.nebuluxai.com");
+assert(res.status === 200 && (await res.text()).includes("Nova"), "sites answer on name.nebuluxai.com too");
+res = await get("star-catch.nebuluxai.com");
+assert(res.status === 200 && (await res.text()).includes("Star game"), "a game gets its own address (no website by that name)");
+res = await get("ghost.nebuluxai.com");
+assert(res.status === 404, "neither a site nor a game: not found");
+asked.length = 0;
+res = await get("www.nebuluxai.com");
+assert(asked.length === 1 && !asked[0].includes("get-site-html"), "www.nebuluxai.com passes straight through to the app");
+res = await get("a.b.nebuluxai.com");
+assert(res.status === 404, "deeper addresses aren't sites");
