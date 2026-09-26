@@ -50,7 +50,7 @@ const ids = Object.keys(P.CREDIT_PACKS);
 assert(ids.length === 12 && ["ai", "code", "galaxy", "space"].every((a) => [10, 25, 50].every((n) => P.CREDIT_PACKS[`credits-${a}-${n}`])), "every AI has packs of 10, 25 and 50");
 assert(Object.values(P.CREDIT_PACKS).every((p) => Number(p.price) >= 0.5), "no pack is under the $0.50 payment minimum");
 const price = (id) => P.CREDIT_PACKS[id].price;
-assert(["ai", "code", "galaxy", "space"].map((a) => price(`credits-${a}-50`)).join() === "0.99,1.49,2.29,2.49", "50 credits: AI $0.99, Code $1.49, Galaxy $2.29, Space $2.49");
+assert(["ai", "code", "galaxy", "space"].map((a) => price(`credits-${a}-50`)).join() === "0.99,1.79,2.29,2.49", "50 credits: AI $0.99, Code $1.79, Galaxy $2.29, Space $2.49");
 assert(["ai", "code", "galaxy", "space"].every((a) => Number(price(`credits-${a}-50`)) < 10), "every 50-credit pack costs less than Pro");
 assert(["ai", "code", "galaxy", "space"].every((a) => Number(price(`credits-${a}-10`)) / 10 > Number(price(`credits-${a}-25`)) / 25 && Number(price(`credits-${a}-25`)) / 25 > Number(price(`credits-${a}-50`)) / 50), "bigger packs cost less per credit");
 {
