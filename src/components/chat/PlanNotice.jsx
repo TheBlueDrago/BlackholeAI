@@ -37,13 +37,13 @@ export default function PlanNotice() {
       ? {
           key: `bh-note-trial-ending:${planEndsAt}`,
           icon: Clock,
-          text: `Your free week of Pro ends in ${left(planEndsAt)}. After that you're back on Free, and for 48 hours every plan is ${offer.discountPct}% off (credit packs ${offer.packDiscountPct || 20}% off).`,
+          text: `Your free week of Pro ends in ${left(planEndsAt)}. Your new-member discount, ${offer.discountPct}% off any plan (credit packs ${offer.packDiscountPct || 20}% off), lasts until 48 hours after that.`,
           action: "Keep Pro",
         }
       : {
           key: `bh-note-trial-start:${planEndsAt}`,
           icon: Sparkles,
-          text: `Your free week of Pro has started: all 4 AIs, more credits, ZIP download and GitHub, for ${left(planEndsAt)}.`,
+          text: `Your free week of Pro has started: all 4 AIs, more credits, ZIP download and GitHub, for ${left(planEndsAt)}. As a new member you also get ${offer.discountPct}% off any plan (${offer.packDiscountPct || 20}% off a credit pack), once.`,
         };
   } else if (offer.discountAvailable) {
     note = {

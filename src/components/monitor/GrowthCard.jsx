@@ -45,10 +45,10 @@ export default function GrowthCard({ users, complete }) {
   const msgsToday = days[days.length - 1].msgs;
   const msgsWeek = days.slice(-7).reduce((n, d) => n + d.msgs, 0);
   // New-member offer (cloudflare-lib/offers.js): who is on the free Pro week, and who is in the
-  // 48 hours of 30% off after it, i.e. about to decide whether to pay.
+  // new-member discount (from sign-up until 48 hours after the free week).
   const offerFrom = Date.parse(OFFER_START);
   const onTrial = times.filter((t) => t >= offerFrom && now < t + TRIAL_DAYS * DAY).length;
-  const inWindow = times.filter((t) => t >= offerFrom && now >= t + TRIAL_DAYS * DAY && now < t + TRIAL_DAYS * DAY + DISCOUNT_HOURS * 3600000).length;
+  const inWindow = times.filter((t) => t >= offerFrom && now < t + TRIAL_DAYS * DAY + DISCOUNT_HOURS * 3600000).length;
   const stats = [
     ["Today", times.filter((t) => t >= startOfToday.getTime()).length],
     ["Last 7 days", since(7)],
@@ -70,7 +70,7 @@ export default function GrowthCard({ users, complete }) {
         ))}
       </div>
       <p className="mt-2 text-xs text-slate-400">
-        On their free Pro week: <b className="text-white">{onTrial}</b> · In the 48-hour 30% offer: <b className="text-white">{inWindow}</b>
+        On their free Pro week: <b className="text-white">{onTrial}</b> · With the new-member discount: <b className="text-white">{inWindow}</b>
       </p>
       <p className="mt-2 text-xs text-slate-400">
         AI messages today: <b className="text-white">{activity ? msgsToday : "…"}</b> · Last 7 days: <b className="text-white">{activity ? msgsWeek : "…"}</b>

@@ -28,7 +28,8 @@ export function offerFor(user, now = Date.now()) {
     discountPct: DISCOUNT_PCT,
     packDiscountPct: PACK_DISCOUNT_PCT,
     trialActive: now < trialEnds,
-    discountActive: now >= trialEnds && now < discountEnds,
+    // From sign-up (during the free week too) until 48 hours after it.
+    discountActive: now < discountEnds,
   };
 }
 

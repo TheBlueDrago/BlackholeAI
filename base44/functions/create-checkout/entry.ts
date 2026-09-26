@@ -147,7 +147,7 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: "Unknown product" }), { status: 400 });
     }
     // New-account offer (numbers kept in step with cloudflare-lib/offers.js): accounts created
-    // from OFFER_START get 30% off any plan in the 48 hours after their free week of Pro, and
+    // from OFFER_START get 30% off any plan from sign-up until 48 hours after their free week of Pro, and
     // keep that price for as long as they stay subscribed. It can be used once: after any
     // purchase at the lower price (still paid or since canceled), plans are full price again,
     // even inside the 48 hours.
@@ -163,7 +163,7 @@ Deno.serve(async (req: Request) => {
       const raw = String(appUser.created_date);
       const created = Date.parse(/Z|[+-]\d\d:?\d\d$/.test(raw) ? raw : raw + "Z");
       const now = Date.now();
-      if (created >= OFFER_START && now >= created + TRIAL_MS && now < created + TRIAL_MS + DISCOUNT_MS) {
+      if (created >= OFFER_START && now < created + TRIAL_MS + DISCOUNT_MS) {
         const past = await base44.asServiceRole.entities.Base44Purchase.filter({ appUserId: appUser.id });
         const used = (past || []).some((p: any) => (p.status === "paid" || p.status === "canceled") && String(p.productName || "").includes(OFFER_TAG));
         if (!used) discountPct = isPack ? PACK_DISCOUNT_PCT : DISCOUNT_PCT;

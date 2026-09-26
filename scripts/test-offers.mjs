@@ -14,7 +14,7 @@ const joined = new Date(start + DAY).toISOString().replace("Z", ""); // Base44 s
 
 assert(offerFor({ created_date: new Date(start - DAY).toISOString() }) === null, "accounts from before the offer don't get it");
 let o = offerFor({ created_date: joined }, start + 3 * DAY);
-assert(o.trialActive && !o.discountActive, "day 2 of the account: on the free Pro week");
+assert(o.trialActive && o.discountActive, "day 2 of the account: on the free Pro week, and the discount already works");
 o = offerFor({ created_date: joined }, start + 9 * DAY);
 assert(!o.trialActive && o.discountActive && o.discountPct === 30, "just after the week: 30% off for 48 hours");
 o = offerFor({ created_date: joined }, start + 11 * DAY);

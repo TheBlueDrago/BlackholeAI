@@ -65,7 +65,7 @@ export function Terms() {
       <h2>New-member offer</h2>
       <ul>
         <li>Accounts created on or after September 24, 2026 get the Pro plan free for 7 days. When the week ends the account goes back to the Free plan unless you choose a paid plan. We don't ask for payment details to start the free week.</li>
-        <li>For the 48 hours after the free week, one purchase gets a discount: 30% off a plan (that lower price continues for as long as that subscription stays active) or 20% off a one-time credit pack. It can be used once: after a plan or credit pack is bought at the lower price, later purchases are at the normal price, even within the 48 hours.</li>
+        <li>From sign-up until 48 hours after the free week, one purchase gets a discount: 30% off a plan (that lower price continues for as long as that subscription stays active) or 20% off a one-time credit pack. It can be used once: after a plan or credit pack is bought at the lower price, later purchases are at the normal price, even within the 48 hours.</li>
         <li>We may change or end this offer for new accounts at any time.</li>
       </ul>
 
