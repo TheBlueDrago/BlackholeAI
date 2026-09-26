@@ -52,6 +52,9 @@ const AI_NAMES = { ai: "Blackhole AI", code: "Blackhole Code", opus5: "Galaxy", 
 
 const RESERVED = ["home", "www", "admin", "api", "mail", "infinity", "ai", "app", "login", "register", "support", "blog"];
 
+// One-tap improvements shown under the latest version of the site.
+const SITE_TWEAKS = ["Make it look more modern", "Add a contact form", "Improve the wording", "Make it better on phones", "Add a new section"];
+
 const SYSTEM = `You are Blackhole AI Website Designer. The user describes a website and you build it.
 ALWAYS build a single complete, self-contained HTML document: include <!DOCTYPE html>, <html>, <head> with inline <style> CSS, and <body> with inline <script> for any interactivity.
 Make it modern, responsive, and visually polished — clean typography, good spacing, a tasteful color palette, and smooth interactions. Use placeholder content that fits the site's purpose.
@@ -793,6 +796,21 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
                       <div className="space-y-2">
                         {m.note && <p className="whitespace-pre-wrap">{m.note}</p>}
                         <span className="block text-emerald-300 font-medium">✓ Website updated</span>
+                        {m === lastAi && !loading && !sendExhausted && (
+                          // One tap to improve the site (each is a normal message, so it's charged like one).
+                          <div className="flex flex-wrap gap-1.5 pt-1">
+                            {SITE_TWEAKS.map((t) => (
+                              <button
+                                key={t}
+                                type="button"
+                                onClick={() => runPrompt(t, selectedAi)}
+                                className="px-2.5 py-1 rounded-full border border-sky-500/40 bg-sky-500/10 text-[12px] text-sky-200 hover:bg-sky-500/20 transition-colors"
+                              >
+                                {t}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                         {isHtmlMsg(m) && m !== lastAi && !loading && (
                           <button
                             onClick={() => restoreBuild(m)}
