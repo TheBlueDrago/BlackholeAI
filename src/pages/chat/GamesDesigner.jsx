@@ -5,6 +5,7 @@ import { RotateCcw } from "lucide-react";
 import { findBuiltInGame } from "@/lib/builtInGames";
 import PageSize from "@/components/designer/PageSize";
 import ShareLink from "@/components/designer/ShareLink";
+import { isPlaceholderName } from "@/lib/siteNaming";
 import QrDialog, { QrButton } from "@/components/designer/QrDialog";
 import Markdown from "@/components/chat/Markdown";
 import { motion, AnimatePresence } from "framer-motion";
@@ -488,6 +489,10 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
       setPublishErr("Enter a game name (slug).");
       return;
     }
+    if (isPlaceholderName(n)) {
+      setPublishErr("Give your game its own name first, like star-catcher. It becomes its web address.");
+      return;
+    }
     if (!previewHtml) {
       setPublishErr("Generate a game first.");
       return;
@@ -874,7 +879,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
                 </button>
                 <button
                   onClick={confirmPublish}
-                  disabled={!gameName || publishing || !previewHtml || taken}
+                  disabled={!gameName || isPlaceholderName(sanitize(gameName)) || publishing || !previewHtml || taken}
                   className="flex-1 py-2.5 rounded-xl bg-fuchsia-600 text-[#fff] font-medium hover:bg-fuchsia-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   {publishing ? (isRepublish ? "Re-publishing…" : "Publishing…") : isRepublish ? "Re-publish" : "Publish"}

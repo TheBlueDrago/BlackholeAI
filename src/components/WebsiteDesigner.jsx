@@ -33,6 +33,7 @@ import { EXPLAIN_NOTE, splitBuildReply, editReplyNote, introBeforeCode } from "@
 import { syncSiteProducts } from "@/lib/siteProducts";
 import SaveStatus from "@/components/designer/SaveStatus";
 import ShareLink from "@/components/designer/ShareLink";
+import { isPlaceholderName, withTitle } from "@/lib/siteNaming";
 import QrDialog, { QrButton } from "@/components/designer/QrDialog";
 import { EDIT_NOTE, hasEditBlocks, applyEdits } from "@/lib/htmlEdits";
 import { DESIGNER_STORE_KEY } from "@/lib/designerStore";
@@ -566,6 +567,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   const confirmPublish = async () => {
     const n = sanitizeSite(siteName).toLowerCase();
     if (!n) { setPublishErr("Enter a website name."); return; }
+    if (isPlaceholderName(n)) { setPublishErr("Give your website its own name first. It becomes its web address."); return; }
     if (!previewHtml) { setPublishErr("Generate a website first."); return; }
     setPublishErr("");
     setPublishing(true);
@@ -587,9 +589,11 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
         }
       }
       // Handled by the Cloudflare function at functions/api/apps/<appId>/functions/publish-site.js.
-      await base44.functions.invoke("publish-site", { name: n, html: previewHtml, ownerName });
+      // The page's tab title is the site's name unless it already has a real one.
+      const html = withTitle(previewHtml, n);
+      await base44.functions.invoke("publish-site", { name: n, html, ownerName });
       // Mirror any products the page sells so checkout prices are server-side and sales are tracked.
-      await syncSiteProducts(n, previewHtml, user).catch(() => {});
+      await syncSiteProducts(n, html, user).catch(() => {});
       const list = getTaken().filter((e) => e.name !== n);
       list.push({ name: n, projectId });
       localStorage.setItem(TAKEN_KEY, JSON.stringify(list));
@@ -1009,7 +1013,20 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
               className="w-full max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain max-w-md bg-slate-900 border border-slate-700/60 rounded-2xl shadow-2xl p-6"
             >
               <h3 className="text-lg font-semibold text-white">{isRepublish ? "Re-publish your website" : "Publish your website"}</h3>
-              <p className="text-slate-400 text-sm mt-1">Your website will be live at:</p>
+              <label htmlFor="bh-publish-name" className="block text-slate-300 text-sm mt-3 font-medium">Website name</label>
+              <input
+                id="bh-publish-name"
+                value={siteName}
+                onChange={(e) => setSiteName(e.target.value)}
+                placeholder="e.g. joes-bakery"
+                autoComplete="off"
+                spellCheck={false}
+                className="mt-1 w-full bg-slate-800 border border-slate-700/50 focus:border-indigo-500/60 rounded-xl px-3 py-2 text-sm text-white outline-none"
+              />
+              {isPlaceholderName(sanitizeSite(siteName || "")) && (
+                <p role="alert" className="mt-1.5 text-xs text-amber-300">Give your website its own name, like joes-bakery or sam-portfolio. It becomes its web address.</p>
+              )}
+              <p className="text-slate-400 text-sm mt-3">Your website will be live at:</p>
               <div className="mt-3 flex items-center gap-2 bg-slate-800/70 border border-slate-700/50 rounded-xl px-3 py-2.5">
                 <Globe className="w-4 h-4 text-sky-300 shrink-0" />
                 <span className="text-slate-100 text-sm font-mono truncate">
@@ -1054,7 +1071,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
                 </button>
                 <button
                   onClick={confirmPublish}
-                  disabled={!siteName || publishing || !previewHtml || taken}
+                  disabled={!siteName || isPlaceholderName(sanitizeSite(siteName)) || publishing || !previewHtml || taken}
                   className="flex-1 py-2.5 rounded-xl bg-indigo-600 text-[#fff] font-medium hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   {publishing ? (isRepublish ? "Re-publishing…" : "Publishing…") : isRepublish ? "Re-publish" : "Publish"}
