@@ -42,7 +42,7 @@ const MODELS = { ai: "automatic", code: "claude_sonnet_4_6", opus5: "claude_opus
 // What people most often come for first: help from the AI; building is one tap away.
 const STARTERS = [
   { icon: "📚", label: "Homework help", hint: "Step by step", prompt: "Help me with my homework. Ask me what the question is, then explain it step by step instead of just giving the answer." },
-  { icon: "💡", label: "Explain simply", hint: "Like black holes", prompt: "Explain black holes like I'm 10." },
+  { icon: "📷", label: "Snap a question", hint: "Photo of homework", go: "photo" },
   { icon: "✍️", label: "Help me write", hint: "Essay, email, story", prompt: "Help me write something. Ask me what it's for, who will read it and how long it should be first." },
   { icon: "🧠", label: "Quiz me", hint: "Practise for a test", prompt: "Quiz me to practise for a test. Ask me the topic and my grade first, then give me one question at a time." },
   { icon: "🌐", label: "Build a website", hint: "Templates or your idea", go: "designer" },
@@ -81,6 +81,7 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
   const [effort, setEffort] = useEffort();
   const [live, setLive] = useState("");
   const fileInputRef = useRef(null);
+  const cameraRef = useRef(null);
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
   const reqIdRef = useRef(0);
@@ -249,6 +250,9 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
 
   const startWith = (s) => {
     if (s.go === "designer") return shell?.goDesigner();
+    // Opens the camera on phones (a file picker on computers); the picture is attached and a
+    // question is typed in, ready to send.
+    if (s.go === "photo") return cameraRef.current?.click();
     // Opens the game maker as it was left (goGameDesigner would start over and clear a draft).
     if (s.go === "game") return shell?.navigate("/chat/game-designer");
     if (loading || isExhausted) return;
@@ -487,6 +491,20 @@ export default function ChatBox({ conversation, createConversation, addMessage, 
             <EffortPicker value={effort} onChange={setEffort} />
             {buildMode.visible && <ModeToggle mode={buildMode.mode} onChange={buildMode.setMode} />}
           </div>
+          <input
+            ref={cameraRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="hidden"
+            onChange={(e) => {
+              if (attach(e.target.files)) {
+                setInput((cur) => cur.trim() || "Help me with this question. Explain it step by step so I understand it.");
+                inputRef.current?.focus();
+              }
+              e.target.value = "";
+            }}
+          />
           <input
             ref={fileInputRef}
             type="file"
