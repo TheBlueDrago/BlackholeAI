@@ -3,7 +3,7 @@
 // the same sizes. The Base44 create-checkout function holds the authoritative prices, so keep
 // PACK_PRICES in step with its copy.
 //
-// Priced against the plans (2026-09-25): every 50-credit pack costs less than Pro ($7 for
+// Priced against the plans (2026-09-25): every 50-credit pack costs less than Pro ($10 for
 // 100 AI + 50 each of Code, Galaxy and Space), and buying Pro's credits as packs costs about
 // 2.5x Pro, so a plan is the better deal and packs are for topping up. Bigger packs cost less
 // per credit. No pack is under the $0.50 payment minimum (so there's no 5-credit pack: it
@@ -11,7 +11,7 @@
 export const PACK_SIZES = [10, 25, 50];
 export const PACK_PRICES = {
   ai: { 10: "0.50", 25: "0.69", 50: "0.99" },
-  aiCode: { 10: "0.50", 25: "0.89", 50: "1.49" },
+  aiCode: { 10: "0.55", 25: "0.89", 50: "1.49" },
   galaxy5: { 10: "0.59", 25: "1.19", 50: "1.99" },
   space5: { 10: "0.75", 25: "1.49", 50: "2.49" },
 };

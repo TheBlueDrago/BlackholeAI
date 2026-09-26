@@ -17,7 +17,7 @@ const load = (p) => import(new URL("../" + p, import.meta.url).href);
 const checkout = read("base44/functions/create-checkout/entry.ts");
 const planPrice = (id) => Number((checkout.match(new RegExp(`\\b${id}: \\{\\s*name: "[^"]+",\\s*price: "([\\d.]+)"`)) || [])[1]);
 const PRICE = { pro: planPrice("pro"), team: planPrice("team") };
-// As prices are written: $10, $7.
+// As prices are written: $15, $10.
 const usd = (n) => (Number.isInteger(n) ? String(n) : n.toFixed(2));
 assert(PRICE.pro > 0 && PRICE.team > 0, `checkout prices found (Pro $${PRICE.pro}, Team $${PRICE.team})`);
 

@@ -14,7 +14,7 @@ export const PUBLIC_PLANS = [
   {
     id: "pro",
     name: "Pro",
-    price: "$7",
+    price: "$10",
     period: "/month",
     blurb: "More credits, all 4 AI models and your code to keep. New accounts get a free week (ZIP and GitHub come with the paid plan).",
     features: [
@@ -29,7 +29,7 @@ export const PUBLIC_PLANS = [
   {
     id: "team",
     name: "Team",
-    price: "$10",
+    price: "$15",
     period: "/month",
     blurb: "Build with up to 2 friends or coworkers.",
     features: [

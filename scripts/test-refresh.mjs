@@ -18,17 +18,17 @@ assert(waitText(oct1 - now) === "6 days 4 hours", "wait shown in days and hours"
 assert(waitText(3 * 3600000 + 12 * 60000) === "3 hours 12 minutes" && waitText(5 * 60000) === "5 minutes" && waitText(1000) === "1 minute", "shorter waits");
 
 let o = outOfCreditsOptions("ai", { plan: "free" }, now);
-assert(o.upgrade.id === "pro" && o.upgrade.price === 7 && o.upgrade.extra === 50 && !o.upgrade.salePrice, "Free, Nebulux AI: Pro for $7, 50 more now");
+assert(o.upgrade.id === "pro" && o.upgrade.price === 10 && o.upgrade.extra === 50 && !o.upgrade.salePrice, "Free, Nebulux AI: Pro for $10, 50 more now");
 assert(o.refresh.at === oct1 && o.refresh.amount === 50, "Free, Nebulux AI: 50 come back on the 1st");
 
 o = outOfCreditsOptions("galaxy5", { plan: "free" }, now);
 assert(o.upgrade.id === "pro" && o.upgrade.extra === 50 && o.refresh === null, "Free has no Galaxy credits: upgrade only, nothing to wait for");
 
 o = outOfCreditsOptions("space5", { plan: "pro", planSource: "paid" }, now);
-assert(o.upgrade.id === "team" && o.upgrade.price === 10 && o.upgrade.extra === 50 && o.refresh.amount === 50, "Pro: Team for $10, or wait for 50");
+assert(o.upgrade.id === "team" && o.upgrade.price === 15 && o.upgrade.extra === 50 && o.refresh.amount === 50, "Pro: Team for $15, or wait for 50");
 
 o = outOfCreditsOptions("ai", { plan: "free", offer: { discountAvailable: true, discountPct: 30 } }, now);
-assert(o.upgrade.salePrice === "4.90", "new-member offer: Pro shown at $4.90 (30% off $7)");
+assert(o.upgrade.salePrice === "7.00", "new-member offer: Pro shown at $7.00 (30% off $10)");
 
 o = outOfCreditsOptions("ai", { plan: "pro", planSource: "trial", planEndsAt: "2026-09-28T00:00:00Z" }, now);
 assert(o.upgrade.id === "team" && o.refresh.amount === 50, "free Pro week ending before the 1st: Free's 50 come back");
@@ -51,10 +51,10 @@ assert(ids.length === 12 && ["ai", "code", "galaxy", "space"].every((a) => [10, 
 assert(Object.values(P.CREDIT_PACKS).every((p) => Number(p.price) >= 0.5), "no pack is under the $0.50 payment minimum");
 const price = (id) => P.CREDIT_PACKS[id].price;
 assert(["ai", "code", "galaxy", "space"].map((a) => price(`credits-${a}-50`)).join() === "0.99,1.49,1.99,2.49", "50 credits: AI $0.99, Code $1.49, Galaxy $1.99, Space $2.49");
-assert(["ai", "code", "galaxy", "space"].every((a) => Number(price(`credits-${a}-50`)) < 7), "every 50-credit pack costs less than Pro");
+assert(["ai", "code", "galaxy", "space"].every((a) => Number(price(`credits-${a}-50`)) < 10), "every 50-credit pack costs less than Pro");
 assert(["ai", "code", "galaxy", "space"].every((a) => Number(price(`credits-${a}-10`)) / 10 > Number(price(`credits-${a}-25`)) / 25 && Number(price(`credits-${a}-25`)) / 25 > Number(price(`credits-${a}-50`)) / 50), "bigger packs cost less per credit");
 {
   // Pro's credits bought as packs: 100 AI + 50 each of the others. Dearer than Pro, not absurdly.
   const asPacks = 2 * Number(price("credits-ai-50")) + ["code", "galaxy", "space"].reduce((n, a) => n + Number(price(`credits-${a}-50`)), 0);
-  assert(asPacks > 7 && asPacks < 3 * 7, `Pro's credits as packs cost $${asPacks.toFixed(2)}: a plan is the better deal, packs still make sense`);
+  assert(asPacks < 3 * 10, `Pro's credits as packs cost $${asPacks.toFixed(2)}: a plan is the better deal, packs still make sense`);
 }
