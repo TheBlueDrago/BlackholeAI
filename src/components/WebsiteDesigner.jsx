@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
+import useRestartWhenShown from "@/hooks/useRestartWhenShown";
 import PageSize from "@/components/designer/PageSize";
 import Markdown from "@/components/chat/Markdown";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -600,6 +601,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
   };
 
   const reload = () => setReloadKey((k) => k + 1);
+  const previewBoxRef = useRestartWhenShown(reload);
 
   const taken = nameTaken;
   const sections = detectSections(previewHtml);
@@ -904,7 +906,7 @@ export default function WebsiteDesigner({ onToggleSidebar, onOpenProfile, onUpgr
             </button>
           </div>
 
-          <div className="flex-1 relative overflow-hidden bg-white">
+          <div ref={previewBoxRef} className="flex-1 relative overflow-hidden bg-white">
             {previewMode === "code" ? (
               <CodeEditor
                 html={lastAi ? extractHtml(lastAi.content) : ""}

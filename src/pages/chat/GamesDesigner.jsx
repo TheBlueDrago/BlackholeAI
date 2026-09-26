@@ -1,3 +1,4 @@
+import useRestartWhenShown from "@/hooks/useRestartWhenShown";
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { saveBuilds, loadBuilds, trimForStorage } from "@/lib/buildHistory";
 import { RotateCcw } from "lucide-react";
@@ -530,6 +531,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
   };
 
   const reload = () => setReloadKey((k) => k + 1);
+  const previewBoxRef = useRestartWhenShown(reload);
   const taken = nameTaken;
   const ownerInitial = (user?.full_name || user?.email || "U").trim().charAt(0).toUpperCase();
 
@@ -747,7 +749,7 @@ export default function GamesDesigner({ onToggleSidebar, onOpenProfile, onUpgrad
             </button>
           </div>
 
-          <div className="flex-1 relative overflow-hidden bg-black">
+          <div ref={previewBoxRef} className="flex-1 relative overflow-hidden bg-black">
             {previewMode === "info" ? (
               <div className="w-full h-full bg-slate-950 p-6 overflow-y-auto text-slate-200">
                 <h2 className="text-lg font-semibold">{title || gameName}</h2>
