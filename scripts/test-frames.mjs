@@ -97,7 +97,7 @@ function openingTag(src, i) {
 // Router <Link>s to the app's own pages are fine.
 {
   // window.open without "noopener", and why it needs the handle.
-  const OPENER_OK = { "src/components/designer/GitHubPush.jsx": "watches the GitHub sign-in popup close", "src/components/DomainMove.jsx": "hands chats to our own nebuluxai.com tab, checked by exact address both ways" };
+  const OPENER_OK = { "src/components/designer/GitHubPush.jsx": "watches the GitHub sign-in popup close" };
   let links = 0;
   for (const file of files) {
     const src = readFileSync(file, "utf8");

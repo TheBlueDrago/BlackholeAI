@@ -34,8 +34,6 @@ const Pricing = lazy(() => import('@/pages/Pricing'));
 const About = lazy(() => import('@/pages/About'));
 const Guides = lazy(() => import('@/pages/Guides'));
 const WhatsNew = lazy(() => import('@/pages/WhatsNew'));
-const Move = lazy(() => import('@/pages/Move'));
-import DomainMove from '@/components/DomainMove';
 const Ideas = lazy(() => import('@/pages/Ideas'));
 const Guide = lazy(() => import('@/pages/Guide'));
 const Enterprise = lazy(() => import('@/pages/Enterprise'));
@@ -122,7 +120,6 @@ const AuthenticatedApp = () => {
       <Route path="/about" element={<About />} />
       <Route path="/guides" element={<Guides />} />
       <Route path="/whats-new" element={<WhatsNew />} />
-      <Route path="/move" element={<Move />} />
       <Route path="/ideas" element={<Ideas />} />
       <Route path="/guides/:slug" element={<Guide />} />
       <Route path="/enterprise" element={<Enterprise />} />
@@ -163,7 +160,6 @@ function App() {
           <ScrollToTop />
           <Splash />
           <OfflineBanner />
-          <DomainMove />
           <ErrorBoundary>
             <AuthenticatedApp />
           </ErrorBoundary>
