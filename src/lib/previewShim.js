@@ -9,6 +9,12 @@
 // This script runs before the page's own scripts and papers over both, so
 // buttons, section links, tabs, forms and saved state work like the real site.
 const SHIM = `<script>(function(){
+  // Phones lay the frame out after the game's code first runs, so a game that measures the screen
+  // once at start (canvas.width = innerWidth) got 0x0 and stayed black. Tell it the size changed
+  // once the page has loaded, again a moment later, and whenever the frame's size changes.
+  function kick(){try{dispatchEvent(new Event("resize"))}catch(_){}}
+  addEventListener("load",function(){kick();setTimeout(kick,250);setTimeout(kick,1000);setTimeout(kick,2500)});
+  try{var lastW=innerWidth,lastH=innerHeight;setInterval(function(){if(innerWidth!==lastW||innerHeight!==lastH){lastW=innerWidth;lastH=innerHeight;kick()}},500)}catch(_){}
   function mem(){var d={};return{getItem:function(k){k=String(k);return Object.prototype.hasOwnProperty.call(d,k)?d[k]:null},setItem:function(k,v){d[String(k)]=String(v)},removeItem:function(k){delete d[String(k)]},clear:function(){d={}},key:function(i){return Object.keys(d)[i]||null},get length(){return Object.keys(d).length}}}
   ["localStorage","sessionStorage"].forEach(function(n){try{window[n].getItem("x")}catch(e){try{Object.defineProperty(window,n,{value:mem(),configurable:true})}catch(_){}}});
   try{document.cookie}catch(e){var jar={};try{Object.defineProperty(document,"cookie",{configurable:true,get:function(){return Object.keys(jar).map(function(k){return k+"="+jar[k]}).join("; ")},set:function(v){var p=String(v).split(";")[0],i=p.indexOf("=");if(i>0)jar[p.slice(0,i).trim()]=p.slice(i+1).trim()}})}catch(_){}}
