@@ -9,6 +9,7 @@ const UPDATES = [
   {
     date: "September 2026",
     items: [
+      { icon: Sparkles, text: "Pin your favourite chats to the top of the chat list with the pin button." },
       { icon: BookOpen, text: "Study mode: switch it on in the chat and the AI becomes a tutor, guiding you one step at a time with hints instead of just giving the answer. Ask for the answer whenever you want it." },
       { icon: Sparkles, text: "Quick follow-ups under each answer: tap \"Explain it more simply\", \"Give me an example\", \"Quiz me on this\" and more, picked to fit the answer." },
       { icon: Zap, text: "Keyboard shortcuts on a computer: / jumps to the message box, Esc stops an answer, and Ctrl+Shift+O (Cmd+Shift+O on a Mac) starts a new chat." },

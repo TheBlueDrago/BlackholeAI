@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { pinnedIds, togglePin, onPinsChange, withPinsFirst } from "@/lib/pinnedChats";
 import { motion, AnimatePresence } from "framer-motion";
-import { Pen, Plus, Code, Sparkles, Gem, Star, Check, X, ShoppingBag, Globe, Gamepad2, Search } from "lucide-react";
+import { Pen, Plus, Code, Sparkles, Gem, Star, Check, X, ShoppingBag, Globe, Gamepad2, Search, Pin, PinOff } from "lucide-react";
 import BlackholeIcon from "@/components/BlackholeIcon";
 import PullToRefresh from "@/components/PullToRefresh";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -36,14 +37,17 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
   const [neverShow, setNeverShow] = useState(false);
   // Filters the chat list by title or by what was said in the chat.
   const [search, setSearch] = useState("");
+  const [pins, setPins] = useState(pinnedIds);
+  useEffect(() => onPinsChange(setPins), []);
   const needle = search.trim().toLowerCase();
+  const ordered = withPinsFirst(conversations, pins);
   const shown = needle
-    ? conversations.filter(
+    ? ordered.filter(
         (c) =>
           String(c.title || "").toLowerCase().includes(needle) ||
           (c.messages || []).some((m) => String(m.content || "").toLowerCase().includes(needle))
       )
-    : conversations;
+    : ordered;
   const isMobile = useIsMobile();
   const targetWidth = isMobile ? Math.min((typeof window !== "undefined" ? window.innerWidth : 400) * 0.86, 320) : 220;
 
@@ -248,8 +252,19 @@ export default function Sidebar({ conversations, activeId, onSelect, onRename, o
                   </div>
                 ) : (
                   <>
-                    <p className="text-xs text-slate-200 truncate pr-[100px]">{conv.title}</p>
+                    <p className="flex items-center gap-1 min-w-0 text-xs text-slate-200 pr-[148px] sm:pr-1 sm:group-hover:pr-[148px]">
+                      {pins.includes(conv.id) && <Pin className="w-3 h-3 shrink-0 text-amber-300" aria-label="Pinned" />}
+                      <span className="truncate">{conv.title}</span>
+                    </p>
                     <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); togglePin(conv.id); }}
+                        className="w-11 h-11 flex items-center justify-center rounded-lg bg-slate-700/80 border border-slate-600/50 text-slate-300 hover:text-amber-300"
+                        title={pins.includes(conv.id) ? "Unpin" : "Pin to the top"}
+                        aria-label={pins.includes(conv.id) ? "Unpin chat" : "Pin chat to the top"}
+                      >
+                        {pins.includes(conv.id) ? <PinOff className="w-4 h-4" /> : <Pin className="w-4 h-4" />}
+                      </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); startEdit(conv); }}
                         className="w-11 h-11 flex items-center justify-center rounded-lg bg-slate-700/80 border border-slate-600/50 text-slate-300 hover:text-white"
